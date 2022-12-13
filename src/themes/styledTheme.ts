@@ -8,6 +8,8 @@ export const styledTheme = {
 		black_primary: 'rgba(0, 0, 0, 0.9)',
 		black_text: '#1F1F1F',
 		blue_primary: '#645ADF',
+		blue_secondary: '#CAC9F9',
+		gray_primary1: '#FBFAFC',
 		purple_app_bg: '#F6F7FE'
 	},
 	fonts: {

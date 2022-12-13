@@ -13,13 +13,29 @@ module.exports = {
 	plugins: [],
 	theme: {
 		extend: {
-			boxShadow: {
-				'secondary': '-2px 4px 6px #CAC9F9'
+			backgroundImage:{
+				'gradient-primary': 'linear-gradient(180deg, #CAC9F9 0%, #332D82 100%)'
 			},
-			colors : {
-				primary: '#645ADF',
-				secondary: '#CAC9F9',
-				tertiary: '#FAF4FF'
+			boxShadow: {
+				'large': '-3px 4px 10px #CAC9F9',
+				'siderBox': '-6px 10px 10px rgba(0, 0, 0, 0.23)',
+				'small': '-2px 3px 6px #CAC9F9',
+				'top': '0px -3px 4px #CAC9F9'
+			},
+			colors: {
+				black_full: '#000',
+				black_primary: 'rgba(0, 0, 0, 0.9)',
+				black_text: '#1F1F1F',
+				blue_primary: '#645ADF',
+				blue_secondary: '#CAC9F9',
+				gray_primary: '#f6f7ff',
+				gray_primary1: '#FBFAFC',
+				gray_secondary: '#F5F5F5',
+				purple_app_bg: '#F6F7FE'
+			},
+			fontFamily: {
+				// add new font family
+				primary: ['DM Sans']
 			}
 		}
 	}

@@ -60,7 +60,7 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	::selection {
-		background-color: black_primary;
+		background-color: rgba(0, 0, 0, 0.9);
 		color: white;
 	}
 
