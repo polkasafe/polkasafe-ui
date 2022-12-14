@@ -14,6 +14,9 @@ import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
+import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
+import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
+import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/icons/polkadot-icon-svg.svg';
 import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot-logo-text.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
@@ -57,6 +60,18 @@ export const KeyIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const MenuIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={MenuSVG} {...props} />
+);
+
+export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NoNotificationSVG} {...props} />
+);
+
+export const PencilNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PencilNotificationSVG} {...props} />
+);
+
+export const PencilIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PencilSVG} {...props} />
 );
 
 export const SettingsIcon = (props: Partial<CustomIconComponentProps>) => (
