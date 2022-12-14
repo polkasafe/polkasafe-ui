@@ -10,7 +10,7 @@ import QR from './QR';
 
 const DonateInfo = () => {
 	return (
-		<section className='bg-white shadow-large min-h-[500px] p-4 lg:p-8 rounded-lg mt-2.5'>
+		<>
 			<div className='grid grid-cols-1 gap-y-10 lg:grid-cols-5 lg:gap-x-10 items-center mb-10'>
 				<article className='col-span-1 lg:col-span-3 '>
 					<div>
@@ -54,7 +54,7 @@ const DonateInfo = () => {
 					</span>
 				</p>
 			</div>
-		</section>
+		</>
 	);
 };
 

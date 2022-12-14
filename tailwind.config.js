@@ -32,6 +32,7 @@ module.exports = {
 				gray_primary: '#f6f7fE',
 				gray_primary1: '#FBFAFC',
 				gray_secondary: '#F5F5F5',
+				green_primary: '#208F0E',
 				purple_app_bg: '#F6F7FE',
 				red_primary: '#C82929'
 			},

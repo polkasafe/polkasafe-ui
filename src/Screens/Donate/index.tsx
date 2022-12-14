@@ -3,19 +3,17 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
 import DonateInfo from 'src/components/Donate/DonateInfo';
-import { TrashIcon } from 'src/ui-components/CustomIcons';
+import ContentHeader from 'src/ui-components/ContentHeader';
+import ContentWrapper from 'src/ui-components/ContentWrapper';
+import RemoveSafeBtn from 'src/ui-components/RemoveSafeBtn';
 
 const Donate = () => {
 	return (
 		<div>
-			<section className='flex items-center justify-between'>
-				<h2 className='text-xl lg:text-3xl font-bold tracking-wide'>Donate</h2>
-				<p className='flex items-center gap-x-0.5 text-red_primary'>
-					<TrashIcon/>
-					<span className='text-sm lg:text-base font-medium'>Remove Safe</span>
-				</p>
-			</section>
-			<DonateInfo/>
+			<ContentHeader title={'Donate'} rightElm={<RemoveSafeBtn/>}  />
+			<ContentWrapper>
+				<DonateInfo/>
+			</ContentWrapper>
 		</div>
 	);
 };
