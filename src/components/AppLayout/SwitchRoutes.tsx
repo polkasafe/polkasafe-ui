@@ -4,12 +4,14 @@
 
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+import Donate from 'src/Screens/Donate';
 import Home from 'src/Screens/Home';
 
 const SwitchRoutes = () => {
 	return (
 		<Routes>
 			<Route path='/' element={<Home/>} />
+			<Route path='/donate' element={<Donate/>} />
 		</Routes>
 	);
 };

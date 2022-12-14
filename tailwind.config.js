@@ -31,7 +31,8 @@ module.exports = {
 				gray_primary: '#f6f7ff',
 				gray_primary1: '#FBFAFC',
 				gray_secondary: '#F5F5F5',
-				purple_app_bg: '#F6F7FE'
+				purple_app_bg: '#F6F7FE',
+				red_primary: '#C82929'
 			},
 			fontFamily: {
 				// add new font family

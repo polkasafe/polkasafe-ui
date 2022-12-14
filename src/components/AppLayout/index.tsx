@@ -38,8 +38,8 @@ const AppLayout = ({ className } : { className?: string }) => {
 					<Menu />
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0'>
-					<div className='hidden lg:block w-[200px]'></div>
-					<Content className='bg-purple_app_bg pl-8 pr-8'>
+					<div className='hidden lg:block w-full max-w-[200px]'></div>
+					<Content className='bg-purple_app_bg p-8'>
 						<SwitchRoutes/>
 					</Content>
 				</Layout>

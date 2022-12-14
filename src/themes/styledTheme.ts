@@ -10,7 +10,8 @@ export const styledTheme = {
 		blue_primary: '#645ADF',
 		blue_secondary: '#CAC9F9',
 		gray_primary1: '#FBFAFC',
-		purple_app_bg: '#F6F7FE'
+		purple_app_bg: '#F6F7FE',
+		red_primary: '#C82929'
 	},
 	fonts: {
 		font_default: 'DM Sans',
