@@ -3,7 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Form, Input } from 'antd';
 import React from 'react';
-import PrimaryButton from 'src/ui-components/PrimaryButton';
+
+import TransactionsBtns from './TransactionsBtns';
 
 const TransactionsForm = () => {
 	return (
@@ -76,20 +77,7 @@ const TransactionsForm = () => {
 					/>
 				</Form.Item>
 			</div>
-			<div className='flex items-center gap-x-5 justify-center mt-5'>
-				<PrimaryButton
-					size='large'
-					className='bg-green_primary px-7'
-				>
-					Review
-				</PrimaryButton>
-				<PrimaryButton
-					size='large'
-					className='bg-[rgba(200,41,41,0.38)] px-7'
-				>
-					Cancel
-				</PrimaryButton>
-			</div>
+			<TransactionsBtns/>
 		</Form>
 	);
 };
