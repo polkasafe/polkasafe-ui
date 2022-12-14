@@ -2,20 +2,23 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Button } from 'antd';
+import { SizeType } from 'antd/es/config-provider/SizeContext';
+import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 
 interface Props {
 	className?: string;
 	children: ReactNode;
-	onClick: () => void;
+	onClick?: () => void;
+	size?: SizeType;
 }
 
-const PrimaryButton = ({ className, children, onClick } : Props) => {
+const PrimaryButton = ({ className, children, onClick, size } : Props) => {
 	return (
-		// TODO: Implement transition for bg and text color
-		<button className={`${className} text-xl font-bold rounded-lg bg-tertiary hover:bg-primary text-primary hover:text-white shadow-secondary px-2 py-3`} onClick={onClick}>
+		<Button size={size} className={classNames('flex items-center border-none outline-none rounded-lg text-white font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
 			{children}
-		</button>
+		</Button>
 	);
 };
 
