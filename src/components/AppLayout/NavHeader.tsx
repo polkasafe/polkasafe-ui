@@ -1,9 +1,10 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { BellOutlined, MenuOutlined } from '@ant-design/icons';
+import { MenuOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import React, { FC } from 'react';
+import Notification from 'src/components/Notification';
 
 const { Header } = Layout;
 
@@ -24,7 +25,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 				</article>
 				<article className='hidden lg:block'/>
 				<article>
-					<Button icon={<BellOutlined />} className='flex items-center justify-center outline-none border-none text-blue_secondary shadow-none text-xl' />
+					<Notification/>
 				</article>
 			</section>
 		</Header>
