@@ -9,6 +9,7 @@ import { styledTheme } from 'src/themes/styledTheme';
 import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
+import { ApiContextProvider } from './context/ApiContext';
 import { antdTheme } from './themes/antdTheme';
 import { GlobalStyle } from './ui-components/GlobalStyle';
 
@@ -18,7 +19,9 @@ function App() {
 			<ConfigProvider theme={antdTheme}>
 				<ThemeProvider theme={styledTheme}>
 					<GlobalStyle/>
-					<AppLayout />
+					<ApiContextProvider>
+						<AppLayout />
+					</ApiContextProvider>
 				</ThemeProvider>
 			</ConfigProvider>
 		</BrowserRouter>
