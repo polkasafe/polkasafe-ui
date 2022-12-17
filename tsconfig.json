@@ -28,7 +28,8 @@
     "**/generated/**/*",
     "node_modules",
     "public",
-    ".cache"
+    ".cache",
+    "cloud-functions/**"
   ],
   "include": [
     "**/*.ts",
