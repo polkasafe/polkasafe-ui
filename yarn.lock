@@ -1661,7 +1661,7 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
-"@polkadot/api-augment@9.10.3":
+"@polkadot/api-augment@9.10.3", "@polkadot/api-augment@^9.10.3":
   version "9.10.3"
   resolved "https://registry.yarnpkg.com/@polkadot/api-augment/-/api-augment-9.10.3.tgz#8b622b65dfc9625e3fba337166f6c0445009368b"
   integrity sha512-lgcvAwpvCFJ+nUCeCJvDFhowflrPXZn9mio8b/uCvkvEbI8JscMDOfOpp3qODl5eMzwDUi+Nac+sYz3WT4M8ew==
