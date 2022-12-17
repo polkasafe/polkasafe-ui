@@ -29,7 +29,7 @@
     "node_modules",
     "public",
     ".cache",
-    "cloud-functions"
+    "cloud-functions/**"
   ],
   "include": [
     "**/*.ts",
