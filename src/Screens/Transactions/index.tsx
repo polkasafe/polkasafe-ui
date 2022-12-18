@@ -9,13 +9,63 @@ import TransactionsCard from 'src/components/Transactions/TransactionsCard';
 import ContentHeader from 'src/ui-components/ContentHeader';
 import ContentWrapper from 'src/ui-components/ContentWrapper';
 
-import History from './History';
+import History, { ITransactionsHistory } from './History';
 import Queued from './Queued';
 
 const ETab =  {
 	HISTORY: 'HISTORY',
 	QUEUED: 'QUEUED'
 };
+
+const transactionsHistory: ITransactionsHistory[] = [
+	{
+		date: 'AUG 10, 2022',
+		transactions: [
+			{
+				amount: '10,000',
+				amountType: 'USDC',
+				no: 3,
+				status: 'Success',
+				time: '12:43 PM',
+				type: 'Sent'
+			},
+			{
+				amount: '10,000',
+				amountType: 'USDC',
+				no: 2,
+				status: 'Success',
+				time: '12:43 PM',
+				type: 'Sent'
+			}
+		]
+	},
+	{
+		date: 'AUG 04, 2022',
+		transactions: [
+			{
+				amount: '10,000',
+				amountType: 'USDC',
+				no: 2,
+				status: 'Success',
+				time: '12:43 PM',
+				type: 'Received'
+			}
+		]
+	},
+	{
+		date: 'JUL 10, 2022',
+		transactions: [
+			{
+				amount: '10,000',
+				amountType: 'USDC',
+				no: 2,
+				status: 'Success',
+				time: '12:43 PM',
+				type: 'Sent'
+			}
+		]
+	}
+];
 
 const Transactions = () => {
 	const [isReject] = useState(true);
@@ -95,7 +145,7 @@ const Transactions = () => {
 								})}>{ETab.QUEUED}</span>
 							},
 							{
-								children: <History transactionsHistory={[]} />,
+								children: <History transactionsHistory={transactionsHistory} />,
 								key: ETab.HISTORY,
 								label: <span className={classNames('font-medium text-sm', {
 									'text-blue_secondary': tab !== ETab.HISTORY

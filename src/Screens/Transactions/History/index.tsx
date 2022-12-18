@@ -1,26 +1,47 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Button } from 'antd';
+
 import React, { FC } from 'react';
-import noTransaction from 'src/assets/icons/no-transaction.svg';
+
+import NoTransactionsHistory from './NoTransactionsHistory';
+import Transaction from './Transaction';
+
+export interface ITransaction {
+    amount: string,
+    amountType: string,
+    no: number,
+    status: 'Success' | 'Fail' | 'Needs Confirmation'
+    time: string,
+    type: 'Sent' | 'Received',
+}
+
+export interface ITransactionsHistory {
+    date: string,
+    transactions: ITransaction[],
+}
 
 interface IHistoryProps {
-    transactionsHistory: any[];
+    transactionsHistory: ITransactionsHistory[];
 }
 
 const History: FC<IHistoryProps> = ({ transactionsHistory }) => {
 	return (
 		<>
-			{transactionsHistory.length > 0? 'hi':<div className='flex flex-col gap-y-10 items-center justify-center min-h-[425px]'>
-				<div className='max-w-[225px] mt-14'>
-					<img className='block w-full' src={noTransaction} alt="no transaction icon" />
-				</div>
-				<p className='font-bold text-lg text-black'>No transactions have been made yet.</p>
-				<Button icon={<span className='text-lg font-medium'>+</span>} className='border-none outline-none mb-5 shadow-small bg-gray_primary1 text-blue_primary p-2 m-0 flex items-center gap-x-2 font-medium'>
-                    Create Transaction
-				</Button>
-			</div>}
+			{transactionsHistory.length > 0? <div>
+				{transactionsHistory.map(({ date, transactions }, index) => {
+					return <section key={index} className='flex flex-col items-start'>
+						<h4 className='font-semibold text-blue_primary uppercase pb-3 border-b my-3'>
+							{date}
+						</h4>
+						<div className='w-full flex flex-col gap-y-5'>
+							{transactions.map((transaction, index) => {
+								return <Transaction key={index} {...transaction} />;
+							})}
+						</div>
+					</section>;
+				})}
+			</div>:<NoTransactionsHistory/>}
 		</>
 	);
 };
