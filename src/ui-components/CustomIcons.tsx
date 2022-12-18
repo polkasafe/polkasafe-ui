@@ -15,6 +15,8 @@ import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
+import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-queued-transaction.svg';
+import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/icons/polkadot-icon-svg.svg';
@@ -60,6 +62,14 @@ export const KeyIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const MenuIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={MenuSVG} {...props} />
+);
+
+export const NoTransactionIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NoTransactionSVG} {...props} />
+);
+
+export const NoQueuedTransactionIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NoQueuedTransactionSVG} {...props} />
 );
 
 export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
