@@ -27,11 +27,11 @@ const AddressCard = ({ className }: { className?: string }) => {
 						<div className='px-1 text-sm truncate'>3J98t1WpnyiWrnqRhWNLy</div>
 					</div>
 				</div>
-				<Link to='/address-book' className='w-[100%] mt-5'>
-					<PrimaryButton className='w-[90%]' onClick={() => { }}>All Address</PrimaryButton>
+				<Link to='/address-book' className='w-[90%] mt-5'>
+					<PrimaryButton className='w-[100%] flex items-center justify-center' onClick={() => { }}>All Address</PrimaryButton>
 				</Link>
-				<Link to='/address-book' className='w-[100%] mt-5'>
-					<PrimaryButton className='w-[90%]' onClick={() => { }}>+ Add Address</PrimaryButton>
+				<Link to='/address-book' className='w-[90%] mt-5'>
+					<PrimaryButton className='w-[100%] flex items-center justify-center' onClick={() => { }}>+ Add Address</PrimaryButton>
 				</Link>
 				{/* TODO: Empty state */}
 				{/* <img src={bookmark} alt="save" />
