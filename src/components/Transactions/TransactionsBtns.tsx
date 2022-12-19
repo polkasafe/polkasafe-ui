@@ -9,15 +9,15 @@ const TransactionsBtns = () => {
 		<div className='flex items-center gap-x-5 justify-center mt-5'>
 			<PrimaryButton
 				size='large'
-				className='bg-green_primary px-7'
+				className='bg-green_primary text-white px-7'
 			>
-                Review
+				Review
 			</PrimaryButton>
 			<PrimaryButton
 				size='large'
-				className='bg-[rgba(200,41,41,0.38)] px-7'
+				className='bg-[rgba(200,41,41,0.38)] text-white px-7'
 			>
-                Cancel
+				Cancel
 			</PrimaryButton>
 		</div>
 	);

@@ -10,16 +10,16 @@ import { PencilNotificationIcon } from 'src/ui-components/CustomIcons';
 import Card from './Card';
 
 export enum ENotificationState {
-    DISABLED,
-    EXECUTED,
-    NON_EXECUTED
+	DISABLED,
+	EXECUTED,
+	NON_EXECUTED
 }
 
 export interface INotification {
-    date: string;
-    state: ENotificationState;
-    time: string;
-    title: string;
+	date: string;
+	state: ENotificationState;
+	time: string;
+	title: string;
 }
 
 const Notification = () => {
@@ -49,14 +49,14 @@ const Notification = () => {
 			<Button onClick={() => {
 				setIsOpen(!isOpen);
 			}} icon={<BellOutlined />} className='flex items-center justify-center outline-none border-none text-blue_secondary shadow-none text-xl' />
-			{isOpen? <div className='absolute top-16 right-0 bg-white rounded-lg border-[1.5px] border-blue_primary shadow-large p-3'>
+			{isOpen ? <div className='absolute top-16 right-0 bg-white rounded-lg border-[1.5px] border-blue_primary shadow-large p-3 z-10'>
 				<p className='flex gap-x-5 items-center'>
 					<span className='text-lg font-bold text-blue_primary w-56 md:w-64'>Notifications</span>
-					<PencilNotificationIcon className='text-blue_secondary text-xl'/>
+					<PencilNotificationIcon className='text-blue_secondary text-xl' />
 				</p>
 				<div>
 					{
-						notifications.length > 0? <section>
+						notifications.length > 0 ? <section>
 							<p className='flex justify-end mt-2'>
 								<button onClick={() => {
 									setNotifications([]);
@@ -67,7 +67,7 @@ const Notification = () => {
 									return <Card key={index} {...notification} />;
 								})}
 							</div>
-						</section>: <section className='flex flex-col items-center'>
+						</section> : <section className='flex flex-col items-center'>
 							<div className='mt-10'>
 								<img src={noNotification} alt="No notification icon" />
 							</div>
@@ -75,7 +75,7 @@ const Notification = () => {
 						</section>
 					}
 				</div>
-			</div>: null}
+			</div> : null}
 		</div>
 	);
 };

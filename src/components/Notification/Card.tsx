@@ -23,25 +23,24 @@ const Card: FC<INotification> = ({ date, state, time, title }) => {
 					<span>{date}</span>
 				</p>
 			</div>
-			<Button className='shadow-none flex items-center justify-center outline-none border-none text-blue_secondary text-lg' icon={<CloseOutlined/>}/>
+			<Button className='shadow-none flex items-center justify-center outline-none border-none text-blue_secondary text-lg' icon={<CloseOutlined />} />
 		</article>
 	);
 };
 
 const NotificationIcon: FC<{
-    state: ENotificationState;
-    className?: string;
-}> = ({ className, state }) => {
-	switch(state) {
-	case ENotificationState.DISABLED:
-		return <CheckOutlined className={`text-blue_secondary text-xl md:text-2xl ${className}`} />;
-	case ENotificationState.NON_EXECUTED:
-		return <PencilIcon className={`text-blue_primary text-3xl md:text-4xl ${className}`} />;
-	case ENotificationState.EXECUTED:
-		return <CheckOutlined className={`text-blue_primary text-xl md:text-2xl ${className}`} />;
-	default:
-		return null;
-	}
-};
+	state: ENotificationState;
+	className?: string; }> = ({ className, state }) => {
+		switch (state) {
+		case ENotificationState.DISABLED:
+			return <CheckOutlined className={`text-blue_secondary text-xl md:text-2xl ${className}`} />;
+		case ENotificationState.NON_EXECUTED:
+			return <PencilIcon className={`text-blue_primary text-3xl md:text-4xl ${className}`} />;
+		case ENotificationState.EXECUTED:
+			return <CheckOutlined className={`text-blue_primary text-xl md:text-2xl ${className}`} />;
+		default:
+			return null;
+		}
+	};
 
 export default Card;
