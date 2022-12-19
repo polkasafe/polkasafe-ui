@@ -14,9 +14,9 @@ interface Props {
 	size?: SizeType;
 }
 
-const PrimaryButton = ({ className, children, onClick, size } : Props) => {
+const PrimaryButton = ({ className, children, onClick, size }: Props) => {
 	return (
-		<Button size={size} className={classNames('flex items-center border-none outline-none rounded-lg text-white font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
+		<Button size={size} className={classNames('flex items-center border-none outline-none shadow-md rounded-lg bg-purple_secondary text-blue_primary font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
 			{children}
 		</Button>
 	);
