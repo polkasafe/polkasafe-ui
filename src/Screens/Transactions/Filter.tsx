@@ -20,13 +20,10 @@ const Filter = () => {
 	};
 
 	return (
-		<section>
-			<article className='grid grid-cols-7 text-blue_secondary my-3'>
-				<p className='col-span-2'>Transaction Type</p>
-				<p className='col-span-5'>Parameters</p>
-			</article>
-			<article className='grid grid-cols-7 '>
-				<div className='col-span-2 flex flex-col items-start gap-y-3'>
+		<section className='grid grid-cols-7'>
+			<article className='col-span-7 md:col-span-2'>
+				<p className='text-blue_secondary mt-3 md:my-3'>Transaction Type</p>
+				<div className='flex items-center md:flex-col md:items-start gap-3'>
 					<button
 						className={classNames('text-lg font-bold', {
 							'text-blue_primary': filterType === EFilterType.INCOMING,
@@ -46,9 +43,12 @@ const Filter = () => {
 						{EFilterType.OUTGOING}
 					</button>
 				</div>
-				<Form className='col-span-5 flex flex-col gap-y-3'>
+			</article>
+			<article className='col-span-7 md:col-span-5'>
+				<p className='text-blue_secondary mt-5 md:my-3'>Parameters</p>
+				<Form className='flex flex-col gap-y-3'>
 					<div className='grid grid-cols-2 gap-x-10'>
-						<div className="col-span-1 flex flex-col gap-y-1">
+						<div className="col-span-2 md:col-span-1 flex flex-col gap-y-1">
 							<label
 								className="text-blue_primary font-bold text-sm"
 								htmlFor="from"
@@ -66,7 +66,7 @@ const Filter = () => {
 								/>
 							</Form.Item>
 						</div>
-						<div className="col-span-1 flex flex-col gap-y-1">
+						<div className="col-span-2 md:col-span-1 flex flex-col gap-y-1">
 							<label
 								className="text-blue_primary font-bold text-sm"
 								htmlFor="to"
@@ -86,7 +86,7 @@ const Filter = () => {
 						</div>
 					</div>
 					<div className='grid grid-cols-2 gap-x-10'>
-						<div className="col-span-1">
+						<div className="col-span-2 md:col-span-1">
 							<Form.Item
 								name="amount"
 							>
@@ -97,7 +97,7 @@ const Filter = () => {
 								/>
 							</Form.Item>
 						</div>
-						<div className="col-span-1">
+						<div className="col-span-2 md:col-span-1">
 							<Form.Item
 								name="tokenAddress"
 							>
