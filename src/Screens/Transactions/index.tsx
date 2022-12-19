@@ -6,13 +6,12 @@ import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import History, { ITransactionsHistory } from 'src/components/Transactions/History';
+import Queued from 'src/components/Transactions/Queued';
 import RejectTransaction from 'src/components/Transactions/RejectTransaction';
 import TransactionsCard from 'src/components/Transactions/TransactionsCard';
 import ContentHeader from 'src/ui-components/ContentHeader';
 import ContentWrapper from 'src/ui-components/ContentWrapper';
-
-import History, { ITransactionsHistory } from './History';
-import Queued from './Queued';
 
 const ETab =  {
 	HISTORY: 'HISTORY',
