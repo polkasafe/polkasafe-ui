@@ -1,6 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+
+import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
@@ -71,6 +73,7 @@ const Transactions = () => {
 	const [isReject] = useState(true);
 	const [isTransactionInitiated] = useState(false);
 	const [tab, setTab] = useState(ETab.QUEUED);
+	const [filter, setFilter] = useState(false);
 	return (
 		<>
 			{isTransactionInitiated?<div className='grid md:grid-cols-2 gap-5 lg:gap-10'>
@@ -118,15 +121,18 @@ const Transactions = () => {
 				<ContentHeader
 					title='Transaction'
 					subTitle={
-						<h3 className='ml-2 text-sm font-normal'>
-							/ {tab}
+						<h3 className='ml-2 text-sm font-normal '>
+							/ {tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase()} {filter? '/ Filter': ''}
 						</h3>
 					}
 					rightElm={
 						tab === ETab.HISTORY?
-							<span className='font-bold text-base text-blue_primary'>
-							Filter
-							</span>: null
+							<button onClick={() => setFilter(!filter)} className='flex items-center gap-x-1'>
+								<span className='font-bold text-base text-blue_primary'>
+									Filter
+								</span>
+								{filter?<CaretUpOutlined className='text-blue_secondary' />: <CaretDownOutlined className='text-blue_secondary' />}
+							</button>: null
 					}
 				/>
 				<ContentWrapper>
@@ -145,7 +151,7 @@ const Transactions = () => {
 								})}>{ETab.QUEUED}</span>
 							},
 							{
-								children: <History transactionsHistory={transactionsHistory} />,
+								children: <History filter={filter} transactionsHistory={transactionsHistory} />,
 								key: ETab.HISTORY,
 								label: <span className={classNames('font-medium text-sm', {
 									'text-blue_secondary': tab !== ETab.HISTORY

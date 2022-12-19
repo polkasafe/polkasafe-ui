@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { FC } from 'react';
+import Filter from 'src/Screens/Transactions/Filter';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
@@ -22,10 +23,14 @@ export interface ITransactionsHistory {
 }
 
 interface IHistoryProps {
+	filter?: boolean;
     transactionsHistory: ITransactionsHistory[];
 }
 
-const History: FC<IHistoryProps> = ({ transactionsHistory }) => {
+const History: FC<IHistoryProps> = ({ filter, transactionsHistory }) => {
+	if (filter) {
+		return <Filter/>;
+	}
 	return (
 		<>
 			{transactionsHistory.length > 0? <div>
