@@ -13,7 +13,7 @@ import SwitchRoutes from './SwitchRoutes';
 
 const { Content, Sider } = Layout;
 
-const AppLayout = ({ className } : { className?: string }) => {
+const AppLayout = ({ className }: { className?: string }) => {
 	const [sideDrawer, setSideDrawer] = useState(false);
 	return (
 		<Layout className={className}>
@@ -40,11 +40,11 @@ const AppLayout = ({ className } : { className?: string }) => {
 				<Layout className='min-h flex flex-row p-0'>
 					<div className='hidden lg:block w-full max-w-[200px]'></div>
 					<Content className='bg-purple_app_bg p-8'>
-						<SwitchRoutes/>
+						<SwitchRoutes />
 					</Content>
 				</Layout>
 			</Layout>
-			<Footer/>
+			<Footer />
 		</Layout>
 	);
 };

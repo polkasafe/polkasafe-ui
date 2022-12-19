@@ -13,7 +13,7 @@ module.exports = {
 	plugins: [],
 	theme: {
 		extend: {
-			backgroundImage:{
+			backgroundImage: {
 				'gradient-primary': 'linear-gradient(180deg, #CAC9F9 0%, #332D82 100%)'
 			},
 			boxShadow: {
@@ -34,6 +34,7 @@ module.exports = {
 				gray_secondary: '#F5F5F5',
 				green_primary: '#208F0E',
 				purple_app_bg: '#F6F7FE',
+				purple_secondary: '#FAF4FF',
 				red_primary: '#C82929'
 			},
 			fontFamily: {

@@ -9,6 +9,7 @@ export const styledTheme = {
 		black_text: '#1F1F1F',
 		blue_primary: '#645ADF',
 		blue_secondary: '#CAC9F9',
+		blue_selected: '#F4F4FF',
 		gray_primary1: '#FBFAFC',
 		purple_app_bg: '#F6F7FE',
 		red_primary: '#C82929'
