@@ -6,7 +6,7 @@ import React from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
 import DragDrop from 'src/components/Assets/DropDown';
 
-const index = () => {
+const Assets = () => {
 	return (
 		<div>
 			<div className="grid grid-cols-12 gap-4">
@@ -29,4 +29,4 @@ const index = () => {
 	);
 };
 
-export default index;
+export default Assets;

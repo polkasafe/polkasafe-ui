@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import AddAddressForm from 'src/components/AddressBook/AddAddressForm';
 import AddressTable from 'src/components/AddressBook/AddressTable';
 
-const index = () => {
+const AddressBook = () => {
 	const [isShown, setIsShown] = useState(false);
 	function handleClick(): any {
 		setIsShown(current => !current);
@@ -48,4 +48,4 @@ const index = () => {
 	);
 };
 
-export default index;
+export default AddressBook;
