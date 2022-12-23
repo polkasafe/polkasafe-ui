@@ -10,16 +10,16 @@ const { Footer: AntdFooter } = Layout;
 
 const Footer = () => {
 	return (
-		<AntdFooter className='bg-white flex flex-row items-center p-0 lg:h-[60px] shadow-top'>
-			<div className='hidden lg:block w-[200px]'></div>
-			<section className='px-4 lg:px-8 flex-1 flex flex-col lg:items-center lg:flex-row lg:justify-between gap-x-2 py-4 gap-y-3'>
-				<div className='flex gap-2 md:gap-4 items-center justify-between'>
+		<AntdFooter className='flex text-white bg-bg-main flex-row items-center p-0 lg:h-[80px] shadow-top'>
+			<div className='hidden lg:block w-[240px]'></div>
+			<section className='flex-1 flex flex-col py-[30px] lg:py-0 lg:items-center lg:flex-row lg:justify-between gap-x-2 gap-y-3 px-[30px]'>
+				<div className='flex gap-2 md:gap-10 items-center justify-between'>
 					<p className='hidden md:block'>
 						<sup>&#169;</sup>
 						All Rights Reserved
 					</p>
 					<Link to='/'>
-						Terms and Conditions
+						Terms & Conditions
 					</Link>
 					<Link to='/'>
 						Privacy Policy
