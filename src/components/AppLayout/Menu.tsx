@@ -2,9 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import classNames from 'classnames';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, KeyIcon, MenuIcon, MultisigLockIcon, PolkasafeLogoIcon, PolkasafeTextIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
+import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
+import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, KeyIcon, MultisigLockIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 const menuItems = [
@@ -57,19 +59,17 @@ const Menu: FC<Props> = ({ className }) => {
 		}
 	];
 	return (
-		<div className={className}>
-			<section>
+		<div className={classNames(className, 'bg-bg-main')}>
+			<section className='mt-[30px] mb-10'>
 				<Link to='/'>
-					<p className='flex items-center gap-x-2 overflow-hidden h-[75px] justify-center'>
-						<PolkasafeLogoIcon className='text-[42px]' />
-						<PolkasafeTextIcon className='text-[100px]' />
+					<p className='text-white flex items-center gap-x-2 overflow-hidden justify-center'>
+						<img src={polkasafeLogo} alt="polkasafe logo" />
 					</p>
 				</Link>
 			</section>
-			<section className='mt-3'>
-				<h2 className='px-6 flex items-center gap-x-2'>
-					<MenuIcon className='text-lg' />
-					<span className='font-bold text-lg'>Menu</span>
+			<section className='text-white'>
+				<h2 className='uppercase text-text_secondary ml-8 text-xs font-primary'>
+					Menu
 				</h2>
 				<ul className='flex flex-col py-2'>
 					{
@@ -123,7 +123,6 @@ const Menu: FC<Props> = ({ className }) => {
 };
 
 export default styled(Menu)`
-    background-color: white;
     .menu-item-active:focus {
         p:first-child {
             border-top-right-radius: 1rem;

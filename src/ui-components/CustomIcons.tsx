@@ -21,6 +21,7 @@ import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/icons/polkadot-icon-svg.svg';
 import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot-logo-text.svg';
+import { ReactComponent as PolkasafeSVG } from 'src/assets/icons/polkasafe.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
@@ -118,6 +119,10 @@ export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const PolkadotLogoTextIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PolkadotLogoTextSVG} {...props} />
+);
+
+export const PolkasafeIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PolkasafeSVG} {...props} />
 );
 
 export const PolkasafeLogoIcon = (props: Partial<CustomIconComponentProps>) => (

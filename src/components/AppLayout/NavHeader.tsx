@@ -15,7 +15,7 @@ interface Props {
 }
 const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 	return (
-		<Header className='bg-purple_app_bg flex flex-row items-center p-0 h-[60px]'>
+		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
 			<section className='hidden lg:block w-[200px]'></section>
 			<section className='px-4 lg:px-8 flex-1 flex items-center justify-between gap-x-2'>
 				<article className='lg:hidden'>

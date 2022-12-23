@@ -20,8 +20,8 @@ module.exports = {
 				'highlight': '#1A2A42',
 				'primary': '#1573FE',
 				'success': '#06D6A0',
-				'text-main': '#FFFFFF',
-				'text-secondary': '#8B8B8B',
+				'text_main': '#FFFFFF',
+				'text_secondary': '#8B8B8B',
 				'waiting': '#FF9F1C'
 			},
 			fontFamily: {

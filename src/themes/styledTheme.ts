@@ -4,15 +4,15 @@
 
 export const styledTheme = {
 	colors: {
-		black_full: '#000',
-		black_primary: 'rgba(0, 0, 0, 0.9)',
-		black_text: '#1F1F1F',
-		blue_primary: '#645ADF',
-		blue_secondary: '#CAC9F9',
-		blue_selected: '#F4F4FF',
-		gray_primary1: '#FBFAFC',
-		purple_app_bg: '#F6F7FE',
-		red_primary: '#C82929'
+		bg_main: '#1B2028',
+		bg_secondary: '#24272E',
+		failure: '#E63946',
+		highlight: '#1A2A42',
+		primary: '#1573FE',
+		success: '#06D6A0',
+		text_main: '#FFFFFF',
+		text_secondary: '#8B8B8B',
+		waiting: '#FF9F1C'
 	},
 	fonts: {
 		font_default: 'Archivo, sans-serif'
