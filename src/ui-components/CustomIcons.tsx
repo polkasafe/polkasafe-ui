@@ -7,6 +7,7 @@ import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/
 import React from 'react';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
+import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
@@ -44,6 +45,10 @@ export const AppsIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const AssetsIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={AssetsSVG} {...props} />
+);
+
+export const ArrowDownLeftIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ArrowDownLeftSVG} {...props} />
 );
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (

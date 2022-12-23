@@ -8,15 +8,14 @@ import { NotificationIcon } from 'src/ui-components/CustomIcons';
 
 import Card from './Card';
 
-export enum ENotificationState {
-	DISABLED,
-	EXECUTED,
-	NON_EXECUTED
+export enum ENotificationStatus {
+	READ = 'READ',
+	UNREAD = 'UNREAD'
 }
 
 export interface INotification {
 	date: string;
-	state: ENotificationState;
+	status: ENotificationStatus;
 	time: string;
 	title: string;
 }
@@ -25,22 +24,22 @@ const Notification = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [notifications, setNotifications] = useState<INotification[]>([
 		{
-			date: '20/09/22',
-			state: ENotificationState.NON_EXECUTED,
-			time: '12:43PM',
-			title: 'New Transaction to sign'
+			date: 'Dec 18, 2022',
+			status: ENotificationStatus.UNREAD,
+			time: '02:30 PM',
+			title: 'Notification - 1'
 		},
 		{
-			date: '20/09/22',
-			state: ENotificationState.DISABLED,
-			time: '12:43PM',
-			title: 'Transaction Executed'
+			date: 'Dec 18, 2022',
+			status: ENotificationStatus.READ,
+			time: '02:30 PM',
+			title: 'Notification - 2'
 		},
 		{
-			date: '20/09/22',
-			state: ENotificationState.EXECUTED,
-			time: '12:43PM',
-			title: 'Transaction Executed'
+			date: 'Dec 18, 2022',
+			status: ENotificationStatus.UNREAD,
+			time: '02:30 PM',
+			title: 'Notification - 3'
 		}
 	]);
 	return (
@@ -50,8 +49,8 @@ const Notification = () => {
 			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-lg'>
 				<NotificationIcon />
 			</button>
-			{isOpen ? <div className='absolute top-16 right-0 bg-highlight rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[344px]'>
-				<div className='flex gap-x-5 items-center justify-between '>
+			{isOpen ? <div className='absolute top-16 right-0 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[344px]'>
+				<div className='flex gap-x-5 items-center justify-between mb-5'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
 					<button onClick={() => {
 						setNotifications([]);
@@ -60,7 +59,7 @@ const Notification = () => {
 				<div>
 					{
 						notifications.length > 0 ? <section>
-							<div className='flex flex-col gap-y-2 mt-2'>
+							<div className='flex flex-col gap-y-[10px] mt-2'>
 								{notifications.map((notification, index) => {
 									return <Card key={index} {...notification} />;
 								})}
@@ -69,7 +68,7 @@ const Notification = () => {
 							<div className='mt-10'>
 								<img src={noNotification} alt="No notification icon" />
 							</div>
-							<p className='text-blue_primary text-lg opacity-90 mt-10'>No new notifications</p>
+							<p className='text-white text-base font-medium mt-10'>No new notifications</p>
 						</section>
 					}
 				</div>
