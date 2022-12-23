@@ -15,7 +15,6 @@ export const styledTheme = {
 		red_primary: '#C82929'
 	},
 	fonts: {
-		font_default: 'DM Sans',
-		font_secondary: 'Roboto'
+		font_default: 'Archivo, sans-serif'
 	}
 };
