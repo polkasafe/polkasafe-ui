@@ -9,6 +9,8 @@ import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, KeyIcon, MultisigLockIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
+import { IRouteInfo } from '.';
+
 const menuItems = [
 	{
 		icon: <HomeIcon />,
@@ -44,9 +46,11 @@ const menuItems = [
 
 interface Props {
 	className?: string;
+	selectedRoute: IRouteInfo;
+	setSelectedRoute: React.Dispatch<React.SetStateAction<IRouteInfo>>;
 }
 
-const Menu: FC<Props> = ({ className }) => {
+const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 	const addresses = [
 		{
 			address: 'John'
@@ -58,6 +62,7 @@ const Menu: FC<Props> = ({ className }) => {
 			address: 'John John'
 		}
 	];
+
 	return (
 		<div className={classNames(className, 'bg-bg-main')}>
 			<section className='mt-[30px] mb-10'>
@@ -74,13 +79,15 @@ const Menu: FC<Props> = ({ className }) => {
 				<ul className='flex flex-col py-2'>
 					{
 						menuItems.map((item) => {
-							return <li className='w-full pr-5' key={item.key}>
-								<Link className='flex items-center gap-x-3 menu-item-active' to={item.key} >
-									<p className='w-[5px] h-9'></p>
-									<p className='px-3 py-2.5 font-bold text-base text-blue_secondary flex items-center gap-x-2 flex-1 rounded-md'>
-										{item.icon}
-										{item.title}
-									</p>
+							return <li className='w-full px-5' key={item.key}>
+								<Link className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+									'bg-highlight text-primary': item.title === selectedRoute.title
+								})} onClick={() => setSelectedRoute({
+									pathName: item.key,
+									title: item.title
+								})} to={item.key} >
+									{item.icon}
+									{item.title}
 								</Link>
 							</li>;
 						})
@@ -122,20 +129,4 @@ const Menu: FC<Props> = ({ className }) => {
 	);
 };
 
-export default styled(Menu)`
-    .menu-item-active:focus {
-        p:first-child {
-            border-top-right-radius: 1rem;
-            border-bottom-right-radius: 1rem;
-            background-color: #645ADF !important;
-        }
-        p:last-child {
-            background-color: #FBFAFC !important;
-            box-shadow: -2px 3px 6px #CAC9F9;
-            color: #645ADF !important;
-            span {
-                color: #645ADF !important;
-            }
-        }
-    }
-`;
+export default styled(Menu)``;
