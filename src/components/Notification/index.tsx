@@ -1,11 +1,10 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { BellOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+
 import React, { useState } from 'react';
 import noNotification from 'src/assets/icons/no-notification.svg';
-import { PencilNotificationIcon } from 'src/ui-components/CustomIcons';
+import { NotificationIcon } from 'src/ui-components/CustomIcons';
 
 import Card from './Card';
 
@@ -46,22 +45,21 @@ const Notification = () => {
 	]);
 	return (
 		<div className='relative'>
-			<Button onClick={() => {
+			<button onClick={() => {
 				setIsOpen(!isOpen);
-			}} icon={<BellOutlined />} className='flex items-center justify-center outline-none border-none text-blue_secondary shadow-none text-xl' />
-			{isOpen ? <div className='absolute top-16 right-0 bg-white rounded-lg border-[1.5px] border-blue_primary shadow-large p-3 z-10'>
-				<p className='flex gap-x-5 items-center'>
-					<span className='text-lg font-bold text-blue_primary w-56 md:w-64'>Notifications</span>
-					<PencilNotificationIcon className='text-blue_secondary text-xl' />
-				</p>
+			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-lg'>
+				<NotificationIcon />
+			</button>
+			{isOpen ? <div className='absolute top-16 right-0 bg-highlight rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[344px]'>
+				<div className='flex gap-x-5 items-center justify-between '>
+					<h3 className='text-white font-bold text-xl'>Notifications</h3>
+					<button onClick={() => {
+						setNotifications([]);
+					}} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>Clear All</button>
+				</div>
 				<div>
 					{
 						notifications.length > 0 ? <section>
-							<p className='flex justify-end mt-2'>
-								<button onClick={() => {
-									setNotifications([]);
-								}} className='text-blue_primary underline text-xs flex items-center justify-center outline-none border-none shadow-none'>Clear All</button>
-							</p>
 							<div className='flex flex-col gap-y-2 mt-2'>
 								{notifications.map((notification, index) => {
 									return <Card key={index} {...notification} />;
