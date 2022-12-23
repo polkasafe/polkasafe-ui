@@ -8,13 +8,11 @@ import { ThemeConfig } from 'antd/es/config-provider/context';
 export const antdTheme: ThemeConfig = {
 	hashed: false,
 	token: {
-		boxShadow: '-2px 3px 6px #CAC9F9',
-		boxShadowSecondary: '-3px 4px 10px #CAC9F9',
-		colorBgBase: '#F5F5F5',
-		colorPrimary: '#645ADF',
-		colorText: '#1F1F1F',
-		colorTextHeading: 'rgba(0, 0, 0, 0.9)',
-		colorTextSecondary: '#CAC9F9',
-		fontFamily: 'DM Sans'
+		colorBgBase: '#1B2028',
+		colorError: '#E63946',
+		colorPrimary: '#1573FE',
+		colorSuccess: '#06D6A0',
+		colorWarning: '#FF9F1C',
+		fontFamily: 'Archivo, sans-serif'
 	}
 };

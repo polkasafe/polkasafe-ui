@@ -13,33 +13,20 @@ module.exports = {
 	plugins: [],
 	theme: {
 		extend: {
-			backgroundImage: {
-				'gradient-primary': 'linear-gradient(180deg, #CAC9F9 0%, #332D82 100%)'
-			},
-			boxShadow: {
-				'large': '-3px 4px 10px #CAC9F9',
-				'siderBox': '-6px 10px 10px rgba(0, 0, 0, 0.23)',
-				'small': '-2px 3px 6px #CAC9F9',
-				'top': '0px -3px 4px #CAC9F9'
-			},
 			colors: {
-				black_full: '#000',
-				black_primary: 'rgba(0, 0, 0, 0.9)',
-				black_text: '#1F1F1F',
-				blue_primary: '#645ADF',
-				blue_primary1: '#EBEBFF',
-				blue_secondary: '#CAC9F9',
-				gray_primary: '#f6f7fE',
-				gray_primary1: '#FBFAFC',
-				gray_secondary: '#F5F5F5',
-				green_primary: '#208F0E',
-				purple_app_bg: '#F6F7FE',
-				purple_secondary: '#FAF4FF',
-				red_primary: '#C82929'
+				'bg-main': '#1B2028',
+				'bg-secondary': '#24272E',
+				'failure': '#E63946',
+				'highlight': '#1A2A42',
+				'primary': '#1573FE',
+				'success': '#06D6A0',
+				'text_main': '#FFFFFF',
+				'text_secondary': '#8B8B8B',
+				'waiting': '#FF9F1C'
 			},
 			fontFamily: {
 				// add new font family
-				primary: ['DM Sans']
+				primary: ['Archivo', 'sans-serif']
 			}
 		}
 	}

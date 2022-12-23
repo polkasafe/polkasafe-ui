@@ -17,10 +17,12 @@ import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-loc
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
 import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-queued-transaction.svg';
 import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
+import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/icons/polkadot-icon-svg.svg';
 import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot-logo-text.svg';
+import { ReactComponent as PolkasafeSVG } from 'src/assets/icons/polkasafe.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
@@ -72,6 +74,10 @@ export const NoQueuedTransactionIcon = (props: Partial<CustomIconComponentProps>
 	<Icon component={NoQueuedTransactionSVG} {...props} />
 );
 
+export const NotificationIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NotificationSVG} {...props} />
+);
+
 export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={NoNotificationSVG} {...props} />
 );
@@ -118,6 +124,10 @@ export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const PolkadotLogoTextIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PolkadotLogoTextSVG} {...props} />
+);
+
+export const PolkasafeIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PolkasafeSVG} {...props} />
 );
 
 export const PolkasafeLogoIcon = (props: Partial<CustomIconComponentProps>) => (

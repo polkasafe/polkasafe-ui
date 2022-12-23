@@ -2,10 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { FC } from 'react';
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar } from 'antd';
+import classNames from 'classnames';
+import React, { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, KeyIcon, MenuIcon, MultisigLockIcon, PolkasafeLogoIcon, PolkasafeTextIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
+import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
+import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
+
+import { IRouteInfo } from '.';
 
 const menuItems = [
 	{
@@ -42,45 +48,50 @@ const menuItems = [
 
 interface Props {
 	className?: string;
+	selectedRoute: IRouteInfo;
+	setSelectedRoute: React.Dispatch<React.SetStateAction<IRouteInfo>>;
 }
 
-const Menu: FC<Props> = ({ className }) => {
+const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
+	const [selectedAddress, setSelectedAddress] = useState('');
 	const addresses = [
 		{
-			address: 'John'
+			address: 'Jaski - 1',
+			imgSrc: ''
 		},
 		{
-			address: 'John Doe'
+			address: 'Jaski - 2',
+			imgSrc: ''
 		},
 		{
-			address: 'John John'
+			address: 'Jaski - 3',
+			imgSrc: ''
 		}
 	];
+
 	return (
-		<div className={className}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5')}>
 			<section>
-				<Link to='/'>
-					<p className='flex items-center gap-x-2 overflow-hidden h-[75px] justify-center'>
-						<PolkasafeLogoIcon className='text-[42px]' />
-						<PolkasafeTextIcon className='text-[100px]' />
-					</p>
+				<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
+					<img src={polkasafeLogo} alt="polkasafe logo" />
 				</Link>
 			</section>
-			<section className='mt-3'>
-				<h2 className='px-6 flex items-center gap-x-2'>
-					<MenuIcon className='text-lg' />
-					<span className='font-bold text-lg'>Menu</span>
+			<section>
+				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary'>
+					Menu
 				</h2>
-				<ul className='flex flex-col py-2'>
+				<ul className='flex flex-col py-2 text-white list-none'>
 					{
 						menuItems.map((item) => {
-							return <li className='w-full pr-5' key={item.key}>
-								<Link className='flex items-center gap-x-3 menu-item-active' to={item.key} >
-									<p className='w-[5px] h-9'></p>
-									<p className='px-3 py-2.5 font-bold text-base text-blue_secondary flex items-center gap-x-2 flex-1 rounded-md'>
-										{item.icon}
-										{item.title}
-									</p>
+							return <li className='w-full' key={item.key}>
+								<Link className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+									'bg-highlight text-primary': item.title === selectedRoute.title
+								})} onClick={() => setSelectedRoute({
+									pathName: item.key,
+									title: item.title
+								})} to={item.key} >
+									{item.icon}
+									{item.title}
 								</Link>
 							</li>;
 						})
@@ -88,55 +99,35 @@ const Menu: FC<Props> = ({ className }) => {
 				</ul>
 			</section>
 			<section>
-				<h2 className='px-6 flex items-center gap-x-2'>
-					<MultisigLockIcon className='text-lg' />
-					<span className='font-bold text-lg'>Your Multisigs</span>
+				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
+					<span>Multisigs</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>3</span>
 				</h2>
 				<div>
-					<ul className='flex flex-col py-2'>
-						{addresses.map(({ address }) => {
-							return <li className='w-full pr-5' key={address}>
-								<Link className='flex items-center gap-x-3 menu-item-active' to={address} >
-									<p className='w-[5px] h-8'></p>
-									<p className='px-3 py-1.5 font-normal text-base text-blue_secondary flex items-center gap-x-2 flex-1 rounded-md'>
-										<KeyIcon />
-										{address}
-									</p>
-								</Link>
+					<ul className='flex flex-col py-2 text-white list-none'>
+						{addresses.map(({ address, imgSrc }) => {
+							return <li className='w-full' key={address}>
+								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+									'bg-highlight text-primary': address === selectedAddress
+								})} onClick={() => setSelectedAddress(address)}>
+									<Avatar className={classNames('bg-white',{
+										'bg-primary': address === selectedAddress
+									})} src={imgSrc} size="small" icon={<UserOutlined className='text-highlight' />}  />
+									{address}
+								</button>
 							</li>;
 						})}
 					</ul>
-					<div className='px-5 py-2'>
-						<Link to='/create-multisig'>
-							<article className='flex flex-col items-center gap-y-4 pt-8 pb-6 rounded-md bg-gradient-primary shadow-siderBox'>
-								<UserPlusIcon className='text-5xl' />
-								<p className='text-white max-w-[100px] text-center font-bold'>
-									Add New Multisig
-								</p>
-							</article>
-						</Link>
-					</div>
 				</div>
+			</section>
+			<section className='mt-auto'>
+				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'>
+					<UserPlusIcon className='text-xl' />
+					<span className='font-normal text-sm'>Add Multisig</span>
+				</button>
 			</section>
 		</div>
 	);
 };
 
-export default styled(Menu)`
-    background-color: white;
-    .menu-item-active:focus {
-        p:first-child {
-            border-top-right-radius: 1rem;
-            border-bottom-right-radius: 1rem;
-            background-color: #645ADF !important;
-        }
-        p:last-child {
-            background-color: #FBFAFC !important;
-            box-shadow: -2px 3px 6px #CAC9F9;
-            color: #645ADF !important;
-            span {
-                color: #645ADF !important;
-            }
-        }
-    }
-`;
+export default styled(Menu)``;
