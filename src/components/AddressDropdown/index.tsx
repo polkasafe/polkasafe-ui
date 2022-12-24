@@ -4,8 +4,7 @@
 
 import { UserOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
-import { EModalType, IModalProps } from 'src/components/AppLayout/NavHeader';
+import React, { useRef, useState } from 'react';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 
 interface IAddress {
@@ -13,20 +12,25 @@ interface IAddress {
     imgSrc: string;
 }
 
-const AddressDropdown: FC<IModalProps> = ({ modalType, setModalType }) => {
+const AddressDropdown = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
 		imgSrc: '',
 		value: '3J98t...hWNLy'
 	});
+	const [isVisible, toggleVisibility] = useState(false);
+	const isMouseEnter = useRef(false);
 	return (
-		<div className='relative'>
-			<button onClick={() => {
-				if (modalType === EModalType.ADDRESS) {
-					setModalType(EModalType.NONE);
-				} else {
-					setModalType(EModalType.ADDRESS);
+		<div
+			className='relative'
+			onBlur={() => {
+				if (!isMouseEnter.current) {
+					(isVisible ? toggleVisibility(false) : null);
 				}
+			}}
+		>
+			<button onClick={() => {
+				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
 			}} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
 					{!selectedAddress?<WarningRoundedIcon className='text-base text-primary'/>
@@ -42,7 +46,15 @@ const AddressDropdown: FC<IModalProps> = ({ modalType, setModalType }) => {
 					'text-white': !selectedAddress
 				})} />
 			</button>
-			{modalType === EModalType.ADDRESS ? <div className='absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-10 min-w-[274px]'>
+			<div
+				className={classNames(
+					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-10 min-w-[274px]',
+					{
+						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
+						'opacity-100 h-auto': isVisible
+					}
+				)}
+			>
 				{selectedAddress? <div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
 						<span className='bg-transparent flex items-center justify-center rounded-full w-[52px] h-[52px] border border-primary'>
@@ -70,7 +82,7 @@ const AddressDropdown: FC<IModalProps> = ({ modalType, setModalType }) => {
 						Disconnect
 					</button>
 				</div>: null}
-			</div>: null}
+			</div>
 		</div>
 	);
 };
