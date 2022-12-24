@@ -2,8 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import noNotification from 'src/assets/icons/no-notification.svg';
+import { EModalType, IModalProps } from 'src/components/AppLayout/NavHeader';
 import { NotificationIcon } from 'src/ui-components/CustomIcons';
 
 import NotificationCard from './NotificationCard';
@@ -20,8 +21,7 @@ export interface INotification {
 	title: string;
 }
 
-const Notification = () => {
-	const [isOpen, setIsOpen] = useState(false);
+const Notification: FC<IModalProps> = ({ modalType, setModalType }) => {
 	const [notifications, setNotifications] = useState<INotification[]>([
 		{
 			date: 'Dec 18, 2022',
@@ -45,11 +45,15 @@ const Notification = () => {
 	return (
 		<div className='relative'>
 			<button onClick={() => {
-				setIsOpen(!isOpen);
+				if (modalType === EModalType.NOTIFICATION) {
+					setModalType(EModalType.NONE);
+				} else {
+					setModalType(EModalType.NOTIFICATION);
+				}
 			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-lg'>
 				<NotificationIcon />
 			</button>
-			{isOpen ? <div className='absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px]'>
+			{modalType === EModalType.NOTIFICATION ? <div className='absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px]'>
 				<div className='flex gap-x-5 items-center justify-between mb-5'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
 					<button onClick={() => {

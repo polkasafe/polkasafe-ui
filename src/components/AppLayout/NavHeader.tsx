@@ -4,7 +4,7 @@
 
 import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import AddressDropdown from 'src/components/AddressDropdown';
 import Dollar from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
@@ -20,7 +20,21 @@ interface Props {
 	setSideDrawer: React.Dispatch<React.SetStateAction<boolean>>
 	selectedRoute: IRouteInfo;
 }
+
+export enum EModalType {
+	NOTIFICATION,
+	NETWORKS,
+	ADDRESS,
+	NONE
+}
+
+export interface IModalProps {
+	modalType: EModalType;
+	setModalType: React.Dispatch<React.SetStateAction<EModalType>>;
+}
+
 const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
+	const [modalType, setModalType] = useState(EModalType.NONE);
 	return (
 		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
 			<section className='hidden lg:block w-[240px]'></section>
@@ -36,9 +50,9 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl'>{selectedRoute.title}</p>
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>
-					<Notification/>
-					<NetworksDropdown />
-					<AddressDropdown />
+					<Notification modalType={modalType} setModalType={setModalType} />
+					<NetworksDropdown modalType={modalType} setModalType={setModalType} />
+					<AddressDropdown modalType={modalType} setModalType={setModalType} />
 					<Dollar />
 				</article>
 			</section>
