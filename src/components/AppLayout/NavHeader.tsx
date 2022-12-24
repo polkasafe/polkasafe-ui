@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { MenuOutlined } from '@ant-design/icons';
-import { Button, Layout } from 'antd';
+import { Layout } from 'antd';
 import React, { FC } from 'react';
 import Notification from 'src/components/Notification';
 
@@ -20,17 +20,18 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 	return (
 		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
 			<section className='hidden lg:block w-[240px]'></section>
-			<section className='px-4 lg:px-8 flex-1 flex items-center justify-between gap-x-2'>
-				<article>
-					<p className='bg-bg-secondary text-primary rounded-xl px-[20px] py-[10px] font-bold text-2xl'>{selectedRoute.title}</p>
-				</article>
+			<section className='px-4 lg:px-8 flex-1 flex items-center gap-x-2'>
 				<article className='lg:hidden'>
-					<Button icon={<MenuOutlined />} className='flex items-center justify-center outline-none border-none text-blue_primary shadow-none text-lg' onClick={() => {
+					<button className='flex items-center justify-center outline-none border-none bg-bg-secondary text-primary rounded-xl px-[18px] py-[12px] md:px-[20px] md:py-[14px] font-bold text-xl md:text-2xl' onClick={() => {
 						setSideDrawer(!sideDrawer);
-					}} />
+					}}>
+						<MenuOutlined />
+					</button>
 				</article>
-				<article className='hidden lg:block'/>
 				<article>
+					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl'>{selectedRoute.title}</p>
+				</article>
+				<article className='ml-auto'>
 					<Notification/>
 				</article>
 			</section>
