@@ -4,9 +4,10 @@
 import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import React, { FC } from 'react';
-import ParachainsDropdown from 'src/components/NetworksDropdown';
+import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 
+import AddressDropdown from '../AddressDropdown';
 import { IRouteInfo } from '.';
 
 const { Header } = Layout;
@@ -34,7 +35,8 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>
 					<Notification/>
-					<ParachainsDropdown/>
+					<NetworksDropdown />
+					<AddressDropdown />
 				</article>
 			</section>
 		</Header>

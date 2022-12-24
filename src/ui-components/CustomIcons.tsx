@@ -35,6 +35,7 @@ import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
 import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
+import { ReactComponent as WarningRoundedSVG } from 'src/assets/icons/warning-rounded.svg';
 import { ReactComponent as KusamaSVG } from 'src/assets/parachains-icons/kusama.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/parachains-icons/polkadot.svg';
 
@@ -124,6 +125,10 @@ export const UserPlusIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const WarningIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={WarningSVG} {...props} />
+);
+
+export const WarningRoundedIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={WarningRoundedSVG} {...props} />
 );
 
 export const WalletIcon = (props: Partial<CustomIconComponentProps>) => (
