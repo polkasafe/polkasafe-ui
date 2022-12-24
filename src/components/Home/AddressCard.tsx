@@ -4,34 +4,37 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import user from 'src/assets/icons/addrUser.svg';
-// import bookmark from 'src/assets/icons/bookmark.svg';
+import AddAddrIcon from 'src/assets/icons/add-addr-icon.svg';
+import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const AddressCard = ({ className }: { className?: string }) => {
 	return (
 		<div>
-			<h2 className="text-lg font-bold">Address Book</h2>
-			<div className={`${className} flex flex-col justify-around items-center rounded-lg py-5 bg-white shadow-lg text-center h-72 mt-3`}>
-				<div className='flex flex-col items-center justify-around h-72'>
+			<h2 className="text-lg font-bold text-white">Address Book</h2>
+			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-72 mt-3`}>
+				<div className='flex flex-col items-center justify-around h-72 overflow-x-hidden'>
 					<div className='flex justify-items-center items-center'>
-						<img className='px-1' src={user} alt="user" />
-						<div className='px-1 text-sm truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
+						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
 					</div>
+					<hr className='bg-secondary h-[1px] w-[110%]' />
 					<div className='flex justify-items-center items-center'>
-						<img className='px-1' src={user} alt="user" />
-						<div className='px-1 text-sm truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
+						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
 					</div>
+					<hr className='bg-secondary h-[1px] w-[110%]' />
 					<div className='flex justify-items-center items-center'>
-						<img className='px-1' src={user} alt="user" />
-						<div className='px-1 text-sm truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
+						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
 					</div>
+					<hr className='bg-secondary h-[1px] w-[110%]' />
 				</div>
 				<Link to='/address-book' className='w-[90%] mt-5'>
-					<PrimaryButton className='w-[100%] flex items-center justify-center' onClick={() => { }}>All Address</PrimaryButton>
-				</Link>
-				<Link to='/address-book' className='w-[90%] mt-5'>
-					<PrimaryButton className='w-[100%] flex items-center justify-center' onClick={() => { }}>+ Add Address</PrimaryButton>
+					<PrimaryButton className='w-[100%] flex items-center justify-center bg-highlight py-5 hover:bg-primary group' onClick={() => { }}>
+						<img className='group-hover:fill-white' src={AddAddrIcon} alt="add"/>
+						<p className='text-primary px-2 group-hover:text-white'>Add Address</p>
+					</PrimaryButton>
 				</Link>
 				{/* TODO: Empty state */}
 				{/* <img src={bookmark} alt="save" />
