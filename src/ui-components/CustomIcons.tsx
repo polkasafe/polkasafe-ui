@@ -9,6 +9,7 @@ import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
+import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
@@ -19,9 +20,9 @@ import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notific
 import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-queued-transaction.svg';
 import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
 import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification.svg';
+import { ReactComponent as OutlineCheckSVG } from 'src/assets/icons/outline-check.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
-import { ReactComponent as PolkadotSVG } from 'src/assets/icons/polkadot-icon-svg.svg';
 import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot-logo-text.svg';
 import { ReactComponent as PolkasafeSVG } from 'src/assets/icons/polkasafe.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
@@ -34,6 +35,8 @@ import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
 import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
+import { ReactComponent as KusamaSVG } from 'src/assets/parachains-icons/kusama.svg';
+import { ReactComponent as PolkadotSVG } from 'src/assets/parachains-icons/polkadot.svg';
 
 export const AddressBookIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={AddressBookSVG} {...props} />
@@ -49,6 +52,10 @@ export const AssetsIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const ArrowDownLeftIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={ArrowDownLeftSVG} {...props} />
+);
+
+export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CircleArrowDownSVG} {...props} />
 );
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (
@@ -87,6 +94,10 @@ export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => 
 	<Icon component={NoNotificationSVG} {...props} />
 );
 
+export const OutlineCheckIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={OutlineCheckSVG} {...props} />
+);
+
 export const PencilNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PencilNotificationSVG} {...props} />
 );
@@ -123,10 +134,6 @@ export const MultisigLockIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={MultisigLockSVG} {...props} />
 );
 
-export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon component={PolkadotSVG} {...props} />
-);
-
 export const PolkadotLogoTextIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PolkadotLogoTextSVG} {...props} />
 );
@@ -149,4 +156,14 @@ export const SubscanIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const QRIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={QRSVG} {...props} />
+);
+
+// PARACHAINS ICONS
+
+export const KusamaIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={KusamaSVG} {...props} />
+);
+
+export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PolkadotSVG} {...props} />
 );

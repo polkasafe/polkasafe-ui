@@ -4,6 +4,7 @@
 import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import React, { FC } from 'react';
+import ParachainsDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 
 import { IRouteInfo } from '.';
@@ -31,8 +32,9 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 				<article>
 					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl'>{selectedRoute.title}</p>
 				</article>
-				<article className='ml-auto'>
+				<article className='ml-auto flex items-center gap-x-3'>
 					<Notification/>
+					<ParachainsDropdown/>
 				</article>
 			</section>
 		</Header>

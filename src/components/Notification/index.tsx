@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import noNotification from 'src/assets/icons/no-notification.svg';
 import { NotificationIcon } from 'src/ui-components/CustomIcons';
 
-import Card from './Card';
+import NotificationCard from './NotificationCard';
 
 export enum ENotificationStatus {
 	READ = 'READ',
@@ -61,7 +61,7 @@ const Notification = () => {
 						notifications.length > 0 ? <section>
 							<div className='flex flex-col gap-y-[10px] mt-2'>
 								{notifications.map((notification, index) => {
-									return <Card key={index} {...notification} />;
+									return <NotificationCard key={index} {...notification} />;
 								})}
 							</div>
 						</section> : <section className='flex flex-col items-center'>
