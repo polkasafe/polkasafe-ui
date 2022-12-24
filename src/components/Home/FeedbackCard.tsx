@@ -8,9 +8,11 @@ import feedback from '../../assets/icons/feedback.svg';
 
 const FeedbackCard = () => {
 	return (
-		<div className="h-72 rounded-lg bg-bg-main shadow-lg flex flex-col justify-around items-center">
-			<img className='w-[130px]' src={feedback} alt="feedback" />
-			<p className='w-[110px]'>Share feedback or suggestions</p>
+		<div>
+			<div className="h-72 rounded-lg bg-white shadow-lg flex flex-col justify-around items-center">
+				<img className='w-[130px]' src={feedback} alt="feedback" />
+				<p className='w-[110px]'>Share feedback or suggestions</p>
+			</div>
 		</div>
 	);
 };

@@ -5,6 +5,7 @@
 import React from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
 import DashboardCard from 'src/components/Home/DashboardCard';
+import FeedbackCard from 'src/components/Home/FeedbackCard';
 import TxnCard from 'src/components/Home/TxnCard';
 
 const Home = () => {
@@ -19,8 +20,11 @@ const Home = () => {
 				</div>
 			</div>
 			<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
-				<div className='col-start-1 col-end-13 lg:col-end-13'>
+				<div className='col-start-1 col-end-13 lg:col-end-10'>
 					<TxnCard />
+				</div>
+				<div className='col-start-1 lg:col-start-10 col-end-13'>
+					<FeedbackCard />
 				</div>
 			</div>
 		</div>
