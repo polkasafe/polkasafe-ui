@@ -32,7 +32,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 						<MenuOutlined />
 					</button>
 				</article>
-				<article>
+				<article className='hidden sm:block'>
 					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl'>{selectedRoute.title}</p>
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>

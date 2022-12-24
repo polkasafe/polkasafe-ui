@@ -49,7 +49,7 @@ const Notification = () => {
 			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-lg'>
 				<NotificationIcon />
 			</button>
-			{isOpen ? <div className='absolute top-16 right-0 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px]'>
+			{isOpen ? <div className='absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px]'>
 				<div className='flex gap-x-5 items-center justify-between mb-5'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
 					<button onClick={() => {
