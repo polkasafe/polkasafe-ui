@@ -11,6 +11,7 @@ import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
+import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
@@ -61,6 +62,10 @@ export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) =>
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={CopySVG} {...props} />
+);
+
+export const DollarIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DollarSVG} {...props} />
 );
 
 export const DonateIcon = (props: Partial<CustomIconComponentProps>) => (

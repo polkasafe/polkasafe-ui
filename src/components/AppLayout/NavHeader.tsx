@@ -1,13 +1,15 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+
 import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import React, { FC } from 'react';
+import AddressDropdown from 'src/components/AddressDropdown';
+import Dollar from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 
-import AddressDropdown from '../AddressDropdown';
 import { IRouteInfo } from '.';
 
 const { Header } = Layout;
@@ -37,6 +39,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 					<Notification/>
 					<NetworksDropdown />
 					<AddressDropdown />
+					<Dollar />
 				</article>
 			</section>
 		</Header>
