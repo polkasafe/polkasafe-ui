@@ -8,7 +8,7 @@ import { ArrowDownLeftIcon } from 'src/ui-components/CustomIcons';
 
 import { ENotificationStatus, INotification } from '.';
 
-const Card: FC<INotification> = ({ date, status, time, title }) => {
+const NotificationCard: FC<INotification> = ({ date, status, time, title }) => {
 	return (
 		<article className={classNames('flex items-center gap-x-4 rounded-lg p-3', {
 			'bg-highlight': status === ENotificationStatus.UNREAD
@@ -31,4 +31,4 @@ const Card: FC<INotification> = ({ date, status, time, title }) => {
 	);
 };
 
-export default Card;
+export default NotificationCard;
