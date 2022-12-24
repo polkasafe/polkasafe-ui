@@ -2,29 +2,35 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
-import { CircleArrowDownIcon, KusamaIcon, PolkadotIcon } from 'src/ui-components/CustomIcons';
+import React, { FC, useRef, useState } from 'react';
+import kusamaIcon from 'src/assets/parachains-icons/kusama.svg';
+import polkadotIcon from 'src/assets/parachains-icons/polkadot.svg';
+import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
 
 import NetworkCard from './NetworkCard';
 
 export interface INetwork {
-	icon: JSX.Element;
+	icon: string;
 	title: string;
 	to: string;
 }
 
 const networks: INetwork[] = [
 	{
-		icon: <PolkadotIcon />,
+		icon: polkadotIcon,
 		title: 'Polkadot',
 		to: '/'
 	},
 	{
-		icon: <KusamaIcon />,
+		icon: kusamaIcon,
 		title: 'Kusama',
 		to: '/'
 	}
 ];
+
+export const ParachainsIcon: FC<{ src: string }> = ({ src }) => {
+	return <img className='w-4 h-4' src={src} alt="parachains icon" />;
+};
 
 const NetworksDropdown = () => {
 	const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
@@ -43,7 +49,9 @@ const NetworksDropdown = () => {
 				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
 			}} className='flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-[10px]'>
-					<span className='flex items-center text-base'>{selectedNetwork.icon}</span>
+					<span className='flex items-center text-base'>
+						<ParachainsIcon src={selectedNetwork.icon} />
+					</span>
 					<span className='hidden md:inline-flex'>{selectedNetwork.title}</span>
 				</p>
 				<CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/>

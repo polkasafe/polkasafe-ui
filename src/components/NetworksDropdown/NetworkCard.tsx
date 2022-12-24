@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import React, { FC } from 'react';
 import { OutlineCheckIcon } from 'src/ui-components/CustomIcons';
 
-import { INetwork } from '.';
+import { INetwork, ParachainsIcon } from '.';
 
 interface INetworkCardProps extends INetwork {
 	selectedNetwork: INetwork;
@@ -19,7 +19,9 @@ const NetworkCard: FC<INetworkCardProps> = ({ icon, onClick, selectedNetwork, ti
 			'bg-highlight': isSelected
 		})}>
 			<p className='flex items-center gap-x-[6px]'>
-				<span className='text-base'>{icon}</span>
+				<span className='text-base'>
+					<ParachainsIcon src={icon} />
+				</span>
 				<span className={classNames('font-medium text-sm', {
 					'text-primary': isSelected,
 					'text-white': !isSelected
