@@ -8,7 +8,9 @@ import React from 'react';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
-import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
+import { ReactComponent as BrainSVG } from 'src/assets/icons/brain-icon.svg';
+import { ReactComponent as ChainSVG } from 'src/assets/icons/chain-icon.svg';
+import { ReactComponent as CopySVG } from 'src/assets/icons/copy-icon.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
@@ -25,13 +27,14 @@ import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot
 import { ReactComponent as PolkasafeSVG } from 'src/assets/icons/polkasafe.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
-import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
+import { ReactComponent as PSSVG } from 'src/assets/icons/ps-icon.svg';
+import { ReactComponent as QRSVG } from 'src/assets/icons/qr-icon.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
 import { ReactComponent as TransactionSVG } from 'src/assets/icons/transaction.svg';
 import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
-import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet.svg';
+import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet-icon.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
 
 export const AddressBookIcon = (props: Partial<CustomIconComponentProps>) => (
@@ -144,4 +147,13 @@ export const SubscanIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const QRIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={QRSVG} {...props} />
+);
+export const PSIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PSSVG} {...props} />
+);
+export const ChainIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ChainSVG} {...props} />
+);
+export const BrainIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={BrainSVG} {...props} />
 );

@@ -6,16 +6,14 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import addAssetIcon from 'src/assets/icons/addAsset.svg';
-import chainIcon from 'src/assets/icons/chain.svg';
-import copyIcon from 'src/assets/icons/copy-icon.svg';
-import sIcon from 'src/assets/icons/image 36.svg';
-import brainIcon from 'src/assets/icons/image 38.svg';
+import brainIcon from 'src/assets/icons/brain-icon.svg';
+import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
-import psIcon from 'src/assets/icons/ps.svg';
+import psIcon from 'src/assets/icons/ps-icon.svg';
+import subscanIcon from 'src/assets/icons/subscan.svg';
 // import multisig from 'src/assets/icons/multisig.svg';
-import qrIcon from 'src/assets/icons/qr-icon.svg';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
+import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 // import statusbar from 'src/assets/icons/statusbar.svg';
 // import transfer from 'src/assets/icons/transfer.svg';
 // import wallet from 'src/assets/icons/wallet.svg';
@@ -42,8 +40,8 @@ const DashboardCard = ({ className }: { className?: string }) => {
 							<div className='text-lg font-bold text-white'>John Doe</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary truncate'>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</div>
-								<img className='w-4 cursor-pointer mx-2' src={copyIcon} alt="icon" />
-								<img className='w-4 cursor-pointer' src={qrIcon} alt="icon" />
+								<CopyIcon className='cursor-pointer mx-2'/>
+								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>
 					</div>
@@ -53,7 +51,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 							<img className='w-5 cursor-pointer' src={brainIcon} alt="icon" />
 							<img className='w-5 cursor-pointer' src={dotIcon} alt="icon" />
 							<img className='w-5 cursor-pointer' src={chainIcon} alt="icon" />
-							<img className='w-5 cursor-pointer' src={sIcon} alt="icon" />
+							<img className='w-5 cursor-pointer' src={subscanIcon} alt="icon" />
 						</div>
 					</div>
 				</div>
@@ -76,7 +74,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm group-hover:bg-primary group-hover:text-white' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
 					</Link>
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm group-hover:bg-primary group-hover:text-white' onClick={() => { }}><img className='group-hover:text-white px-2' src={addAssetIcon} alt="icon" /> Add Asset</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm group-hover:bg-primary group-hover:text-white' onClick={() => { }}><WalletIcon />Add Asset</PrimaryButton>
 					</Link>
 				</div>
 			</div>
