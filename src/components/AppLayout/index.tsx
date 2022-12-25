@@ -49,7 +49,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
 					<div className='hidden lg:block w-full max-w-[240px]'></div>
-					<Content className='bg-bg-secondary p-8 rounded-lg'>
+					<Content className='bg-bg-secondary p-[30px] rounded-lg'>
 						<SwitchRoutes />
 					</Content>
 				</Layout>

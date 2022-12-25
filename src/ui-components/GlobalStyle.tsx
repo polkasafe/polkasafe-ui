@@ -77,8 +77,8 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	::selection {
-		background-color: rgba(0, 0, 0, 0.9);
-		color: white;
+		background-color: white;
+		color: #1573FE;
 	}
 
 	.ant-btn-primary {
