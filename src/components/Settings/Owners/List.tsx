@@ -6,6 +6,8 @@ import React, { FC } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
+import EditOwner from './Edit';
+
 export interface IOwner {
 	name: string;
 	address: string;
@@ -50,7 +52,7 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 								</div>
 								<div className='col-span-1 flex items-center gap-x-[10px]'>
 									<button
-										onClick={() => openModal('Edit Owner Name', <></>) }
+										onClick={() => openModal('Edit Owner Name', <EditOwner />) }
 										className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon className='' />
 									</button>
