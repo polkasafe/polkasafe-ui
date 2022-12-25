@@ -4,6 +4,8 @@
 
 import React from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
+import Details from 'src/components/Settings/Details';
+import Feedback from 'src/components/Settings/Feedback';
 import AddNewOwnerBtn from 'src/components/Settings/Owners/AddBtn';
 import ListOwners, { IOwner } from 'src/components/Settings/Owners/List';
 import SearchOwner from 'src/components/Settings/Owners/Search';
@@ -37,6 +39,14 @@ const Settings = () => {
 				</section>
 				<section className='mt-[30px]'>
 					<ListOwners owners={ owners } />
+				</section>
+			</div>
+			<div className='mt-[30px] grid md:grid-cols-2 gap-[30px]'>
+				<section className='col-span-1'>
+					<Details />
+				</section>
+				<section className='col-span-1'>
+					<Feedback />
 				</section>
 			</div>
 		</div>
