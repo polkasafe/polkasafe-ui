@@ -7,6 +7,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
 import EditOwner from './Edit';
+import RemoveOwner from './Remove';
 
 export interface IOwner {
 	name: string;
@@ -57,7 +58,7 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 										<EditIcon className='' />
 									</button>
 									<button
-										onClick={() => openModal('Remove Owner', <></>) }
+										onClick={() => openModal('Remove Owner', <RemoveOwner />) }
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>
