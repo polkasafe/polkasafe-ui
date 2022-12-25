@@ -13,6 +13,7 @@ import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-ar
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
+import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
@@ -71,6 +72,10 @@ export const DollarIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const DonateIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={DonateSVG} {...props} />
+);
+
+export const ExternalLinkIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ExternalLinkSVG} {...props} />
 );
 
 export const HomeIcon = (props: Partial<CustomIconComponentProps>) => (
