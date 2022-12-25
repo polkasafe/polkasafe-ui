@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Divider } from 'antd';
 import React, { FC } from 'react';
+import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
 export interface IOwner {
@@ -15,6 +16,7 @@ interface IListOwnersProps {
 }
 
 const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
+	const { openModal } = useModalContext();
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -47,10 +49,14 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center gap-x-[10px]'>
-									<button className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
+									<button
+										onClick={() => openModal('Edit Owner Name', <></>) }
+										className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon className='' />
 									</button>
-									<button className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
+									<button
+										onClick={() => openModal('Remove Owner', <></>) }
+										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>
 								</div>

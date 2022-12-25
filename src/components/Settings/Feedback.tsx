@@ -2,10 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
+import { useModalContext } from 'src/context/ModalContext';
 
 const emojis  = ['😍', '🙂', '😐', '🙁', '😢'];
 
 const Feedback = () => {
+	const { openModal } = useModalContext();
 	return (
 		<>
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
@@ -14,7 +16,11 @@ const Feedback = () => {
 			<article className='bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
 				<div className='flex items-center gap-x-5 justify-between text-sm font-normal leading-[15px]'>
 					<p className='text-white'>What do you think of PolkaSafe?</p>
-					<button className='text-primary font-medium'>Write a Review</button>
+					<button
+						onClick={() => openModal('Edit Owner Name', <></>) }
+						className='text-primary font-medium'>
+							Write a Review
+					</button>
 				</div>
 				<div className='my-[34.5px] flex items-center justify-center gap-x-5'>
 					{emojis.map((emoji) => {
