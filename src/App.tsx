@@ -10,6 +10,7 @@ import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
 import { ApiContextProvider } from './context/ApiContext';
+import ModalContextProvider from './context/ModalContext';
 import { antdTheme } from './themes/antdTheme';
 import { GlobalStyle } from './ui-components/GlobalStyle';
 
@@ -20,7 +21,9 @@ function App() {
 				<ThemeProvider theme={styledTheme}>
 					<GlobalStyle/>
 					<ApiContextProvider>
-						<AppLayout />
+						<ModalContextProvider>
+							<AppLayout />
+						</ModalContextProvider>
 					</ApiContextProvider>
 				</ThemeProvider>
 			</ConfigProvider>

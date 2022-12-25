@@ -6,7 +6,7 @@ import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import React, { FC } from 'react';
 import AddressDropdown from 'src/components/AddressDropdown';
-import Dollar from 'src/components/Donate/DonateBtn';
+import DonateBtn from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 
@@ -40,7 +40,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 					<Notification />
 					<NetworksDropdown />
 					<AddressDropdown />
-					<Dollar />
+					<DonateBtn />
 				</article>
 			</section>
 		</Header>

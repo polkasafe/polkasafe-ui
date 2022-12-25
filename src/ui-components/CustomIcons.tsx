@@ -22,6 +22,7 @@ import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-qu
 import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
 import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification.svg';
 import { ReactComponent as OutlineCheckSVG } from 'src/assets/icons/outline-check.svg';
+import { ReactComponent as OutlineCloseSVG } from 'src/assets/icons/outline-close.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
 import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot-logo-text.svg';
@@ -102,6 +103,10 @@ export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => 
 
 export const OutlineCheckIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={OutlineCheckSVG} {...props} />
+);
+
+export const OutlineCloseIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={OutlineCloseSVG} {...props} />
 );
 
 export const PencilNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
