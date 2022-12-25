@@ -4,6 +4,8 @@
 import React from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 
+import Review from './Review';
+
 const emojis  = ['😍', '🙂', '😐', '🙁', '😢'];
 
 const Feedback = () => {
@@ -17,7 +19,7 @@ const Feedback = () => {
 				<div className='flex items-center gap-x-5 justify-between text-sm font-normal leading-[15px]'>
 					<p className='text-white'>What do you think of PolkaSafe?</p>
 					<button
-						onClick={() => openModal('Edit Owner Name', <></>) }
+						onClick={() => openModal('Write a review', <Review />) }
 						className='text-primary font-medium'>
 							Write a Review
 					</button>

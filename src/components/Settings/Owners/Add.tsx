@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Form, Input } from 'antd';
 import React, { useState } from 'react';
-import AddBtn from 'src/components/Settings/AddBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
+import AddBtn from 'src/components/Settings/ModalBtn';
 
 const AddOwner = () => {
 	const [confirmations, setConfirmations] = useState(2);

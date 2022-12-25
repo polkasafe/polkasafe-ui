@@ -4,51 +4,39 @@
 import { Form, Input } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
-import AddBtn from 'src/components/Settings/ModalBtn';
+import ModalBtn from 'src/components/Settings/ModalBtn';
 
-const EditOwner = () => {
+const Review = () => {
 	return (
 		<Form
 			className='my-0'
 		>
 			<div className="flex flex-col gap-y-3">
 				<label
-					className="text-primary text-xs leading-[13px] font-normal"
-					htmlFor="name"
+					className="text-white font-normal text-sm leading-[15px]"
+					htmlFor="review"
 				>
-                    Name
+                    Do you have any thoughts you{"'"}d like to share?
 				</label>
 				<Form.Item
-					name="name"
+					name="review"
 					rules={[]}
 					className='border-0 outline-0 my-0 p-0'
 				>
-					<Input
-						placeholder="Give the address a name"
+					<Input.TextArea
+						placeholder="Share Feedback..."
 						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
-						id="name"
+						id="review"
+						rows={5}
 					/>
 				</Form.Item>
 			</div>
-			<div className="flex flex-col gap-y-3 mt-5">
-				<label
-					className="text-primary text-xs leading-[13px] font-normal"
-					htmlFor="address"
-				>
-                    Address
-				</label>
-				<p
-					className="text-sm font-normal m-0 leading-[15px] p-3 rounded-lg text-[#505050] border border-dashed border-[#505050]"
-				>
-                    3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
-				</p>
-			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn />
-				<AddBtn title='Save' />
+				<ModalBtn title='Share'/>
 			</div>
 		</Form>
 	);
 };
 
-export default EditOwner;
+export default Review;
