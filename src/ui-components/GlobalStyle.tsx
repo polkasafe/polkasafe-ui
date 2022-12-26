@@ -24,6 +24,23 @@ export const GlobalStyle = createGlobalStyle`
 	::-webkit-scrollbar-thumb:hover {
 		background: #555; 
 	}
+	.scroll-transparent::-webkit-scrollbar {
+		width: 0px;
+		height: 0px;
+	}
+
+	.scroll-transparent::-webkit-scrollbar-track {
+		background: transparent; 
+	}
+	
+	/* Handle */
+	.scroll-transparent::-webkit-scrollbar-thumb {
+		background: transparent; 
+	}
+
+	.scroll-transparent::-webkit-scrollbar-thumb:hover {
+		background: transparent; 
+	}
 
 	body {
 		margin: 0;
@@ -60,8 +77,8 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	::selection {
-		background-color: rgba(0, 0, 0, 0.9);
-		color: white;
+		background-color: white;
+		color: #1573FE;
 	}
 
 	.ant-btn-primary {

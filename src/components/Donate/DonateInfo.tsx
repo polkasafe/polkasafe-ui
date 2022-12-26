@@ -4,55 +4,52 @@
 import { Divider } from 'antd';
 import React from 'react';
 import polkadotLogoText from 'src/assets/icons/polkadot-logo-text.svg';
-import { WalletIcon } from 'src/ui-components/CustomIcons';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ExternalLinkIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 
 import QR from './QR';
 
 const DonateInfo = () => {
 	return (
 		<>
-			<div className='grid grid-cols-1 gap-y-10 lg:grid-cols-5 lg:gap-x-10 items-center mb-10'>
-				<article className='col-span-1 lg:col-span-3 '>
-					<div>
-						<h3 className='text-lg lg:text-xl font-bold tracking-wide'>
-                        Scan the QR with your wallet application
-						</h3>
-						<p className='mt-3'>
-                        Please feel free to donate us any amount you want.
-						</p>
-					</div>
-					<div>
+			<div className='flex flex-col gap-y-10 md:flex-row md:gap-x-20 items-center'>
+				<article className='flex flex-col justify-between h-full'>
+					<p className='text-sm font-normal'>
+						Please feel free to donate us any amount you want.
+					</p>
+					<div className='flex items-center ml-[59.1px] my-20'>
 						<img src={polkadotLogoText} alt="polkadot logo" />
 					</div>
-					<div className='max-w-lg'>
+					<div className='text-normal text-sm max-w-[367px] leading-4'>
 						<p>
-                        Polkadot is a consensus network that enables a new payment system and a completely digital money.
+							Polkadot is a consensus network that enables a new payment system and a completely digital money.
 						</p>
 						<p>
-                        From a user perspective, Polkadot is pretty much like cash for the Internet.
+							From a user perspective, Polkadot is pretty much like cash for the Internet.
 						</p>
 					</div>
 				</article>
-				<article className='col-span-1 lg:col-span-2'>
+				<article>
 					<QR/>
 				</article>
 			</div>
-			<Divider/>
-			<div className='flex items-center gap-x-5 gap-y-5 mt-10 flex-col md:flex-row'>
+			<Divider className='bg-text_secondary my-8' />
+			<div className='flex items-center gap-x-5 gap-y-5 flex-col md:flex-row justify-between'>
 				<p className='flex gap-x-2 flex-col xl:flex-row xl:items-center'>
-					<span>
+					<span className='text-sm font-normal leading-[15px]'>
                         If you don{'\''}t have a polkadot wallet, don{'\''}t worry, you can create one for free at
 					</span>
-					<span className='text-blue_primary font-bold text-sm italic'>
+					<span className='text-primary'>
                         Polkadot.io
+						<ExternalLinkIcon className='w-[11px] h-[11px] ml-[6.62px]' />
 					</span>
 				</p>
-				<p className='bg-gray_primary1 text-blue_primary shadow-small px-2 py-1.5 rounded-lg flex items-center gap-x-2'>
+				<button className='text-primary px-[10px] py-3 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
 					<WalletIcon className='text-base'/>
 					<span className='font-bold text-sm'>
                         Create Wallet
 					</span>
-				</p>
+				</button>
 			</div>
 		</>
 	);
