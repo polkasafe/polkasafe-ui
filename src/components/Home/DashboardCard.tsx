@@ -40,7 +40,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 							<div className='text-lg font-bold text-white'>John Doe</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary truncate'>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</div>
-								<CopyIcon className='cursor-pointer mx-2'/>
+								<CopyIcon className='cursor-pointer ml-2 w-5 text-primary'/>
 								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>
@@ -71,10 +71,10 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm group-hover:bg-primary group-hover:text-white' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
 					</Link>
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm group-hover:bg-primary group-hover:text-white' onClick={() => { }}><WalletIcon />Add Asset</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm' onClick={() => { }}><WalletIcon />Add Asset</PrimaryButton>
 					</Link>
 				</div>
 			</div>

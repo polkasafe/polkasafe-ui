@@ -12,6 +12,7 @@ export const antdTheme: ThemeConfig = {
 		colorError: '#E63946',
 		colorPrimary: '#1573FE',
 		colorSuccess: '#06D6A0',
+		colorTextPlaceholder: '#ffffff',
 		colorWarning: '#FF9F1C',
 		fontFamily: 'Archivo, sans-serif'
 	}

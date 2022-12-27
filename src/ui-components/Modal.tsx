@@ -10,6 +10,7 @@ export interface IModal extends PropsWithChildren {
     isVisible: boolean;
     title: ReactNode;
     CloseBtnNode?: ReactNode;
+	switch?: Boolean;
 }
 
 interface IModalProps extends IModal {

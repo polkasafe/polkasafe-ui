@@ -11,10 +11,10 @@ const Home = () => {
 	return (
 		<div>
 			<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
-				<div className='col-start-1 col-end-13 lg:col-end-10'>
+				<div className='col-start-1 col-end-13 xl:col-end-10'>
 					<DashboardCard className='mt-3' />
 				</div>
-				<div className='col-start-1 lg:col-start-10 col-end-13'>
+				<div className='col-start-1 col-end-13 xl:col-start-10'>
 					<AddressCard className='mt-3' />
 				</div>
 			</div>

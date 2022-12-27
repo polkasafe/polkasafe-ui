@@ -139,4 +139,7 @@ export const GlobalStyle = createGlobalStyle`
 	.ant-menu-submenu-popup {
 		display: none !important;
 	}
+	.ant-input{
+		background-color: #24272E;
+	}
 `;

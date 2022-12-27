@@ -2,51 +2,67 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { DownOutlined } from '@ant-design/icons';
+import { DownCircleOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Button, Divider, Dropdown, Space } from 'antd';
-import React from 'react';
+import { Button, Dropdown, Space } from 'antd';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+
+// const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+// message.info('Click on left button.');
+// console.log('click left button', e);
+// };
+
+const DropdownLabel: React.FC<ILabelProps> = ({ label }) => (
+	<span className='text-white hover:text-primary'>
+		{label}
+	</span>
+);
 
 const items: MenuProps['items'] = [
 	{
 		key: '1',
-		label: (
-			<a target="_blank" rel="noopener noreferrer">
-				Dot
-			</a>
-		)
+		label:(<DropdownLabel label={'USD'}/>)
 	},
 	{
 		key: '2',
-		label: (
-			<a target="_blank" rel="noopener noreferrer">
-				USD
-			</a>
-		)
-		// disabled: true
+		label:(<DropdownLabel label={'Kusama'}/>)
 	}
 ];
 
-const DragDrop: React.FC = () => (
-	<Dropdown
-		menu={{ items }}
-		dropdownRender={(menu) => (
-			<div className="dropdown-content">
-				{menu}
-				<Divider style={{ margin: 0 }} />
-				<Space style={{ padding: 8 }}>
-					<Button type="primary">Click me!</Button>
-				</Space>
-			</div>
-		)}
-	>
-		<a onClick={(e) => e.preventDefault()}>
-			<Space>
-				Select Currency
-				<DownOutlined />
-			</Space>
-		</a>
-	</Dropdown>
-);
+interface IAssetsTableProps {
+	className?: string
+}
+interface ILabelProps {
+	label?: string
+}
 
-export default DragDrop;
+const DropDown: React.FC<IAssetsTableProps> = ({ className })  => {
+	const [currencyValue, setCurrencyValue] = useState<String | null>('USD');
+	const handleMenuClick: MenuProps['onClick'] = (e) => {
+		setCurrencyValue(e.domEvent.currentTarget.textContent);
+	};
+	const menuProps = {
+		items,
+		onClick: handleMenuClick
+	};
+	return(
+		<Space wrap className={className}>
+			<Dropdown menu={menuProps}>
+				<Button className='bg-highlight text-primary border-none'>
+					<Space>
+						<p className='text-primary'>{ currencyValue }</p>
+						<DownCircleOutlined />
+					</Space>
+				</Button>
+			</Dropdown>
+		</Space>
+	);
+};
+
+export default styled(DropDown)`
+	.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item{
+		background: red;
+	}
+`;
+

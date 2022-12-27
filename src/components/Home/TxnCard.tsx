@@ -15,18 +15,18 @@ const TxnCard = () => {
 				{/* Txn Queue */}
 				<div className='col-start-1 col-end-13 md:col-end-7'>
 					<div className="flex justify-between flex-row w-full">
-						<h2 className="text-lg font-bold text-white">Transaction Queue</h2>
+						<h2 className="text-xl font-bold text-white">Transaction Queue</h2>
 						<div className="flex items-center justify-center text-primary cursor-pointer">
-							<p className='mx-2 text-primary'>View All</p>
+							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightCircleOutlined />
 						</div>
 					</div>
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
-						<h1 className="text-primary text-md mb-2">Pending Transactions</h1>
-						<div className="flex items-center justify-between pb-2">
+						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
+						<div className="flex items-center justify-between pb-2 mb-2">
 							<div className="flex items-center justify-between">
-								<div className='bg-waiting bg-opacity-10 rounded-lg p-2 mr-3'><ReloadOutlined className='text-waiting' /></div>
-								<div>
+								<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
+								<div className='ml-3'>
 									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a5c6f465</h1>
 									<p className='text-white text-xs'>In Process...</p>
 								</div>
@@ -36,10 +36,10 @@ const TxnCard = () => {
 								<p className='text-white text-right text-xs'>5173.42 USD</p>
 							</div>
 						</div>
-						<div className="flex items-center justify-between pb-2">
+						<div className="flex items-center justify-between pb-2 mb-2">
 							<div className="flex items-center justify-between">
-								<div className='bg-waiting bg-opacity-10 rounded-lg p-2 mr-3'><ReloadOutlined className='text-waiting' /></div>
-								<div>
+								<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
+								<div className='ml-3'>
 									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a5c6f465</h1>
 									<p className='text-white text-xs'>In Process...</p>
 								</div>
@@ -54,17 +54,17 @@ const TxnCard = () => {
 				{/* Txn History */}
 				<div className='md:col-start-7 col-start-1 col-end-13'>
 					<div className="flex justify-between flex-row w-full">
-						<h2 className="text-lg font-bold text-white">Transaction History</h2>
+						<h2 className="text-xl font-bold text-white">Transaction History</h2>
 						<div className="flex items-center justify-center text-primary cursor-pointer">
-							<p className='mx-2 text-primary'>View All</p>
+							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightCircleOutlined />
 						</div>
 					</div>
 					<div className='bg-bg-main p-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto'>
-						<h1 className="text-primary text-md mb-2">Completed Transactions</h1>
-						<div className="flex items-center justify-between pb-2">
+						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
+						<div className="flex items-center justify-between pb-2 mb-2">
 							<div className="flex items-center justify-between">
-								<div className='bg-failure bg-opacity-10 rounded-lg p-2 mr-3'><img src={TopRightArrow} alt="send"/></div>
+								<div className='bg-failure bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center'><img src={TopRightArrow} alt="send"/></div>
 								<div>
 									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a5c6f465</h1>
 									<p className='text-text_secondary text-xs'>12/12/12 at 12:53 AM</p>
@@ -75,11 +75,11 @@ const TxnCard = () => {
 								<p className='text-text_secondary text-right text-xs'>5173.42 USD</p>
 							</div>
 						</div>
-						<div className="flex items-center justify-between pb-2">
+						<div className="flex items-center justify-between pb-2 mb-2">
 							<div className="flex items-center justify-between">
-								<div className='bg-success bg-opacity-10 rounded-lg p-2 mr-3'><img src={BottomLeftArrow} alt="send"/></div>
+								<div className='bg-success bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center'><img src={BottomLeftArrow} alt="send"/></div>
 								<div>
-									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a5c6f465</h1>
+									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a7c6f465</h1>
 									<p className='text-text_secondary text-xs'>12/12/12 at 12:53 AM</p>
 								</div>
 							</div>
@@ -88,9 +88,9 @@ const TxnCard = () => {
 								<p className='text-text_secondary text-right text-xs'>5173.42 USD</p>
 							</div>
 						</div>
-						<div className="flex items-center justify-between pb-2">
+						<div className="flex items-center justify-between pb-2 mb-2">
 							<div className="flex items-center justify-between">
-								<div className='bg-failure bg-opacity-10 rounded-lg p-2 mr-3'><img src={TopRightArrow} alt="send"/></div>
+								<div className='bg-failure bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center'><img src={TopRightArrow} alt="send"/></div>
 								<div>
 									<h1 className='text-md text-white'>Txn: 0xcac0c4e3...a5c6f465</h1>
 									<p className='text-text_secondary text-xs'>12/12/12 at 12:53 AM</p>

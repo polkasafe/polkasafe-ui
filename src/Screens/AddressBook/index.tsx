@@ -2,46 +2,33 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { DownloadOutlined, PlusCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import React, { useState } from 'react';
-import AddAddressForm from 'src/components/AddressBook/AddAddressForm';
+import Button from 'antd/es/button';
+import React from 'react';
+import AddAdress from 'src/components/AddressBook/AddAddress';
 import AddressTable from 'src/components/AddressBook/AddressTable';
+import ExportAdress from 'src/components/AddressBook/ExportAddress';
+import ImportAdress from 'src/components/AddressBook/ImportAddress';
+import SearchAddress from 'src/components/AddressBook/Search';
+import { useModalContext } from 'src/context/ModalContext';
+import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
 
 const AddressBook = () => {
-	const [isShown, setIsShown] = useState(false);
-	function handleClick(): any {
-		setIsShown(current => !current);
-	}
+	const { openModal } = useModalContext();
 	return (
-		<div>
+		<div className='h-[70vh] bg-bg-main rounded-lg'>
 			<div className="grid grid-cols-12 gap-4">
 				<div className="col-start-1 col-end-13">
 					<div className="flex items-center justify-between">
-						<div className='flex items-center'>
-							<h2 className="text-lg font-bold">Address Book</h2>
-							<p>(4)</p>
-						</div>
-						<div className='flex'>
-							<div className='flex mr-2'>
-								<UploadOutlined className='text-blue_primary font-bold' />
-								<p className='px-2 cursor-pointer font-bold hover:text-blue_secondary text-blue_primary'>Export</p>
-							</div>
-							<div className='flex mr-2'>
-								<DownloadOutlined className='text-blue_primary font-bold' />
-								<p className='px-2 cursor-pointer font-bold hover:text-blue_secondary text-blue_primary'>Import</p>
-							</div>
-							<div className='flex mr-2'>
-								<PlusCircleOutlined className='text-blue_primary font-bold' />
-								<p className='px-2 cursor-pointer font-bold hover:text-blue_secondary text-blue_primary' onClick={handleClick}>Create new Entry</p>
-							</div>
+						<SearchAddress/>
+						<div className='flex mr-3'>
+							<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Import Address Book', <ImportAdress/>) }><ImportArrowIcon/>Import</Button>
+							<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Export Address Book', <ExportAdress/>) }><ExportArrowIcon/>Export</Button>
+							<Button className='flex items-center justify-center bg-primary text-white mr-2 mt-4 border-none' onClick={() => openModal('Add Address', <AddAdress/>)}><AddBoxIcon/> Add Address</Button>
 						</div>
 					</div>
 				</div>
-				<div className='col-start-1 col-end-13 relative'>
+				<div className='col-start-1 col-end-13 relative mx-5'>
 					<AddressTable />
-					{isShown && (
-						<AddAddressForm />
-					)}
 				</div>
 			</div>
 		</div>

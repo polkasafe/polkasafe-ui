@@ -2,34 +2,26 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { SwapOutlined } from '@ant-design/icons';
 import React from 'react';
-import dotIcon from 'src/assets/icons/polkadot.svg';
 
 const Signotary = () => {
 	return (
-		<div className="flex w-[100%]">
-			<div className='flex flex-col w-1/2'>
-				<h1 className='mx-3 text-blue_primary'>Selected Signatories</h1>
-				<div className='h-48 m-3 shadow-lg rounded-lg'>
-					<div className="flex flex-col m-3">
-						<div className='flex'>
-							<img className='m-1 w-[20px] items-center' src={dotIcon} alt="icon" />
-							<p className='m-1'>Main (Extension)</p>
-						</div>
-						<div className='flex'>
-							<img className='m-1 w-[20px] items-center' src={dotIcon} alt="icon" />
-							<p className='m-1'>Testnet-2 (Extension)</p>
-						</div>
-						<div className='flex'>
-							<img className='m-1 w-[20px] items-center' src={dotIcon} alt="icon" />
-							<p className='m-1'>Personal Test</p>
-						</div>
+		<div className="flex w-[45vw]">
+			<div className="flex w-[100%] items-center justify-center">
+				<div className="flex flex-col my-2 pd-2 w-1/2 mr-1">
+					<h1 className='text-primary'>Available Signatory</h1>
+					<div className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
+						<p className='bg-bg-main p-2 m-1 rounded-md'>Polka-test 1</p>
+						<p className='bg-bg-main p-2 m-1 rounded-md'>Polka-test 2</p>
+						<p className='bg-bg-main p-2 m-1 rounded-md'>MultiSig test</p>
 					</div>
 				</div>
-			</div>
-			<div className='flex flex-col w-1/2'>
-				<h1 className='mx-3 text-blue_primary'>Available Signatories</h1>
-				<div className='h-48 m-3 shadow-lg rounded-lg'></div>
+				<SwapOutlined className='text-primary' />
+				<div className="flex flex-col my-2 pd-2 w-1/2 ml-2">
+					<h1 className='text-primary'>Selected Signatory</h1>
+					<div className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto'></div>
+				</div>
 			</div>
 		</div>
 	);

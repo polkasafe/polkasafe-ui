@@ -2,44 +2,29 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+// import { Button } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
-import { useModalContext } from 'src/context/ModalContext';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 import DragDrop from '../AddressBook/DragDrop';
 import Search from '../Multisig/Search';
-import Signotary from './Signotary';
 
 interface IMultisigProps {
 	className?: string
 }
 
-const CreateMultisig: React.FC<IMultisigProps> = () => {
-	const { toggleVisibility, toggleSwitch } = useModalContext();
-	console.log(toggleSwitch);
-	// const [disabled, setDisabled] = useState(false);
-
-	// const onChange = (checked: boolean) => {
-	// setDisabled(checked);
-	// };
+const MultisigSignatories: React.FC<IMultisigProps> = () => {
 	return (
-		<div className='flex flex-col relative'>
+		<div className='flex flex-col'>
 			<div className='w-[80vw] flex justify-between items-end'>
 				<div>
 					<Search/>
-					<div className="poition-absolute top-0 right-0"></div>
 					<div className='flex items-center justify-between'>
-						{toggleSwitch? <Signotary/> : <DragDrop/>}
+						<DragDrop/>
 						<DashDotIcon className='mt-5'/>
-						<div className='w-[40%]'>
-							<br />
-							<p className='bg-bg-secondary p-5 rounded-md mx-2 h-[30vh]'>The signatories has the ability to create transactions using the multisig and approve transactions sent by others. Once the threshold is reached with approvals, the multisig transaction is enacted on-chain.
-							Since the multisig function like any other account, once created it is available for selection anywhere accounts are used and needs to be funded before use.
-							</p>
-						</div>
 					</div>
 					<div className='flex items-center justify-between'>
 						<div className='w-[45vw]'>
@@ -64,14 +49,14 @@ const CreateMultisig: React.FC<IMultisigProps> = () => {
 				</div>
 			</div>
 			<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn />
 				<AddBtn title='Create Multisig' />
 			</div>
 		</div>
 	);
 };
 
-export default styled(CreateMultisig)`
+export default styled(MultisigSignatories)`
 	.ant-switch-inner-checked {
 		background-color: #645ADF !important;
 	}

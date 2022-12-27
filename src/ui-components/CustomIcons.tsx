@@ -6,6 +6,7 @@ import Icon from '@ant-design/icons';
 import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import React from 'react';
 import { ReactComponent as AddSVG } from 'src/assets/icons/add.svg';
+import { ReactComponent as AddBoxSVG } from 'src/assets/icons/add-box.svg';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
@@ -13,14 +14,21 @@ import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
 import { ReactComponent as BrainSVG } from 'src/assets/icons/brain-icon.svg';
 import { ReactComponent as ChainSVG } from 'src/assets/icons/chain-icon.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
+import { ReactComponent as CloseSVG } from 'src/assets/icons/close-icon.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
+import { ReactComponent as CopyGreySVG } from 'src/assets/icons/copy-icon-grey.svg';
+import { ReactComponent as CreateMultisigSVG } from 'src/assets/icons/createMultisig.svg';
+import { ReactComponent as DashDotSVG } from 'src/assets/icons/dash-dot.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
+import { ReactComponent as ExportArrowSVG } from 'src/assets/icons/export-arrow.svg';
 import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
+import { ReactComponent as ImportArrowSVG } from 'src/assets/icons/import-arrow.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
+import { ReactComponent as LinkSVG } from 'src/assets/icons/link.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
@@ -39,9 +47,11 @@ import { ReactComponent as PSSVG } from 'src/assets/icons/ps-icon.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
+import { ReactComponent as ShareSVG } from 'src/assets/icons/share-icon.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
 import { ReactComponent as TransactionSVG } from 'src/assets/icons/transaction.svg';
 import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
+import { ReactComponent as UploadBoxSVG } from 'src/assets/icons/upload-box.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
 import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet-icon.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
@@ -218,4 +228,34 @@ export const KusamaIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PolkadotSVG} {...props} />
+);
+export const CloseIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CloseSVG} {...props} />
+);
+export const ImportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ImportArrowSVG} {...props} />
+);
+export const ExportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ExportArrowSVG} {...props} />
+);
+export const ShareIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ShareSVG} {...props} />
+);
+export const CopyGreyIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CopyGreySVG} {...props} />
+);
+export const UploadBoxIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={UploadBoxSVG} {...props} />
+);
+export const AddBoxIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={AddBoxSVG} {...props} />
+);
+export const DashDotIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DashDotSVG} {...props} />
+);
+export const CreateMultisigIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CreateMultisigSVG} {...props} />
+);
+export const LinkIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={LinkSVG} {...props} />
 );

@@ -8,6 +8,8 @@ import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
+import AddMultisig from 'src/components/Multisig/AddMultisig';
+import { useModalContext } from 'src/context/ModalContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
@@ -68,7 +70,7 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 			imgSrc: ''
 		}
 	];
-
+	const { openModal } = useModalContext();
 	return (
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5')}>
 			<section>
@@ -121,7 +123,7 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 				</div>
 			</section>
 			<section className='mt-auto'>
-				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'>
+				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer' onClick={() => openModal('', <AddMultisig />) }>
 					<UserPlusIcon className='text-xl' />
 					<span className='font-normal text-sm'>Add Multisig</span>
 				</button>
