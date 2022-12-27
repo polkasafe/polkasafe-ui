@@ -33,7 +33,7 @@ const AddMultisig: React.FC<IMultisigProps> = () => {
 						<p className='text-text_secondary text-sm'>Create  a new MultiSig that is controlled by one or multiple owners.</p>
 					</div>
 					<div>
-						<Button className='flex items-center justify-center bg-primary text-white w-[100%] border-none' onClick={() => openModal('Create Multisig', <CreateMultisig/>,<div><p>hello</p><Switch size="small" onChange={toggleOnSwitch} /></div>) }><CreateMultisigIcon/> Multisig</Button>
+						<Button className='flex items-center justify-center bg-primary text-white w-[100%] border-none' onClick={() => openModal('Create Multisig', <CreateMultisig/>,<div className='flex items-center justify-center'><p className='mx-2'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch} /></div>) }><CreateMultisigIcon/> Multisig</Button>
 					</div>
 				</div>
 				<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-md p-5 m-5">

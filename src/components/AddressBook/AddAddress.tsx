@@ -16,7 +16,7 @@ const AddAdress = () => {
 				<input type="text" className='rounded-md py-2 px-2 mb-4 mt-1 bg-bg-secondary text-white text-xs' placeholder='Unique Address'/>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn/>
 				<AddBtn title='Export' />
 			</div>
 		</div>
