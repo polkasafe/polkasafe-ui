@@ -9,7 +9,6 @@ import Assets from 'src/Screens/Assets';
 import Donate from 'src/Screens/Donate';
 import Home from 'src/Screens/Home';
 import MultiSig from 'src/Screens/MultiSig';
-import SendFunds from 'src/Screens/SendFunds';
 import Settings from 'src/Screens/Settings';
 import Transaction from 'src/Screens/Transactions';
 
@@ -21,7 +20,6 @@ const SwitchRoutes = () => {
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
 			<Route path='/create-multisig' element={<MultiSig />} />
-			<Route path='/send-funds' element={<SendFunds />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
 		</Routes>

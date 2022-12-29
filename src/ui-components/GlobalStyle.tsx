@@ -99,7 +99,7 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	.ant-switch {
-		background: #CED4DE !important;
+		background: #1573FE !important;
 	}
 
 	.ant-switch-checked{

@@ -19,6 +19,7 @@ import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
 import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
+import { ReactComponent as LineSVG } from 'src/assets/icons/line.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
@@ -36,12 +37,14 @@ import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-t
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
+import { ReactComponent as SquareDownArrowSVG } from 'src/assets/icons/square-down-arrow.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
 import { ReactComponent as TransactionSVG } from 'src/assets/icons/transaction.svg';
 import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
 import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
+import { ReactComponent as WarningCircleSVG } from 'src/assets/icons/warning-circle.svg';
 import { ReactComponent as WarningRoundedSVG } from 'src/assets/icons/warning-rounded.svg';
 import { ReactComponent as KusamaSVG } from 'src/assets/parachains-icons/kusama.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/parachains-icons/polkadot.svg';
@@ -102,6 +105,10 @@ export const KeyIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={KeySVG} {...props} />
 );
 
+export const LineIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={LineSVG} {...props} />
+);
+
 export const MenuIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={MenuSVG} {...props} />
 );
@@ -142,6 +149,10 @@ export const SearchIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SearchSVG} {...props} />
 );
 
+export const SquareDownArrowIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={SquareDownArrowSVG} {...props} />
+);
+
 export const SettingsIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SettingsSVG} {...props} />
 );
@@ -164,6 +175,10 @@ export const WarningIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const WarningRoundedIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={WarningRoundedSVG} {...props} />
+);
+
+export const WarningCircleIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={WarningCircleSVG} {...props} />
 );
 
 export const WalletIcon = (props: Partial<CustomIconComponentProps>) => (
