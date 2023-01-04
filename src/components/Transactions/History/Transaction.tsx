@@ -5,10 +5,11 @@
 import { Divider } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
-import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon, CopyIcon, ExternalLinkIcon, PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 
 import { ITransaction } from '.';
+import ReceivedInfo from './ReceivedInfo';
+import SentInfo from './SentInfo';
 
 interface ITransactionProps extends ITransaction {
 	date: string;
@@ -83,95 +84,22 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 				}
 			)}>
 				<Divider className='bg-text_secondary my-5' />
-				<article
-					className='p-4 rounded-lg bg-bg-main'
-				>
-					<p
-						className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-					>
-						<span>
-							Received
-						</span>
-						<span
-							className='text-success'
-						>
-							{amount} {amountType}
-						</span>
-						<span>
-							from:
-						</span>
-					</p>
-					<div
-						className='mt-3 flex items-center gap-x-4'
-					>
-						<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
-						<div
-							className='flex flex-col gap-y-[6px]'
-						>
-							<p
-								className='font-medium text-sm leading-[15px] text-white'
-							>
-								Akshit
-							</p>
-							<p
-								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-							>
-								<span>
-									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
-								</span>
-								<span
-									className='flex items-center gap-x-2 text-sm'
-								>
-									<CopyIcon />
-									<ExternalLinkIcon />
-								</span>
-							</p>
-						</div>
-					</div>
-					<Divider className='bg-text_secondary my-5' />
-					<div
-						className='w-full max-w-[418px] flex items-center justify-between gap-x-5'
-					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
-						>
-							Txn Hash:
-						</span>
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-								0xfb92...ed36
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
-							>
-								<CopyIcon />
-								<ExternalLinkIcon />
-							</span>
-						</p>
-					</div>
-					<div
-						className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
-					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
-						>
-							Executed:
-						</span>
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-								{date}, {time}
-							</span>
-						</p>
-					</div>
-				</article>
+				{
+					type === 'Received'?
+						<ReceivedInfo
+							amount={amount}
+							amountType={amountType}
+							date={date}
+							time={time}
+						/>
+						:
+						<SentInfo
+							amount={amount}
+							amountType={amountType}
+							date={date}
+							time={time}
+						/>
+				}
 			</div>
 		</article>
 	);

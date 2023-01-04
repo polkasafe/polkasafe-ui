@@ -9,10 +9,15 @@ import { ReactComponent as AddSVG } from 'src/assets/icons/add.svg';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
+import { ReactComponent as ArrowRightSVG } from 'src/assets/icons/arrow-right.svg';
 import { ReactComponent as ArrowUpRightSVG } from 'src/assets/icons/arrow-up-right.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
+import { ReactComponent as Circle3DotsSVG } from 'src/assets/icons/circle-3-dots.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
 import { ReactComponent as CircleArrowUpSVG } from 'src/assets/icons/circle-arrow-up.svg';
+import { ReactComponent as CircleCheckSVG } from 'src/assets/icons/circle-check.svg';
+import { ReactComponent as CirclePlusSVG } from 'src/assets/icons/circle-plus.svg';
+import { ReactComponent as CircleWatchSVG } from 'src/assets/icons/circle-watch.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
@@ -71,8 +76,16 @@ export const ArrowDownLeftIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={ArrowDownLeftSVG} {...props} />
 );
 
+export const ArrowRightIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ArrowRightSVG} {...props} />
+);
+
 export const ArrowUpRightIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={ArrowUpRightSVG} {...props} />
+);
+
+export const Circle3DotsIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={Circle3DotsSVG} {...props} />
 );
 
 export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) => (
@@ -81,6 +94,18 @@ export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) =>
 
 export const CircleArrowUpIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={CircleArrowUpSVG} {...props} />
+);
+
+export const CircleCheckIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CircleCheckSVG} {...props} />
+);
+
+export const CirclePlusIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CirclePlusSVG} {...props} />
+);
+
+export const CircleWatchIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CircleWatchSVG} {...props} />
 );
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (
