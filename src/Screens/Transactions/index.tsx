@@ -4,8 +4,8 @@
 
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import Filter from 'src/components/Transactions/Filter';
 import History, { ITransactionsHistory } from 'src/components/Transactions/History';
-import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
 	QUEUE,
@@ -90,12 +90,7 @@ const Transactions = () => {
 					>
 						History
 					</button>
-					<button className="ml-auto flex items-center justify-center gap-x-[6.83px] rounded-lg p-2.5 font-medium text-sm leading-[15px] w-[100px] text-primary border-2 border-primary">
-						<span>
-							Filter
-						</span>
-						<CircleArrowDownIcon />
-					</button>
+					<Filter />
 				</div>
 				{
 					tab === ETab.HISTORY?

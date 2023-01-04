@@ -19,6 +19,7 @@ import { ReactComponent as CircleCheckSVG } from 'src/assets/icons/circle-check.
 import { ReactComponent as CirclePlusSVG } from 'src/assets/icons/circle-plus.svg';
 import { ReactComponent as CircleWatchSVG } from 'src/assets/icons/circle-watch.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
+import { ReactComponent as DatePickerSVG } from 'src/assets/icons/date-picker-icon.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
@@ -110,6 +111,10 @@ export const CircleWatchIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={CopySVG} {...props} />
+);
+
+export const DatePickerIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DatePickerSVG} {...props} />
 );
 
 export const DeleteIcon = (props: Partial<CustomIconComponentProps>) => (

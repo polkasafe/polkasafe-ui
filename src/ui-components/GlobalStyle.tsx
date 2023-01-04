@@ -139,4 +139,25 @@ export const GlobalStyle = createGlobalStyle`
 	.ant-menu-submenu-popup {
 		display: none !important;
 	}
+	.ant-picker-panel-container {
+		background-color: #1573FE !important;
+	}
+	.ant-picker-header {
+		color: white !important;
+	}
+	.ant-picker-body th, td{
+		color: white !important;
+	}
+	.ant-picker-header-super-prev-btn , .ant-picker-header-prev-btn, .ant-picker-header-next-btn, .ant-picker-header-super-next-btn{
+		color: white !important;
+	}
+	.ant-picker-footer, .ant-picker-header {
+		border-color: white !important;
+	}
+	.ant-picker-today-btn {
+		color: white !important;
+	}
+	.ant-picker-header-super-prev-btn:hover , .ant-picker-header-prev-btn:hover, .ant-picker-header-next-btn:hover, .ant-picker-header-super-next-btn:hover, .ant-picker-month-btn:hover, .ant-picker-year-btn:hover, .ant-picker-today-btn:hover {
+		color: #1B2028 !important;
+	}
 `;
