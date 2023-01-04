@@ -5,14 +5,16 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import Filter from 'src/components/Transactions/Filter';
-import History, { ITransactionsHistory } from 'src/components/Transactions/History';
+import History, { ITransactions } from 'src/components/Transactions/History';
+import Queued from 'src/components/Transactions/Queued';
 
 enum ETab {
 	QUEUE,
 	HISTORY
 }
 
-const transactionsHistory: ITransactionsHistory[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const transactions: ITransactions[] = [
 	{
 		date: 'DEC 22, 2022',
 		transactions: [
@@ -94,8 +96,8 @@ const Transactions = () => {
 				</div>
 				{
 					tab === ETab.HISTORY?
-						<History transactionsHistory={transactionsHistory} />
-						:null
+						<History transactionsHistory={transactions} />
+						:<Queued transactionsQueued={transactions} />
 				}
 			</div>
 		</>
