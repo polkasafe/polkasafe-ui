@@ -7,12 +7,14 @@ import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 
 interface ICancelBtnProps {
 	className?: string;
+	onClick?: () => void;
 }
 
-const CancelBtn: FC<ICancelBtnProps> = ({ className }) => {
+const CancelBtn: FC<ICancelBtnProps> = ({ className, onClick }) => {
 	return (
 		<button
 			className={classNames('flex items-center gap-x-[10.83px] text-failure text-sm font-normal leading-[15px] bg-failure bg-opacity-10 p-3 rounded-lg min-w-[120px] justify-center', className)}
+			onClick={onClick}
 		>
 			<span
 				className='flex items-center justify-center p-2 border border-failure rounded-full w-[14.33px] h-[14.33px]'

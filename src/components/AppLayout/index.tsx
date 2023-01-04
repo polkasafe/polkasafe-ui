@@ -26,9 +26,9 @@ const AppLayout = ({ className }: { className?: string }) => {
 		pathName: '/',
 		title: 'Home'
 	});
-	const { openModal } = useModalContext();
+	const { openModal, toggleVisibility } = useModalContext();
 	useEffect(() => {
-		openModal('Send Funds', <SendFundsForm />, <div className='px-[10px] py-[6px] bg-highlight rounded-lg text-sm font-normal text-primary leading-[15px]'>Polkadot</div>);
+		openModal('Send Funds', <SendFundsForm onCancel={toggleVisibility} />, <div className='px-[10px] py-[6px] bg-highlight rounded-lg text-sm font-normal text-primary leading-[15px]'>Polkadot</div>);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

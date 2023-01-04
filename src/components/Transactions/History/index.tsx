@@ -9,12 +9,12 @@ import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
 
 export interface ITransaction {
-    amount: string,
-    amountType: string,
-    no: number,
-    status: 'Success' | 'Fail' | 'Needs Confirmation'
-    time: string,
-    type: 'Sent' | 'Received',
+    amount: string;
+    amountType: string;
+    id: number;
+    status: 'Success' | 'Failed';
+    time: string;
+    type: 'Sent' | 'Received';
 }
 
 export interface ITransactionsHistory {
@@ -29,19 +29,23 @@ interface IHistoryProps {
 
 const History: FC<IHistoryProps> = ({ filter, transactionsHistory }) => {
 	if (filter) {
-		return <Filter/>;
+		return <Filter />;
 	}
 	return (
 		<>
 			{transactionsHistory.length > 0? <div>
 				{transactionsHistory.map(({ date, transactions }, index) => {
-					return <section key={index} className='flex flex-col items-start'>
-						<h4 className='font-semibold text-blue_primary uppercase pb-3 border-b my-3'>
+					return <section key={index} className='mt-[30.5px]'>
+						<h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{date}
 						</h4>
-						<div className='w-full flex flex-col gap-y-5'>
+						<div className='flex flex-col gap-y-[10px]'>
 							{transactions.map((transaction, index) => {
-								return <Transaction key={index} {...transaction} />;
+								return <Transaction
+									date={date}
+									key={index}
+									{...transaction}
+								/>;
 							})}
 						</div>
 					</section>;

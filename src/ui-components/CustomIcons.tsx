@@ -9,8 +9,10 @@ import { ReactComponent as AddSVG } from 'src/assets/icons/add.svg';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
+import { ReactComponent as ArrowUpRightSVG } from 'src/assets/icons/arrow-up-right.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
+import { ReactComponent as CircleArrowUpSVG } from 'src/assets/icons/circle-arrow-up.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
@@ -69,8 +71,16 @@ export const ArrowDownLeftIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={ArrowDownLeftSVG} {...props} />
 );
 
+export const ArrowUpRightIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ArrowUpRightSVG} {...props} />
+);
+
 export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={CircleArrowDownSVG} {...props} />
+);
+
+export const CircleArrowUpIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CircleArrowUpSVG} {...props} />
 );
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (

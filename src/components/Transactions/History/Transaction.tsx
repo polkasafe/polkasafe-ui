@@ -2,86 +2,177 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ArrowDownOutlined, ArrowUpOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
+import { Divider } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
-import { CopyIcon } from 'src/ui-components/CustomIcons';
+import profileImg from 'src/assets/icons/profile-img.png';
+import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon, CopyIcon, ExternalLinkIcon, PolkadotIcon } from 'src/ui-components/CustomIcons';
 
 import { ITransaction } from '.';
 
-const Transaction: FC<ITransaction> = ({ amount, amountType, no, status, time, type }) => {
+interface ITransactionProps extends ITransaction {
+	date: string;
+}
+
+const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, time, type }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	return (
-		<article>
-			<div onClick={() => {
-				toggleTransactionVisible(!transactionInfoVisible);
-			}} className={classNames('grid items-center grid-cols-10 w-full flex-1 hover:bg-gray_primary cursor-pointer rounded-md px-3 py-5 font-medium', {
-				'bg-gray_primary': transactionInfoVisible
-			})}>
-				<span className='col-span-1'>{no}</span>
-				<p className='col-span-2 flex items-center gap-x-1'>
-					{type === 'Sent'?<ArrowUpOutlined className='text-red-500' />: <ArrowDownOutlined className='text-green-500' />}
-					<span>{type}</span>
+		<article
+			className='bg-bg-secondary rounded-lg p-3'
+		>
+			<div
+				onClick={() => {
+					toggleTransactionVisible(!transactionInfoVisible);
+				}}
+				className={classNames(
+					'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
+				)}
+			>
+				<p className='col-span-3 flex items-center gap-x-3'>
+					{
+						type === 'Sent'?
+							<span
+								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+							>
+								<ArrowUpRightIcon />
+							</span>
+							:
+							<span
+								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
+							>
+								<ArrowDownLeftIcon />
+							</span>
+					}
+					<span>
+						{type}
+					</span>
 				</p>
-				<p className='col-span-2'>{type === 'Sent'?'-': '+'}{amount} {amountType}</p>
-				<span className='col-span-3'>{time}</span>
-				<div className='col-span-2 flex items-center justify-end gap-x-2 '>
-					<span className='text-green-600'>{status}</span>
-					{transactionInfoVisible?<UpOutlined className='text-gray-400' />: <DownOutlined className='text-gray-400' />}
-				</div>
+				<p className='col-span-2 flex items-center gap-x-[6px]'>
+					<PolkadotIcon className='text-base' />
+					<span
+						className={classNames(
+							'font-normal text-xs leading-[13px] text-failure',
+							{
+								'text-success': type === 'Received'
+							}
+						)}
+					>
+						{type === 'Sent'? '-': '+'}{amount} {amountType}
+					</span>
+				</p>
+				<p className='col-span-2'>
+					{time}
+				</p>
+				<p className='col-span-2 flex items-center justify-end gap-x-4'>
+					<span className='text-success'>
+						{status}
+					</span>
+					<span className='text-white text-sm'>
+						{
+							transactionInfoVisible?
+								<CircleArrowUpIcon />:
+								<CircleArrowDownIcon />
+						}
+					</span>
+				</p>
 			</div>
-			{
-				transactionInfoVisible? <div className='grid grid-cols-3'>
-					<div className="col-span-2">
-						<div className='border-b border-blue_primary p-4'>
-							<p>Sent <span className='font-medium'>10, 000 USDC</span> to:</p>
-							<p className='flex items-center gap-x-1'>
-								<span className='font-semibold'>eth: </span>
-								<span>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</span>
-								<CopyIcon className='text-blue_secondary'/>
+			<div className={classNames(
+				'h-0 transition-all overflow-hidden',
+				{
+					'h-auto overflow-auto': transactionInfoVisible
+				}
+			)}>
+				<Divider className='bg-text_secondary my-5' />
+				<article
+					className='p-4 rounded-lg bg-bg-main'
+				>
+					<p
+						className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+					>
+						<span>
+							Received
+						</span>
+						<span
+							className='text-success'
+						>
+							{amount} {amountType}
+						</span>
+						<span>
+							from:
+						</span>
+					</p>
+					<div
+						className='mt-3 flex items-center gap-x-4'
+					>
+						<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+						<div
+							className='flex flex-col gap-y-[6px]'
+						>
+							<p
+								className='font-medium text-sm leading-[15px] text-white'
+							>
+								Akshit
 							</p>
-						</div>
-						<div className='border-b border-blue_primary p-4 flex flex-col gap-y-2'>
-							<p className='grid grid-cols-6'>
-								<span className='col-span-2 text-blue_secondary'>
-                                    Transaction hash:
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+							>
+								<span>
+									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
 								</span>
-								<span className='col-span-4 flex items-center gap-x-1'>
-                                    3J98t1...qRhWNLy
-									<CopyIcon className='text-blue_secondary'/>
-								</span>
-							</p>
-							<p className='grid grid-cols-6'>
-								<span className='col-span-2 text-blue_secondary'>
-                                    SafeTxHash:
-								</span>
-								<span className='col-span-4 flex items-center gap-x-1'>
-                                    3J98t1...qRhWNLy
-									<CopyIcon className='text-blue_secondary'/>
+								<span
+									className='flex items-center gap-x-2 text-sm'
+								>
+									<CopyIcon />
+									<ExternalLinkIcon />
 								</span>
 							</p>
-							<p className='grid grid-cols-6'>
-								<span className='col-span-2 text-blue_secondary'>
-                                    Created:
-								</span>
-								<span className='col-span-4'>
-                                    Aug 4, 2022 - 12:10:22 PM
-								</span>
-							</p>
-							<p className='grid grid-cols-6'>
-								<span className='col-span-2 text-blue_secondary'>
-                                    Executed:
-								</span>
-								<span className='col-span-4'>
-                                    Aug 10, 2022 - 12:43:22 PM
-								</span>
-							</p>
-							<p className='underline text-green-600 font-medium cursor-pointer'>Advanced Details</p>
 						</div>
 					</div>
-					<div className="col-span-1 border-l border-blue_primary border-b"></div>
-				</div>: null
-			}
+					<Divider className='bg-text_secondary my-5' />
+					<div
+						className='w-full max-w-[418px] flex items-center justify-between gap-x-5'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Txn Hash:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								0xfb92...ed36
+							</span>
+							<span
+								className='flex items-center gap-x-2 text-sm'
+							>
+								<CopyIcon />
+								<ExternalLinkIcon />
+							</span>
+						</p>
+					</div>
+					<div
+						className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Executed:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{date}, {time}
+							</span>
+						</p>
+					</div>
+				</article>
+			</div>
 		</article>
 	);
 };

@@ -5,13 +5,18 @@
 // import { WarningOutlined } from '@ant-design/icons';
 
 import { Divider, Form, Input, Switch } from 'antd';
-import React from 'react';
+import React, { FC } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { LineIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 
-const SendFundsForm = () => {
+interface ISendFundsFormProps {
+	onCancel?: () => void;
+}
+
+const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
+	const { onCancel } = props;
 	return (
 		<Form>
 			<section>
@@ -138,7 +143,7 @@ const SendFundsForm = () => {
 				</p>
 			</section>
 			<section className='flex items-center gap-x-5 justify-center mt-10'>
-				<CancelBtn className='w-[300px]' />
+				<CancelBtn className='w-[300px]' onClick={onCancel} />
 				<ModalBtn className='w-[300px]' title='Make Transaction' />
 			</section>
 		</Form>
