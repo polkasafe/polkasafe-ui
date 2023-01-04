@@ -7,6 +7,7 @@
 import { Divider, Form, Input, Switch } from 'antd';
 import React, { FC } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
+import NetworksDropdown from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { LineIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
@@ -75,17 +76,22 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block'>Amount</label>
 				<div className='flex items-center gap-x-[10px]'>
-					<article className='w-[500px]'>
+					<article className='w-[500px] relative'>
 						<Form.Item
-							name="recipient"
+							name="amount"
 							rules={[]}
 							className='border-0 outline-0 my-0 p-0'
 						>
-							<Input
-								placeholder="Send to Address.."
-								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
-								id="recipient"
-							/>
+							<div className='flex items-center h-[40px]'>
+								<Input
+									placeholder="0"
+									className="h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050] pr-10"
+									id="amount"
+								/>
+								<div className='absolute right-0'>
+									<NetworksDropdown className='bg-transparent text-primary gap-x-[12.83px] font-medium' isCardToken={true} iconClassName='h-3 w-3' titleClassName='ml-[4px]' />
+								</div>
+							</div>
 						</Form.Item>
 					</article>
 					<article className='w-[412px] flex items-center'>
@@ -107,12 +113,17 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 							rules={[]}
 							className='border-0 outline-0 my-0 p-0'
 						>
-							<Input
-								type='number'
-								placeholder="1.0000"
-								className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-[#505050]"
-								id="existential_deposit"
-							/>
+							<div className='flex items-center h-[40px]'>
+								<Input
+									type='number'
+									placeholder="1.0000"
+									className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-[#505050]"
+									id="existential_deposit"
+								/>
+								<div className='absolute right-0'>
+									<NetworksDropdown className='bg-transparent text-primary gap-x-[12.83px] font-medium' isCardToken={true} iconClassName='h-3 w-3' titleClassName='ml-[4px]' />
+								</div>
+							</div>
 						</Form.Item>
 					</article>
 				</div>
