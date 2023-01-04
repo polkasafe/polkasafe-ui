@@ -35,6 +35,7 @@ import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notific
 import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-queued-transaction.svg';
 import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
 import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification.svg';
+import { ReactComponent as NotifyMailSVG } from 'src/assets/icons/notify-mail.svg';
 import { ReactComponent as OutlineCheckSVG } from 'src/assets/icons/outline-check.svg';
 import { ReactComponent as OutlineCloseSVG } from 'src/assets/icons/outline-close.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
@@ -258,4 +259,7 @@ export const CreateMultisigIcon = (props: Partial<CustomIconComponentProps>) => 
 );
 export const LinkIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={LinkSVG} {...props} />
+);
+export const NotifyMail = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NotifyMailSVG} {...props} />
 );

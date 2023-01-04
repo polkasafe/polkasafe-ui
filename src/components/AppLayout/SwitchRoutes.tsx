@@ -5,6 +5,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AddressBook from 'src/Screens/AddressBook';
+import Apps from 'src/Screens/Apps';
 import Assets from 'src/Screens/Assets';
 import Donate from 'src/Screens/Donate';
 import Home from 'src/Screens/Home';
@@ -16,6 +17,7 @@ const SwitchRoutes = () => {
 	return (
 		<Routes>
 			<Route path='/' element={<Home />} />
+			<Route path='/apps' element={<Apps />} />
 			<Route path='/donate' element={<Donate />} />
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
