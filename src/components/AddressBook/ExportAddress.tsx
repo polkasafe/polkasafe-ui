@@ -5,17 +5,19 @@
 import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
 const ExportAdress = () => {
+	const { toggleVisibility } = useModalContext();
 	return (
-		<div className='flex flex-col'>
+		<div className='flex flex-col w-[560px]'>
 			<div className="flex items-left justify-left">
 				<p className='mr-2 text-white'>You are about to export a CSV file with</p>
 				<div className='bg-highlight text-primary px-2 rounded-md'>2 address book entries</div>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
-				<AddBtn title='Import' />
+				<CancelBtn onClick={toggleVisibility}/>
+				<AddBtn title='Export' />
 			</div>
 		</div>
 	);

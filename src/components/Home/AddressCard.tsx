@@ -15,22 +15,19 @@ const AddressCard = ({ className }: { className?: string }) => {
 		<div>
 			<h2 className="text-lg font-bold text-white">Address Book</h2>
 			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-72 mt-3`}>
-				<div className='flex flex-col items-center justify-around h-72 overflow-x-hidden w-[100%]'>
-					<div className='flex justify-items-center items-center'>
+				<div className='flex flex-col items-left px-5 justify-around h-72 overflow-x-hidden w-[100%] divide-y divide-gray-700'>
+					<div className='flex justify-items-center items-center pt-5'>
 						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<div className='px-1 text-sm text-white truncate'>3J98t1Wpnyi...WrnqRhWNLy</div>
 					</div>
-					<hr className='bg-secondary h-[1px] w-[80%]' />
-					<div className='flex justify-items-center items-center'>
+					<div className='flex justify-items-center items-center pt-5'>
 						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<div className='px-1 text-sm text-white truncate'>3J98t1Wpnyi...WrnqRhWNLy</div>
 					</div>
-					<hr className='bg-secondary h-[1px] w-[80%]' />
-					<div className='flex justify-items-center items-center'>
+					<div className='flex justify-items-center items-center pt-5'>
 						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1WpnyiWrnqRhWNLy</div>
+						<div className='px-1 text-sm text-white truncate'>3J98t1Wpnyi...WrnqRhWNLy</div>
 					</div>
-					<hr className='bg-secondary h-[1px] w-[80%]' />
 				</div>
 				<div className='w-[90%] mt-5'>
 					<PrimaryButton className='w-[100%] flex items-center justify-center bg-highlight py-5' onClick={() => openModal('Add Address', <AddAdress/>)}>

@@ -5,11 +5,13 @@ import { Form, Input } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
-const EditOwner = () => {
+const EditAddress = () => {
+	const { toggleVisibility } = useModalContext();
 	return (
 		<Form
-			className='my-0'
+			className='my-0 w-[560px]'
 		>
 			<div className="flex flex-col gap-y-3">
 				<label
@@ -25,7 +27,7 @@ const EditOwner = () => {
 				>
 					<Input
 						placeholder="Give the address a name"
-						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
+						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="name"
 					/>
 				</Form.Item>
@@ -44,11 +46,11 @@ const EditOwner = () => {
 				</p>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn onClick={toggleVisibility}/>
 				<AddBtn title='Save' />
 			</div>
 		</Form>
 	);
 };
 
-export default EditOwner;
+export default EditAddress;

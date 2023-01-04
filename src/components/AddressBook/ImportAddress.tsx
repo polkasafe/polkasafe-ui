@@ -6,15 +6,17 @@ import React from 'react';
 import DragDrop from 'src/components/AddressBook/DragDrop';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
 const ImportAdress = () => {
+	const { toggleVisibility } = useModalContext();
 	return (
-		<div className='flex flex-col'>
+		<div className='flex flex-col w-[560px]'>
 			<div className='bg-bg-secondary p-4 m-3 rounded-md'>
 				<DragDrop/>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn onClick={toggleVisibility}/>
 				<AddBtn title='Import' />
 			</div>
 		</div>

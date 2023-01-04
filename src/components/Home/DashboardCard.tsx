@@ -34,7 +34,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-72 mt-3`}>
 				<div className="flex justify-between flex-wrap truncate">
 					<div className='flex gap-x-4 items-center mb-3 flex-wrap'>
-						<Avatar className='border-8 border-secondary' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
+						<Avatar className='border-4 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
 						<div>
 							{/* TODO: Use dynamic values */}
 							<div className='text-lg font-bold text-white'>John Doe</div>

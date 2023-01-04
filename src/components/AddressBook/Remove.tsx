@@ -6,25 +6,27 @@ import { Form } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
-const RemoveOwner = () => {
+const RemoveAddress = () => {
+	const { toggleVisibility } = useModalContext();
 	return (
 		<Form
-			className='my-0'
+			className='my-0 w-[560px]'
 		>
 			<p className='text-white font-medium text-sm leading-[15px]'>
-                Are you sure you want to permanently remove
+				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
                     Jaski - 1
 				</span>
-                as a owner?
+                from your Address Book?
 			</p>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn onClick={toggleVisibility}/>
 				<RemoveBtn/>
 			</div>
 		</Form>
 	);
 };
 
-export default RemoveOwner;
+export default RemoveAddress;

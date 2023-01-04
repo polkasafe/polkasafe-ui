@@ -4,11 +4,13 @@
 import React, { FC } from 'react';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 
-interface ICancelBtnProps {}
+interface ICancelBtnProps {
+	onClick?: () => void;
+}
 
-const CancelBtn: FC<ICancelBtnProps> = () => {
+const CancelBtn: FC<ICancelBtnProps> = ({ onClick }) => {
 	return (
-		<button
+		<button onClick={onClick}
 			className='flex items-center gap-x-[10.83px] text-failure text-sm font-normal leading-[15px] bg-failure bg-opacity-10 p-3 rounded-lg min-w-[120px] justify-center'
 		>
 			<span

@@ -10,7 +10,7 @@ import TxnCard from 'src/components/Home/TxnCard';
 const Home = () => {
 	return (
 		<div>
-			<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
+			<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
 				<div className='col-start-1 col-end-13 xl:col-end-10'>
 					<DashboardCard className='mt-3' />
 				</div>

@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Input } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
@@ -38,7 +39,7 @@ const CreateMultisig: React.FC<IMultisigProps> = () => {
 					<div className='flex items-center justify-between'>
 						<div className='w-[45vw]'>
 							<p>Threshold</p>
-							<input className='bg-bg-secondary p-2 w-full my-2 rounded-md' placeholder='2' />
+							<Input className= 'placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2'></Input>
 						</div>
 						<DashDotIcon className='mt-5'/>
 						<div className='w-[40%] overflow-auto'>
@@ -48,7 +49,7 @@ const CreateMultisig: React.FC<IMultisigProps> = () => {
 					<div className='flex items-center justify-between'>
 						<div className='w-[45vw]'>
 							<p>Name</p>
-							<input className='bg-bg-secondary p-2 w-full my-2 rounded-md' placeholder='Give the MultiSig a unique name' />
+							<Input className= 'placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name'></Input>
 						</div>
 						<DashDotIcon className='mt-5'/>
 						<div className='w-[40%] overflow-auto'>
