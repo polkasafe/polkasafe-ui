@@ -4,22 +4,42 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { Divider, Form, Input, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
+import { DefaultOptionType } from 'antd/es/select';
+import classNames from 'classnames';
 import React, { FC } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
-import { LineIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import styled from 'styled-components';
 
 interface ISendFundsFormProps {
 	onCancel?: () => void;
+	className?: string;
 }
 
 const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
-	const { onCancel } = props;
+	const { className, onCancel } = props;
+	const recentAddresses: DefaultOptionType[] = [
+		{
+			label: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
+			value: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy'
+		},
+		{
+			label: 'QviecrnyiWrnqRhWNLy3J98t1WpEZ73CNm',
+			value: 'QviecrnyiWrnqRhWNLy3J98t1WpEZ73CNm'
+		},
+		{
+			label: 'WrnqRhWNLy3J98t1WpEZ73CNmQviecrnyi',
+			value: 'WrnqRhWNLy3J98t1WpEZ73CNmQviecrnyi'
+		}
+	];
 	return (
-		<Form>
+		<Form
+			className={classNames(className)}
+		>
 			<section>
 				<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 				<div className='flex items-center gap-x-[10px] mt-[14px]'>
@@ -58,11 +78,33 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 							rules={[]}
 							className='border-0 outline-0 my-0 p-0'
 						>
-							<Input
-								placeholder="Send to Address.."
-								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
-								id="recipient"
-							/>
+							<div className="flex items-center">
+								<AutoComplete
+									onClick={() => {
+										const elm = document.getElementById('recipient_list');
+										if (elm) {
+											const parentElm = elm.parentElement;
+											if (parentElm) {
+												const isElmPresent = document.getElementById('recipient_heading');
+												if (!isElmPresent) {
+													const recipientHeading = document.createElement('p');
+													recipientHeading.textContent = 'Recent Addresses';
+													recipientHeading.id = 'recipient_heading';
+													recipientHeading.classList.add('recipient_heading');
+													parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
+												}
+											}
+										}
+									}}
+									options={recentAddresses}
+									id='recipient'
+									placeholder="Send to Address.."
+								/>
+								<div className='absolute right-2'>
+									<PasteIcon className='mr-2 text-primary' />
+									<QRIcon className='text-text_secondary' />
+								</div>
+							</div>
 						</Form.Item>
 					</article>
 					<article className='w-[412px] flex items-center'>
@@ -76,7 +118,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block'>Amount</label>
 				<div className='flex items-center gap-x-[10px]'>
-					<article className='w-[500px] relative'>
+					<article className='w-[500px]'>
 						<Form.Item
 							name="amount"
 							rules={[]}
@@ -85,7 +127,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 							<div className='flex items-center h-[40px]'>
 								<Input
 									placeholder="0"
-									className="h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050] pr-10"
+									className="h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
 									id="amount"
 								/>
 								<div className='absolute right-0'>
@@ -107,7 +149,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
 				<div className='flex items-center gap-x-[10px]'>
-					<article className='w-[500px] relative'>
+					<article className='w-[500px]'>
 						<Form.Item
 							name="existential_deposit"
 							rules={[]}
@@ -117,7 +159,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 								<Input
 									type='number'
 									placeholder="1.0000"
-									className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-[#505050]"
+									className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
 									id="existential_deposit"
 								/>
 								<div className='absolute right-0'>
@@ -161,4 +203,36 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 	);
 };
 
-export default SendFundsForm;
+export default styled(SendFundsForm)`
+	.ant-select input {
+		font-size: 14px !important;
+		font-style: normal !important;
+		line-height: 15px !important;
+		border: 0 !important;
+		outline: 0 !important;
+		background-color: #24272E !important;
+		border-radius: 8px !important;
+		color: white !important;
+		padding: 12px !important;
+		display: block !important;
+		height: auto !important;
+	}
+	.ant-select-selector {
+		border: none !important;
+		height: 40px !important; 
+		box-shadow: none !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+`;

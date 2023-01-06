@@ -3,11 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Drawer, Layout } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { useModalContext } from 'src/context/ModalContext';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import SendFundsForm from '../SendFunds/SendFundsForm';
 import Footer from './Footer';
 import Menu from './Menu';
 import NavHeader from './NavHeader';
@@ -26,11 +24,6 @@ const AppLayout = ({ className }: { className?: string }) => {
 		pathName: '/',
 		title: 'Home'
 	});
-	const { openModal, toggleVisibility } = useModalContext();
-	useEffect(() => {
-		openModal('Send Funds', <SendFundsForm onCancel={toggleVisibility} />, <div className='px-[10px] py-[6px] bg-highlight rounded-lg text-sm font-normal text-primary leading-[15px]'>Polkadot</div>);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	return (
 		<Layout className={className}>
