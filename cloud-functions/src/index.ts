@@ -28,7 +28,8 @@ export const connectAddress = functions.https.onCall(async (data) => {
 	// check if address doc already exists
 	const addressRef = admin.firestore().collection('addresses').doc(address);
 
-	addressRef.get().then(async (doc) => {
+	try {
+		const doc = await addressRef.get();
 		if (doc.exists) return doc;
 
 		// else create a new user document
@@ -40,11 +41,11 @@ export const connectAddress = functions.https.onCall(async (data) => {
 		};
 
 		await addressRef.set(newUser);
-
 		return newUser;
-	}).catch((e) => {
-		throw new functions.https.HttpsError('internal', e.message);
-	});
+	} catch (err:unknown) {
+		functions.logger.info('Error in firestore call :', { err });
+		throw new functions.https.HttpsError('internal', responseMessages.internal);
+	}
 });
 
 // TODO: Every time history is asked from the server, the server should check from subscan and store it in the database
