@@ -1,4 +1,3 @@
-/* eslint-disable */
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
@@ -16,27 +15,22 @@ const isValidSignature = async (signature:string, address:string) => {
 
 export const connectAddress = functions.https.onCall(async (data) => {
 	if (!data || !data.address || !data.signature) {
-		return {
-			error: new Error(responseMessages.INVALID_PARAMS)
-		};
+		throw new functions.https.HttpsError('invalid-argument', responseMessages.invalid_argument);
 	}
 
 	const { address, signature } = data;
 	const isValid = await isValidSignature(signature, address);
 
 	if (!isValid) {
-		return {
-			error: new Error(responseMessages.INVALID_SIGNATURE)
-		};
+		throw new functions.https.HttpsError('permission-denied', responseMessages.invalid_signature);
 	}
 
 	// check if address doc already exists
 	const addressRef = admin.firestore().collection('addresses').doc(address);
-	const doc = await addressRef.get();
 
-	if (doc.exists) {
-		return doc;
-	} else {
+	addressRef.get().then(async (doc) => {
+		if (doc.exists) return doc;
+
 		// else create a new user document
 		const newUser:IUser = {
 			address,
@@ -44,9 +38,13 @@ export const connectAddress = functions.https.onCall(async (data) => {
 			multisigAddresses: [],
 			addressBook: []
 		};
+
 		await addressRef.set(newUser);
+
 		return newUser;
-	}
+	}).catch((e) => {
+		throw new functions.https.HttpsError('internal', e.message);
+	});
 });
 
 // TODO: Every time history is asked from the server, the server should check from subscan and store it in the database
