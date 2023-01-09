@@ -20,6 +20,23 @@ interface ISendFundsFormProps {
 	className?: string;
 }
 
+const addRecipientHeading = () => {
+	const elm = document.getElementById('recipient_list');
+	if (elm) {
+		const parentElm = elm.parentElement;
+		if (parentElm) {
+			const isElmPresent = document.getElementById('recipient_heading');
+			if (!isElmPresent) {
+				const recipientHeading = document.createElement('p');
+				recipientHeading.textContent = 'Recent Addresses';
+				recipientHeading.id = 'recipient_heading';
+				recipientHeading.classList.add('recipient_heading');
+				parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
+			}
+		}
+	}
+};
+
 const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 	const { className, onCancel } = props;
 	const recentAddresses: DefaultOptionType[] = [
@@ -36,6 +53,9 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 			value: 'WrnqRhWNLy3J98t1WpEZ73CNmQviecrnyi'
 		}
 	];
+	const onClick = () => {
+		addRecipientHeading();
+	};
 	return (
 		<Form
 			className={classNames(className)}
@@ -80,22 +100,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 						>
 							<div className="flex items-center">
 								<AutoComplete
-									onClick={() => {
-										const elm = document.getElementById('recipient_list');
-										if (elm) {
-											const parentElm = elm.parentElement;
-											if (parentElm) {
-												const isElmPresent = document.getElementById('recipient_heading');
-												if (!isElmPresent) {
-													const recipientHeading = document.createElement('p');
-													recipientHeading.textContent = 'Recent Addresses';
-													recipientHeading.id = 'recipient_heading';
-													recipientHeading.classList.add('recipient_heading');
-													parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
-												}
-											}
-										}
-									}}
+									onClick={onClick}
 									options={recentAddresses}
 									id='recipient'
 									placeholder="Send to Address.."
