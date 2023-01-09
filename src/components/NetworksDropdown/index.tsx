@@ -3,36 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import classNames from 'classnames';
 import React, { FC, useRef, useState } from 'react';
-import kusamaIcon from 'src/assets/parachains-icons/kusama.svg';
-import polkadotIcon from 'src/assets/parachains-icons/polkadot.svg';
 import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
+import { networks } from 'src/utils/networks';
 
 import NetworkCard from './NetworkCard';
 
-export interface INetwork {
-	icon: string;
-	title: string;
-	to: string;
-}
-
-const networks: INetwork[] = [
-	{
-		icon: polkadotIcon,
-		title: 'Polkadot',
-		to: '/'
-	},
-	{
-		icon: kusamaIcon,
-		title: 'Kusama',
-		to: '/'
-	}
-];
-
 export const ParachainsIcon: FC<{ src: string }> = ({ src }) => {
-	return <img className='w-4 h-4' src={src} alt="parachains icon" />;
+	return <img className='block w-full h-full' src={src} alt="parachains icon" />;
 };
 
-const NetworksDropdown = () => {
+interface INetworksDropdownProps {
+	isCardToken?: boolean;
+	className?: string;
+	iconClassName?: string;
+	titleClassName?: string;
+}
+
+const NetworksDropdown: FC<INetworksDropdownProps> = (props) => {
+	const { className, isCardToken, iconClassName, titleClassName } = props;
 	const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
@@ -45,14 +33,30 @@ const NetworksDropdown = () => {
 				}
 			}}
 		>
-			<button onClick={() => {
-				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
-			}} className='flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
-				<p className='flex items-center gap-x-[10px]'>
-					<span className='flex items-center text-base'>
+			<button
+				onClick={() => {
+					(isVisible ? toggleVisibility(false) : toggleVisibility(true));
+				}}
+				className={classNames(
+					'flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm',
+					className
+				)}
+			>
+				<p className={classNames(
+					'flex items-center'
+				)}>
+					<span className={classNames(
+						'flex items-center w-4 h-4',
+						iconClassName
+					)}>
 						<ParachainsIcon src={selectedNetwork.icon} />
 					</span>
-					<span className='hidden md:inline-flex'>{selectedNetwork.title}</span>
+					<span className={classNames(
+						'ml-[10px] hidden md:inline-flex',
+						titleClassName
+					)}>
+						{isCardToken? selectedNetwork.token: selectedNetwork.title}
+					</span>
 				</p>
 				<CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/>
 			</button>
@@ -73,9 +77,15 @@ const NetworksDropdown = () => {
 			>
 				{
 					networks.map((network) => {
-						return <NetworkCard onClick={() => {
-							setSelectedNetwork(network);
-						}} selectedNetwork={selectedNetwork} {...network} key={network.title} />;
+						return <NetworkCard
+							onClick={() => {
+								setSelectedNetwork(network);
+							}}
+							selectedNetwork={selectedNetwork}
+							{...network}
+							key={network.title}
+							isCardToken={isCardToken}
+						/>;
 					})
 				}
 			</div>
