@@ -8,11 +8,12 @@ import AddressBook from 'src/Screens/AddressBook';
 import Apps from 'src/Screens/Apps';
 import Assets from 'src/Screens/Assets';
 import Donate from 'src/Screens/Donate';
+import Error404 from 'src/Screens/Error404';
+import Error500 from 'src/Screens/Error500';
 import Home from 'src/Screens/Home';
 import SendFunds from 'src/Screens/SendFunds';
 import Settings from 'src/Screens/Settings';
 import Transaction from 'src/Screens/Transactions';
-import UserFlow from 'src/Screens/UserFlow';
 
 const SwitchRoutes = () => {
 	return (
@@ -20,9 +21,10 @@ const SwitchRoutes = () => {
 			<Route path='/' element={<Home />} />
 			<Route path='/apps' element={<Apps />} />
 			<Route path='/donate' element={<Donate />} />
+			<Route path='*' element={<Error404/>}/>
+			<Route path="/error/500" element={<Error500/>} />
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
-			<Route path='/user-flow' element={<UserFlow />} />
 			<Route path='/send-funds' element={<SendFunds />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
