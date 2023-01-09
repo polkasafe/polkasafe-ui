@@ -2,164 +2,104 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
-import { Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import History, { ITransactionsHistory } from 'src/components/Transactions/History';
+import Filter from 'src/components/Transactions/Filter';
+import History, { ITransactions } from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
-import RejectTransaction from 'src/components/Transactions/RejectTransaction';
-import TransactionsCard from 'src/components/Transactions/TransactionsCard';
-import ContentHeader from 'src/ui-components/ContentHeader';
-import ContentWrapper from 'src/ui-components/ContentWrapper';
 
-const ETab =  {
-	HISTORY: 'HISTORY',
-	QUEUED: 'QUEUED'
-};
+enum ETab {
+	QUEUE,
+	HISTORY
+}
 
-const transactionsHistory: ITransactionsHistory[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const transactions: ITransactions[] = [
 	{
-		date: 'AUG 10, 2022',
+		date: 'DEC 22, 2022',
 		transactions: [
 			{
-				amount: '10,000',
-				amountType: 'USDC',
-				no: 3,
+				amount: '50',
+				amountType: 'DOT',
+				id: 1,
 				status: 'Success',
-				time: '12:43 PM',
-				type: 'Sent'
+				time: '11:15 AM',
+				type: 'Received'
 			},
 			{
-				amount: '10,000',
-				amountType: 'USDC',
-				no: 2,
+				amount: '20',
+				amountType: 'DOT',
+				id: 2,
 				status: 'Success',
-				time: '12:43 PM',
+				time: '14:00 PM',
 				type: 'Sent'
 			}
 		]
 	},
 	{
-		date: 'AUG 04, 2022',
+		date: 'DEC 16, 2022',
 		transactions: [
 			{
-				amount: '10,000',
-				amountType: 'USDC',
-				no: 2,
+				amount: '50',
+				amountType: 'DOT',
+				id: 1,
 				status: 'Success',
-				time: '12:43 PM',
+				time: '11:15 AM',
 				type: 'Received'
-			}
-		]
-	},
-	{
-		date: 'JUL 10, 2022',
-		transactions: [
+			},
 			{
-				amount: '10,000',
-				amountType: 'USDC',
-				no: 2,
+				amount: '50',
+				amountType: 'DOT',
+				id: 1,
 				status: 'Success',
-				time: '12:43 PM',
-				type: 'Sent'
+				time: '11:15 AM',
+				type: 'Received'
 			}
 		]
 	}
 ];
 
 const Transactions = () => {
-	const [isReject] = useState(true);
-	const [isTransactionInitiated] = useState(false);
-	const [tab, setTab] = useState(ETab.QUEUED);
-	const [filter, setFilter] = useState(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [tab, setTab] = useState(ETab.QUEUE);
 	return (
 		<>
-			{isTransactionInitiated?<div className='grid md:grid-cols-2 gap-5 lg:gap-10'>
-				{isReject?
-					<RejectTransaction/>
-					:<>
-						<div>
-							<ContentHeader
-								title='Send Funds'
-								subTitle={
-									<h3 className='ml-2 text-sm font-normal'>
-							/Step 1 of 2
-									</h3>
-								}
-								rightElm={
-									<span className='font-bold text-base text-blue_primary'>
-							Polkadot
-									</span>
-								}
-							/>
-							<ContentWrapper>
-								<TransactionsCard/>
-							</ContentWrapper>
-						</div>
-						<div>
-							<ContentHeader
-								title='Send Funds'
-								subTitle={
-									<h3 className='ml-2 text-sm font-normal'>
-							/Step 2 of 2
-									</h3>
-								}
-								rightElm={
-									<span className='font-bold text-base text-blue_primary'>
-							Polkadot
-									</span>
-								}
-							/>
-							<ContentWrapper>
-								<TransactionsCard/>
-							</ContentWrapper>
-						</div>
-					</>}
-			</div>: <div>
-				<ContentHeader
-					title='Transaction'
-					subTitle={
-						<h3 className='ml-2 text-sm font-normal '>
-							/ {tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase()} {filter? '/ Filter': ''}
-						</h3>
-					}
-					rightElm={
-						tab === ETab.HISTORY?
-							<button onClick={() => setFilter(!filter)} className='flex items-center gap-x-1'>
-								<span className='font-bold text-base text-blue_primary'>
-									Filter
-								</span>
-								{filter?<CaretUpOutlined className='text-blue_secondary' />: <CaretDownOutlined className='text-blue_secondary' />}
-							</button>: null
-					}
-				/>
-				<ContentWrapper>
-					<Tabs
-						defaultActiveKey={ETab.QUEUED}
-						activeKey={tab}
-						onChange={(key) => {
-							setTab(key);
-						}}
-						items={[
+			<div
+				className='bg-bg-main rounded-xl p-[20.5px]'
+			>
+				<div
+					className='flex items-center'
+				>
+					<button
+						onClick={() => setTab(ETab.QUEUE)}
+						className={classNames(
+							'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
 							{
-								children: <Queued transactionsQueued={[]} />,
-								key: ETab.QUEUED,
-								label: <span className={classNames('font-medium text-sm', {
-									'text-blue_secondary': tab !== ETab.QUEUED
-								})}>{ETab.QUEUED}</span>
-							},
-							{
-								children: <History filter={filter} transactionsHistory={transactionsHistory} />,
-								key: ETab.HISTORY,
-								label: <span className={classNames('font-medium text-sm', {
-									'text-blue_secondary': tab !== ETab.HISTORY
-								})}>{ETab.HISTORY}</span>
+								'text-primary bg-highlight': tab === ETab.QUEUE
 							}
-						]}
-					/>
-				</ContentWrapper>
-			</div>}
+						)}
+					>
+						Queue
+					</button>
+					<button
+						onClick={() => setTab(ETab.HISTORY)}
+						className={classNames(
+							'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+							{
+								'text-primary bg-highlight': tab === ETab.HISTORY
+							}
+						)}
+					>
+						History
+					</button>
+					<Filter />
+				</div>
+				{
+					tab === ETab.HISTORY?
+						<History transactionsHistory={transactions} />
+						:<Queued transactionsQueued={transactions} />
+				}
+			</div>
 		</>
 	);
 };

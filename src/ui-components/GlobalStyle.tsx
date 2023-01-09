@@ -99,7 +99,7 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	.ant-switch {
-		background: #CED4DE !important;
+		background: #1573FE !important;
 	}
 
 	.ant-switch-checked{
@@ -141,5 +141,52 @@ export const GlobalStyle = createGlobalStyle`
 	}
 	.ant-input{
 		background-color: #24272E;
+	.ant-picker-panel-container {
+		background-color: #1573FE !important;
+	}
+	.ant-picker-header {
+		color: white !important;
+	}
+	.ant-picker-body th, td{
+		color: white !important;
+	}
+	.ant-picker-header-super-prev-btn , .ant-picker-header-prev-btn, .ant-picker-header-next-btn, .ant-picker-header-super-next-btn{
+		color: white !important;
+	}
+	.ant-picker-footer, .ant-picker-header {
+		border-color: white !important;
+	}
+	.ant-picker-today-btn {
+		color: white !important;
+	}
+	.ant-picker-header-super-prev-btn:hover , .ant-picker-header-prev-btn:hover, .ant-picker-header-next-btn:hover, .ant-picker-header-super-next-btn:hover, .ant-picker-month-btn:hover, .ant-picker-year-btn:hover, .ant-picker-today-btn:hover {
+		color: #1B2028 !important;
+	}
+
+	.ant-select-dropdown {
+		background-color: #24272E !important;
+		border: 1px solid #1573FE !important;
+		border-radius: 12px !important;
+		padding-bottom: 10px !important;
+	}
+	.ant-select-item-option-content {
+		color: white !important;
+		border-bottom: 1px solid #8B8B8B !important;
+		font-family: 'Archivo' !important;
+		font-style: normal !important;
+		font-weight: 400 !important;
+		font-size: 14px !important;
+		line-height: 15px !important;
+		padding: 10px !important;
+	}
+	.recipient_heading {
+		font-family: 'Archivo';
+		font-style: normal;
+		font-weight: 400;
+		font-size: 12px;
+		line-height: 13px;
+		color: #1573FE;
+		margin-left: 12px;
+		margin-top: 12px;
 	}
 `;

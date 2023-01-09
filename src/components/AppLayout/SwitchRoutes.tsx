@@ -11,7 +11,6 @@ import Donate from 'src/Screens/Donate';
 import Error404 from 'src/Screens/Error404';
 import Error500 from 'src/Screens/Error500';
 import Home from 'src/Screens/Home';
-import SendFunds from 'src/Screens/SendFunds';
 import Settings from 'src/Screens/Settings';
 import Transaction from 'src/Screens/Transactions';
 
@@ -25,7 +24,6 @@ const SwitchRoutes = () => {
 			<Route path="/error/500" element={<Error500/>} />
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
-			<Route path='/send-funds' element={<SendFunds />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
 		</Routes>
