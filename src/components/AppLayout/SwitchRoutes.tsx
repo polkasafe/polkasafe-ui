@@ -13,10 +13,13 @@ import SendFunds from 'src/Screens/SendFunds';
 import Settings from 'src/Screens/Settings';
 import Transaction from 'src/Screens/Transactions';
 
+import ConnectWallet from '../Home/ConnectWallet';
+
 const SwitchRoutes = () => {
 	return (
 		<Routes>
 			<Route path='/' element={<Home />} />
+			<Route path='/connect-wallet' element={<ConnectWallet />} />
 			<Route path='/donate' element={<Donate />} />
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
