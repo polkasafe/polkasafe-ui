@@ -5,11 +5,13 @@
 import React from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
 import DashboardCard from 'src/components/Home/DashboardCard';
+import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
 
 const Home = () => {
 	return (
 		<div>
+			<EmailBadge/>
 			<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
 				<div className='col-start-1 col-end-13 xl:col-end-10'>
 					<DashboardCard className='mt-3' />

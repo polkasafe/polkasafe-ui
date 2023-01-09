@@ -6,11 +6,12 @@ import { OutlineCheckIcon } from 'src/ui-components/CustomIcons';
 
 interface IModalBtnProps {
     title: string;
+	onClick?: ()=>void;
 }
 
-const ModalBtn: FC<IModalBtnProps> = ({ title }) => {
+const ModalBtn: FC<IModalBtnProps> = ({ onClick, title }) => {
 	return (
-		<button
+		<button onClick={onClick}
 			className='flex items-center w-[30%] gap-x-[10.83px] text-white text-sm font-normal leading-[15px] bg-primary p-3 rounded-lg min-w-[120px] justify-center'
 		>
 			<span

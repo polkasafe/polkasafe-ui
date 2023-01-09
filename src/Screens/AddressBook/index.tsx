@@ -13,7 +13,6 @@ import ImportAdress from 'src/components/AddressBook/ImportAddress';
 import SearchAddress from 'src/components/AddressBook/Search';
 import { useModalContext } from 'src/context/ModalContext';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
-// .filter(obj => obj.name.includes(search))
 const AddressBook = () => {
 	const address: IAddress[] = [
 		{
@@ -33,11 +32,6 @@ const AddressBook = () => {
 		}
 	];
 	const { openModal } = useModalContext();
-	// const [search, setSearch] = useState<string>('');
-	// const getSearchValue = (value: string) => {
-	// setSearch(value);
-	// };
-	// console.log(search);
 	return (
 		<div className='h-[70vh] bg-bg-main rounded-lg'>
 			<div className="grid grid-cols-12 gap-4">

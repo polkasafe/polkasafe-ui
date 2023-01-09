@@ -27,6 +27,7 @@ const EditAddress = () => {
 				>
 					<Input
 						placeholder="Give the address a name"
+						required
 						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="name"
 					/>

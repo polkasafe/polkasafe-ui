@@ -123,7 +123,8 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 				</div>
 			</section>
 			<section className='mt-auto'>
-				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer' onClick={() => openModal('', <AddMultisig />) }>
+				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+					onClick={() => openModal('', <AddMultisig isModalPopup = {true} />) }>
 					<UserPlusIcon className='text-xl' />
 					<span className='font-normal text-sm'>Add Multisig</span>
 				</button>

@@ -11,30 +11,19 @@ import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
 import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
-// import multisig from 'src/assets/icons/multisig.svg';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
-// import statusbar from 'src/assets/icons/statusbar.svg';
-// import transfer from 'src/assets/icons/transfer.svg';
-// import wallet from 'src/assets/icons/wallet.svg';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const DashboardCard = ({ className }: { className?: string }) => {
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
-			{/* TODO: Empty state */}
-			{/* <div className={`${className} flex flex-row justify-between items-center rounded-lg px-8 py-5 bg-white shadow-lg h-72 mt-3`}>
-				<div><img className='w-[100px]' src={wallet} alt="wallet" /><p>Connect Wallet</p></div>
-				<img src={statusbar} alt="statusbar" />
-				<div><img className='w-[100px]' src={multisig} alt="multisig" /><p>Add Multisig</p></div>
-				<img src={statusbar} alt="statusbar" />
-				<div><img className='w-[100px]' src={transfer} alt="transfer" /><p>Make a Transaction</p></div>
-			</div> */}
 			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-72 mt-3`}>
 				<div className="flex justify-between flex-wrap truncate">
-					<div className='flex gap-x-4 items-center mb-3 flex-wrap'>
+					<div className='flex gap-x-4 items-center mb-3 flex-wrap relative'>
 						<Avatar className='border-4 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
+						<div className="bg-primary rounded-lg absolute -bottom-2 mt-3 left-[18px] text-white px-2">2/3</div>
 						<div>
 							{/* TODO: Use dynamic values */}
 							<div className='text-lg font-bold text-white'>John Doe</div>
@@ -73,8 +62,8 @@ const DashboardCard = ({ className }: { className?: string }) => {
 					<Link to='/send-funds' className='w-[45%] group'>
 						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
 					</Link>
-					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm' onClick={() => { }}><WalletIcon />Add Asset</PrimaryButton>
+					<Link to='/assets' className='w-[45%] group'>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm' onClick={() => { }}><WalletIcon />View Asset</PrimaryButton>
 					</Link>
 				</div>
 			</div>

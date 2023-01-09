@@ -13,6 +13,7 @@ import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
 import { ReactComponent as BrainSVG } from 'src/assets/icons/brain-icon.svg';
 import { ReactComponent as ChainSVG } from 'src/assets/icons/chain-icon.svg';
+import { ReactComponent as CheckOutlinedSVG } from 'src/assets/icons/CheckOutlined.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
 import { ReactComponent as CloseSVG } from 'src/assets/icons/close-icon.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
@@ -20,6 +21,7 @@ import { ReactComponent as CopyGreySVG } from 'src/assets/icons/copy-icon-grey.s
 import { ReactComponent as CreateMultisigSVG } from 'src/assets/icons/createMultisig.svg';
 import { ReactComponent as DashDotSVG } from 'src/assets/icons/dash-dot.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
+import { ReactComponent as DiscSVG } from 'src/assets/icons/disc.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
@@ -46,6 +48,7 @@ import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-l
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
 import { ReactComponent as PSSVG } from 'src/assets/icons/ps-icon.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
+import { ReactComponent as RightArrowOutlinedSVG } from 'src/assets/icons/RightArrowOutlined.svg';
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
 import { ReactComponent as ShareSVG } from 'src/assets/icons/share-icon.svg';
@@ -262,4 +265,13 @@ export const LinkIcon = (props: Partial<CustomIconComponentProps>) => (
 );
 export const NotifyMail = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={NotifyMailSVG} {...props} />
+);
+export const RightArrowOutlined = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={RightArrowOutlinedSVG} {...props} />
+);
+export const CheckOutlined = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CheckOutlinedSVG} {...props} />
+);
+export const Disc = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DiscSVG} {...props} />
 );

@@ -2,9 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ReloadOutlined, RightCircleOutlined } from '@ant-design/icons';
+import { ReloadOutlined } from '@ant-design/icons';
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 
+// import emptyTxHistory from 'src/assets/icons/tx-h-empty.svg';
+// import emptyTxQueue from 'src/assets/icons/tx-q-empty.svg';
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
 import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 
@@ -16,10 +20,10 @@ const TxnCard = () => {
 				<div className='col-start-1 col-end-13 md:col-end-7'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction Queue</h2>
-						<div className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
-							<RightCircleOutlined />
-						</div>
+							<RightArrowOutlined/>
+						</Link>
 					</div>
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
@@ -49,16 +53,21 @@ const TxnCard = () => {
 								<p className='text-white text-right text-xs'>5173.42 USD</p>
 							</div>
 						</div>
+						{/* Empty state */}
+						{/* <div className="flex flex-col items-center justify-center mt-5">
+							<img className='w-[150px] mt-3' src={emptyTxQueue} alt="tx"/>
+							<p className='text-text_secondary my-2'>No queued transactions</p>
+						</div> */}
 					</div>
 				</div>
 				{/* Txn History */}
 				<div className='md:col-start-7 col-start-1 col-end-13'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction History</h2>
-						<div className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
-							<RightCircleOutlined />
-						</div>
+							<RightArrowOutlined/>
+						</Link>
 					</div>
 					<div className='bg-bg-main p-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto'>
 						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
@@ -101,12 +110,12 @@ const TxnCard = () => {
 								<p className='text-text_secondary text-right text-xs'>5173.42 USD</p>
 							</div>
 						</div>
+						{/*TODO: Empty state */}
+						{/* <div className="flex flex-col items-center justify-center mt-5">
+							<img className='w-[150px] mt-3' src={emptyTxHistory} alt="tx"/>
+							<p className='text-text_secondary my-2'>No past transactions</p>
+						</div> */}
 					</div>
-					{/*TODO: Empty state */}
-					{/* <div className="bg-white p-3 shadow-lg rounded-lg mt-2 h-60 flex flex-col justify-center items-center">
-						<img className='w-[100px]' src={transfer} alt="queue" />
-						<p>No transactions have been made yet</p>
-					</div> */}
 				</div>
 			</div>
 		</div>

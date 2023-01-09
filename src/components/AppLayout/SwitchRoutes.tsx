@@ -12,6 +12,7 @@ import Home from 'src/Screens/Home';
 import SendFunds from 'src/Screens/SendFunds';
 import Settings from 'src/Screens/Settings';
 import Transaction from 'src/Screens/Transactions';
+import UserFlow from 'src/Screens/UserFlow';
 
 const SwitchRoutes = () => {
 	return (
@@ -21,6 +22,7 @@ const SwitchRoutes = () => {
 			<Route path='/donate' element={<Donate />} />
 			<Route path='/settings' element={<Settings />} />
 			<Route path='/transactions' element={<Transaction />} />
+			<Route path='/user-flow' element={<UserFlow />} />
 			<Route path='/send-funds' element={<SendFunds />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />

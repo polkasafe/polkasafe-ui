@@ -8,11 +8,6 @@ import { Button, Dropdown, Space } from 'antd';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-// const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-// message.info('Click on left button.');
-// console.log('click left button', e);
-// };
-
 const DropdownLabel: React.FC<ILabelProps> = ({ label }) => (
 	<span className='text-white hover:text-primary'>
 		{label}
