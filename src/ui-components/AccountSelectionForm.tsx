@@ -17,10 +17,8 @@ interface IAccountSelectionFormProps {
 const AccountSelectionForm: FC<IAccountSelectionFormProps> = (props) => {
 	const { accounts, address, onAccountChange, title } = props;
 	return (
-		<article className='w-full gap-y-2 flex flex-col'>
-			<div className='flex items-center gap-x-2'>
-				<h3 className='text-sm'>{title}</h3>
-			</div>
+		<article className='flex flex-col gap-y-3 w-[350px]'>
+			<h3 className='text-primary font-normal text-sm leading-[13px]'>{title}</h3>
 			<AddressDropdown
 				accounts={accounts}
 				defaultAddress={address}

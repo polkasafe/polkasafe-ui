@@ -2,51 +2,67 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { DownOutlined } from '@ant-design/icons';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
-import { Dropdown } from 'antd';
+import { Divider, Dropdown } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import React, { FC, useState } from 'react';
+import classNames from 'classnames';
+import React, { FC, useEffect, useState } from 'react';
 import Address from 'src/ui-components/Address';
+import styled from 'styled-components';
+
+import { CircleArrowDownIcon } from './CustomIcons';
 
 interface IAddressDropdownProps {
 	defaultAddress?: string;
 	accounts: InjectedAccount[];
 	className?: string;
-	filterAccounts?: string[]
 	onAccountChange: (address: string) => void;
 }
 
 const AddressDropdown: FC<IAddressDropdownProps> = (props) => {
-	const { defaultAddress, className = 'px-4 py-2 border-2 rounded-md', accounts, filterAccounts, onAccountChange } = props;
+	const { defaultAddress, className, accounts, onAccountChange } = props;
 
-	const [selectedAddress, setSelectedAddress] = useState(defaultAddress || '');
-	const filteredAccounts = !filterAccounts
-		? accounts
-		: accounts.filter( elem =>
-			filterAccounts.includes(elem.address)
-		);
+	const [selectedAddress, setSelectedAddress] = useState('');
+	useEffect(() => {
+		if (defaultAddress) {
+			setSelectedAddress(defaultAddress);
+		}
+	}, [defaultAddress]);
 
 	const dropdownList: {[index: string]: string} = {};
 	const addressItems: ItemType[] = [];
 
-	filteredAccounts.forEach(account => {
-		addressItems.push({
-			key: account.address,
-			label: (
-				<Address address={account.address} />
-			)
-		});
+	accounts.forEach((account, index) => {
+		if (index === accounts.length - 1) {
+			addressItems.push({
+				key: account.address,
+				label: (
+					<Address extensionName={account.name} className='text-white' address={account.address} />
+				)
+			});
+		} else {
+			addressItems.push({
+				key: account.address,
+				label: (
+					<div>
+						<Address extensionName={account.name} className='text-white' address={account.address} />
+						<Divider className='bg-text_secondary my-0 mt-3' />
+					</div>
+				)
+			});
+		}
 
 		if (account.address && account.name){
 			dropdownList[account.address] = account.name;
 		}
-	}
-	);
+	});
 	return (
 		<Dropdown
 			trigger={['click']}
-			className={className}
+			className={classNames(
+				'border border-primary rounded-xl px-3 py-[13px] bg-bg-secondary cursor-pointer',
+				className
+			)}
 			menu={{
 				items: addressItems,
 				onClick: (e) => {
@@ -55,16 +71,19 @@ const AddressDropdown: FC<IAddressDropdownProps> = (props) => {
 				}
 			}}
 		>
-			<div className="flex justify-between items-center">
+			<div className="flex justify-between items-center ">
 				<Address
+					extensionName={dropdownList[selectedAddress]}
 					address={selectedAddress}
 				/>
-				<span>
-					<DownOutlined />
-				</span>
+				<CircleArrowDownIcon className='text-primary text-base' />
 			</div>
 		</Dropdown>
 	);
 };
 
-export default AddressDropdown;
+export default styled(AddressDropdown)`
+	.ant-dropdown-menu-root {
+		background-color: red !important;
+	}
+`;

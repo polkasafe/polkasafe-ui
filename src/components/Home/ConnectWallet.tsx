@@ -53,6 +53,8 @@ const ConnectWallet = () => {
 						wallet.enable(APP_NAME)
 							.then((value) => { clearTimeout(timeoutId); resolve(value); })
 							.catch((error) => { reject(error); });
+					} else {
+						reject(new Error('No wallet'));
 					}
 				});
 			} catch (err) {
