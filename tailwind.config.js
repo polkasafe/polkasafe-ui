@@ -21,6 +21,7 @@ module.exports = {
 				'primary': '#1573FE',
 				'success': '#06D6A0',
 				'text_main': '#FFFFFF',
+				'text_placeholder' : '#505050',
 				'text_secondary': '#8B8B8B',
 				'waiting': '#FF9F1C'
 			},

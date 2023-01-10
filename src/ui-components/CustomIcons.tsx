@@ -6,34 +6,47 @@ import Icon from '@ant-design/icons';
 import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import React from 'react';
 import { ReactComponent as AddSVG } from 'src/assets/icons/add.svg';
+import { ReactComponent as AddBoxSVG } from 'src/assets/icons/add-box.svg';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
 import { ReactComponent as AppsSVG } from 'src/assets/icons/apps.svg';
 import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-left.svg';
 import { ReactComponent as ArrowRightSVG } from 'src/assets/icons/arrow-right.svg';
 import { ReactComponent as ArrowUpRightSVG } from 'src/assets/icons/arrow-up-right.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
+import { ReactComponent as BrainSVG } from 'src/assets/icons/brain-icon.svg';
+import { ReactComponent as ChainSVG } from 'src/assets/icons/chain-icon.svg';
+import { ReactComponent as CheckOutlinedSVG } from 'src/assets/icons/CheckOutlined.svg';
 import { ReactComponent as Circle3DotsSVG } from 'src/assets/icons/circle-3-dots.svg';
 import { ReactComponent as CircleArrowDownSVG } from 'src/assets/icons/circle-arrow-down.svg';
 import { ReactComponent as CircleArrowUpSVG } from 'src/assets/icons/circle-arrow-up.svg';
 import { ReactComponent as CircleCheckSVG } from 'src/assets/icons/circle-check.svg';
 import { ReactComponent as CirclePlusSVG } from 'src/assets/icons/circle-plus.svg';
 import { ReactComponent as CircleWatchSVG } from 'src/assets/icons/circle-watch.svg';
+import { ReactComponent as CloseSVG } from 'src/assets/icons/close-icon.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
+import { ReactComponent as CopyGreySVG } from 'src/assets/icons/copy-icon-grey.svg';
+import { ReactComponent as CreateMultisigSVG } from 'src/assets/icons/createMultisig.svg';
+import { ReactComponent as DashDotSVG } from 'src/assets/icons/dash-dot.svg';
 import { ReactComponent as DatePickerSVG } from 'src/assets/icons/date-picker-icon.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
+import { ReactComponent as DiscSVG } from 'src/assets/icons/disc.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
+import { ReactComponent as ExportArrowSVG } from 'src/assets/icons/export-arrow.svg';
 import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
+import { ReactComponent as ImportArrowSVG } from 'src/assets/icons/import-arrow.svg';
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
 import { ReactComponent as LineSVG } from 'src/assets/icons/line.svg';
+import { ReactComponent as LinkSVG } from 'src/assets/icons/link.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
 import { ReactComponent as NoQueuedTransactionSVG } from 'src/assets/icons/no-queued-transaction.svg';
 import { ReactComponent as NoTransactionSVG } from 'src/assets/icons/no-transaction.svg';
 import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification.svg';
+import { ReactComponent as NotifyMailSVG } from 'src/assets/icons/notify-mail.svg';
 import { ReactComponent as OutlineCheckSVG } from 'src/assets/icons/outline-check.svg';
 import { ReactComponent as OutlineCloseSVG } from 'src/assets/icons/outline-close.svg';
 import { ReactComponent as PasteSVG } from 'src/assets/icons/paste-icon.svg';
@@ -43,15 +56,19 @@ import { ReactComponent as PolkadotLogoTextSVG } from 'src/assets/icons/polkadot
 import { ReactComponent as PolkasafeSVG } from 'src/assets/icons/polkasafe.svg';
 import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-logo.svg';
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
+import { ReactComponent as PSSVG } from 'src/assets/icons/ps-icon.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
+import { ReactComponent as RightArrowOutlinedSVG } from 'src/assets/icons/RightArrowOutlined.svg';
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
+import { ReactComponent as ShareSVG } from 'src/assets/icons/share-icon.svg';
 import { ReactComponent as SquareDownArrowSVG } from 'src/assets/icons/square-down-arrow.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
 import { ReactComponent as TransactionSVG } from 'src/assets/icons/transaction.svg';
 import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
+import { ReactComponent as UploadBoxSVG } from 'src/assets/icons/upload-box.svg';
 import { ReactComponent as UserPlusSVG } from 'src/assets/icons/user-plus.svg';
-import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet.svg';
+import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet-icon.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
 import { ReactComponent as WarningCircleSVG } from 'src/assets/icons/warning-circle.svg';
 import { ReactComponent as WarningRoundedSVG } from 'src/assets/icons/warning-rounded.svg';
@@ -257,6 +274,15 @@ export const SubscanIcon = (props: Partial<CustomIconComponentProps>) => (
 export const QRIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={QRSVG} {...props} />
 );
+export const PSIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PSSVG} {...props} />
+);
+export const ChainIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ChainSVG} {...props} />
+);
+export const BrainIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={BrainSVG} {...props} />
+);
 
 // PARACHAINS ICONS
 
@@ -266,4 +292,46 @@ export const KusamaIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PolkadotSVG} {...props} />
+);
+export const CloseIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CloseSVG} {...props} />
+);
+export const ImportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ImportArrowSVG} {...props} />
+);
+export const ExportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ExportArrowSVG} {...props} />
+);
+export const ShareIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ShareSVG} {...props} />
+);
+export const CopyGreyIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CopyGreySVG} {...props} />
+);
+export const UploadBoxIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={UploadBoxSVG} {...props} />
+);
+export const AddBoxIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={AddBoxSVG} {...props} />
+);
+export const DashDotIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DashDotSVG} {...props} />
+);
+export const CreateMultisigIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CreateMultisigSVG} {...props} />
+);
+export const LinkIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={LinkSVG} {...props} />
+);
+export const NotifyMail = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={NotifyMailSVG} {...props} />
+);
+export const RightArrowOutlined = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={RightArrowOutlinedSVG} {...props} />
+);
+export const CheckOutlined = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={CheckOutlinedSVG} {...props} />
+);
+export const Disc = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DiscSVG} {...props} />
 );

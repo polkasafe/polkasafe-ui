@@ -5,12 +5,14 @@ import { Form, Input } from 'antd';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
 const AddOwner = () => {
+	const { toggleVisibility } = useModalContext();
 	const [confirmations, setConfirmations] = useState(2);
 	return (
 		<Form
-			className='my-0'
+			className='my-0 w-[560px]'
 		>
 			<div className="flex flex-col gap-y-3">
 				<label
@@ -95,7 +97,7 @@ const AddOwner = () => {
 				</div>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn onClick={toggleVisibility}/>
 				<AddBtn title='Add' />
 			</div>
 		</Form>

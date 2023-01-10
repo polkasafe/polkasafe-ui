@@ -7,7 +7,9 @@ import Modal, { IModal } from 'src/ui-components/Modal';
 
 interface IModalContext {
 	toggleVisibility: () => void;
+	toggleOnSwitch: () => void;
 	openModal: (title: string, children: ReactNode, CloseBtnNode?: ReactNode) => void;
+	toggleSwitch: boolean;
 }
 
 const ModalContext: Context<IModalContext> = createContext({} as IModalContext);
@@ -17,12 +19,16 @@ export const useModalContext = () => {
 };
 
 const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
+	const [toggleSwitch, setToggleSwitch] = useState(true);
 	const [modal, setModal] = useState<IModal>({
 		isVisible: false,
 		title: ''
 	});
 	const toggleVisibility = () => {
 		setModal((prev) => ({ ...prev, isVisible: !prev.isVisible }));
+	};
+	const toggleOnSwitch = () => {
+		setToggleSwitch(prev => !prev);
 	};
 	const openModal = (title: string, children: ReactNode, CloseBtnNode?: ReactNode) => {
 		setModal({
@@ -35,6 +41,8 @@ const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<ModalContext.Provider value={{
 			openModal,
+			toggleOnSwitch,
+			toggleSwitch,
 			toggleVisibility
 		}}>
 			{children}

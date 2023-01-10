@@ -6,6 +6,9 @@ import React, { FC } from 'react';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 
 interface ICancelBtnProps {
+	onClick?: () => void;
+}
+interface ICancelBtnProps {
 	className?: string;
 	onClick?: () => void;
 	title?: string;
