@@ -1,132 +1,132 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-
-import { Form, Input } from 'antd';
+import { DatePicker, Form, Input } from 'antd';
 import classNames from 'classnames';
-import React, { useState } from 'react';
-import PrimaryButton from 'src/ui-components/PrimaryButton';
+import React, { FC, useState } from 'react';
+import CancelBtn from 'src/components/Settings/CancelBtn';
+import ModalBtn from 'src/components/Settings/ModalBtn';
+import { CircleArrowDownIcon, DatePickerIcon } from 'src/ui-components/CustomIcons';
+import styled from 'styled-components';
 
-enum EFilterType {
-	INCOMING = 'Incoming',
-	OUTGOING = 'Outgoing'
+interface IFilterProps {
+	className?: string;
 }
 
-const Filter = () => {
-	const [filterType, setFilterType] = useState(EFilterType.INCOMING);
-
-	const clickOnFilterType = (selectedFilterType: EFilterType) => {
-		setFilterType(selectedFilterType);
-	};
+const Filter: FC<IFilterProps> = (props) => {
+	const { className } = props;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
 	return (
-		<section className='grid grid-cols-7'>
-			<article className='col-span-7 md:col-span-2'>
-				<p className='text-blue_secondary mt-3 md:my-3'>Transaction Type</p>
-				<div className='flex items-center md:flex-col md:items-start gap-3'>
-					<button
-						className={classNames('text-lg font-bold', {
-							'text-blue_primary': filterType === EFilterType.INCOMING,
-							'text-blue_secondary': filterType !== EFilterType.INCOMING
-						})}
-						onClick={() => clickOnFilterType(EFilterType.INCOMING)}
-					>
-						{EFilterType.INCOMING}
-					</button>
-					<button
-						className={classNames('text-lg font-bold', {
-							'text-blue_primary': filterType === EFilterType.OUTGOING,
-							'text-blue_secondary': filterType !== EFilterType.OUTGOING
-						})}
-						onClick={() => clickOnFilterType(EFilterType.OUTGOING)}
-					>
-						{EFilterType.OUTGOING}
-					</button>
-				</div>
-			</article>
-			<article className='col-span-7 md:col-span-5'>
-				<p className='text-blue_secondary mt-5 md:my-3'>Parameters</p>
-				<Form className='flex flex-col gap-y-3'>
-					<div className='grid grid-cols-2 gap-x-10'>
-						<div className="col-span-2 md:col-span-1 flex flex-col gap-y-1">
-							<label
-								className="text-blue_primary font-bold text-sm"
-								htmlFor="from"
-							>
-                                From:
-							</label>
-							<Form.Item
-								name="from"
-							>
-								<Input
-									placeholder=""
-									className="rounded-md py-3 w-full px-4 bg-white border-gray-300 tracking-wider"
-									id="from"
-									type='date'
-								/>
-							</Form.Item>
-						</div>
-						<div className="col-span-2 md:col-span-1 flex flex-col gap-y-1">
-							<label
-								className="text-blue_primary font-bold text-sm"
-								htmlFor="to"
-							>
-                                To:
-							</label>
-							<Form.Item
-								name="to"
-							>
-								<Input
-									placeholder=""
-									className="rounded-md py-3 w-full px-4 bg-white border-gray-300 tracking-wider"
-									id="to"
-									type='date'
-								/>
-							</Form.Item>
-						</div>
-					</div>
-					<div className='grid grid-cols-2 gap-x-10'>
-						<div className="col-span-2 md:col-span-1">
-							<Form.Item
-								name="amount"
-							>
-								<Input
-									placeholder="Amount"
-									className="rounded-md py-3 w-full px-4 bg-white border-gray-300 tracking-wider"
-									id="amount"
-								/>
-							</Form.Item>
-						</div>
-						<div className="col-span-2 md:col-span-1">
-							<Form.Item
-								name="tokenAddress"
-							>
-								<Input
-									placeholder="Token Address"
-									className="rounded-md py-3 w-full px-4 bg-white border-gray-300 tracking-wider"
-									id="tokenAddress"
-								/>
-							</Form.Item>
-						</div>
-					</div>
-					<div className='flex items-center gap-x-5'>
-						<PrimaryButton
-							size='middle'
-							className='bg-green_primary px-7'
+		<div className={classNames('ml-auto relative', className)}>
+			<button
+				onClick={() => setIsFilterModalVisible(!isFilterModalVisible)}
+				className="flex items-center justify-center gap-x-[6.83px] rounded-lg p-2.5 font-medium text-sm leading-[15px] w-[100px] text-primary border-2 border-primary"
+			>
+				<span>
+					Filter
+				</span>
+				<CircleArrowDownIcon />
+			</button>
+			{
+				isFilterModalVisible?
+					<div className='absolute top-12 right-0 z-10 bg-bg-main p-5 rounded-xl border border-primary w-[360px]'>
+						<h3 className='text-white font-bold text-xl leading-[22px] text-left'>Parameters</h3>
+						<Form
+							className='flex flex-col gap-y-4 mt-[30px]'
 						>
-                            Apply
-						</PrimaryButton>
-						<PrimaryButton
-							size='middle'
-							className='bg-gray-400 px-7'
-						>
-                            Clear
-						</PrimaryButton>
+							<div className="flex flex-col gap-y-3">
+								<label
+									className="text-primary font-normal text-xs leading-[13px]"
+									htmlFor="startDate"
+								>
+									From
+								</label>
+								<Form.Item
+									name="startDate"
+									className='m-0'
+								>
+									<DatePicker
+										className='w-full text-white bg-bg-secondary border-none outline-none min-h-[40px]'
+										placeholder='Start Date'
+										suffixIcon={<DatePickerIcon className='text-white' />}
+									/>
+								</Form.Item>
+							</div>
+							<div className="flex flex-col gap-y-3">
+								<label
+									className="text-primary font-normal text-xs leading-[13px]"
+									htmlFor="endDate"
+								>
+									To
+								</label>
+								<Form.Item
+									name="endDate"
+									className='m-0'
+								>
+									<DatePicker
+										className='w-full text-white bg-bg-secondary border-none outline-none min-h-[40px] '
+										placeholder='End Date'
+										suffixIcon={<DatePickerIcon className='text-white' />}
+									/>
+								</Form.Item>
+							</div>
+							<div className="flex flex-col gap-y-3">
+								<label
+									className="text-primary font-normal text-xs leading-[13px]"
+									htmlFor="amount"
+								>
+									Amount
+								</label>
+								<Form.Item
+									name="amount"
+									className='m-0'
+								>
+									<Input
+										placeholder="0.00"
+										className="w-full text-white bg-bg-secondary border-none outline-none min-h-[40px] placeholder:text-[#505050]"
+										id="amount"
+										type='number'
+									/>
+								</Form.Item>
+							</div>
+							<div className="flex flex-col gap-y-3">
+								<label
+									className="text-primary font-normal text-xs leading-[13px]"
+									htmlFor="address"
+								>
+									Wallet Address
+								</label>
+								<Form.Item
+									name="address"
+									className='m-0'
+								>
+									<Input
+										placeholder="Unique Address"
+										className="w-full text-white bg-bg-secondary border-none outline-none min-h-[40px] placeholder:text-[#505050]"
+										id="address"
+										type='text'
+									/>
+								</Form.Item>
+							</div>
+							<div className='flex justify-between gap-x-5 mt-[30px]'>
+								<CancelBtn title='Clear' />
+								<ModalBtn title='Apply' />
+							</div>
+						</Form>
 					</div>
-				</Form>
-			</article>
-		</section>
+					: null
+			}
+		</div>
 	);
 };
 
-export default Filter;
+export default styled(Filter)`
+	.ant-picker-input input {
+		color: white !important;
+	}
+	.ant-picker-input input::placeholder {
+		color: #505050 !important;
+	}
+`;

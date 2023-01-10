@@ -18,10 +18,10 @@ const Footer = () => {
 						<sup>&#169;</sup>
 						All Rights Reserved
 					</p>
-					<Link to='/'>
+					<Link to='/terms-and-conditions'>
 						Terms & Conditions
 					</Link>
-					<Link to='/'>
+					<Link to='/privacy-policy'>
 						Privacy Policy
 					</Link>
 				</div>
