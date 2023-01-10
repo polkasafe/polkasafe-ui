@@ -7,11 +7,14 @@ import { Route, Routes } from 'react-router-dom';
 import AddressBook from 'src/Screens/AddressBook';
 import Apps from 'src/Screens/Apps';
 import Assets from 'src/Screens/Assets';
+import ContactUs from 'src/Screens/ContactUs';
 import Donate from 'src/Screens/Donate';
 import Error404 from 'src/Screens/Error404';
 import Error500 from 'src/Screens/Error500';
 import Home from 'src/Screens/Home';
+import PrivacyPolicy from 'src/Screens/PrivacyPolicy';
 import Settings from 'src/Screens/Settings';
+import TermsAndCondition from 'src/Screens/TermsAndCondition';
 import Transaction from 'src/Screens/Transactions';
 
 const SwitchRoutes = () => {
@@ -26,6 +29,9 @@ const SwitchRoutes = () => {
 			<Route path='/transactions' element={<Transaction />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
+			<Route path='/contact-us' element={<ContactUs/>} />
+			<Route path='/privacy-policy' element={<PrivacyPolicy/>} />
+			<Route path='/terms-and-conditions' element={<TermsAndCondition/>} />
 		</Routes>
 	);
 };

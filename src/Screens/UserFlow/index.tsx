@@ -6,7 +6,6 @@ import { Button } from 'antd';
 import React, { useState } from 'react';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import Loader from 'src/components/UserFlow/Loader';
-import WalletDropdown from 'src/components/UserFlow/WalletDropdown';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 
 const UserFlow = () => {
@@ -30,7 +29,6 @@ const UserFlow = () => {
 					<h1 className='text-xl text-white font-bold'>Get Started</h1>
 					<p className='text-white m-1'>Connect your wallet</p>
 					<p className='text-text_secondary m-3 mb-5'>Your first step towards creating a safe & secure MultiSig:</p>
-					<WalletDropdown/>
 					<Button className='flex items-center justify-center text-white border-none mt-5 py-4 w-[350px] bg-primary'
 						onClick={handleClick}><WalletIcon className='text-white' />Connect Wallet</Button>
 				</div>
