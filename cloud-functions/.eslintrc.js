@@ -14,10 +14,7 @@ module.exports = {
 	],
 	'parser': '@typescript-eslint/parser',
 	'parserOptions': {
-		project: [
-			'./cloud-functions/tsconfig.json',
-			'./cloud-functions/tsconfig.dev.json'
-		],
+		tsconfigRootDir: __dirname,
 		sourceType: 'module'
 	},
 	'ignorePatterns': [

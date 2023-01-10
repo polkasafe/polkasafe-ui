@@ -44,13 +44,13 @@ export const connectAddress = functions.https.onCall(async (data) => {
 			const addressDoc = doc.data() as IUser;
 			const multisigAddresses = await getMultisigAddressesByAddress(address);
 
-			const res: IUserResponse = {
+			const resUser: IUserResponse = {
 				address: addressDoc.address,
 				email: addressDoc.email,
 				addressBook: addressDoc.addressBook,
 				multisigAddresses
 			};
-			return res;
+			return resUser;
 		}
 
 		// else create a new user document
