@@ -11,6 +11,7 @@ import { WalletIcon } from 'src/ui-components/CustomIcons';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 const ConnectWallet = () => {
+	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const [, setWalletError] = useState('');
 	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [address, setAddress] = useState('');
@@ -110,10 +111,24 @@ const ConnectWallet = () => {
 			<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
 			<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
 			<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
-			<div className='mt-[30px]'>
-				<AccountSelectionForm accounts={accounts} address={address} onAccountChange={onAccountChange} title='Choose linked account' />
-			</div>
-			<button className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'>
+			{
+				showAccountsDropdown?
+					<div className='mt-[30px]'>
+						<AccountSelectionForm
+							accounts={accounts}
+							address={address}
+							onAccountChange={onAccountChange}
+							title='Choose linked account'
+						/>
+					</div>
+					: null
+			}
+			<button
+				onClick={() => {
+					setShowAccountsDropdown(true);
+				}}
+				className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
+			>
 				<WalletIcon/>
 				<span className='font-normal text-sm leading-[15px]'>
                     Connect Wallet
