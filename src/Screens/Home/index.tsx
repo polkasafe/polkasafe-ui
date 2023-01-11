@@ -4,33 +4,38 @@
 
 import React from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
+import ConnectWallet from 'src/components/Home/ConnectWallet';
+import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalletWrapper';
 import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
-
-import UserFlow from '../UserFlow';
 
 const Home = () => {
 	// TODO: Get multisigs from firebase
 	const multisigs = [];
 	return (
 		<>
-			{multisigs.length>0? <div>
-				<EmailBadge/>
-				<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
-					<div className='col-start-1 col-end-13 xl:col-end-10'>
-						<DashboardCard className='mt-3' />
+			{
+				multisigs.length > 0 ? <div>
+					<EmailBadge/>
+					<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
+						<div className='col-start-1 col-end-13 xl:col-end-10'>
+							<DashboardCard className='mt-3' />
+						</div>
+						<div className='col-start-1 col-end-13 xl:col-start-10'>
+							<AddressCard className='mt-3' />
+						</div>
 					</div>
-					<div className='col-start-1 col-end-13 xl:col-start-10'>
-						<AddressCard className='mt-3' />
+					<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
+						<div className='col-start-1 col-end-13 lg:col-end-13'>
+							<TxnCard />
+						</div>
 					</div>
-				</div>
-				<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
-					<div className='col-start-1 col-end-13 lg:col-end-13'>
-						<TxnCard />
-					</div>
-				</div>
-			</div>:<UserFlow/>}
+				</div>:
+					<ConnectWalletWrapper>
+						<ConnectWallet />
+					</ConnectWalletWrapper>
+			}
 		</>
 	);
 };
