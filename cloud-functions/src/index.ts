@@ -23,16 +23,24 @@ const getMultisigAddressesByAddress = async (address:string) => {
 	return multisigAddresses.docs.map((doc) => doc.data()) as IMultisigAddress[];
 };
 
-export const connectAddress = functions.https.onCall(async (data) => {
-	if (!data || !data.address || !data.signature) {
-		throw new functions.https.HttpsError('invalid-argument', responseMessages.invalid_argument);
+export const connectAddress = functions.https.onRequest(async (req, res) => {
+	const signature = req.get('x-signature');
+	const address = req.get('x-address');
+
+	if (!signature || !address) {
+		res.status(400).send(responseMessages.missing_params);
+		return;
 	}
 
-	const { address, signature } = data;
-	const isValid = await isValidSignature(signature, address);
-
-	if (!isValid) {
-		throw new functions.https.HttpsError('permission-denied', responseMessages.invalid_signature);
+	try {
+		const isValid = await isValidSignature(signature, address);
+		if (!isValid) {
+			res.status(400).send(responseMessages.invalid_signature);
+			return;
+		}
+	} catch (e) {
+		res.status(400).send(responseMessages.invalid_signature);
+		return;
 	}
 
 	// check if address doc already exists
@@ -50,7 +58,8 @@ export const connectAddress = functions.https.onCall(async (data) => {
 				addressBook: addressDoc.addressBook,
 				multisigAddresses
 			};
-			return resUser;
+			res.status(200).send(resUser);
+			return;
 		}
 
 		// else create a new user document
@@ -62,10 +71,12 @@ export const connectAddress = functions.https.onCall(async (data) => {
 		};
 
 		await addressRef.set(newUser);
-		return newUser;
+		res.status(200).send(newUser);
+		return;
 	} catch (err:unknown) {
 		functions.logger.info('Error in firestore call :', { err });
-		throw new functions.https.HttpsError('internal', responseMessages.internal);
+		res.status(500).send(responseMessages.internal);
+		return;
 	}
 });
 
