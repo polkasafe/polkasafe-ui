@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
 import { responseMessages, SIGNING_MSG } from './constants';
-import { IUser } from './types';
+import { IMultisigAddress, IUser, IUserResponse } from './types';
 
 admin.initializeApp();
 
@@ -11,6 +11,16 @@ const isValidSignature = async (signature:string, address:string) => {
 	await cryptoWaitReady();
 	const hexPublicKey = u8aToHex(decodeAddress(address));
 	return signatureVerify(SIGNING_MSG, signature, hexPublicKey).isValid;
+};
+
+const getMultisigAddressesByAddress = async (address:string) => {
+	const multisigAddresses = await admin
+		.firestore()
+		.collection('multisigAddresses')
+		.where('signatories', 'array-contains', address)
+		.get();
+
+	return multisigAddresses.docs.map((doc) => doc.data()) as IMultisigAddress[];
 };
 
 export const connectAddress = functions.https.onCall(async (data) => {
@@ -30,7 +40,18 @@ export const connectAddress = functions.https.onCall(async (data) => {
 
 	try {
 		const doc = await addressRef.get();
-		if (doc.exists) return doc;
+		if (doc.exists) {
+			const addressDoc = doc.data() as IUser;
+			const multisigAddresses = await getMultisigAddressesByAddress(address);
+
+			const resUser: IUserResponse = {
+				address: addressDoc.address,
+				email: addressDoc.email,
+				addressBook: addressDoc.addressBook,
+				multisigAddresses
+			};
+			return resUser;
+		}
 
 		// else create a new user document
 		const newUser:IUser = {
