@@ -9,3 +9,13 @@ export interface IUser {
 	multisigAddresses: string[];
 	addressBook?: IAddressBookEntry[];
 }
+
+export interface IMultisigAddress {
+	address: string;
+	name: string;
+	signatories: string[];
+}
+
+export interface IUserResponse extends Omit<IUser, 'multisigAddresses'> {
+	multisigAddresses: IMultisigAddress[];
+}
