@@ -29,8 +29,8 @@ const DashboardCard = ({ className }: { className?: string }) => {
 							<div className='text-lg font-bold text-white'>John Doe</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary truncate'>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</div>
-								<CopyIcon className='cursor-pointer ml-2 w-5 text-primary'/>
-								<QRIcon className='cursor-pointer'/>
+								<CopyIcon className='cursor-pointer ml-2 w-5 hover:text-primary text-text_secondary'/>
+								<QRIcon className='cursor-pointer hover:text-primary text-text_secondary'/>
 							</div>
 						</div>
 					</div>

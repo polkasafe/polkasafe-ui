@@ -21,10 +21,6 @@ interface IAddressProps {
 
 const AddAddress: FC<IAddressProps> = ({ address }) => {
 	const { openModal } = useModalContext();
-	// useEffect(() => {
-	// address.filter(obj => obj.name.includes(search));
-	// //eslint-disable-next-line
-	// }, [search]);
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -52,7 +48,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									</div>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<CopyIcon />
+										<button className='hover:text-primary' onClick={() => navigator.clipboard.writeText(`${address}`)}><CopyIcon /></button>
 										<ExternalLinkIcon />
 									</div>
 								</div>
@@ -60,7 +56,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									<button
 										onClick={() => openModal('Edit Address', <EditAddress />) }
 										className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
-										<EditIcon className='' />
+										<EditIcon />
 									</button>
 									<button
 										onClick={() => openModal('Remove Address', <RemoveAddress />) }

@@ -16,17 +16,17 @@ import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/
 const AddressBook = () => {
 	const address: IAddress[] = [
 		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
+			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLp',
 			imgSrc: profileImg,
 			name: 'Jaski - 1'
 		},
 		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
+			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWooo',
 			imgSrc: profileImg,
 			name: 'Mridul'
 		},
 		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
+			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNou',
 			imgSrc: profileImg,
 			name: 'Param'
 		}
