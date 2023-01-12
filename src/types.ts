@@ -24,7 +24,7 @@ export interface AccountMeta {
 export interface Account {
     address: string;
     meta: AccountMeta;
-  }
+}
 
 export type Network = typeof network[keyof typeof network];
 export type TokenSymbol = typeof tokenSymbol[keyof typeof tokenSymbol];
@@ -43,3 +43,25 @@ export interface ChainProps {
 export type ChainPropType = {
     [index: string]: ChainProps;
 };
+
+interface IAddressBookEntry {
+	name: string;
+	address: string;
+}
+
+export interface IUser {
+	address: string;
+	email: string | null;
+	multisigAddresses: string[];
+	addressBook?: IAddressBookEntry[];
+}
+
+export interface IMultisigAddress {
+	address: string;
+	name: string;
+	signatories: string[];
+}
+
+export interface IUserResponse extends Omit<IUser, 'multisigAddresses'> {
+	multisigAddresses: IMultisigAddress[];
+}

@@ -5,7 +5,7 @@
 import { FirebaseOptions, initializeApp } from 'firebase/app';
 import { getFunctions } from 'firebase/functions';
 
-const firebaseConfig = process.env.REACT_APP_FIREBASE_CONFIG as FirebaseOptions;
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '') as FirebaseOptions;
 const app = initializeApp(firebaseConfig);
 
 const firebaseFunctions = getFunctions(app);
