@@ -25,6 +25,7 @@ module.exports = {
 		'import'
 	],
 	'rules': {
+		'linebreak-style': 0,
 		'@typescript-eslint/no-unused-vars': 'error',
 		'arrow-spacing': ['warn', { 'before': true, 'after': true }],
 		'comma-dangle': ['error', 'never'],
