@@ -12,7 +12,7 @@ import UserFlow from '../UserFlow';
 
 const Home = () => {
 	// TODO: Get multisigs from firebase
-	const multisigs = [];
+	const multisigs = [1,2];
 	return (
 		<>
 			{multisigs.length>0? <div>

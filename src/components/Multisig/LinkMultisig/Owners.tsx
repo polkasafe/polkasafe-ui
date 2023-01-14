@@ -10,6 +10,45 @@ import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcon
 import Loader from '../../UserFlow/Loader';
 
 const Owners = () => {
+	const owners = [<div className="flex flex-col gap-y-3 mb-5" key={1}>
+		<label
+			className="text-primary text-xs leading-[13px] font-normal"
+			htmlFor="name1"
+		>Owner Name 1</label>
+		<div className="flex items-center">
+			<Form.Item
+				name="name1"
+				rules={[]}
+				className='border-0 outline-0 my-0 p-0'
+			>
+				<Input
+					placeholder="John Doe"
+					className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+					id="name"
+				/>
+			</Form.Item>
+			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLz</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
+		</div>
+	</div>,<div className="flex flex-col gap-y-3 mb-5" key={2}>
+		<label
+			className="text-primary text-xs leading-[13px] font-normal"
+			htmlFor="name2"
+		>Owner Name 2</label>
+		<div className="flex items-center">
+			<Form.Item
+				name="name2"
+				rules={[]}
+				className='border-0 outline-0 my-0 p-0'
+			>
+				<Input
+					placeholder="John Doe"
+					className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+					id="name"
+				/>
+			</Form.Item>
+			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLm</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
+		</div>
+	</div>];
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -35,51 +74,11 @@ const Owners = () => {
 					</div>
 				</div>
 				<div>
-					<p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has 2 owners. Optional: Provide a name for each owner.</p>
+					<p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {owners.length} owners. Optional: Provide a name for each owner.</p>
 					<Form
 						className='my-0 mt-5'
 					>
-
-						<div className="flex flex-col gap-y-3 mb-5">
-							<label
-								className="text-primary text-xs leading-[13px] font-normal"
-								htmlFor="name"
-							>Owner Name 1</label>
-							<div className="flex items-center">
-								<Form.Item
-									name="name"
-									rules={[]}
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="John Doe"
-										className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
-										id="name"
-									/>
-								</Form.Item>
-								<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLz</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
-							</div>
-						</div>
-						<div className="flex flex-col gap-y-3 mb-5">
-							<label
-								className="text-primary text-xs leading-[13px] font-normal"
-								htmlFor="name"
-							>Owner Name 2</label>
-							<div className="flex items-center">
-								<Form.Item
-									name="name"
-									rules={[]}
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="John Doe"
-										className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
-										id="name"
-									/>
-								</Form.Item>
-								<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLm</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
-							</div>
-						</div>
+						{ owners }
 					</Form>
 				</div>
 			</div>

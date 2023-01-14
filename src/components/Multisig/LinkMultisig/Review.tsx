@@ -9,6 +9,22 @@ import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcon
 import Loader from '../../UserFlow/Loader';
 
 const Review = () => {
+	const ownerReview = [
+		<div className='flex items-center mx-5 mt-5' key={1}>
+			<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
+			<div className='flex flex-col'>
+				<p className='text-sm'>Akshit</p>
+				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
+			</div>
+		</div>,
+		<div className='flex items-center mx-5 mt-5' key={2}>
+			<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
+			<div className='flex flex-col'>
+				<p className='text-sm'>Akshit</p>
+				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
+			</div>
+		</div>
+	];
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -34,7 +50,7 @@ const Review = () => {
 					</div>
 				</div>
 				<div className='flex w-[80%] h-[30vh] mt-5'>
-					<div className='flex flex-col justify-between w-[60%] mr-2 h-full rounded-lg bg-bg-secondary text-sm overflow-auto'>
+					<div className='flex flex-col justify-between w-[60%] mr-2 h-full rounded-lg bg-bg-secondary text-sm overflow-auto [&::-webkit-scrollbar]:hidden'>
 						<h1 className='mt-5 mx-5'>Details</h1>
 						<div>
 							<div className="flex items-center justify-between m-5">
@@ -51,28 +67,15 @@ const Review = () => {
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Confirmations:</p>
-								<p><span className='text-primary'>2</span> out 2 owners</p>
+								<p><span className='text-primary'>{ownerReview.length}</span> out {ownerReview.length} owners</p>
 							</div>
 						</div>
 					</div>
-					<div className='w-[50%] ml-2 h-full rounded-lg bg-bg-secondary'>
+					<div className='w-[50%] ml-2 h-full rounded-lg bg-bg-secondary [&::-webkit-scrollbar]:hidden'>
 						<div className='flex flex-col h-full rounded-lg bg-bg-secondary text-sm'>
 							<h1 className='mt-5 mx-5'>Owners</h1>
 							<div className='flex flex-1 flex-col items-center justify-start overflow-auto'>
-								<div className='flex items-center mx-5 mt-5'>
-									<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
-									<div className='flex flex-col'>
-										<p className='text-sm'>Akshit</p>
-										<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
-									</div>
-								</div>
-								<div className='flex items-center mx-5 mt-5'>
-									<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
-									<div className='flex flex-col'>
-										<p className='text-sm'>Akshit</p>
-										<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
-									</div>
-								</div>
+								{ownerReview}
 							</div>
 						</div>
 					</div>
