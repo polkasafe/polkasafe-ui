@@ -14,14 +14,22 @@ const Review = () => {
 			<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
 			<div className='flex flex-col'>
 				<p className='text-sm'>Akshit</p>
-				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
+				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p>
+					<button className='mx-1' onClick={() => navigator.clipboard.writeText('3J98t1Wp...rnqRhWNL0')}>
+						<CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/>
+					</button><ShareIcon />
+				</div>
 			</div>
 		</div>,
 		<div className='flex items-center mx-5 mt-5' key={2}>
 			<img className='h-8 w-8 mr-5' src={profileImg} alt="img" />
 			<div className='flex flex-col'>
 				<p className='text-sm'>Akshit</p>
-				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p><button className='mx-1'><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/></button><ShareIcon /></div>
+				<div className='flex'><p className='text-sm text-text_secondary'>3J98t1Wp...rnqRhWNLy</p>
+					<button className='mx-1' onClick={() => navigator.clipboard.writeText('3J98t1Wp...rnqRhWNL9')}><CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/>
+					</button>
+					<ShareIcon />
+				</div>
 			</div>
 		</div>
 	];
@@ -63,7 +71,10 @@ const Review = () => {
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Address:</p>
-								<div className='flex'><img className='w-5 h-5' src={profileImg} alt="img"/><p className='mx-2'>3J98t...WNLy</p><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon/></div>
+								<div className='flex'><img className='w-5 h-5' src={profileImg} alt="img"/><p className='mx-2'>3J98t...WNL7</p>
+									<button onClick={() => navigator.clipboard.writeText('3J98t...WNL7')}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
+									<ShareIcon/>
+								</div>
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Confirmations:</p>

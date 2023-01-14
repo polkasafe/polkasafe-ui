@@ -27,7 +27,9 @@ const Owners = () => {
 					id="name"
 				/>
 			</Form.Item>
-			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLz</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
+			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>3J98t1Wp...nyiWrnqRhWNLz</div>
+				<button onClick={() => navigator.clipboard.writeText('3J98t1Wp...nyiWrnqRhWNL1')}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
+				<ShareIcon className='text-text_secondary'/></div>
 		</div>
 	</div>,<div className="flex flex-col gap-y-3 mb-5" key={2}>
 		<label
@@ -46,7 +48,10 @@ const Owners = () => {
 					id="name"
 				/>
 			</Form.Item>
-			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>3J98t1Wp...nyiWrnqRhWNLm</button><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/><ShareIcon className='text-text_secondary'/></div>
+			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>nJ98t1Wp...nyiWrnqRhWNLm</button>
+				<button onClick={() => navigator.clipboard.writeText('nJ98t1Wp...nyiWrnqRhWNL1')}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
+				<ShareIcon className='text-text_secondary'/>
+			</div>
 		</div>
 	</div>];
 	return (
