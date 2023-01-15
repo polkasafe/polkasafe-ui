@@ -139,8 +139,14 @@ export const GlobalStyle = createGlobalStyle`
 	.ant-menu-submenu-popup {
 		display: none !important;
 	}
-	.ant-input{
-		background-color: #24272E;
+
+	.ant-dropdown-menu-root {
+		margin-top: 6px !important;
+		border: 1px solid #1573FE !important;
+		border-radius: 12px !important;
+		background-color: #24272E !important;
+		padding: 12px 8px !important;
+  }
 	.ant-picker-panel-container {
 		background-color: #1573FE !important;
 	}

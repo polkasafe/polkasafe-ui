@@ -10,7 +10,7 @@ interface Props {
 
 const Loader = ({ className }: Props) => {
 	return (
-		<div className={classNames('w-[49%] h-1 rounded-lg', className)}></div>
+		<div className={classNames('h-1 rounded-[4px]', className)}></div>
 	);
 };
 
