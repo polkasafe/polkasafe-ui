@@ -4,7 +4,6 @@
 import { Input } from 'antd';
 import React from 'react';
 import { SearchIcon } from 'src/ui-components/CustomIcons';
-//type
 
 const SearchAddress = ({ value, onChange }: any) => {
 	return (
