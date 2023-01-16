@@ -5,7 +5,7 @@
 import '@polkadot/api-augment';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 export interface ApiContextType {
 	api: ApiPromise | undefined;
@@ -53,4 +53,8 @@ export function ApiContextProvider(
 			{children}
 		</ApiContext.Provider>
 	);
+}
+
+export function useGlobalApiContext() {
+	return useContext(ApiContext);
 }
