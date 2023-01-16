@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Input } from 'antd';
+import { Button, Input, Switch } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -27,7 +27,7 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
-	const { openModal, toggleVisibility, toggleSwitch } = useModalContext();
+	const { openModal, toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [show, setShow] = useState(true);
 	const handleMultisigCreated = () => {
 		setShow(false);
@@ -49,14 +49,21 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						'w-auto':onCancel
 					}
 				)}>
-					<div>
-						{!onCancel?<div className="flex items-left justify-between w-[690px]">
-							<Search/>
-						</div>:
-							<div className="flex items-left justify-between w-[690px]">
-								<Search/>
-								<Button className='bg-highlight text-primary border-none py-5 flex items-center justify-center ml-2'
-									onClick={() => openModal('Add Signatory', <AddSignatory/>)}><PlusCircleOutlined />Add Signatory</Button>
+					<div className='relative'>
+						{!onCancel?
+							<div className="flex items-left justify-between w-[45vw]">
+								{toggleSwitch?<Search/>:null}
+							</div>:
+							<div className='flex items-center justify-between'>
+								{toggleSwitch?<div className="flex items-left justify-between w-[45vw]">
+									<Search />
+									<Button className='bg-highlight text-primary border-none py-5 flex items-center justify-center ml-2'
+										onClick={() => openModal('Add Signatory', <AddSignatory />)}><PlusCircleOutlined />Add Signatory
+									</Button>
+								</div>:null}
+								<div className='flex items-center justify-center absolute top-1 right-1'>
+									<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
+								</div>
 							</div>}
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
