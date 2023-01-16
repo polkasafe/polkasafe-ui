@@ -41,7 +41,7 @@ const Settings = () => {
 					{/* <SearchOwner /> */}
 					<div className='rounded-lg bg-bg-secondary flex items-center p-1 text-xs gap-x-2 md:gap-x-4 md:text-sm'>
 						<SearchIcon className='text-primary pl-3 pr-0' />
-						<Input className= 'placeholder-text_placeholder text-white outline-none border-none min-w-[300px]' placeholder='Search by name or address' value={searchTerm} onChange={e => setSearchTerm(e.target.value)}>
+						<Input className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none min-w-[300px]' placeholder='Search by name or address' value={searchTerm} onChange={e => setSearchTerm(e.target.value)}>
 						</Input>
 					</div>
 					<AddNewOwnerBtn />
