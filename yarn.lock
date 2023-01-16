@@ -2112,7 +2112,7 @@
     eventemitter3 "^4.0.7"
     rxjs "^7.8.0"
 
-"@polkadot/extension-dapp@^0.44.6":
+"@polkadot/extension-dapp@^0.44.8":
   version "0.44.8"
   resolved "https://registry.yarnpkg.com/@polkadot/extension-dapp/-/extension-dapp-0.44.8.tgz#f07acc50054e4dd39e9506d38f81b1a231fe9d3e"
   integrity sha512-CaGrY+Vh9u2ABPpLsbMEVQniQDKreBWEmtp0RzfmIbed8lmmOgwtfDZjb7ncTNR79WJX+1AD+VX5dKQtvT3S4w==
