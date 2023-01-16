@@ -6,6 +6,11 @@ import { SwapOutlined } from '@ant-design/icons';
 import React from 'react';
 
 const Signotary = () => {
+	const signatures = [
+		{ id: 'item1', key: 1, name: 'Polka test-1' },
+		{ id: 'item2', key: 2, name: 'Polka test-2' },
+		{ id: 'item3', key: 3, name: 'Polka test-3' }
+	];
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);
 	};
@@ -22,19 +27,19 @@ const Signotary = () => {
 	return (
 		<div className="flex w-[45vw]">
 			<div className="flex w-[100%] items-center justify-center">
-				<div id='div1' className="flex flex-col my-2 pd-2 w-1/2 mr-1" onDrop={drop} onDragOver={dragOver}>
-					<h1 className='text-primary'>Available Signatory</h1>
+				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1" onDrop={drop} onDragOver={dragOver}>
+					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
-						<p id='item1' className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>Polka-test 1</p>
-						<p id='item2' className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>Polka-test 2</p>
-						<p id='item3' className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>MultiSig test</p>
+						{signatures.map((signature) => (
+							<p id={signature.id} key={signature.key} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{signature.name}</p>
+						))}
 					</div>
 				</div>
 				<SwapOutlined className='text-primary' />
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
-					<h1 className='text-primary'>Selected Signatory</h1>
+					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
 					<div className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto' onDrop={drop} onDragOver={dragOver}>
-						<p id='item4' className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>MultiSig</p>
+						<p></p>
 					</div>
 				</div>
 			</div>

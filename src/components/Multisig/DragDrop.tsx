@@ -29,14 +29,16 @@ const props: UploadProps = {
 };
 
 const DragDrop = () => (
-	<Dragger {...props} className="w-[45vw] bg-bg-secondary rounded-md p-4 my-3">
-		<p className="ant-upload-drag-icon">
-			<UploadBoxIcon className='my-2'/>
-		</p>
-		<p className="ant-upload-text text-white">Drag and Drop CSV file to upload</p>
-		<p className='text-text_secondary'>OR</p>
-		<Button className='mt-3 bg-primary text-primary border-none bg-opacity-10'>Browse</Button>
-	</Dragger>
+	<div className='flex flex-col'>
+		<h1 className='text-primary mb-1'>Signatories List</h1>
+		<Dragger {...props} className="w-[45vw] h-[37vh] bg-bg-secondary rounded-md p-4 my-3">
+			<p className="ant-upload-drag-icon">
+				<UploadBoxIcon className='my-2' />
+			</p>
+			<p className="ant-upload-text text-white">Drag and Drop CSV file to upload</p>
+			<p className='text-text_secondary'>OR</p>
+			<Button className='mt-3 bg-primary text-primary border-none bg-opacity-10'>Browse</Button>
+		</Dragger></div>
 );
 
 export default DragDrop;
