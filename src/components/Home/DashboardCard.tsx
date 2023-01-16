@@ -4,7 +4,7 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -16,6 +16,8 @@ import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const DashboardCard = ({ className }: { className?: string }) => {
+	const [address, setAddress] = useState('');
+	setAddress('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy');
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
@@ -28,9 +30,9 @@ const DashboardCard = ({ className }: { className?: string }) => {
 							{/* TODO: Use dynamic values */}
 							<div className='text-lg font-bold text-white'>John Doe</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary truncate'>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</div>
-								<CopyIcon className='cursor-pointer ml-2 w-5 hover:text-primary text-text_secondary'/>
-								<QRIcon className='cursor-pointer hover:text-primary text-text_secondary'/>
+								<div className='text-md font-normal text-text_secondary truncate'>{address}</div>
+								<button onClick={() => navigator.clipboard.writeText(`${address}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
+								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>
 					</div>
@@ -60,10 +62,10 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm'><PlusCircleOutlined /> New Transaction</PrimaryButton>
 					</Link>
 					<Link to='/assets' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm' onClick={() => { }}><WalletIcon />View Asset</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'><WalletIcon />View Asset</PrimaryButton>
 					</Link>
 				</div>
 			</div>
