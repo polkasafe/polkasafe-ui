@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
+import NetworksDropdown from 'src/components/NetworksDropdown';
 
 import Loader from '../../UserFlow/Loader';
 
@@ -31,7 +32,10 @@ const SelectNetwork = () => {
 					</div>
 				</div>
 				<div>
-					<p className='text-primary mt-10'>Select a network on which the safe was created</p>
+					<p className='text-primary mt-10 w-[500px]'>Select a network on which the safe was created</p>
+				</div>
+				<div>
+					<NetworksDropdown className='w-[500px] justify-between mt-3'/>
 				</div>
 			</div>
 		</div>
