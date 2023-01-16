@@ -57,7 +57,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
+									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLm
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
@@ -215,7 +215,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 										>
 											<span>
-                                                3J98t1W...hWNLy
+                                                3J98t1W...hWNL2
 											</span>
 											<span
 												className='flex items-center gap-x-2 text-sm'

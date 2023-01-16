@@ -7,11 +7,12 @@ import { Link } from 'react-router-dom';
 import MultisigImg from 'src/assets/icons/multisig-created.svg';
 
 const MultisigCreated = () => {
+	const refresh = () => window.location.reload();
 	return (
 		<div className='flex flex-col items-center justify-center'>
 			<img src={MultisigImg} alt="multisig" className='mb-3'/>
 			<p className="text-text_secondary m-5">Your MultiSig has been created successfully!</p>
-			<Link to="/" ><Button className='flex items-center justify-center bg-highlight text-white border-none ml-1 py-4 mt-3'>View Dashboard</Button></Link>
+			<Link to="/" ><Button className='flex items-center justify-center bg-highlight text-white border-none ml-1 py-4 mt-3' onClick={refresh}>View Dashboard</Button></Link>
 		</div>
 	);
 };

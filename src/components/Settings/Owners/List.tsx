@@ -47,7 +47,7 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 									</div>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<CopyIcon />
+										<button className='hover:text-primary' onClick={() => navigator.clipboard.writeText(`${address}`)}><CopyIcon /></button>
 										<ExternalLinkIcon />
 									</div>
 								</div>

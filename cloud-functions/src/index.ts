@@ -6,6 +6,7 @@ import { responseMessages, SIGNING_MSG } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 
 admin.initializeApp();
+const db = admin.firestore();
 
 const isValidSignature = async (signature:string, address:string) => {
 	await cryptoWaitReady();
@@ -44,7 +45,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	}
 
 	// check if address doc already exists
-	const addressRef = admin.firestore().collection('addresses').doc(address);
+	const addressRef = db.collection('addresses').doc(address);
 
 	try {
 		const doc = await addressRef.get();

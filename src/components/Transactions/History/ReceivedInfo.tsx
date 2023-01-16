@@ -50,12 +50,12 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						<span>
-									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
+									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNL1
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<CopyIcon />
+							<button><CopyIcon /></button>
 							<ExternalLinkIcon />
 						</span>
 					</p>
