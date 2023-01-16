@@ -2,15 +2,18 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
+import { Input } from 'antd';
+import React, { useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import Details from 'src/components/Settings/Details';
 import Feedback from 'src/components/Settings/Feedback';
 import AddNewOwnerBtn from 'src/components/Settings/Owners/AddBtn';
 import ListOwners, { IOwner } from 'src/components/Settings/Owners/List';
-import SearchOwner from 'src/components/Settings/Owners/Search';
+// import SearchOwner from 'src/components/Settings/Owners/Search';
+import { SearchIcon } from 'src/ui-components/CustomIcons';
 
 const Settings = () => {
+	const [searchTerm, setSearchTerm] = useState('');
 	const owners: IOwner[] = [
 		{
 			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
@@ -28,17 +31,23 @@ const Settings = () => {
 			name: 'Param'
 		}
 	];
+	const filteredData = owners.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
 
 	return (
 		<div>
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl'>
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
-					<SearchOwner />
+					{/* <SearchOwner /> */}
+					<div className='rounded-lg bg-bg-secondary flex items-center p-1 text-xs gap-x-2 md:gap-x-4 md:text-sm'>
+						<SearchIcon className='text-primary pl-3 pr-0' />
+						<Input className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none min-w-[300px]' placeholder='Search by name or address' value={searchTerm} onChange={e => setSearchTerm(e.target.value)}>
+						</Input>
+					</div>
 					<AddNewOwnerBtn />
 				</section>
 				<section className='mt-[30px]'>
-					<ListOwners owners={ owners } />
+					<ListOwners owners={ filteredData } />
 				</section>
 			</div>
 			<div className='mt-[30px] grid md:grid-cols-2 gap-[30px]'>

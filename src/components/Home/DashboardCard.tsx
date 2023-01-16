@@ -24,7 +24,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-72 mt-3`}>
 				<div className="flex justify-between flex-wrap truncate">
 					<div className='flex gap-x-4 items-center mb-3 flex-wrap relative'>
-						<Avatar className='border-4 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
+						<Avatar className='border-2 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
 						<div className="bg-primary rounded-lg absolute -bottom-2 mt-3 left-[18px] text-white px-2">2/3</div>
 						<div>
 							{/* TODO: Use dynamic values */}
@@ -62,10 +62,10 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm' onClick={() => { }}><PlusCircleOutlined /> New Transaction</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm'><PlusCircleOutlined /> New Transaction</PrimaryButton>
 					</Link>
 					<Link to='/assets' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm' onClick={() => { }}><WalletIcon />View Asset</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'><WalletIcon />View Asset</PrimaryButton>
 					</Link>
 				</div>
 			</div>
