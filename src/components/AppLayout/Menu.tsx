@@ -72,7 +72,7 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 	];
 	const { openModal } = useModalContext();
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5')}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5 overflow-auto [&::-webkit-scrollbar]:hidden')}>
 			<section>
 				<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
 					<img src={polkasafeLogo} alt="polkasafe logo" />
