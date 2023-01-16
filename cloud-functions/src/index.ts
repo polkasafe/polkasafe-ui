@@ -6,7 +6,6 @@ import { responseMessages, SIGNING_MSG } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 
 admin.initializeApp();
-const db = admin.firestore();
 
 const isValidSignature = async (signature:string, address:string) => {
 	await cryptoWaitReady();
@@ -28,6 +27,9 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	const signature = req.get('x-signature');
 	const address = req.get('x-address');
 
+	// TODO: Remove this before production
+	res.set('Access-Control-Allow-Origin', '*');
+
 	if (!signature || !address) {
 		res.status(400).send(responseMessages.missing_params);
 		return;
@@ -45,7 +47,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	}
 
 	// check if address doc already exists
-	const addressRef = db.collection('addresses').doc(address);
+	const addressRef = admin.firestore().collection('addresses').doc(address);
 
 	try {
 		const doc = await addressRef.get();
