@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { createContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { UserDetailsContextType } from 'src/types';
 
 const initialUserDetailsContext : UserDetailsContextType = {
@@ -13,6 +13,10 @@ const initialUserDetailsContext : UserDetailsContextType = {
 };
 
 export const UserDetailsContext = createContext(initialUserDetailsContext);
+
+export function useGlobalUserDetailsContext() {
+	return useContext(UserDetailsContext);
+}
 
 export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) => {
 
