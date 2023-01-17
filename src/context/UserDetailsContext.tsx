@@ -7,6 +7,7 @@ import { UserDetailsContextType } from 'src/types';
 
 const initialUserDetailsContext : UserDetailsContextType = {
 	addresses: [],
+	currentUserAddress: '',
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	}
@@ -17,6 +18,8 @@ export const UserDetailsContext = createContext(initialUserDetailsContext);
 export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) => {
 
 	const [userDetailsContextState, setUserDetailsContextState] = useState(initialUserDetailsContext);
+
+	console.log(userDetailsContextState);
 
 	return (
 		<UserDetailsContext.Provider value={{ ...userDetailsContextState, setUserDetailsContextState }}>

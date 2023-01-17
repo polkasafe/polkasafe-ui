@@ -4,7 +4,8 @@
 import { isWeb3Injected } from '@polkadot/extension-dapp';
 import { InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
-import React, { useEffect, useState } from 'react';
+import React, { useContext,useEffect, useState } from 'react';
+import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
@@ -14,6 +15,7 @@ const ConnectWallet = () => {
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
+	const { setUserDetailsContextState } = useContext(UserDetailsContext);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -71,7 +73,10 @@ const ConnectWallet = () => {
 				method: 'POST'
 			});
 			const data = await res.json();
-			console.log(data);
+			if (data) {
+				setUserDetailsContextState( prev => ({ ...prev, currentUserAddress: data.address }));
+			}
+			console.log(data.address);
 		} catch (error) {
 			console.log(error);
 		}

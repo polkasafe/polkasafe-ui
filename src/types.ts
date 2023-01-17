@@ -8,6 +8,7 @@ import { network, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
     addresses?: string[] | null;
+    currentUserAddress: string;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 

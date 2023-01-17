@@ -4,7 +4,8 @@
 
 import { UserOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
+import React, { useContext,useEffect,useRef, useState } from 'react';
+import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 
 interface IAddress {
@@ -13,13 +14,19 @@ interface IAddress {
 }
 
 const AddressDropdown = () => {
+	const { currentUserAddress } = useContext(UserDetailsContext);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
 		imgSrc: '',
-		value: '3J98t...hWNLy'
+		value: '3J66t...hWNLy'
 	});
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
+	useEffect(() => {
+		if(currentUserAddress)
+			setSelectedAddress(prev => ({ ...prev, value: currentUserAddress }));
+	}, [currentUserAddress]);
+
 	return (
 		<div
 			className='relative'
