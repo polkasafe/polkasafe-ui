@@ -3,8 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { UserOutlined } from '@ant-design/icons';
+import { Avatar } from 'antd';
 import classNames from 'classnames';
 import React, { useContext,useEffect,useRef, useState } from 'react';
+import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 
@@ -64,15 +66,13 @@ const AddressDropdown = () => {
 			>
 				{selectedAddress? <div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
-						<span className='bg-transparent flex items-center justify-center rounded-full w-[52px] h-[52px] border border-primary'>
-							<UserOutlined className='text-primary text-2xl' />
-						</span>
+						<Avatar className='border-2 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
 						<p className='text-white font-normal text-sm'>
                         Jaski
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{selectedAddress.value}</span>
-							<CopyIcon className='text-base' />
+							<CopyIcon className='text-base hover:text-primary cursor-pointer' />
 						</p>
 					</div>
 					<div className='w-full'>
