@@ -1,8 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Divider } from 'antd';
-import React, { FC } from 'react';
+import { Divider, message } from 'antd';
+import React, { FC, useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
@@ -14,7 +14,13 @@ interface IReceivedInfoProps {
 }
 
 const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLp');
 	const { amount, amountType, date, time } = props;
+	const handleCopy = () => {
+		navigator.clipboard.writeText(`${address}`);
+		message.success('Copied!');
+	};
 	return (
 		<article
 			className='p-4 rounded-lg bg-bg-main'
@@ -50,12 +56,12 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						<span>
-									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNL1
+							{address}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button><CopyIcon /></button>
+							<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
 							<ExternalLinkIcon />
 						</span>
 					</p>
@@ -81,7 +87,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					<span
 						className='flex items-center gap-x-2 text-sm'
 					>
-						<CopyIcon />
+						<button onClick={handleCopy}><CopyIcon/></button>
 						<ExternalLinkIcon />
 					</span>
 				</p>
