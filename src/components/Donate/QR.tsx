@@ -11,7 +11,10 @@ const QR = () => {
 	const [address, setAddress] = useState('3J98t1W...RhWNLy');
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
+		message.success({
+			className: 'fixed top-2 w-[100%] m-auto',
+			content: 'Copied'
+		});
 	};
 	return (
 		<div className='flex flex-col gap-y-5 p-5 bg-bg-secondary rounded-xl items-center'>

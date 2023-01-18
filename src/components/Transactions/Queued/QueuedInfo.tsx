@@ -1,11 +1,12 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+
 import { Divider, message,Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
-import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, Circle3DotsIcon, CirclePlusIcon, ClockIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
@@ -92,7 +93,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-								0xfb92...ed31
+								0xfb92...ed30
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
@@ -170,25 +171,25 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</Timeline.Item>
 						<Timeline.Item
 							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CircleCheckIcon className='text-success text-sm' />
+								<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<ClockIcon className='text-waiting text-sm' />
 								</span>
 							}
-							className='success'
+							className='warning'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-                                Confirmations <span className='text-text_secondary'>(3 of 3)</span>
+                                Confirmations <span className='text-text_secondary'>(1 of 2)</span>
 							</div>
 						</Timeline.Item>
 						<Timeline.Item
 							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<Circle3DotsIcon className='text-success text-sm' />
+								<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<Circle3DotsIcon className='text-waiting text-sm' />
 								</span>
 							}
-							className='success'
+							className='warning'
 						>
 							<div
 								className='text-primary font-normal text-sm leading-[15px] bg-highlight px-2 py-1 rounded-md'
@@ -198,42 +199,20 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</Timeline.Item>
 						<Timeline.Item
 							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CircleCheckIcon className='text-success text-sm' />
+								<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<ClockIcon className='text-waiting text-sm' />
 								</span>
 							}
-							className='success'
+							className='warning'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
 								<p>Executed</p>
 								<div
-									className='mt-3 flex items-center gap-x-4'
+									className='mt-2 flex items-center gap-x-4'
 								>
-									<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
-									<div
-										className='flex flex-col gap-y-[6px]'
-									>
-										<p
-											className='font-medium text-sm leading-[15px] text-white'
-										>
-                                            Akshit
-										</p>
-										<p
-											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-										>
-											<span>
-                                                3J98t1W...hWNL2
-											</span>
-											<span
-												className='flex items-center gap-x-2 text-sm'
-											>
-												<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
-												<ExternalLinkIcon />
-											</span>
-										</p>
-									</div>
+									<p className='text-text_secondary'>The transaction will be executed once the threshold is reached.</p>
 								</div>
 							</div>
 						</Timeline.Item>

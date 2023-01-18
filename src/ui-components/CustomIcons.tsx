@@ -22,6 +22,7 @@ import { ReactComponent as CircleArrowUpSVG } from 'src/assets/icons/circle-arro
 import { ReactComponent as CircleCheckSVG } from 'src/assets/icons/circle-check.svg';
 import { ReactComponent as CirclePlusSVG } from 'src/assets/icons/circle-plus.svg';
 import { ReactComponent as CircleWatchSVG } from 'src/assets/icons/circle-watch.svg';
+import { ReactComponent as ClockSVG } from 'src/assets/icons/clock.svg';
 import { ReactComponent as CloseSVG } from 'src/assets/icons/close-icon.svg';
 import { ReactComponent as CopySVG } from 'src/assets/icons/copy.svg';
 import { ReactComponent as CopyGreySVG } from 'src/assets/icons/copy-icon-grey.svg';
@@ -282,6 +283,9 @@ export const ChainIcon = (props: Partial<CustomIconComponentProps>) => (
 );
 export const BrainIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={BrainSVG} {...props} />
+);
+export const ClockIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ClockSVG} {...props} />
 );
 
 // PARACHAINS ICONS

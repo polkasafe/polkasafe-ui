@@ -58,6 +58,50 @@ const transactions: ITransactions[] = [
 		]
 	}
 ];
+const pendingTransactions: ITransactions[] = [
+	{
+		date: 'DEC 22, 2022',
+		transactions: [
+			{
+				amount: '150',
+				amountType: 'DOT',
+				id: 1,
+				status: 'Pending',
+				time: '12:15 AM',
+				type: 'Received'
+			},
+			{
+				amount: '100',
+				amountType: 'DOT',
+				id: 2,
+				status: 'Pending',
+				time: '16:00 PM',
+				type: 'Sent'
+			}
+		]
+	},
+	{
+		date: 'DEC 16, 2022',
+		transactions: [
+			{
+				amount: '50',
+				amountType: 'DOT',
+				id: 1,
+				status: 'Pending',
+				time: '1:15 AM',
+				type: 'Sent'
+			},
+			{
+				amount: '250',
+				amountType: 'DOT',
+				id: 1,
+				status: 'Pending',
+				time: '8:15 AM',
+				type: 'Received'
+			}
+		]
+	}
+];
 
 const Transactions = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -97,7 +141,7 @@ const Transactions = () => {
 				{
 					tab === ETab.HISTORY?
 						<History transactionsHistory={transactions} />
-						:<Queued transactionsQueued={transactions} />
+						:<Queued transactionsQueued={pendingTransactions} />
 				}
 			</div>
 		</>

@@ -11,7 +11,7 @@ export interface ITransaction {
     amount: string;
     amountType: string;
     id: number;
-    status: 'Success' | 'Failed';
+    status: 'Success' | 'Failed' | 'Pending';
     time: string;
     type: 'Sent' | 'Received';
 }

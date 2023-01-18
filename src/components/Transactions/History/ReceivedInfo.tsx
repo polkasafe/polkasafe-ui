@@ -19,7 +19,10 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 	const { amount, amountType, date, time } = props;
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
+		message.success({
+			className: 'fixed top-2 w-[100%] m-auto',
+			content: 'Copied'
+		});
 	};
 	return (
 		<article
@@ -87,7 +90,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					<span
 						className='flex items-center gap-x-2 text-sm'
 					>
-						<button onClick={handleCopy}><CopyIcon/></button>
+						<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
 						<ExternalLinkIcon />
 					</span>
 				</p>

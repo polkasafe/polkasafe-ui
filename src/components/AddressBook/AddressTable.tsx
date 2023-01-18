@@ -39,7 +39,10 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 				address.map(({ address, imgSrc, name }, index) => {
 					const handleCopy = () => {
 						navigator.clipboard.writeText(`${address}`);
-						message.success('Copied!');
+						message.success({
+							className: 'fixed top-2 w-[100%] m-auto',
+							content: 'Copied'
+						});
 					};
 					return (
 						<>

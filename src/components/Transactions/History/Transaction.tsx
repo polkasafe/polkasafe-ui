@@ -2,14 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ReloadOutlined } from '@ant-design/icons';
 import { Divider } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
+import ReceivedInfo from 'src/components/Transactions/History/ReceivedInfo';
+import SentInfo from 'src/components/Transactions/History/SentInfo';
+// import QueuedInfo from 'src/components/Transactions/Queued/QueuedInfo';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 
+import QueuedInfo from '../Queued/QueuedInfo';
 import { ITransaction } from '.';
-import ReceivedInfo from './ReceivedInfo';
-import SentInfo from './SentInfo';
 
 interface ITransactionProps extends ITransaction {
 	date: string;
@@ -32,17 +35,34 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 				<p className='col-span-3 flex items-center gap-x-3'>
 					{
 						type === 'Sent'?
-							<span
-								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
-							>
-								<ArrowUpRightIcon />
-							</span>
+							<div>
+								{status !== 'Success'?
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-waiting bg-opacity-10 p-[10px] rounded-lg text-red-500'
+									>
+										<ReloadOutlined className='text-waiting'/>
+									</span>:
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+									>
+										<ArrowUpRightIcon />
+									</span>}
+							</div>
 							:
-							<span
-								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
-							>
-								<ArrowDownLeftIcon />
-							</span>
+							<div>
+								{status !== 'Success'?
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-waiting bg-opacity-10 p-[10px] rounded-lg text-red-500'
+									>
+										<ReloadOutlined className='text-waiting'/>
+									</span>:
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
+									>
+										<ArrowDownLeftIcon />
+									</span>}
+							</div>
+
 					}
 					<span>
 						{type}
@@ -65,7 +85,15 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 					{time}
 				</p>
 				<p className='col-span-2 flex items-center justify-end gap-x-4'>
-					<span className='text-success'>
+					<span
+						className={classNames(
+							'',
+							{
+								'text-success': status === 'Success',
+								'text-waiting': status === 'Pending'
+							}
+						)}
+					>
 						{status}
 					</span>
 					<span className='text-white text-sm'>
@@ -93,12 +121,22 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 							time={time}
 						/>
 						:
-						<SentInfo
-							amount={amount}
-							amountType={amountType}
-							date={date}
-							time={time}
-						/>
+						<div>
+							{status === 'Pending'?
+								<QueuedInfo
+									amount={amount}
+									amountType={amountType}
+									date={date}
+									time={time}
+								/>:
+								<SentInfo
+									amount={amount}
+									amountType={amountType}
+									date={date}
+									time={time}
+								/>
+							}
+						</div>
 				}
 			</div>
 		</article>

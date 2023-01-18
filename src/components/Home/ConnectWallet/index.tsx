@@ -6,6 +6,7 @@ import { InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { message } from 'antd';
 import React, { useContext,useEffect, useState } from 'react';
+import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
@@ -16,6 +17,7 @@ const ConnectWallet = () => {
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
+	const [connected, setConnected] = useState(false);
 	const { setUserDetailsContextState } = useContext(UserDetailsContext);
 
 	useEffect(() => {
@@ -54,8 +56,8 @@ const ConnectWallet = () => {
 			if (!signRaw) {
 				return console.error('Signer not available');
 			}
-
-			const signMessage = process.env.REACT_APP_SIGNING_MSG;
+			// TODO:Mridul calling function for dynamic sign in msg
+			const signMessage = '2N2q19bdOwuuXV6PGBwTEKqZilpLrY3I5EqLNZdm';
 
 			if (!signMessage) {
 				throw new Error('Challenge message not found');
@@ -76,6 +78,11 @@ const ConnectWallet = () => {
 			const data = await res.json();
 			if (data) {
 				setUserDetailsContextState( prev => ({ ...prev, currentUserAddress: data.address }));
+				message.success({
+					className: 'fixed top-2 w-[100%] m-auto',
+					content: 'Wallet Connected'
+				});
+				setConnected(true);
 			}
 			console.log(data.address);
 		} catch (error) {
@@ -85,7 +92,7 @@ const ConnectWallet = () => {
 
 	return (
 		<>
-			<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
+			{!connected?<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
 				{
 					!noAccounts?
 						<>
@@ -104,26 +111,42 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
-							<button
-								onClick={async () => {
-									await handleConnectWallet();
-									message.success('Wallet connected');
-									setShowAccountsDropdown(true);
-								}}
-								className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
-							>
-								<WalletIcon/>
-								<span className='font-normal text-sm leading-[15px]'>
-								Connect Wallet
-								</span>
-							</button>
+							{!showAccountsDropdown?
+								<button
+									onClick={async () => {
+										setShowAccountsDropdown(true);
+									}}
+									className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
+								>
+									<WalletIcon/>
+									<span className='font-normal text-sm leading-[15px]'>
+							Connect Wallet
+									</span>
+								</button>:
+								<button
+									onClick={async () => {
+										await handleConnectWallet();
+										setShowAccountsDropdown(true);
+									}}
+									className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
+								>
+									<WalletIcon/>
+									<span className='font-normal text-sm leading-[15px]'>
+							Connect Wallet
+									</span>
+								</button>
+							}
 						</>
 						: <h2 className='font-bold text-xl leading-[22px] text-primary'>
 							Loading...
 						</h2>
 
 				}
-			</div>
+			</div>:
+				<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
+					<AddMultisig/>
+				</div>
+			}
 		</>
 	);
 };
