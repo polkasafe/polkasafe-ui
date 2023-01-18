@@ -4,6 +4,7 @@
 import { isWeb3Injected } from '@polkadot/extension-dapp';
 import { InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
+import { message } from 'antd';
 import React, { useContext,useEffect, useState } from 'react';
 import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
@@ -106,6 +107,7 @@ const ConnectWallet = () => {
 							<button
 								onClick={async () => {
 									await handleConnectWallet();
+									message.success('Wallet connected');
 									setShowAccountsDropdown(true);
 								}}
 								className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
