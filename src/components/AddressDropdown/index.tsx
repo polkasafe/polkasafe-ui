@@ -11,7 +11,7 @@ import { UserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 
 interface IAddress {
-    value: string;
+    value: string | null;
     imgSrc: string;
 }
 
@@ -20,7 +20,7 @@ const AddressDropdown = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
 		imgSrc: '',
-		value: '3J66t...hWNLy'
+		value: null
 	});
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
@@ -38,21 +38,28 @@ const AddressDropdown = () => {
 				}
 			}}
 		>
-			<button onClick={() => {
+			<button disabled={!selectedAddress.value} onClick={() => {
 				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
-			}} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+			}} className={classNames(
+				'flex items-center justify-center gap-x-3 text-white rounded-lg p-3 shadow-none text-sm',
+				{
+					'bg-highlight border-none outline-none' : selectedAddress.value,
+					'bg-transparent border-2 border-text_secondary' : !selectedAddress.value
+				}
+			)}
+			>
 				<p className='flex items-center gap-x-3'>
-					{!selectedAddress?<WarningRoundedIcon className='text-base text-primary'/>
+					{!selectedAddress.value?<WarningRoundedIcon className='text-base text-primary'/>
 						:<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
 							<UserOutlined className='text-white text-[10px]' />
 						</span>}
-					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{selectedAddress? selectedAddress.value:'Not Connected'}
+					<span className='md:inline-flex w-24 block truncate'>
+						{selectedAddress.value? selectedAddress.value:'Not Connected'}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
-					'text-primary': selectedAddress,
-					'text-white': !selectedAddress
+					'text-primary': selectedAddress.value,
+					'text-text_secondary': !selectedAddress.value
 				})} />
 			</button>
 			<div
@@ -64,15 +71,15 @@ const AddressDropdown = () => {
 					}
 				)}
 			>
-				{selectedAddress? <div className='flex items-center justify-center flex-col gap-y-9'>
+				{selectedAddress.value? <div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
 						<Avatar className='border-2 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
 						<p className='text-white font-normal text-sm'>
                         Jaski
 						</p>
-						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
-							<span className='text-text_secondary'>{selectedAddress.value}</span>
-							<CopyIcon className='text-base hover:text-primary cursor-pointer' />
+						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] w-[10vw] rounded-lg flex items-center gap-x-3'>
+							<span className='text-text_secondary block truncate'>{selectedAddress.value}</span>
+							<CopyIcon className='text-base text-primary cursor-pointer' />
 						</p>
 					</div>
 					<div className='w-full'>
