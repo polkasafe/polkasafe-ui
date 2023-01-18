@@ -5,8 +5,10 @@ import { Form, Input } from 'antd';
 import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useModalContext } from 'src/context/ModalContext';
 
 const Review = () => {
+	const { toggleVisibility } = useModalContext();
 	return (
 		<Form
 			className='my-0'
@@ -32,7 +34,7 @@ const Review = () => {
 				</Form.Item>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
+				<CancelBtn onClick={toggleVisibility}/>
 				<ModalBtn title='Share'/>
 			</div>
 		</Form>

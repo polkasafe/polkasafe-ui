@@ -1,7 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Divider } from 'antd';
+
+import { Divider, message } from 'antd';
 import React, { FC } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -36,6 +37,10 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 			</article>
 			{
 				address.map(({ address, imgSrc, name }, index) => {
+					const handleCopy = () => {
+						navigator.clipboard.writeText(`${address}`);
+						message.success('Copied!');
+					};
 					return (
 						<>
 							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white' key={index}>
@@ -48,7 +53,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									</div>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<button className='hover:text-primary' onClick={() => navigator.clipboard.writeText(`${address}`)}><CopyIcon /></button>
+										<button className='hover:text-primary' onClick={handleCopy}><CopyIcon /></button>
 										<ExternalLinkIcon />
 									</div>
 								</div>

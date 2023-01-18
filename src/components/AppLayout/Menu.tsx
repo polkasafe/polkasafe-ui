@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
+import profileImg from 'src/assets/icons/profile-img.png';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { useModalContext } from 'src/context/ModalContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
@@ -59,20 +60,20 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 	const addresses = [
 		{
 			address: 'Jaski - 1',
-			imgSrc: ''
+			imgSrc: profileImg
 		},
 		{
 			address: 'Jaski - 2',
-			imgSrc: ''
+			imgSrc: profileImg
 		},
 		{
 			address: 'Jaski - 3',
-			imgSrc: ''
+			imgSrc: profileImg
 		}
 	];
 	const { openModal } = useModalContext();
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5')}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5 overflow-auto [&::-webkit-scrollbar]:hidden')}>
 			<section>
 				<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
 					<img src={polkasafeLogo} alt="polkasafe logo" />
@@ -112,7 +113,7 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
 									'bg-highlight text-primary': address === selectedAddress
 								})} onClick={() => setSelectedAddress(address)}>
-									<Avatar className={classNames('bg-white',{
+									<Avatar className={classNames('bg-white border-none outline-none',{
 										'bg-primary': address === selectedAddress
 									})} src={imgSrc} size="small" icon={<UserOutlined className='text-highlight' />}  />
 									{address}

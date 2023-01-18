@@ -26,7 +26,7 @@ const Feedback = () => {
 				</div>
 				<div className='my-[34.5px] flex items-center justify-center gap-x-5'>
 					{emojis.map((emoji) => {
-						return <span key={emoji} className='p-[10px] text-[32px] flex items-center justify-center bg-bg-secondary rounded-lg leading-none w-[52px] h-[52px]'>
+						return <span key={emoji} className='p-[10px] text-[32px] flex items-center justify-center bg-bg-secondary cursor-pointer rounded-lg leading-none w-[52px] h-[52px]'>
 							{emoji}
 						</span>;
 					})}
