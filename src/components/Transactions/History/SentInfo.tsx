@@ -1,9 +1,9 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Divider, Timeline } from 'antd';
+import { Divider, message,Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
@@ -19,6 +19,12 @@ interface ISentInfoProps {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { amount, amountType, className, date, time } = props;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
+	const handleCopy = () => {
+		navigator.clipboard.writeText(`${address}`);
+		message.success('Copied!');
+	};
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -57,12 +63,12 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-									3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLm
+								{address}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<CopyIcon />
+								<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
 								<ExternalLinkIcon />
 							</span>
 						</p>

@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar } from 'antd';
+import { Avatar, message } from 'antd';
 import classNames from 'classnames';
 import React, { useRef, useState } from 'react';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
@@ -22,6 +22,10 @@ const AddressDropdown = () => {
 	});
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
+	const handleCopy = () => {
+		// navigator.clipboard.writeText(`${address}`);
+		message.success('Copied!');
+	};
 	return (
 		<div
 			className='relative'
@@ -65,7 +69,7 @@ const AddressDropdown = () => {
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{selectedAddress.value}</span>
-							<CopyIcon className='text-base hover:text-primary cursor-pointer' />
+							<button onClick={handleCopy}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>
 					<div className='w-full'>

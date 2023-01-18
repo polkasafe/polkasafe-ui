@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import classNames from 'classnames';
-import React, { FC, PropsWithChildren, ReactNode } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useEffect } from 'react';
 
 import { OutlineCloseIcon } from './CustomIcons';
 
@@ -18,8 +18,15 @@ interface IModalProps extends IModal {
 }
 
 const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, toggleVisibility }) => {
+	useEffect(() => {
+		if (isVisible) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'auto';
+		}
+	}, [isVisible]);
 	return (
-		<section className={classNames('absolute inset-0 h-screen w-screen bg-black bg-opacity-50 text-white flex items-center justify-center z-50', {
+		<section className={classNames('fixed top-0 left-0 inset-0 h-screen w-screen bg-black bg-opacity-50 text-white flex items-center justify-center z-50', {
 			'hidden opacity-0 h-0 w-0': !isVisible
 		})}>
 			<div className='overflow-auto h-screen py-10 px-5 scroll-transparent flex items-center'>

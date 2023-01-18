@@ -79,7 +79,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Threshold</p>
-								<Input className= 'placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2'></Input>
+								<Input className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2'></Input>
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
@@ -89,7 +89,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Name</p>
-								<Input className= 'placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name'></Input>
+								<Input className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name'></Input>
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
