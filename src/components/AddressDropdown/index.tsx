@@ -43,7 +43,7 @@ const AddressDropdown = () => {
 			}} className={classNames(
 				'flex items-center justify-center gap-x-3 text-white rounded-lg p-3 shadow-none text-sm',
 				{
-					'bg-highlight border-none outline-none' : selectedAddress.value,
+					'bg-highlight border-2 border-primary' : selectedAddress.value,
 					'bg-transparent border-2 border-text_secondary' : !selectedAddress.value
 				}
 			)}
