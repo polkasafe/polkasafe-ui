@@ -65,7 +65,7 @@ const ConnectWallet = () => {
 				data: stringToHex(signMessage),
 				type: 'bytes'
 			});
-			const res = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/connectAddress`, {
+			const res = await fetch('https://us-central1-polkasafe-a8042.cloudfunctions.net/connectAddress', {
 				headers: {
 					'x-address': address,
 					'x-signature': signature
