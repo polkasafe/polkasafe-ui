@@ -19,7 +19,3 @@ export interface IMultisigAddress {
 export interface IUserResponse extends Omit<IUser, 'multisigAddresses'> {
 	multisigAddresses: IMultisigAddress[];
 }
-
-export interface IToken {
-	token: string;
-}
