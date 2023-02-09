@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { responseMessages, SIGNING_MSG } from './constants';
+import { responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 
 admin.initializeApp();
@@ -18,7 +18,12 @@ const isValidSignature = async (signature:string, address:string) => {
 	try {
 		await cryptoWaitReady();
 		const hexPublicKey = u8aToHex(decodeAddress(address));
-		return signatureVerify(SIGNING_MSG, signature, hexPublicKey).isValid;
+
+		const addressDoc = await firestoreDB.collection('addresses').doc(address).get();
+		const addressData = addressDoc.data();
+		if (!addressData?.token) return false;
+
+		return signatureVerify(addressData?.token, signature, hexPublicKey).isValid;
 	} catch (e) {
 		return false;
 	}
@@ -58,7 +63,6 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-
 		if (!signature || !address) return res.status(400).json({ error: responseMessages.missing_params });
 
 		const isValid = await isValidSignature(signature, address);
