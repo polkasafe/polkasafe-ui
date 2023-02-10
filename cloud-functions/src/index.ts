@@ -14,6 +14,15 @@ const firestoreDB = admin.firestore();
 // TODO: Remove cors before production
 const corsHandler = cors({ origin: true });
 
+const isValidRequest = async (address?:string, signature?:string): Promise<{ isValid: boolean, error: string }> => {
+	if (!address || !signature) return { isValid: false, error: responseMessages.missing_params };
+	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_params };
+
+	const isValid = await isValidSignature(signature, address);
+	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };
+	return { isValid: true, error: '' };
+};
+
 const isValidSubstrateAddress = (address:string): boolean => {
 	return Boolean(checkAddress(address, 42));
 };
@@ -56,7 +65,7 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 
 		try {
 			await addressRef.set({ address, token }, { merge: true });
-			return res.status(500).json({ data: token });
+			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
 			functions.logger.error('Error in firestore call :', { err });
 			return res.status(500).json({ error: responseMessages.internal });
@@ -68,20 +77,18 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		if (!signature || !address) return res.status(400).json({ error: responseMessages.missing_params });
-		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
-		const isValid = await isValidSignature(signature, address);
-		if (!isValid) return res.status(400).json({ error: responseMessages.invalid_signature });
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
 
 		// check if address doc already exists
-		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const addressRef = firestoreDB.collection('addresses').doc(String(address));
 
 		try {
 			const doc = await addressRef.get();
 			if (doc.exists) {
 				const addressDoc = doc.data() as IUser;
-				const multisigAddresses = await getMultisigAddressesByAddress(address);
+				const multisigAddresses = await getMultisigAddressesByAddress(String(address));
 
 				const resUser: IUserResponse = {
 					address: addressDoc.address,
@@ -94,7 +101,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 			// else create a new user document
 			const newUser:IUser = {
-				address,
+				address: String(address),
 				email: null,
 				multisigAddresses: [],
 				addressBook: []
@@ -102,6 +109,36 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 			await addressRef.set(newUser);
 			return res.status(200).json({ data: newUser });
+		} catch (err:unknown) {
+			functions.logger.error('Error in firestore call :', { err });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addToAddressBook = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { name, address: addressToAdd } = req.body;
+		if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressRef = firestoreDB.collection('addresses').doc(String(address));
+
+		try {
+			const doc = await addressRef.get();
+			if (doc.exists) {
+				const addressDoc = doc.data() as IUser;
+				const addressBook = addressDoc.addressBook || [];
+				const newAddressBook = [...addressBook, { name, address: addressToAdd }];
+				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
+				return res.status(200).json({ data: newAddressBook });
+			}
+			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
 			functions.logger.error('Error in firestore call :', { err });
 			return res.status(500).json({ error: responseMessages.internal });
