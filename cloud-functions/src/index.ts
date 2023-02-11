@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
-import { checkAddress, cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
+import { checkAddress, cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
 import { responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
@@ -52,19 +52,26 @@ const getMultisigAddressesByAddress = async (address:string) => {
 	return multisigAddresses.docs.map((doc) => doc.data()) as IMultisigAddress[];
 };
 
+const getSubstrateAddress = (address: string): string => {
+	if (address.startsWith('0x')) return address;
+	return encodeAddress(address, 42);
+};
+
 export const getConnectAddressToken = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
 		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
+		const substrateAddress = getSubstrateAddress(String(address));
+
 		// check if address doc already exists
-		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 
 		const token = `<Bytes>${uuidv4()}</Bytes>`;
 
 		try {
-			await addressRef.set({ address, token }, { merge: true });
+			await addressRef.set({ address: substrateAddress, token }, { merge: true });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
 			functions.logger.error('Error in firestore call :', { err });
@@ -81,14 +88,16 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
+		const substrateAddress = getSubstrateAddress(String(address));
+
 		// check if address doc already exists
-		const addressRef = firestoreDB.collection('addresses').doc(String(address));
+		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 
 		try {
 			const doc = await addressRef.get();
 			if (doc.exists) {
 				const addressDoc = doc.data() as IUser;
-				const multisigAddresses = await getMultisigAddressesByAddress(String(address));
+				const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
 				const resUser: IUserResponse = {
 					address: addressDoc.address,
@@ -101,7 +110,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 			// else create a new user document
 			const newUser:IUser = {
-				address: String(address),
+				address: String(substrateAddress),
 				email: null,
 				multisigAddresses: [],
 				addressBook: []
@@ -124,17 +133,20 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { name, address: addressToAdd } = req.body;
-		if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+		const substrateAddress = getSubstrateAddress(String(address));
 
-		const addressRef = firestoreDB.collection('addresses').doc(String(address));
+		const { name, address: addressToAdd } = req.body;
+		const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+		if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 
 		try {
 			const doc = await addressRef.get();
 			if (doc.exists) {
 				const addressDoc = doc.data() as IUser;
 				const addressBook = addressDoc.addressBook || [];
-				const newAddressBook = [...addressBook, { name, address: addressToAdd }];
+				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
 				return res.status(200).json({ data: newAddressBook });
 			}
