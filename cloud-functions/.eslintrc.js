@@ -25,12 +25,13 @@ module.exports = {
 		'import'
 	],
 	'rules': {
+		'require-jsdoc': 'off',
 		'linebreak-style': 0,
 		'@typescript-eslint/no-unused-vars': 'error',
 		'arrow-spacing': ['warn', { 'before': true, 'after': true }],
 		'comma-dangle': ['error', 'never'],
 		'indent': ['error', 'tab'],
-		'max-len': ['error', { 'code': 120 }],
+		'max-len': ['error', { 'code': 160 }],
 		'no-multiple-empty-lines': ['error', { 'max': 1 }],
 		'no-tabs': ['error', { 'allowIndentationTabs': true }],
 		'no-trailing-spaces': ['warn'],
