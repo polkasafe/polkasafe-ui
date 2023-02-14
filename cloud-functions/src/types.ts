@@ -9,6 +9,7 @@ export interface IUser {
 	address: string;
 	email: string | null;
 	addressBook?: IAddressBookEntry[];
+	created_at: Date;
 }
 
 export interface IMultisigAddress {
@@ -16,6 +17,7 @@ export interface IMultisigAddress {
 	name: string;
 	signatories: string[];
 	network: string;
+	created_at: Date;
 }
 
 export interface IUserResponse extends IUser {

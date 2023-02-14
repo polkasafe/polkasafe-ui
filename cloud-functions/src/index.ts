@@ -50,7 +50,10 @@ const getMultisigAddressesByAddress = async (address:string) => {
 		.where('signatories', 'array-contains', address)
 		.get();
 
-	return multisigAddresses.docs.map((doc) => doc.data()) as IMultisigAddress[];
+	return multisigAddresses.docs.map((doc) => ({
+		...doc.data(),
+		created_at: doc.data().created_at.toDate()
+	})) as IMultisigAddress[];
 };
 
 export const getConnectAddressToken = functions.https.onRequest(async (req, res) => {
@@ -89,21 +92,28 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {
-				const addressDoc = doc.data() as IUser;
+				const addressDoc = {
+					...doc.data(),
+					created_at: doc.data()?.created_at.toDate()
+				} as IUser;
+
 				const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
 				const resUser: IUserResponse = {
 					address: addressDoc.address,
 					email: addressDoc.email,
+					created_at: addressDoc.created_at,
 					addressBook: addressDoc.addressBook,
 					multisigAddresses
 				};
+
 				return res.status(200).json({ data: resUser });
 			}
 
 			// else create a new user document
 			const newUser:IUser = {
 				address: String(substrateAddress),
+				created_at: new Date(),
 				email: null,
 				addressBook: []
 			};
@@ -135,7 +145,10 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {
-				const addressDoc = doc.data() as IUser;
+				const addressDoc = {
+					...doc.data(),
+					created_at: doc.data()?.created_at.toDate()
+				} as IUser;
 				const addressBook = addressDoc.addressBook || [];
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
@@ -186,6 +199,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			const newMultisig: IMultisigAddress = {
 				address,
+				created_at: new Date(),
 				name: multisigName,
 				signatories: substrateSignatories,
 				network: String(network).toLowerCase()
