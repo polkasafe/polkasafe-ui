@@ -176,15 +176,9 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
-		if (Array.isArray(signatories)) {
-			if (signatories.length < 2) {
-				return res.status(400).json({ error: responseMessages.min_singatories });
-			}
-		} else {
-			return res.status(400).json({ error: responseMessages.invalid_params });
-		}
+		if (!Array.isArray(signatories)) return res.status(400).json({ error: responseMessages.invalid_params });
 
-		if (isNaN(threshold) || threshold > signatories.length) {
+		if (isNaN(threshold) || threshold > signatories.length || signatories.length < 2) {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
