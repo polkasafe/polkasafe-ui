@@ -10,6 +10,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
+import '@polkadot/api-augment';
 
 const IS_DEVELOPMENT = true;
 
@@ -188,6 +189,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		}
 
 		try {
+			// sort is important to check if multisig with same signatories already exists
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
 			// check if the multisig with same signatories already exists

@@ -16,6 +16,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@polkadot/api": "^9.14.1",
+    "@polkadot/api-augment": "^9.14.1",
     "@polkadot/ui-keyring": "^2.11.1",
     "@polkadot/util": "^10.2.1",
     "@polkadot/util-crypto": "^10.2.1",
