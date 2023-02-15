@@ -188,7 +188,15 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		}
 
 		try {
-			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory)));
+			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
+
+			// check if the multisig with same signatories already exists
+			const multisigQuerySnapshot = await firestoreDB
+				.collection('multisigAddresses')
+				.where('signatories', '==', substrateSignatories)
+				.get();
+
+			if (!multisigQuerySnapshot.empty) return res.status(400).json({ error: responseMessages.multisig_exists });
 
 			const provider = new WsProvider(chainProperties?.[String(network).toLowerCase()]?.rpcEndpoint);
 			const api = await ApiPromise.create({ provider });
