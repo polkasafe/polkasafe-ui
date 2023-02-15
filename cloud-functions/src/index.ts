@@ -202,18 +202,18 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			const api = await ApiPromise.create({ provider });
 
 			const options = { genesisHash: IS_DEVELOPMENT ? undefined : api.genesisHash.toString(), name: multisigName.trim() };
-			const { address, error } = _createMultisig(substrateSignatories, threshold, options);
-			if (error || !address) return res.status(400).json({ error: error || responseMessages.internal });
+			const { multisigAddress, error } = _createMultisig(substrateSignatories, threshold, options);
+			if (error || !multisigAddress) return res.status(400).json({ error: error || responseMessages.internal });
 
 			const newMultisig: IMultisigAddress = {
-				address,
+				address: multisigAddress,
 				created_at: new Date(),
 				name: multisigName,
 				signatories: substrateSignatories,
 				network: String(network).toLowerCase()
 			};
 
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(address);
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
 			await multisigRef.set(newMultisig);
 
 			return res.status(200).json({ data: newMultisig });

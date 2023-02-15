@@ -9,7 +9,7 @@ interface CreateOptions {
 }
 
 interface CreateMultisigResponse {
-	address?: string;
+	multisigAddress?: string;
 	error?: string;
 }
 
@@ -19,7 +19,7 @@ export default function _createMultisig(
 		const result = keyring.addMultisig(signatories, threshold, { genesisHash, name, tags });
 		const { address } = result.pair;
 
-		return { address };
+		return { multisigAddress: address };
 	} catch (error) {
 		return { error: String(error) || responseMessages.internal };
 	}
