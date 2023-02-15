@@ -6,6 +6,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { Avatar, message } from 'antd';
 import classNames from 'classnames';
 import React, { useRef, useState } from 'react';
+import { redirect } from 'react-router-dom';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 
@@ -26,6 +27,20 @@ const AddressDropdown = () => {
 		// navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
 	};
+
+	const handleDisconnect = () => {
+		// clear local storage
+		localStorage.clear();
+
+		// logout the user
+		// remove from user context
+		// clear the context
+
+		// redirect back to homepage '/'
+		return redirect('/');
+		console.log('Logout clicked');
+	};
+
 	return (
 		<div
 			className='relative'
@@ -82,7 +97,7 @@ const AddressDropdown = () => {
 							<span className='text-white'>Polkadot.js</span>
 						</p>
 					</div>
-					<button className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>
+					<button className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure' onClick={() => handleDisconnect}>
 						Disconnect
 					</button>
 				</div>: null}
