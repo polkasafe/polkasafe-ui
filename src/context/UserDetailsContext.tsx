@@ -5,8 +5,10 @@
 import React, { createContext, useContext, useState } from 'react';
 import { UserDetailsContextType } from 'src/types';
 
-const initialUserDetailsContext : UserDetailsContextType = {
-	addresses: [],
+export const initialUserDetailsContext : UserDetailsContextType = {
+	address: localStorage.getItem('address') || '',
+	addressBook: [],
+	multisigAddresses: [],
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	}

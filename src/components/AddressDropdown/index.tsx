@@ -5,10 +5,12 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, message } from 'antd';
 import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
-import { redirect } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
+import { initialUserDetailsContext, useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
+import logout from 'src/utils/logout';
 
 interface IAddress {
     value: string;
@@ -16,43 +18,32 @@ interface IAddress {
 }
 
 const AddressDropdown = () => {
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const navigate = useNavigate();
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
 		imgSrc: '',
 		value: '3J98t...hWNLy'
 	});
 	const [isVisible, toggleVisibility] = useState(false);
-	const isMouseEnter = useRef(false);
 	const handleCopy = () => {
 		// navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
 	};
 
 	const handleDisconnect = () => {
-		// clear local storage
-		localStorage.clear();
-
-		// logout the user
-		// remove from user context
-		// clear the context
-
-		// redirect back to homepage '/'
-		return redirect('/');
-		console.log('Logout clicked');
+		setUserDetailsContextState(initialUserDetailsContext);
+		logout();
+		toggleVisibility(false);
+		return navigate('/', { replace: true });
 	};
 
 	return (
 		<div
 			className='relative'
-			onBlur={() => {
-				if (!isMouseEnter.current) {
-					(isVisible ? toggleVisibility(false) : null);
-				}
-			}}
 		>
-			<button onClick={() => {
-				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
-			}} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
 					{!selectedAddress?<WarningRoundedIcon className='text-base text-primary'/>
 						:<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
@@ -67,6 +58,7 @@ const AddressDropdown = () => {
 					'text-white': !selectedAddress
 				})} />
 			</button>
+
 			<div
 				className={classNames(
 					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-10 min-w-[274px]',
@@ -97,7 +89,7 @@ const AddressDropdown = () => {
 							<span className='text-white'>Polkadot.js</span>
 						</p>
 					</div>
-					<button className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure' onClick={() => handleDisconnect}>
+					<button onClick={handleDisconnect} className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>
 						Disconnect
 					</button>
 				</div>: null}

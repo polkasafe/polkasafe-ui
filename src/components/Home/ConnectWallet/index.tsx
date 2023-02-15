@@ -3,15 +3,18 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { stringToHex } from '@polkadot/util';
 import React, { useEffect, useState } from 'react';
-import { redirect } from 'react-router-dom';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const ConnectWallet = () => {
+
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
-	const { accounts, noAccounts, noExtension, signersMap, accountsMap } = useGetAllAccounts();
+	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
 
 	useEffect(() => {
@@ -69,12 +72,21 @@ const ConnectWallet = () => {
 					},
 					method: 'POST'
 				});
-				console.log(await connectAddressRes.json());
-				if(address && signature){
+
+				const { data: userData, error: connectAddressErr } = await connectAddressRes.json();
+
+				if(!connectAddressErr && userData){
 					localStorage.setItem('address', address);
 					localStorage.setItem('signature', signature);
 
-					return redirect('add-multisig');
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							address: userData?.address,
+							addressBook: userData?.addressBook,
+							multisigAddresses: userData?.multisigAddresses
+						};
+					});
 				}
 			}
 		} catch (error){
@@ -104,9 +116,7 @@ const ConnectWallet = () => {
 									: null
 							}
 							<button
-								onClick={async () => {
-									showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true);
-								}}
+								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
 								className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
 							>
 								<WalletIcon/>
