@@ -207,6 +207,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			const { multisigAddress, error } = _createMultisig(substrateSignatories, threshold, options);
 			if (error || !multisigAddress) return res.status(400).json({ error: error || responseMessages.internal });
 
+			functions.logger.info('New multisig created with an address of ', multisigAddress);
+
 			const newMultisig: IMultisigAddress = {
 				address: multisigAddress,
 				created_at: new Date(),
