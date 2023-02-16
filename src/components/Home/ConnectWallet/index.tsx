@@ -1,18 +1,20 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { isWeb3Injected } from '@polkadot/extension-dapp';
-import { InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import React, { useEffect, useState } from 'react';
-import { APP_NAME } from 'src/global/appName';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const ConnectWallet = () => {
+
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
-	const { accounts, noAccounts } = useGetAllAccounts();
+	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
 
 	useEffect(() => {
@@ -25,55 +27,70 @@ const ConnectWallet = () => {
 		setAddress(address);
 	};
 
-	const handleConnectWallet = async  () => {
-		if (!accounts.length) {
-			return;
-		}
+	const handleConnectWallet = async () => {
+		if(noExtension || noAccounts) return;
 		try {
-			const injectedWindow = window as Window & InjectedWindow;
+			const substrateAddress = getSubstrateAddress(address);
 
-			let wallet = isWeb3Injected
-				? injectedWindow.injectedWeb3['polkadot-js']
-				: null;
-
-			if (!wallet) {
-				wallet = Object.values(injectedWindow.injectedWeb3)[0];
-			}
-
-			if (!wallet || !wallet.enable) {
+			// TODO - error state
+			if(!substrateAddress){
+				console.log('INVALID SUBSTRATE ADDRESS');
 				return;
 			}
 
-			const injected = await wallet.enable(APP_NAME);
-
-			const signRaw = injected && injected.signer && injected.signer.signRaw;
-
-			if (!signRaw) {
-				return console.error('Signer not available');
-			}
-
-			const signMessage = process.env.REACT_APP_SIGNING_MSG;
-
-			if (!signMessage) {
-				throw new Error('Challenge message not found');
-			}
-
-			const { signature } = await signRaw({
-				address: address,
-				data: stringToHex(signMessage),
-				type: 'bytes'
-			});
-			const res = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/connectAddress`, {
+			const tokenResponse = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/getConnectAddressToken`, {
 				headers: {
-					'x-address': address,
-					'x-signature': signature
+					'x-address': substrateAddress
 				},
 				method: 'POST'
 			});
-			const data = await res.json();
-			console.log(data);
-		} catch (error) {
-			console.log(error);
+
+			const { data: token, error: tokenError } = await tokenResponse.json();
+
+			if(tokenError) {
+				// TODO extension
+				console.log('ERROR TODO', tokenError);
+				return;
+			} else {
+				const wallet = accountsMap[address];
+
+				if(!signersMap[wallet]){
+					// error state - please add ...
+					return;
+				}
+				// @ts-ignore
+				const { signature } = await signersMap[wallet].signRaw({
+					address: substrateAddress,
+					data: stringToHex(token),
+					type: 'bytes'
+				});
+
+				const connectAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/connectAddress`, {
+					headers: {
+						'x-address': substrateAddress,
+						'x-signature': signature
+					},
+					method: 'POST'
+				});
+
+				const { data: userData, error: connectAddressErr } = await connectAddressRes.json();
+
+				if(!connectAddressErr && userData){
+					localStorage.setItem('address', address);
+					localStorage.setItem('signature', signature);
+
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							address: userData?.address,
+							addressBook: userData?.addressBook,
+							multisigAddresses: userData?.multisigAddresses
+						};
+					});
+				}
+			}
+		} catch (error){
+			console.log('ERROR OCCURED', error);
 		}
 	};
 
@@ -99,10 +116,7 @@ const ConnectWallet = () => {
 									: null
 							}
 							<button
-								onClick={async () => {
-									await handleConnectWallet();
-									setShowAccountsDropdown(true);
-								}}
+								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
 								className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
 							>
 								<WalletIcon/>

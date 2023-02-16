@@ -2,13 +2,17 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
-import { checkAddress, cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
+import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { responseMessages } from './constants';
+import { chainProperties, responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
+import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
+import getSubstrateAddress from './utlils/getSubstrateAddress';
+import _createMultisig from './utlils/_createMultisig';
+import '@polkadot/api-augment';
+import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 
 admin.initializeApp();
-
 const firestoreDB = admin.firestore();
 
 // TODO: Remove cors before production
@@ -21,10 +25,6 @@ const isValidRequest = async (address?:string, signature?:string): Promise<{ isV
 	const isValid = await isValidSignature(signature, address);
 	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };
 	return { isValid: true, error: '' };
-};
-
-const isValidSubstrateAddress = (address:string): boolean => {
-	return Boolean(checkAddress(address, 42));
 };
 
 const isValidSignature = async (signature:string, address:string) => {
@@ -49,12 +49,10 @@ const getMultisigAddressesByAddress = async (address:string) => {
 		.where('signatories', 'array-contains', address)
 		.get();
 
-	return multisigAddresses.docs.map((doc) => doc.data()) as IMultisigAddress[];
-};
-
-const getSubstrateAddress = (address: string): string => {
-	if (address.startsWith('0x')) return address;
-	return encodeAddress(address, 42);
+	return multisigAddresses.docs.map((doc) => ({
+		...doc.data(),
+		created_at: doc.data().created_at.toDate()
+	})) as IMultisigAddress[];
 };
 
 export const getConnectAddressToken = functions.https.onRequest(async (req, res) => {
@@ -63,18 +61,16 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
-		const substrateAddress = getSubstrateAddress(String(address));
-
-		// check if address doc already exists
-		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-
-		const token = `<Bytes>${uuidv4()}</Bytes>`;
-
 		try {
+			// check if address doc already exists
+			const token = `<Bytes>${uuidv4()}</Bytes>`;
+
+			const substrateAddress = getSubstrateAddress(String(address));
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			await addressRef.set({ address: substrateAddress, token }, { merge: true });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in getConnectAddressToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -88,38 +84,43 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const substrateAddress = getSubstrateAddress(String(address));
-
-		// check if address doc already exists
-		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			// check if address doc already exists
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {
-				const addressDoc = doc.data() as IUser;
+				const addressDoc = {
+					...doc.data(),
+					created_at: doc.data()?.created_at.toDate()
+				} as IUser;
+
 				const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
 				const resUser: IUserResponse = {
 					address: addressDoc.address,
 					email: addressDoc.email,
+					created_at: addressDoc.created_at,
 					addressBook: addressDoc.addressBook,
 					multisigAddresses
 				};
+
 				return res.status(200).json({ data: resUser });
 			}
 
 			// else create a new user document
 			const newUser:IUser = {
 				address: String(substrateAddress),
+				created_at: new Date(),
 				email: null,
-				multisigAddresses: [],
 				addressBook: []
 			};
 
 			await addressRef.set(newUser);
 			return res.status(200).json({ data: newUser });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -133,18 +134,20 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const substrateAddress = getSubstrateAddress(String(address));
-
-		const { name, address: addressToAdd } = req.body;
-		const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-		if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
-
-		const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const { name, address: addressToAdd } = req.body;
+			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {
-				const addressDoc = doc.data() as IUser;
+				const addressDoc = {
+					...doc.data(),
+					created_at: doc.data()?.created_at.toDate()
+				} as IUser;
 				const addressBook = addressDoc.addressBook || [];
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
@@ -152,7 +155,66 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const createMultisig = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { signatories, threshold, multisigName, network } = req.body;
+		if (!signatories || !threshold || !multisigName || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		if (!Array.isArray(signatories)) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		if (isNaN(threshold) || threshold > signatories.length || signatories.length < 2) {
+			return res.status(400).json({ error: responseMessages.invalid_threshold });
+		}
+
+		try {
+			// sort is important to check if multisig with same signatories already exists
+			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
+
+			// check if the multisig with same signatories already exists in our db
+			const multisigQuerySnapshot = await firestoreDB
+				.collection('multisigAddresses')
+				.where('signatories', '==', substrateSignatories)
+				.get();
+
+			if (!multisigQuerySnapshot.empty) return res.status(400).json({ error: responseMessages.multisig_exists });
+
+			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, threshold, chainProperties[network].ss58Format);
+			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
+
+			// check if multisig already exists on chain
+			const { data: onChainMultisigData, error: onchainFetchErr } = await getOnChainMultisigByAddress(multisigAddress, network);
+			if (onchainFetchErr) return res.status(400).json({ error: onchainFetchErr || responseMessages.onchain_multisig_fetch_error });
+			if (onChainMultisigData && onChainMultisigData.count > 0) return res.status(400).json({ error: responseMessages.multisig_exists });
+
+			const newMultisig: IMultisigAddress = {
+				address: multisigAddress,
+				created_at: new Date(),
+				name: multisigName,
+				signatories: substrateSignatories,
+				network: String(network).toLowerCase()
+			};
+
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			await multisigRef.set(newMultisig);
+
+			functions.logger.info('New multisig created with an address of ', multisigAddress);
+			return res.status(200).json({ data: newMultisig });
+		} catch (err:unknown) {
+			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

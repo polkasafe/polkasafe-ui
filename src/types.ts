@@ -7,7 +7,9 @@ import { Dispatch, SetStateAction } from 'react';
 import { network, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
-    addresses?: string[] | null;
+    address: string;
+    multisigAddresses: IMultisigAddress[];
+    addressBook: IAddressBookEntry[];
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 
@@ -52,16 +54,18 @@ interface IAddressBookEntry {
 export interface IUser {
 	address: string;
 	email: string | null;
-	multisigAddresses: string[];
 	addressBook?: IAddressBookEntry[];
+	created_at: Date;
 }
 
 export interface IMultisigAddress {
 	address: string;
 	name: string;
 	signatories: string[];
+	network: string;
+	created_at: Date;
 }
 
-export interface IUserResponse extends Omit<IUser, 'multisigAddresses'> {
+export interface IUserResponse extends IUser {
 	multisigAddresses: IMultisigAddress[];
 }

@@ -15,9 +15,11 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@polkadot/api": "^9.14.1",
+    "@polkadot/api-augment": "^9.14.1",
     "@polkadot/util": "^10.2.1",
     "@polkadot/util-crypto": "^10.2.1",
-    "axios": "^1.2.2",
+    "axios": "^1.3.3",
     "cors": "^2.8.5",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.1.1",

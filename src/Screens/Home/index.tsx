@@ -6,22 +6,23 @@ import React from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
 import ConnectWallet from 'src/components/Home/ConnectWallet';
 import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalletWrapper';
-import DashboardCard from 'src/components/Home/DashboardCard';
+// import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
-	// TODO: Get multisigs from firebase
-	const multisigs = [];
+	const { multisigAddresses } = useGlobalUserDetailsContext();
 	return (
 		<>
 			{
-				multisigs.length > 0 ?
+				multisigAddresses.length > 0 ?
 					<div>
 						<EmailBadge/>
 						<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
 							<div className='col-start-1 col-end-13 xl:col-end-10'>
-								<DashboardCard className='mt-3' />
+								DASHBOARD CARD
+								{/* <DashboardCard className='mt-3' /> */}
 							</div>
 							<div className='col-start-1 col-end-13 xl:col-start-10'>
 								<AddressCard className='mt-3' />
