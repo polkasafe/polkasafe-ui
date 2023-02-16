@@ -13,10 +13,11 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
 	const { multisigAddresses } = useGlobalUserDetailsContext();
+	console.log('multi addresses', multisigAddresses);
 	return (
 		<>
 			{
-				multisigAddresses.length > 0 ?
+				multisigAddresses && multisigAddresses.length > 0 ?
 					<div>
 						<EmailBadge/>
 						<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
