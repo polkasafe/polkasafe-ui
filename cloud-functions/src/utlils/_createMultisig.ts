@@ -1,25 +1,17 @@
-import { BN } from '@polkadot/util';
-import { keyring } from '@polkadot/ui-keyring';
+import { encodeAddress, encodeMultiAddress } from '@polkadot/util-crypto';
 import { responseMessages } from '../constants';
-
-interface CreateOptions {
-  genesisHash?: string;
-  name: string;
-  tags?: string[];
-}
 
 interface CreateMultisigResponse {
 	multisigAddress?: string;
 	error?: string;
 }
 
-export default function _createMultisig(
-	signatories: string[], threshold: BN | number, { genesisHash, name, tags = [] }: CreateOptions ): CreateMultisigResponse {
+export default function _createMultisig(signatories: string[], threshold: number, ss58Format: number ): CreateMultisigResponse {
 	try {
-		const result = keyring.addMultisig(signatories, threshold, { genesisHash, name, tags });
-		const { address } = result.pair;
+		const encodedSignatories = signatories.map((signatory) => encodeAddress(signatory, ss58Format));
+		const multisigAddress = encodeMultiAddress(encodedSignatories, threshold);
 
-		return { multisigAddress: address };
+		return { multisigAddress };
 	} catch (error) {
 		return { error: String(error) || responseMessages.internal };
 	}

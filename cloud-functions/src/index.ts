@@ -6,13 +6,11 @@ import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-
 import { u8aToHex } from '@polkadot/util';
 import { chainProperties, responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
-import { ApiPromise, WsProvider } from '@polkadot/api';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
 import '@polkadot/api-augment';
-
-const IS_DEVELOPMENT = true;
+import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -72,7 +70,7 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 			await addressRef.set({ address: substrateAddress, token }, { merge: true });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in getConnectAddressToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -122,7 +120,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			await addressRef.set(newUser);
 			return res.status(200).json({ data: newUser });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -157,7 +155,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -186,7 +184,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			// sort is important to check if multisig with same signatories already exists
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
-			// check if the multisig with same signatories already exists
+			// check if the multisig with same signatories already exists in our db
 			const multisigQuerySnapshot = await firestoreDB
 				.collection('multisigAddresses')
 				.where('signatories', '==', substrateSignatories)
@@ -194,14 +192,13 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			if (!multisigQuerySnapshot.empty) return res.status(400).json({ error: responseMessages.multisig_exists });
 
-			const provider = new WsProvider(chainProperties?.[String(network).toLowerCase()]?.rpcEndpoint);
-			const api = await ApiPromise.create({ provider });
+			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, threshold, chainProperties[network].ss58Format);
+			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
 
-			const options = { genesisHash: IS_DEVELOPMENT ? undefined : api.genesisHash.toString(), name: multisigName.trim() };
-			const { multisigAddress, error } = _createMultisig(substrateSignatories, threshold, options);
-			if (error || !multisigAddress) return res.status(400).json({ error: error || responseMessages.internal });
-
-			functions.logger.info('New multisig created with an address of ', multisigAddress);
+			// check if multisig already exists on chain
+			const { data: onChainMultisigData, error: onchainFetchErr } = await getOnChainMultisigByAddress(multisigAddress, network);
+			if (onchainFetchErr) return res.status(400).json({ error: onchainFetchErr || responseMessages.onchain_multisig_fetch_error });
+			if (onChainMultisigData && onChainMultisigData.count > 0) return res.status(400).json({ error: responseMessages.multisig_exists });
 
 			const newMultisig: IMultisigAddress = {
 				address: multisigAddress,
@@ -214,9 +211,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
 			await multisigRef.set(newMultisig);
 
+			functions.logger.info('New multisig created with an address of ', multisigAddress);
 			return res.status(200).json({ data: newMultisig });
 		} catch (err:unknown) {
-			functions.logger.error('Error in firestore call :', { err });
+			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

@@ -27,6 +27,7 @@ module.exports = {
 	'rules': {
 		'require-jsdoc': 'off',
 		'linebreak-style': 0,
+		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/no-unused-vars': 'error',
 		'arrow-spacing': ['warn', { 'before': true, 'after': true }],
 		'comma-dangle': ['error', 'never'],
