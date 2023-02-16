@@ -178,7 +178,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 		if (!Array.isArray(signatories)) return res.status(400).json({ error: responseMessages.invalid_params });
 
-		if (isNaN(threshold) || threshold > signatories.length || signatories.length < 2) {
+		if (isNaN(threshold) || Number(threshold) > signatories.length || signatories.length < 2) {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
@@ -194,7 +194,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			if (!multisigQuerySnapshot.empty) return res.status(400).json({ error: responseMessages.multisig_exists });
 
-			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, threshold, chainProperties[network].ss58Format);
+			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
 			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
 
 			// check if multisig already exists on chain
@@ -207,7 +207,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				name: multisigName,
 				signatories: substrateSignatories,
-				network: String(network).toLowerCase()
+				network: String(network).toLowerCase(),
+				threshold: Number(threshold)
 			};
 
 			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
