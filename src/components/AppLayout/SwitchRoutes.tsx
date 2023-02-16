@@ -4,12 +4,11 @@
 
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import AddMultisigWrapper from 'src/Screens/AddMultisigWrapper';
+import AddMultisig from 'src/Screens/AddMultisig';
 import AddressBook from 'src/Screens/AddressBook';
 import Apps from 'src/Screens/Apps';
 import Assets from 'src/Screens/Assets';
 import ContactUs from 'src/Screens/ContactUs';
-import Dashboard from 'src/Screens/Dashboard';
 import Donate from 'src/Screens/Donate';
 import Error404 from 'src/Screens/Error404';
 import Error500 from 'src/Screens/Error500';
@@ -35,10 +34,8 @@ const SwitchRoutes = () => {
 			<Route path='/privacy-policy' element={<PrivacyPolicy/>} />
 			<Route path='/terms-and-conditions' element={<TermsAndCondition/>} />
 
-			{/* user personal dashboard */}
-			<Route path='dashboard' element={<Dashboard />}/>
 			{/* new user dashboard */}
-			<Route path='add-multisig' element={<AddMultisigWrapper/>} />
+			<Route path='add-multisig' element={<AddMultisig />} />
 
 		</Routes>
 	);

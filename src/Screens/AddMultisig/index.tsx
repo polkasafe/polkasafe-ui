@@ -3,14 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
+import AddMultisigWrapper from 'src/components/Multisig/AddMultisigWrapper';
 
-const AddMultisigWrapper = () => {
+const AddMultisigScreen = () => {
 	return (
-		<div className='flex justify-center items-center h-full rounded-xl flex-col  min-h-[500px] bg-bg-main
-		'>
+		<AddMultisigWrapper>
 			<AddMultisig />
-		</div>
+		</AddMultisigWrapper>
 	);
 };
 
-export default AddMultisigWrapper;
+export default AddMultisigScreen;
