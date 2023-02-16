@@ -91,22 +91,24 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {
-				const addressDoc = {
-					...doc.data(),
-					created_at: doc.data()?.created_at.toDate()
-				} as IUser;
+				const data = doc.data();
+				if (data && data.created_at) {
+					const addressDoc = {
+						...data,
+						created_at: data?.created_at.toDate()
+					} as IUser;
 
-				const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
+					const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
-				const resUser: IUserResponse = {
-					address: addressDoc.address,
-					email: addressDoc.email,
-					created_at: addressDoc.created_at,
-					addressBook: addressDoc.addressBook,
-					multisigAddresses
-				};
-
-				return res.status(200).json({ data: resUser });
+					const resUser: IUserResponse = {
+						address: addressDoc.address,
+						email: addressDoc.email,
+						created_at: addressDoc.created_at,
+						addressBook: addressDoc.addressBook,
+						multisigAddresses
+					};
+					return res.status(200).json({ data: resUser });
+				}
 			}
 
 			// else create a new user document
