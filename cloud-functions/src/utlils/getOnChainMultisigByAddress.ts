@@ -8,11 +8,9 @@ export default async function getOnChainMultisigByAddress(address: string, netwo
 	};
 
 	try {
-		const response = await axios.post(`https://${network}.api.subscan.io/api/scan/accounts`, {
+		const { data: response } = await axios.post(`https://${network}.api.subscan.io/api/scan/multisigs`, {
 			'row': 1,
-			'page': 0,
-			'filter': 'multisig',
-			'address': [address]
+			'account': address
 		}, {
 			headers: {
 				'Accept': 'application/json',
@@ -21,7 +19,7 @@ export default async function getOnChainMultisigByAddress(address: string, netwo
 			}
 		});
 
-		returnValue.data = response.data.data;
+		returnValue.data = response.data;
 	} catch (err) {
 		console.log('Error in getAccountOnChainMultisigs:', err);
 		returnValue.error = String(err) || responseMessages.onchain_multisig_fetch_error;

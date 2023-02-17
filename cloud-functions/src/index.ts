@@ -4,13 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { chainProperties, responseMessages } from './constants';
+import { chainProperties, DEFAULT_MULTISIG_NAME, responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
 import '@polkadot/api-augment';
 import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
+import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -218,6 +219,58 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(200).json({ data: newMultisig });
 		} catch (err:unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getMultisigDataByMultisigAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, network } = req.body;
+		if (!multisigAddress || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		try {
+			// check if the multisig already exists in our db
+			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(multisigAddress)).get();
+			if (multisigRef.exists) {
+				const data = multisigRef.data();
+				return res.status(200).json({ data: {
+					...data,
+					created_at: data?.created_at.toDate()
+				} });
+			}
+
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
+			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
+			if (multisigMetaData && isNaN(multisigMetaData.threshold) || multisigMetaData.signatories.length <= 1) {
+				return res.status(400).json({ error: responseMessages.multisig_not_found });
+			}
+
+			const newMultisig: IMultisigAddress = {
+				address: multisigAddress,
+				created_at: new Date(),
+				name: DEFAULT_MULTISIG_NAME,
+				signatories: multisigMetaData.signatories,
+				network: String(network).toLowerCase(),
+				threshold: Number(multisigMetaData.threshold)
+			};
+
+			// make a copy to db
+			const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			await newMultisigRef.set(newMultisig);
+
+			// TODO: after implementation, check if we should send this response before saving to db
+			return res.status(200).json({ data: newMultisig });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
