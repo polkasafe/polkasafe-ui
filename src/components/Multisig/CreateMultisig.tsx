@@ -10,13 +10,9 @@ import React, { useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
-<<<<<<< HEAD
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-=======
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress } from 'src/types';
->>>>>>> a358bc02f7513d9a56ea3b0121bfc51ea1baac72
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
