@@ -9,6 +9,7 @@ import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalle
 // import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
+import CreateMultisig from 'src/components/Multisig/CreateMultisig';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
@@ -36,8 +37,8 @@ const Home = () => {
 							</div>
 						</section>
 						:
-						<section>
-							Add Multisig Flow
+						<section className='bg-black bg-opacity-50 p-5 rounded-lg'>
+							<CreateMultisig homepage />
 						</section>
 					:
 					<ConnectWalletWrapper>
