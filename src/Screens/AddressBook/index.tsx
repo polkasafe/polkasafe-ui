@@ -12,27 +12,19 @@ import { IAddress } from 'src/components/AddressBook/AddressTable';
 import ExportAdress from 'src/components/AddressBook/ExportAddress';
 import ImportAdress from 'src/components/AddressBook/ImportAddress';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { IAddressBookEntry } from 'src/types';
 import { SearchIcon } from 'src/ui-components/CustomIcons';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
 const AddressBook = () => {
 	const [searchTerm, setSearchTerm] = useState('');
-	const address: IAddress[] = [
-		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLp',
-			imgSrc: profileImg,
-			name: 'Jaski - 1'
-		},
-		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWooo',
-			imgSrc: profileImg,
-			name: 'Mridul'
-		},
-		{
-			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNou',
-			imgSrc: profileImg,
-			name: 'Param'
-		}
-	];
+	const { addressBook } = useGlobalUserDetailsContext();
+	const address: IAddress[] = addressBook.map((item: IAddressBookEntry) => ({
+		address: item.address,
+		imgSrc: profileImg,
+		name: item.name
+	}));
+	console.log(addressBook);
 	const filteredData = address.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
 	const { openModal } = useModalContext();
 	return (

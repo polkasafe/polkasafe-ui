@@ -46,7 +46,7 @@ export type ChainPropType = {
     [index: string]: ChainProps;
 };
 
-interface IAddressBookEntry {
+export interface IAddressBookEntry {
 	name: string;
 	address: string;
 }
