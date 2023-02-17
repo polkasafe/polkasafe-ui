@@ -76,7 +76,7 @@ const ConnectWallet = () => {
 				const { data: userData, error: connectAddressErr } = await connectAddressRes.json();
 
 				if(!connectAddressErr && userData){
-					localStorage.setItem('address', address);
+					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
 
 					setUserDetailsContextState((prevState) => {

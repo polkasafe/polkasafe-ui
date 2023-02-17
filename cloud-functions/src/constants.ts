@@ -31,5 +31,11 @@ export const responseMessages = {
 	internal: 'Internal error occured.',
 	min_singatories: 'Minimum number of signatories is 2.',
 	invalid_threshold: 'Threshold should be a number less than or equal to the number of signatories.',
-	multisig_exists: 'Multisig already exists.'
+	multisig_exists: 'Multisig already exists.',
+	multisig_create_error: 'Error while creating multisig.',
+	onchain_multisig_fetch_error: 'Error while fetching multisig from chain.',
+	multisig_not_found: 'Multisig not found.'
 };
+
+export const SUBSCAN_API_KEY = '056b677410ac226bea971a3e03de66fa';
+export const DEFAULT_MULTISIG_NAME = 'Untitled Multisig';

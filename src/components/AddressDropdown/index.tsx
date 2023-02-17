@@ -33,8 +33,8 @@ const AddressDropdown = () => {
 	};
 
 	const handleDisconnect = () => {
-		setUserDetailsContextState(initialUserDetailsContext);
 		logout();
+		setUserDetailsContextState(initialUserDetailsContext);
 		toggleVisibility(false);
 		return navigate('/', { replace: true });
 	};

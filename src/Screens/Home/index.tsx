@@ -12,29 +12,34 @@ import TxnCard from 'src/components/Home/TxnCard';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
-	const { multisigAddresses } = useGlobalUserDetailsContext();
-	console.log('multi addresses', multisigAddresses);
+	const { address, multisigAddresses } = useGlobalUserDetailsContext();
 	return (
 		<>
 			{
-				multisigAddresses && multisigAddresses.length > 0 ?
-					<div>
-						<EmailBadge/>
-						<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
-							<div className='col-start-1 col-end-13 xl:col-end-10'>
+				address ?
+					multisigAddresses && multisigAddresses.length > 0 ?
+						<section>
+							<EmailBadge/>
+							<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
+								<div className='col-start-1 col-end-13 xl:col-end-10'>
 								DASHBOARD CARD
-								{/* <DashboardCard className='mt-3' /> */}
+									{/* <DashboardCard className='mt-3' /> */}
+								</div>
+								<div className='col-start-1 col-end-13 xl:col-start-10'>
+									<AddressCard className='mt-3' />
+								</div>
 							</div>
-							<div className='col-start-1 col-end-13 xl:col-start-10'>
-								<AddressCard className='mt-3' />
+							<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
+								<div className='col-start-1 col-end-13 lg:col-end-13'>
+									<TxnCard />
+								</div>
 							</div>
-						</div>
-						<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
-							<div className='col-start-1 col-end-13 lg:col-end-13'>
-								<TxnCard />
-							</div>
-						</div>
-					</div>:
+						</section>
+						:
+						<section>
+							Add Multisig Flow
+						</section>
+					:
 					<ConnectWalletWrapper>
 						<ConnectWallet />
 					</ConnectWalletWrapper>

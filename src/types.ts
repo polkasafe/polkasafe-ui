@@ -64,6 +64,7 @@ export interface IMultisigAddress {
 	signatories: string[];
 	network: string;
 	created_at: Date;
+	threshold: number;
 }
 
 export interface IUserResponse extends IUser {

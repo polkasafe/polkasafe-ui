@@ -10,7 +10,13 @@ import React, { useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
+<<<<<<< HEAD
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+=======
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import { IMultisigAddress } from 'src/types';
+>>>>>>> a358bc02f7513d9a56ea3b0121bfc51ea1baac72
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
@@ -37,7 +43,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [threshold, setThreshold] = useState<string>('');
 
-	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+
+	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
 
 	useEffect(() => {
@@ -50,24 +58,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 		setShow(false);
 	};
 	const handleMultisigBadge = async () => {
-		if(noExtension || noAccounts) return;
-
 		try{
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature) {
+			if(!address || !signature || noAccounts) {
 				console.log('ERROR');
 				return;
 			}
 			else{
-				const wallet = accountsMap[address];
-
-				if(!signersMap[wallet]){
-					// error state - please add ...
-					return;
-				}
-
 				const signatories: string[] = [
 					accounts[0].address,
 					accounts[1].address
@@ -82,17 +81,32 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 					}),
 					headers: {
 						'x-address': address,
-						'x-signature': signature
+						'x-signature': signature,
+						Accept: 'application/json',
+						'Content-Type': 'application/json'
 					},
 					method: 'POST'
 				});
 
-				const { data: multisigData, error: multisigError } = await connectAddressRes.json();
+				const { data: multisigData, error: multisigError } = await connectAddressRes.json() as { error: string; data: IMultisigAddress};
 
-				console.log('data', multisigData);
-				console.log('error', multisigError);
+				if(multisigError) {
+					queueNotification({
+						header: 'Error!',
+						message: multisigError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
 
 				if(multisigData){
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							multisigAddresses: [...prevState.multisigAddresses, multisigData]
+						};
+					});
+
 					queueNotification({
 						header: 'Success!',
 						message: 'Your MultiSig Jaski - 2 has been created successfully!',
@@ -180,4 +194,3 @@ export default styled(CreateMultisig)`
 		background-color: #645ADF !important;
 	}
 `;
-
