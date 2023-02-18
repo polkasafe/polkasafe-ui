@@ -34,7 +34,11 @@ export const responseMessages = {
 	multisig_exists: 'Multisig already exists.',
 	multisig_create_error: 'Error while creating multisig.',
 	onchain_multisig_fetch_error: 'Error while fetching multisig from chain.',
-	multisig_not_found: 'Multisig not found.'
+	multisig_not_found: 'Multisig not found.',
+	duplicate_signatories: 'Duplicate signatories.',
+	invalid_limit: 'Min. and max. limit that can be fetched per page is 1 and 100 respectively.',
+	invalid_page: 'Min. value for page is 1.',
+	transfers_fetch_error: 'Error while fetching transfers.'
 };
 
 export const SUBSCAN_API_KEY = '056b677410ac226bea971a3e03de66fa';
