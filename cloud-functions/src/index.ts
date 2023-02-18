@@ -152,6 +152,15 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 					created_at: doc.data()?.created_at.toDate()
 				} as IUser;
 				const addressBook = addressDoc.addressBook || [];
+
+				// check if address already exists in address book
+				const addressIndex = addressBook.findIndex((a) => a.address == substrateAddressToAdd);
+				if (addressIndex > -1) {
+					addressBook[addressIndex] = { name, address: substrateAddressToAdd };
+					await addressRef.set({ addressBook }, { merge: true });
+					return res.status(200).json({ data: addressBook });
+				}
+
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
 				return res.status(200).json({ data: newAddressBook });
@@ -183,6 +192,9 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
+		// check if signatories contain duplicate addresses
+		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
+
 		try {
 			// sort is important to check if multisig with same signatories already exists
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
@@ -213,7 +225,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			};
 
 			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
-			await multisigRef.set(newMultisig);
+			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', multisigAddress);
 			return res.status(200).json({ data: newMultisig });
