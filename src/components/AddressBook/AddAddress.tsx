@@ -21,7 +21,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 	const [address, setAddress] = useState<string>('');
 	const [name, setName] = useState<string>('');
 
-	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleAddAddress = async () => {
 		try{
@@ -33,6 +33,14 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 				return;
 			}
 			else{
+				if(addressBook.some((item) => item.address === address)){
+					queueNotification({
+						header: 'Error!',
+						message: 'Address exists in Address book.',
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
 
 				const addAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/addToAddressBook`, {
 					body: JSON.stringify({
