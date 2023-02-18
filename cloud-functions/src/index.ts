@@ -12,6 +12,7 @@ import _createMultisig from './utlils/_createMultisig';
 import '@polkadot/api-augment';
 import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
+import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -283,6 +284,43 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 			return res.status(200).json({ data: newMultisig });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getTransactionsForMultisig = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, network, limit, page } = req.body;
+		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
+		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
+		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
+
+		try {
+			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(multisigAddress, network, Number(limit), Number(page));
+			if (transactionsError || !transactionsArr) return res.status(400).json({ error: transactionsError || responseMessages.transfers_fetch_error });
+
+			res.status(200).json({ data: transactionsArr });
+
+			// make a copy to db after response is sent
+			// single batch will do because there'll never be more than 100 transactions
+			const firestoreBatch = firestoreDB.batch();
+
+			transactionsArr.forEach((transaction) => {
+				const transactionRef = firestoreDB.collection('transactions').doc(transaction.id);
+				firestoreBatch.set(transactionRef, transaction);
+			});
+
+			await firestoreBatch.commit();
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
