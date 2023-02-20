@@ -41,10 +41,15 @@ const Signotary = ({ setSignatories }: ISignatoryProps) => {
 		const address = `${data}`.split('-')[1];
 		if(setSignatories){
 			setSignatories((prevState) => {
-				return [
-					...prevState,
-					address
-				];
+				if(prevState.includes(address)){
+					return prevState;
+				}
+				else{
+					return [
+						...prevState,
+						address
+					];
+				}
 			});
 
 		}

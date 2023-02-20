@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import Identicon from '@polkadot/react-identicon';
 import { Divider, message } from 'antd';
 import React, { FC } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
@@ -14,7 +15,6 @@ import RemoveAddress from './Remove';
 export interface IAddress {
 	name: string;
 	address: string;
-	imgSrc: string;
 }
 interface IAddressProps {
     address: IAddress[];
@@ -36,7 +36,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 				</span>
 			</article>
 			{
-				address.map(({ address, imgSrc, name }, index) => {
+				address.map(({ address, name }, index) => {
 					const handleCopy = () => {
 						navigator.clipboard.writeText(`${address}`);
 						message.success('Copied!');
@@ -48,9 +48,12 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									{name}
 								</p>
 								<div className='col-span-2 flex items-center'>
-									<div className='flex items-center justify-center overflow-hidden rounded-full w-4 h-4'>
-										<img src={imgSrc} alt="profile img" />
-									</div>
+									<Identicon
+										className='image identicon mx-2'
+										value={address}
+										size={30}
+										theme={'polkadot'}
+									/>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={handleCopy}><CopyIcon /></button>

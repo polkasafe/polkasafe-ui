@@ -5,30 +5,21 @@
 import { Button } from 'antd';
 import { Input } from 'antd';
 import React, { useState } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
 import AddAdress from 'src/components/AddressBook/AddAddress';
 import AddressTable from 'src/components/AddressBook/AddressTable';
-import { IAddress } from 'src/components/AddressBook/AddressTable';
 import ExportAdress from 'src/components/AddressBook/ExportAddress';
 import ImportAdress from 'src/components/AddressBook/ImportAddress';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { IAddressBookEntry } from 'src/types';
 import { SearchIcon } from 'src/ui-components/CustomIcons';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
 const AddressBook = () => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const { addressBook } = useGlobalUserDetailsContext();
-	const address: IAddress[] = addressBook.map((item: IAddressBookEntry) => ({
-		address: item.address,
-		imgSrc: profileImg,
-		name: item.name
-	}));
-	console.log(addressBook);
-	const filteredData = address.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
+	const filteredData = addressBook.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
 	const { openModal } = useModalContext();
 	return (
-		<div className='h-[70vh] bg-bg-main rounded-lg'>
+		<div className='h-[70vh] overflow-y-auto bg-bg-main rounded-lg'>
 			<div className="grid grid-cols-12 gap-4">
 				<div className="col-start-1 col-end-13">
 					<div className="flex items-center justify-between">

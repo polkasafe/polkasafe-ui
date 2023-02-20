@@ -20,16 +20,19 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 
 	const [address, setAddress] = useState<string>('');
 	const [name, setName] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleAddAddress = async () => {
 		try{
+			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
 			if(!userAddress || !signature) {
 				console.log('ERROR');
+				setLoading(false);
 				return;
 			}
 			else{
@@ -39,6 +42,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						message: 'Address exists in Address book.',
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
 					return;
 				}
 
@@ -65,6 +69,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						message: addAddressError,
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
 					return;
 				}
 
@@ -81,6 +86,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						message: 'Your address has been added successfully!',
 						status: NotificationStatus.SUCCESS
 					});
+					setLoading(false);
 					toggleVisibility();
 
 				}
@@ -88,6 +94,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 			}
 		} catch (error){
 			console.log('ERROR', error);
+			setLoading(false);
 		}
 	};
 
@@ -140,7 +147,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn onClick={toggleVisibility}/>
-				<AddBtn title='Add' onClick={handleAddAddress} />
+				<AddBtn loading={loading} title='Add' onClick={handleAddAddress} />
 			</div>
 		</Form>
 	);

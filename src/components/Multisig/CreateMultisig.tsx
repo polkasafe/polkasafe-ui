@@ -45,6 +45,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -57,11 +58,13 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	};
 	const handleMultisigBadge = async () => {
 		try{
+			setLoading(true);
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
 			if(!address || !signature || noAccounts) {
 				console.log('ERROR');
+				setLoading(false);
 				return;
 			}
 			else{
@@ -90,6 +93,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						message: multisigError,
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
 					return;
 				}
 
@@ -106,6 +110,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						message: 'Your MultiSig Jaski - 2 has been created successfully!',
 						status: NotificationStatus.SUCCESS
 					});
+					setLoading(false);
 					toggleVisibility();
 
 				}
@@ -113,6 +118,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			}
 		} catch (error){
 			console.log('ERROR', error);
+			setLoading(false);
 		}
 	};
 	return (
@@ -175,7 +181,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
-					<AddBtn title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
+					<AddBtn loading={loading} title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
 				</div>
 			</div>:
 				<MultisigCreated/>}

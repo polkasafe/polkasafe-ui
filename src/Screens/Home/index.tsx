@@ -14,6 +14,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
 	const { address, multisigAddresses } = useGlobalUserDetailsContext();
+	console.log('multisig addresses: ', multisigAddresses);
 	return (
 		<>
 			{
