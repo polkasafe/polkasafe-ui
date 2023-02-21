@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { DEFAULT_MULTISIG_NAME, responseMessages, SUBSCAN_API_KEY } from '../constants';
+import { DEFAULT_MULTISIG_NAME } from '../constants/defaults';
+import { responseMessages } from '../constants/response_messages';
+import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
 
 interface IResponse {
 	error?: string | null;
@@ -25,11 +27,7 @@ export default async function getOnChainMultisigMetaData(multisigAddress: string
 			'row': 1,
 			'key': multisigAddress
 		}, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'X-API-Key': SUBSCAN_API_KEY
-			}
+			headers: SUBSCAN_API_HEADERS
 		});
 
 		returnValue.data = {

@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { chainProperties, DEFAULT_MULTISIG_NAME, responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
@@ -13,6 +12,10 @@ import '@polkadot/api-augment';
 import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
+import _getAssetsForAddress from './utlils/_getAssetsForAddress';
+import { responseMessages } from './constants/response_messages';
+import { chainProperties } from './constants/network_constants';
+import { DEFAULT_MULTISIG_NAME } from './constants/defaults';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -318,6 +321,34 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 			});
 
 			await firestoreBatch.commit();
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getAssetsForAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { address: addressToFetch, network } = req.body;
+		if (!addressToFetch || !network) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const { data: assetsArr, error: assetsError } = await _getAssetsForAddress(addressToFetch, network);
+			if (assetsError || !assetsArr) return res.status(400).json({ error: assetsError || responseMessages.assets_fetch_error });
+
+			res.status(200).json({ data: assetsArr });
+
+			// make a copy to db after response is sent
+			const assetsRef = firestoreDB.collection('assets').doc(addressToFetch);
+			assetsRef.set({ assets: assetsArr });
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { responseMessages, SUBSCAN_API_KEY } from '../constants';
+import { responseMessages } from '../constants/response_messages';
+import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
 
 export default async function getOnChainMultisigByAddress(address: string, network: string): Promise<{ error?: string | null, data: any }> {
 	const returnValue = {
@@ -12,11 +13,7 @@ export default async function getOnChainMultisigByAddress(address: string, netwo
 			'row': 1,
 			'account': address
 		}, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'X-API-Key': SUBSCAN_API_KEY
-			}
+			headers: SUBSCAN_API_HEADERS
 		});
 
 		returnValue.data = response.data;

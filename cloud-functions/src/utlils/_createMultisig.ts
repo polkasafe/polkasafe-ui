@@ -1,5 +1,5 @@
 import { encodeAddress, encodeMultiAddress } from '@polkadot/util-crypto';
-import { responseMessages } from '../constants';
+import { responseMessages } from '../constants/response_messages';
 
 interface CreateMultisigResponse {
 	multisigAddress?: string;
