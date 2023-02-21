@@ -13,9 +13,9 @@ import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
-import { responseMessages } from './constants/response_messages';
 import { chainProperties } from './constants/network_constants';
 import { DEFAULT_MULTISIG_NAME } from './constants/defaults';
+import { responseMessages } from './constants/response_messages';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -352,6 +352,30 @@ export const getAssetsForAddress = functions.https.onRequest(async (req, res) =>
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const deleteMultisig = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			await multisigRef.delete();
+
+			functions.logger.info('Deleted multisig with an address of ', multisigAddress);
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
