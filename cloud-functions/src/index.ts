@@ -436,3 +436,28 @@ export const addContactFormResponse = functions.https.onRequest(async (req, res)
 		}
 	});
 });
+
+export const updateEmail = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { email } = req.body;
+		if (!email ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ email: String(email) });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateEmail :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
