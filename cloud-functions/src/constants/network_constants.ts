@@ -2,7 +2,8 @@ import { ChainProperties } from '../types';
 
 export const networks = {
 	POLKADOT: 'polkadot',
-	KUSAMA: 'kusama'
+	KUSAMA: 'kusama',
+	WESTEND: 'westend'
 };
 
 export const chainProperties: ChainProperties = {
@@ -21,5 +22,13 @@ export const chainProperties: ChainProperties = {
 		ss58Format: 2,
 		tokenDecimals: 12,
 		tokenSymbol: 'KSM'
+	},
+	[networks.WESTEND]: {
+		blockTime: 6000,
+		keyringType: 'sr25519',
+		rpcEndpoint: 'wss://westend-rpc.dwellir.com',
+		ss58Format: 42,
+		tokenDecimals: 12,
+		tokenSymbol: 'WND'
 	}
 };

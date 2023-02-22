@@ -203,6 +203,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			// sort is important to check if multisig with same signatories already exists
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
+			// check if substrateSignatories contains the address of the user
+			const substrateAddress = getSubstrateAddress(String(address));
+			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.invalid_params });
+
 			// check if the multisig with same signatories already exists in our db
 			const multisigQuerySnapshot = await firestoreDB
 				.collection('multisigAddresses')

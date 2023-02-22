@@ -14,6 +14,13 @@ export const tokenProperties = {
         "symbol": "KSM",
         "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/5034.png"
     },
+    "WND": {
+        "chainId": 1,
+        "name": "Westend",
+        "decimals": 10,
+        "symbol": "WND",
+        "logoURI": "https://polkassembly.io/assets/westend-logo.f93479e5.jpg"
+    },
     "300": {
         "chainId": 1,
         "name": "Spartan",
@@ -17581,14 +17588,6 @@ export const tokenProperties = {
         "decimals": 18,
         "symbol": "PAZZI",
         "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/5635.png"
-    },
-    "WND": {
-        "chainId": 1,
-        "name": "Wonder",
-        "address": "0x69DC5556A91DFab39f8D50f6FE552296F2268Dda",
-        "decimals": 5,
-        "symbol": "WND",
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/5637.png"
     },
     "OYO": {
         "chainId": 1,
