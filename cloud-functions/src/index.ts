@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { chainProperties, DEFAULT_MULTISIG_NAME, responseMessages } from './constants';
 import { IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
@@ -13,6 +12,10 @@ import '@polkadot/api-augment';
 import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
+import _getAssetsForAddress from './utlils/_getAssetsForAddress';
+import { chainProperties } from './constants/network_constants';
+import { DEFAULT_MULTISIG_NAME } from './constants/defaults';
+import { responseMessages } from './constants/response_messages';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -200,6 +203,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			// sort is important to check if multisig with same signatories already exists
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
+			// check if substrateSignatories contains the address of the user
+			const substrateAddress = getSubstrateAddress(String(address));
+			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.invalid_params });
+
 			// check if the multisig with same signatories already exists in our db
 			const multisigQuerySnapshot = await firestoreDB
 				.collection('multisigAddresses')
@@ -321,6 +328,58 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getAssetsForAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { address: addressToFetch, network } = req.body;
+		if (!addressToFetch || !network) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const { data: assetsArr, error: assetsError } = await _getAssetsForAddress(addressToFetch, network);
+			if (assetsError || !assetsArr) return res.status(400).json({ error: assetsError || responseMessages.assets_fetch_error });
+
+			res.status(200).json({ data: assetsArr });
+
+			// make a copy to db after response is sent
+			const assetsRef = firestoreDB.collection('assets').doc(addressToFetch);
+			assetsRef.set({ assets: assetsArr });
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const deleteMultisig = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			await multisigRef.delete();
+
+			functions.logger.info('Deleted multisig with an address of ', multisigAddress);
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

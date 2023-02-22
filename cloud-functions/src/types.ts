@@ -49,3 +49,10 @@ export interface ITransaction {
 	network: string;
 }
 
+export interface IAsset {
+	name: string;
+	logoURI: string;
+	symbol: string;
+	balance_usd: string;
+	balance_token: string;
+}

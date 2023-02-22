@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { responseMessages, SUBSCAN_API_KEY } from '../constants';
 import { ITransaction } from '../types';
 import dayjs from 'dayjs';
+import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
+import { responseMessages } from '../constants/response_messages';
 
 interface IResponse {
 	error?: string | null;
@@ -21,11 +22,7 @@ export default async function getTransactionsByAddress(multisigAddress: string, 
 			'address': multisigAddress,
 			'currency': 'token'
 		}, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'X-API-Key': SUBSCAN_API_KEY
-			}
+			headers: SUBSCAN_API_HEADERS
 		});
 
 		const transactions: ITransaction[] = [];

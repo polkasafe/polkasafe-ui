@@ -1,29 +1,3 @@
-import { ChainProperties } from './types';
-
-export const networks = {
-	POLKADOT: 'polkadot',
-	KUSAMA: 'kusama'
-};
-
-export const chainProperties: ChainProperties = {
-	[networks.POLKADOT]: {
-		blockTime: 6000,
-		keyringType: 'sr25519',
-		rpcEndpoint: 'wss://rpc.polkadot.io',
-		ss58Format: 0,
-		tokenDecimals: 10,
-		tokenSymbol: 'DOT'
-	},
-	[networks.KUSAMA]: {
-		blockTime: 6000,
-		keyringType: 'ed25519',
-		rpcEndpoint: 'wss://kusama-rpc.polkadot.io',
-		ss58Format: 2,
-		tokenDecimals: 12,
-		tokenSymbol: 'KSM'
-	}
-};
-
 export const responseMessages = {
 	missing_params: 'Missing parameters.',
 	invalid_params: 'Invalid parameters passed to the function call.',
@@ -38,8 +12,7 @@ export const responseMessages = {
 	duplicate_signatories: 'Duplicate signatories.',
 	invalid_limit: 'Min. and max. limit that can be fetched per page is 1 and 100 respectively.',
 	invalid_page: 'Min. value for page is 1.',
-	transfers_fetch_error: 'Error while fetching transfers.'
+	transfers_fetch_error: 'Error while fetching transfers.',
+	assets_fetch_error: 'Error while fetching assets.',
+	success: 'Success'
 };
-
-export const SUBSCAN_API_KEY = '056b677410ac226bea971a3e03de66fa';
-export const DEFAULT_MULTISIG_NAME = 'Untitled Multisig';
