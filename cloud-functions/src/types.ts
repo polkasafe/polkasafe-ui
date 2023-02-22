@@ -60,5 +60,11 @@ export interface IAsset {
 export interface IFeedback {
 	address: string;
 	rating: number;
-	comment: string;
+	review: string;
+}
+
+export interface IContactFormResponse {
+	name: string;
+	email: string;
+	message: string;
 }

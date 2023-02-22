@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
+import { IContactFormResponse, IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -393,22 +393,45 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { comment, rating } = req.body;
-		if (!comment || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
+		const { review, rating } = req.body;
+		if (!review || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			const multisigRef = firestoreDB.collection('feedback').doc();
+			const feedbackRef = firestoreDB.collection('feedbacks').doc();
 			const newFeedback: IFeedback = {
 				address: String(address),
 				rating: Number(rating),
-				comment: String(comment)
+				review: String(review)
 			};
 
-			await multisigRef.set(newFeedback);
+			await feedbackRef.set(newFeedback);
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in addFeedback :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addContactFormResponse = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const { name, email, message } = req.body;
+		if (!name || !email || !message ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const contactFormResponseRef = firestoreDB.collection('contactFormResponses').doc();
+			const newContactFormResponse: IContactFormResponse = {
+				name: String(name),
+				email: String(email),
+				message: String(message)
+			};
+
+			await contactFormResponseRef.set(newContactFormResponse);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in addContactFormResponse :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
