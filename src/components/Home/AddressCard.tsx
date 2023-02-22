@@ -8,11 +8,13 @@ import AddAddrIcon from 'src/assets/icons/add-addr-icon.svg';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import AddAdress from 'src/components/AddressBook/AddAddress';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const AddressCard = ({ className }: { className?: string }) => {
 	const { openModal } = useModalContext();
+	const { addressBook } = useGlobalUserDetailsContext();
 	return (
 		<div>
 			<div className="flex justify-between flex-row w-full">
@@ -24,18 +26,12 @@ const AddressCard = ({ className }: { className?: string }) => {
 			</div>
 			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-72 mt-3`}>
 				<div className='flex flex-col items-center px-5 h-72 overflow-auto w-[100%] divide-y divide-gray-700'>
-					<div className='flex justify-items-center items-center pt-5 mb-5'>
-						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1Wpnyifhfh...WrnqRgjgjhWNLy</div>
-					</div>
-					<div className='flex justify-items-center items-center pt-5 mb-5'>
-						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1Wpfhfhnyi...WrgjgjnqRhWNLy</div>
-					</div>
-					<div className='flex justify-items-center items-center pt-5 mb-5'>
-						<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
-						<div className='px-1 text-sm text-white truncate'>3J98t1Wfhfhpnyi...WgjgjrnqRhWNLy</div>
-					</div>
+					{addressBook.map((item, i) => (
+						<div key={`${i}-${item.address}`} className='flex justify-items-center items-center pt-5 mb-5'>
+							<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
+							<div className='px-1 text-sm text-white truncate'>{item.address}</div>
+						</div>
+					))}
 				</div>
 				<div className='w-[90%] mt-5'>
 					<PrimaryButton className='w-[100%] flex items-center justify-center bg-highlight py-5' onClick={() => openModal('Add Address', <AddAdress/>)}>

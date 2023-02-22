@@ -4,13 +4,29 @@
 
 import { SwapOutlined } from '@ant-design/icons';
 import React from 'react';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { IAddressBookEntry } from 'src/types';
 
-const Signotary = () => {
-	const signatures = [
-		{ id: 'item1', key: 1, name: 'Polka test-1' },
-		{ id: 'item2', key: 2, name: 'Polka test-2' },
-		{ id: 'item3', key: 3, name: 'Polka test-3' }
-	];
+interface ISignature{
+	name: string
+	address: string
+	key: number
+}
+
+interface ISignatoryProps{
+	setSignatories?: React.Dispatch<React.SetStateAction<string[]>>
+
+}
+
+const Signotary = ({ setSignatories }: ISignatoryProps) => {
+
+	const { addressBook } = useGlobalUserDetailsContext();
+
+	const signatures: ISignature[] = addressBook.map((item: IAddressBookEntry, i: number) => ({
+		address: item.address,
+		key: i,
+		name: item.name
+	}));
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);
 	};
@@ -22,6 +38,21 @@ const Signotary = () => {
 	const drop = (event:any) => {
 		event.preventDefault();
 		const data = event.dataTransfer.getData('text');
+		const address = `${data}`.split('-')[1];
+		if(setSignatories){
+			setSignatories((prevState) => {
+				if(prevState.includes(address)){
+					return prevState;
+				}
+				else{
+					return [
+						...prevState,
+						address
+					];
+				}
+			});
+
+		}
 		event.target.appendChild(document.getElementById(data));
 	};
 	return (
@@ -31,7 +62,7 @@ const Signotary = () => {
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
 						{signatures.map((signature) => (
-							<p id={signature.id} key={signature.key} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{signature.name}</p>
+							<p id={`${signature.key}-${signature.address}`} key={`${signature.key}-${signature.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{signature.name}</p>
 						))}
 					</div>
 				</div>

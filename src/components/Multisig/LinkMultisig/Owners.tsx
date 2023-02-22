@@ -6,54 +6,21 @@ import { Form, Input } from 'antd';
 import React from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcons';
+import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
 
-const Owners = () => {
-	const owners = [<div className="flex flex-col gap-y-3 mb-5" key={1}>
-		<label
-			className="text-primary text-xs leading-[13px] font-normal"
-			htmlFor="name1"
-		>Owner Name 1</label>
-		<div className="flex items-center">
-			<Form.Item
-				name="name1"
-				rules={[]}
-				className='border-0 outline-0 my-0 p-0'
-			>
-				<Input
-					placeholder="John Doe"
-					className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-					id="name"
-				/>
-			</Form.Item>
-			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>3J98t1Wp...nyiWrnqRhWNLz</div>
-				<button onClick={() => navigator.clipboard.writeText('3J98t1Wp...nyiWrnqRhWNL1')}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
-				<ShareIcon className='text-text_secondary'/></div>
-		</div>
-	</div>,<div className="flex flex-col gap-y-3 mb-5" key={2}>
-		<label
-			className="text-primary text-xs leading-[13px] font-normal"
-			htmlFor="name2"
-		>Owner Name 2</label>
-		<div className="flex items-center">
-			<Form.Item
-				name="name2"
-				rules={[]}
-				className='border-0 outline-0 my-0 p-0'
-			>
-				<Input
-					placeholder="John Doe"
-					className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-					id="name"
-				/>
-			</Form.Item>
-			<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><button className='text-white'>nJ98t1Wp...nyiWrnqRhWNLm</button>
-				<button onClick={() => navigator.clipboard.writeText('nJ98t1Wp...nyiWrnqRhWNL1')}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
-				<ShareIcon className='text-text_secondary'/>
-			</div>
-		</div>
-	</div>];
+interface ISignatory{
+	name: string
+	address: string
+}
+
+interface Props{
+	signatories: ISignatory[]
+}
+
+const Owners = ({ signatories }: Props) => {
+
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -79,11 +46,37 @@ const Owners = () => {
 					</div>
 				</div>
 				<div>
-					<p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {owners.length} owners. Optional: Provide a name for each owner.</p>
+					<p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>
 					<Form
 						className='my-0 mt-5'
 					>
-						{ owners }
+						{signatories?.map((item, i: number) => (
+
+							<div className="flex flex-col gap-y-3 mb-5" key={i}>
+								<label
+									className="text-primary text-xs leading-[13px] font-normal"
+									htmlFor="name1"
+								>Owner Name {i+1}</label>
+								<div className="flex items-center">
+									<Form.Item
+										name="name1"
+										rules={[]}
+										className='border-0 outline-0 my-0 p-0'
+									>
+										<Input
+											placeholder="John Doe"
+											className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+											id="name"
+											value={item.name}
+											defaultValue={item.name}
+										/>
+									</Form.Item>
+									<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
+										<button onClick={() => navigator.clipboard.writeText(item.address)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
+										<ShareIcon className='text-text_secondary'/></div>
+								</div>
+							</div>
+						))}
 					</Form>
 				</div>
 			</div>

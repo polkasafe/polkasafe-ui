@@ -7,7 +7,8 @@ import { CheckOutlined } from 'src/ui-components/CustomIcons';
 
 import Loader from '../../UserFlow/Loader';
 
-const NameAddress = () => {
+const NameAddress = ({ multisigAddress, setMultisigAddress }: { multisigAddress: string, setMultisigAddress: React.Dispatch<React.SetStateAction<string>>
+}) => {
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -68,6 +69,8 @@ const NameAddress = () => {
 								className='border-0 outline-0 my-0 p-0'
 							>
 								<Input
+									onChange={(e) => setMultisigAddress(e.target.value)}
+									value={multisigAddress}
 									placeholder="Unique Safe Address"
 									className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 									id="address"

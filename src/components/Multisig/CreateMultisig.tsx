@@ -4,7 +4,7 @@
 /* eslint-disable sort-keys */
 
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Input, Switch } from 'antd';
+import { Button, Input, InputNumber, Switch } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -31,18 +31,21 @@ interface IMultisigProps {
 	className?: string
 	onCancel?: () => void
 	isModalPopup?:boolean
+	homepage?: boolean
 }
 
-const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
+const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
 	const { openModal, toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [show, setShow] = useState(true);
 	const [multisigName, setMultisigName] = useState<string>('');
-	const [threshold, setThreshold] = useState<string>('');
+	const [threshold, setThreshold] = useState<number | null>(null);
+	const [signatories, setSignatories] = useState<string[]>([]);
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -55,20 +58,18 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 	};
 	const handleMultisigBadge = async () => {
 		try{
+			setLoading(true);
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
 			if(!address || !signature || noAccounts) {
 				console.log('ERROR');
+				setLoading(false);
 				return;
 			}
 			else{
-				const signatories: string[] = [
-					accounts[0].address,
-					accounts[1].address
-				];
 
-				const connectAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/createMultisig`, {
+				const createMultisigRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
 						threshold,
@@ -84,7 +85,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 					method: 'POST'
 				});
 
-				const { data: multisigData, error: multisigError } = await connectAddressRes.json() as { error: string; data: IMultisigAddress};
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
 
 				if(multisigError) {
 					queueNotification({
@@ -92,6 +93,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						message: multisigError,
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
 					return;
 				}
 
@@ -108,6 +110,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						message: 'Your MultiSig Jaski - 2 has been created successfully!',
 						status: NotificationStatus.SUCCESS
 					});
+					setLoading(false);
 					toggleVisibility();
 
 				}
@@ -115,13 +118,14 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 			}
 		} catch (error){
 			console.log('ERROR', error);
+			setLoading(false);
 		}
 	};
 	return (
 		<div>
 			{show?<div className='flex flex-col relative'>
 				<div className={classNames(
-					'w-[80vw] flex justify-between items-end',
+					`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 					{
 						'w-auto':onCancel
 					}
@@ -144,7 +148,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 							</div>}
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signotary/> : <DragDrop/>}
+							{toggleSwitch? <Signotary setSignatories={setSignatories}/> : <DragDrop/>}
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />
@@ -156,7 +160,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Threshold</p>
-								<Input onChange={(e) => setThreshold(e.target.value)} value={threshold} className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2'></Input>
+								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2' />
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
@@ -166,7 +170,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Name</p>
-								<Input onChange={(e) => setMultisigName(e.target.value)} value={multisigName}  className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name'></Input>
+								<Input onChange={(e) => setMultisigName(e.target.value)} value={multisigName}  className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name' />
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
@@ -177,7 +181,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel }) => {
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
-					<AddBtn title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
+					<AddBtn loading={loading} title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
 				</div>
 			</div>:
 				<MultisigCreated/>}
