@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IMultisigAddress, IUser, IUserResponse } from './types';
+import { IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -385,5 +385,31 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 	});
 });
 
-// TODO: Every time history is asked from the server, the server should check from subscan and store it in the database
-// with the price at that time.
+export const addFeedback = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { comment, rating } = req.body;
+		if (!comment || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const multisigRef = firestoreDB.collection('feedback').doc();
+			const newFeedback: IFeedback = {
+				address: String(address),
+				rating: Number(rating),
+				comment: String(comment)
+			};
+
+			await multisigRef.set(newFeedback);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in addFeedback :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
