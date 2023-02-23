@@ -150,6 +150,8 @@ const LinkMultisig = () => {
 		}
 	};
 
+	console.log('signatoriesWithName', signatoriesWithName);
+
 	return (
 		<>
 			{nameAddress?
@@ -169,7 +171,7 @@ const LinkMultisig = () => {
 						</div>
 					</div>:<div>
 						{viewReviews?<div>
-							<Owners signatories={signatoriesWithName} />
+							<Owners signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={toggleVisibility} />
 								<AddBtn title='Continue' onClick={handleViewReviews}/>

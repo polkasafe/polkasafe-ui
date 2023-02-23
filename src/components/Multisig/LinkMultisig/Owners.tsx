@@ -17,9 +17,10 @@ interface ISignatory{
 
 interface Props{
 	signatories: ISignatory[]
+	setSignatoriesWithName: React.Dispatch<React.SetStateAction<ISignatory[]>>
 }
 
-const Owners = ({ signatories }: Props) => {
+const Owners = ({ signatories, setSignatoriesWithName }: Props) => {
 
 	return (
 		<div>
@@ -68,6 +69,15 @@ const Owners = ({ signatories }: Props) => {
 											className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 											id="name"
 											value={item.name}
+											onChange={(e) => setSignatoriesWithName(prevState => {
+												return [
+													...prevState,
+													{
+														...prevState[i],
+														name: e.target.value
+													}
+												];
+											})}
 											defaultValue={item.name}
 										/>
 									</Form.Item>
