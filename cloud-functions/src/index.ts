@@ -466,3 +466,32 @@ export const updateEmail = functions.https.onRequest(async (req, res) => {
 		}
 	});
 });
+
+export const isMultisigOnChain = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, network } = req.body;
+		if (!multisigAddress || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		try {
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
+			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
+			if (multisigMetaData && isNaN(multisigMetaData.threshold) || multisigMetaData.signatories.length <= 1) {
+				return res.status(200).json({ data: { isOnChain: false } });
+			}
+
+			return res.status(200).json({ data: { isOnChain: true } });
+		} catch (err:unknown) {
+			functions.logger.error('Error in isMultisigOnChain :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+

@@ -7,6 +7,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -61,12 +62,7 @@ const LinkMultisig = () => {
 						multisigAddress,
 						network
 					}),
-					headers: {
-						Accept: 'application/json',
-						'Content-Type': 'application/json',
-						'x-address': userAddress,
-						'x-signature': signature
-					},
+					headers: firebaseFunctionsHeader,
 					method: 'POST'
 				});
 
