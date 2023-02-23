@@ -55,26 +55,32 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
-	const { multisigAddresses, activeMultisig, setActiveMultisig } = useGlobalUserDetailsContext();
-	const [selectedAddress, setSelectedAddress] = useState('');
+	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState('');
 	const { openModal } = useModalContext();
 
 	useEffect(() => {
 		if(activeMultisig){
-			setSelectedAddress(activeMultisig);
+			setSelectedMultisigAddress(activeMultisig);
 		}
 		else if(multisigAddresses && multisigAddresses[0]){
-			setSelectedAddress(multisigAddresses[0].address);
+			setSelectedMultisigAddress(multisigAddresses[0].address);
+			setUserDetailsContextState(prevState => {
+				return {
+					...prevState,
+					activeMultisig: multisigAddresses[0].address
+				};
+			});
 		}
 		else{
-			setSelectedAddress('');
+			setSelectedMultisigAddress('');
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [multisigAddresses]);
 
 	useEffect(() => {
-		localStorage.setItem('active_multisig', selectedAddress);
-	}, [selectedAddress]);
+		localStorage.setItem('active_multisig', selectedMultisigAddress);
+	}, [selectedMultisigAddress]);
 
 	return (
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5 overflow-auto [&::-webkit-scrollbar]:hidden')}>
@@ -115,10 +121,15 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 						{multisigAddresses.map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
-									'bg-highlight text-primary': multisig.address === selectedAddress
+									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
 								})} onClick={() => {
-									setActiveMultisig(multisig.address);
-									setSelectedAddress(multisig.address);
+									setUserDetailsContextState((prevState) => {
+										return {
+											...prevState,
+											activeMultisig: multisig.address
+										};
+									});
+									setSelectedMultisigAddress(multisig.address);
 								}}>
 									<Identicon
 										className='image identicon mx-2'

@@ -10,9 +10,6 @@ export const initialUserDetailsContext : UserDetailsContextType = {
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	multisigAddresses: [],
-	setActiveMultisig: (): void => {
-		throw new Error('setActiveMultisig function must be overridden');
-	},
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	}
@@ -27,10 +24,9 @@ export function useGlobalUserDetailsContext() {
 export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) => {
 
 	const [userDetailsContextState, setUserDetailsContextState] = useState(initialUserDetailsContext);
-	const [activeMultisig, setActiveMultisig] = useState(initialUserDetailsContext.activeMultisig);
 
 	return (
-		<UserDetailsContext.Provider value={{ ...userDetailsContextState, activeMultisig, setActiveMultisig, setUserDetailsContextState }}>
+		<UserDetailsContext.Provider value={{ ...userDetailsContextState, setUserDetailsContextState }}>
 			{children}
 		</UserDetailsContext.Provider>
 	);
