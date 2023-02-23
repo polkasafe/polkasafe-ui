@@ -7,8 +7,14 @@ import { CheckOutlined } from 'src/ui-components/CustomIcons';
 
 import Loader from '../../UserFlow/Loader';
 
-const NameAddress = ({ multisigAddress, setMultisigAddress }: { multisigAddress: string, setMultisigAddress: React.Dispatch<React.SetStateAction<string>>
-}) => {
+interface Props {
+	multisigAddress: string,
+	setMultisigAddress: React.Dispatch<React.SetStateAction<string>>
+	multisigName: string
+	setMultisigName: React.Dispatch<React.SetStateAction<string>>
+}
+
+const NameAddress = ({ multisigAddress, setMultisigAddress, multisigName, setMultisigName }: Props) => {
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -53,6 +59,8 @@ const NameAddress = ({ multisigAddress, setMultisigAddress }: { multisigAddress:
 									placeholder="my-polka-safe"
 									className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 text-white placeholder:text-[#505050] bg-bg-secondary rounded-lg"
 									id="name"
+									value={multisigName}
+									onChange={(e) => setMultisigName(e.target.value)}
 								/>
 							</Form.Item>
 						</div>

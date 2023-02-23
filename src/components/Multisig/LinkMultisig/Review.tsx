@@ -18,9 +18,10 @@ interface ISignatory{
 interface Props{
 	signatories: ISignatory[]
 	multisigData?: IMultisigAddress
+	multisigName: string
 }
 
-const Review = ({ multisigData, signatories }: Props) => {
+const Review = ({ multisigData, signatories, multisigName }: Props) => {
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -55,7 +56,7 @@ const Review = ({ multisigData, signatories }: Props) => {
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Name:</p>
-								<p>{multisigData?.name}</p>
+								<p>{multisigData?.name ? multisigData.name : multisigName}</p>
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Address:</p>

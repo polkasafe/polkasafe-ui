@@ -6,20 +6,21 @@ import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
 import { ChainPropType } from 'src/types';
 
-export const network = {
+export const networks = {
 	KUSAMA: 'kusama',
-	POLKADOT: 'polkadot'
+	POLKADOT: 'polkadot',
+	WESTEND: 'westend'
 };
 
 export const tokenSymbol = {
 	DOT: 'DOT',
-	KSM: 'KSM'
+	KSM: 'KSM',
+	WND: 'WND'
 };
 
 export const chainProperties: ChainPropType = {
-	[network.POLKADOT]: {
+	[networks.POLKADOT]: {
 		blockTime: 6000,
-		category: 'polkadot',
 		chainId: 0,
 		logo: polkadotLogo,
 		rpcEndpoint: 'wss://rpc.polkadot.io',
@@ -27,14 +28,22 @@ export const chainProperties: ChainPropType = {
 		tokenDecimals: 10,
 		tokenSymbol: tokenSymbol.DOT
 	},
-	[network.KUSAMA]: {
+	[networks.KUSAMA]: {
 		blockTime: 6000,
-		category: 'kusama',
 		chainId: 0,
 		logo: kusamaLogo,
 		rpcEndpoint: 'wss://kusama-rpc.polkadot.io',
 		ss58Format: 2,
 		tokenDecimals: 12,
 		tokenSymbol: tokenSymbol.KSM
+	},
+	[networks.WESTEND]: {
+		blockTime: 6000,
+		chainId: 0,
+		logo: polkadotLogo,
+		rpcEndpoint: 'wss://westend-rpc.dwellir.com',
+		ss58Format: 42,
+		tokenDecimals: 12,
+		tokenSymbol: tokenSymbol.WND
 	}
 };

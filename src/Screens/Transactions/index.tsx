@@ -8,6 +8,7 @@ import Filter from 'src/components/Transactions/Filter';
 import History, { ITransactions } from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import getNetwork from 'src/utils/getNetwork';
 
 enum ETab {
@@ -28,7 +29,7 @@ const Transactions = () => {
 				console.log('ERROR');
 				return;
 			}
-			const addAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/getTransactionsForMultisig`, {
+			const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
 				body: JSON.stringify({
 					limit: 10,
 					multisigAddress: activeMultisig,

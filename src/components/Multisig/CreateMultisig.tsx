@@ -11,6 +11,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress } from 'src/types';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
@@ -68,7 +69,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				return;
 			}
 			else{
-				const createMultisigRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/createMultisig`, {
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
 						threshold,
@@ -159,7 +160,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Threshold</p>
-								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='2' />
+								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='#' />
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
