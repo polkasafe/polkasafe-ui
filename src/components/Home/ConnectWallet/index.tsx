@@ -4,6 +4,7 @@
 import { stringToHex } from '@polkadot/util';
 import React, { useEffect, useState } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
@@ -38,7 +39,7 @@ const ConnectWallet = () => {
 				return;
 			}
 
-			const tokenResponse = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/getConnectAddressToken`, {
+			const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressToken`, {
 				headers: {
 					'x-address': substrateAddress
 				},
@@ -65,7 +66,7 @@ const ConnectWallet = () => {
 					type: 'bytes'
 				});
 
-				const connectAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/connectAddress`, {
+				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
 					headers: {
 						'x-address': substrateAddress,
 						'x-signature': signature

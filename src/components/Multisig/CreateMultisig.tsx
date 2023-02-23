@@ -11,6 +11,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress } from 'src/types';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
@@ -68,7 +69,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				return;
 			}
 			else{
-				const createMultisigRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/createMultisig`, {
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
 						threshold,

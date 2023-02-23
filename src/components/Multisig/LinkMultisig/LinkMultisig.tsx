@@ -7,6 +7,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
@@ -55,7 +56,7 @@ const LinkMultisig = () => {
 			}
 			else{
 
-				const getMultisigDataRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/getMultisigDataByMultisigAddress`, {
+				const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
 					body: JSON.stringify({
 						multisigAddress,
 						network
