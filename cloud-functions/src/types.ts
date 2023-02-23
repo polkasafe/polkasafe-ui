@@ -1,6 +1,6 @@
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-interface IAddressBookEntry {
+export interface IAddressBookEntry {
 	name: string;
 	address: string;
 }

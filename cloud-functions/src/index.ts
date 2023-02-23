@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IContactFormResponse, IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
+import { IAddressBookEntry, IContactFormResponse, IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -14,7 +14,7 @@ import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
 import { chainProperties } from './constants/network_constants';
-import { DEFAULT_MULTISIG_NAME } from './constants/defaults';
+import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
 
 admin.initializeApp();
@@ -116,12 +116,17 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				}
 			}
 
+			const newAddress: IAddressBookEntry = {
+				name: DEFAULT_USER_ADDRESS_NAME,
+				address: String(substrateAddress)
+			};
+
 			// else create a new user document
 			const newUser:IUser = {
 				address: String(substrateAddress),
 				created_at: new Date(),
 				email: null,
-				addressBook: []
+				addressBook: [newAddress]
 			};
 
 			await addressRef.set(newUser);
@@ -190,9 +195,9 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
-		if (!Array.isArray(signatories)) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (!Array.isArray(signatories) || signatories.length < 2) return res.status(400).json({ error: responseMessages.invalid_params });
 
-		if (isNaN(threshold) || Number(threshold) > signatories.length || signatories.length < 2) {
+		if (isNaN(threshold) || Number(threshold) > signatories.length) {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
