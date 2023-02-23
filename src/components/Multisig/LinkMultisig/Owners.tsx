@@ -59,28 +59,21 @@ const Owners = ({ signatories, setSignatoriesWithName }: Props) => {
 									htmlFor="name1"
 								>Owner Name {i+1}</label>
 								<div className="flex items-center">
-									<Form.Item
-										name="name1"
-										rules={[]}
-										className='border-0 outline-0 my-0 p-0'
-									>
-										<Input
-											placeholder="John Doe"
-											className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-											id="name"
-											value={item.name}
-											onChange={(e) => setSignatoriesWithName(prevState => {
-												return [
-													...prevState,
-													{
-														...prevState[i],
-														name: e.target.value
-													}
-												];
-											})}
-											defaultValue={item.name}
-										/>
-									</Form.Item>
+
+									<Input
+										placeholder="John Doe"
+										className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+										id="name"
+										value={item.name}
+										onChange={(e) => {
+											const copyArray = [...signatories];
+											const copyObject = { ...copyArray[i] };
+											copyObject.name = e.target.value;
+											copyArray[i] = copyObject;
+											setSignatoriesWithName(copyArray);
+										}}
+										defaultValue={item.name}
+									/>
 									<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
 										<button onClick={() => navigator.clipboard.writeText(item.address)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
 										<ShareIcon className='text-text_secondary'/></div>

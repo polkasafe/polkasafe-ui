@@ -24,7 +24,7 @@ const Signotary = ({ setSignatories, signatories }: ISignatoryProps) => {
 
 	const { addressBook } = useGlobalUserDetailsContext();
 
-	const addresses: ISignature[] = addressBook.map((item: IAddressBookEntry, i: number) => ({
+	const addresses: ISignature[] = addressBook.filter((_, i) => i !== 0).map((item: IAddressBookEntry, i: number) => ({
 		address: item.address,
 		key: i+1,
 		name: item.name
