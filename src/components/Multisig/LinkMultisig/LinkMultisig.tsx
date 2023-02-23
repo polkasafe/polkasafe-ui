@@ -112,6 +112,15 @@ const LinkMultisig = () => {
 				return;
 			}
 			else{
+				if(!signatories.includes(address)){
+					queueNotification({
+						header: 'Error!',
+						message: 'Signatories does not have your Address.',
+						status: NotificationStatus.ERROR
+					});
+					setLoading(false);
+					return;
+				}
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
@@ -147,13 +156,17 @@ const LinkMultisig = () => {
 							multisigAddresses: [...prevState.multisigAddresses, multisigData]
 						};
 					});
-					queueNotification({
-						header: 'Success!',
-						message: 'Multisig Linked',
-						status: NotificationStatus.SUCCESS
+					Promise.all(signatoriesWithName.map(
+						(signatory) => handleAddAddress(signatory.address, signatory.name)
+					)).then(() => {
+						queueNotification({
+							header: 'Success!',
+							message: 'Multisig Linked',
+							status: NotificationStatus.SUCCESS
+						});
+						setLoading(false);
+						toggleVisibility();
 					});
-					setLoading(false);
-					toggleVisibility();
 				}
 
 			}
@@ -242,23 +255,18 @@ const LinkMultisig = () => {
 	};
 	const handleLinkMultisig = () => {
 		setLoading(true);
-		Promise.all(
-			signatoriesWithName.map(
-				(signatory) => handleAddAddress(signatory.address, signatory.name)
-			)).then(() => {
-			if(multisigData){
-				const name = multisigData.name ? multisigData.name : multisigName;
-				handleMultisigBadge(multisigData.signatories, multisigData.threshold, name, network);
-			}
-			else{
-				queueNotification({
-					header: 'Error!',
-					message: 'Invalid Multisig',
-					status: NotificationStatus.ERROR
-				});
-				setLoading(false);
-			}
-		});
+		if(multisigData){
+			const name = multisigData.name ? multisigData.name : multisigName;
+			handleMultisigBadge(multisigData.signatories, multisigData.threshold, name, network);
+		}
+		else{
+			queueNotification({
+				header: 'Error!',
+				message: 'Invalid Multisig',
+				status: NotificationStatus.ERROR
+			});
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -286,7 +294,7 @@ const LinkMultisig = () => {
 								<AddBtn title='Continue' onClick={handleViewReviews}/>
 							</div>
 						</div>: <div>
-							<Review multisigData={multisigData} signatories={signatoriesWithName} />
+							<Review multisigName={multisigName} multisigData={multisigData} signatories={signatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={toggleVisibility} />
 								<AddBtn loading={loading} title='Link Multisig' onClick={handleLinkMultisig}/>
