@@ -7,9 +7,11 @@ import { Dispatch, SetStateAction } from 'react';
 import { network, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
+    activeMultisig: string;
     address: string;
     multisigAddresses: IMultisigAddress[];
     addressBook: IAddressBookEntry[];
+    setActiveMultisig: Dispatch<SetStateAction<string>>;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 

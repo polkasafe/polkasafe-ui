@@ -6,6 +6,7 @@ import { SwapOutlined } from '@ant-design/icons';
 import React from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { IAddressBookEntry } from 'src/types';
+import shortenAddress from 'src/utils/shortenAddress';
 
 interface ISignature{
 	name: string
@@ -15,16 +16,17 @@ interface ISignature{
 
 interface ISignatoryProps{
 	setSignatories?: React.Dispatch<React.SetStateAction<string[]>>
+	signatories: string[]
 
 }
 
-const Signotary = ({ setSignatories }: ISignatoryProps) => {
+const Signotary = ({ setSignatories, signatories }: ISignatoryProps) => {
 
 	const { addressBook } = useGlobalUserDetailsContext();
 
-	const signatures: ISignature[] = addressBook.map((item: IAddressBookEntry, i: number) => ({
+	const addresses: ISignature[] = addressBook.map((item: IAddressBookEntry, i: number) => ({
 		address: item.address,
-		key: i,
+		key: i+1,
 		name: item.name
 	}));
 	const dragStart = (event:any) => {
@@ -61,8 +63,8 @@ const Signotary = ({ setSignatories }: ISignatoryProps) => {
 				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1" onDrop={drop} onDragOver={dragOver}>
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
-						{signatures.map((signature) => (
-							<p id={`${signature.key}-${signature.address}`} key={`${signature.key}-${signature.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{signature.name}</p>
+						{addresses.map((address) => (
+							<p id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
 						))}
 					</div>
 				</div>
@@ -70,6 +72,7 @@ const Signotary = ({ setSignatories }: ISignatoryProps) => {
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
 					<div className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto' onDrop={drop} onDragOver={dragOver}>
+						<p id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white'>{shortenAddress(signatories[0])}</p>
 						<p></p>
 					</div>
 				</div>

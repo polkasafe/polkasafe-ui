@@ -35,13 +35,13 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
+	const { setUserDetailsContextState, address: userAddress } = useGlobalUserDetailsContext();
+
 	const { openModal, toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [show, setShow] = useState(true);
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [threshold, setThreshold] = useState<number | null>(null);
-	const [signatories, setSignatories] = useState<string[]>([]);
-
-	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const [signatories, setSignatories] = useState<string[]>([userAddress]);
 
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
@@ -68,7 +68,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				return;
 			}
 			else{
-
 				const createMultisigRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
@@ -107,7 +106,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 					queueNotification({
 						header: 'Success!',
-						message: 'Your MultiSig Jaski - 2 has been created successfully!',
+						message: `Your MultiSig ${multisigName} has been created successfully!`,
 						status: NotificationStatus.SUCCESS
 					});
 					setLoading(false);
@@ -148,7 +147,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							</div>}
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signotary setSignatories={setSignatories}/> : <DragDrop/>}
+							{toggleSwitch? <Signotary setSignatories={setSignatories} signatories={signatories}/> : <DragDrop/>}
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />

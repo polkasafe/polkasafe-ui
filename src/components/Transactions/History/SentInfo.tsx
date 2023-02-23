@@ -12,13 +12,13 @@ interface ISentInfoProps {
 	amount: string;
 	amountType: string;
 	date: string;
-	time: string;
+	// time: string;
     className?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, time } = props;
+	const { amount, amountType, className, date } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
 	const handleCopy = () => {
@@ -113,7 +113,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-							{date}, {time}
+							{date}
 						</span>
 					</p>
 				</div>
@@ -131,7 +131,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-							{date}, {time}
+							{date}
 						</span>
 					</p>
 				</div>

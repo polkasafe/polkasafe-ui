@@ -3,64 +3,57 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Filter from 'src/components/Transactions/Filter';
 import History, { ITransactions } from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import getNetwork from 'src/utils/getNetwork';
 
 enum ETab {
 	QUEUE,
 	HISTORY
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const transactions: ITransactions[] = [
-	{
-		date: 'DEC 22, 2022',
-		transactions: [
-			{
-				amount: '50',
-				amountType: 'DOT',
-				id: 1,
-				status: 'Success',
-				time: '11:15 AM',
-				type: 'Received'
-			},
-			{
-				amount: '20',
-				amountType: 'DOT',
-				id: 2,
-				status: 'Success',
-				time: '14:00 PM',
-				type: 'Sent'
-			}
-		]
-	},
-	{
-		date: 'DEC 16, 2022',
-		transactions: [
-			{
-				amount: '50',
-				amountType: 'DOT',
-				id: 1,
-				status: 'Success',
-				time: '11:15 AM',
-				type: 'Received'
-			},
-			{
-				amount: '50',
-				amountType: 'DOT',
-				id: 1,
-				status: 'Success',
-				time: '11:15 AM',
-				type: 'Received'
-			}
-		]
-	}
-];
-
 const Transactions = () => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const userAddress = localStorage.getItem('address');
+	const signature = localStorage.getItem('signature');
+	const { activeMultisig } = useGlobalUserDetailsContext();
+
+	const [transactions, setTransactions] = useState<ITransactions[]>();
+
+	useEffect(() => {
+		const getTransactions = async () => {
+			if(!userAddress || !signature || !activeMultisig) {
+				console.log('ERROR');
+				return;
+			}
+			const addAddressRes = await fetch(`${process.env.REACT_APP_FIREBASE_URL}/getTransactionsForMultisig`, {
+				body: JSON.stringify({
+					limit: 10,
+					multisigAddress: activeMultisig,
+					network: getNetwork(),
+					page: 1
+				}),
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'x-address': userAddress,
+					'x-signature': signature
+				},
+				method: 'POST'
+			});
+
+			const { data, error } = await addAddressRes.json();
+			if(error){
+				console.log('Error in Fetching Transactions: ', error);
+			}
+			if(data){
+				setTransactions(data);
+			}
+		};
+		getTransactions();
+	}, [activeMultisig, signature, userAddress]);
 	const [tab, setTab] = useState(ETab.QUEUE);
 	return (
 		<>

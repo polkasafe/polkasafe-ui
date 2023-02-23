@@ -10,13 +10,13 @@ interface IReceivedInfoProps {
 	amount: string;
 	amountType: string;
 	date: string;
-	time: string;
+	// time: string;
 }
 
 const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLp');
-	const { amount, amountType, date, time } = props;
+	const { amount, amountType, date } = props;
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -106,7 +106,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					<span
 						className='text-white font-normal text-sm leading-[15px]'
 					>
-						{date}, {time}
+						{date}
 					</span>
 				</p>
 			</div>

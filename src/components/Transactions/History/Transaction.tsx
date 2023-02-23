@@ -15,7 +15,7 @@ interface ITransactionProps extends ITransaction {
 	date: string;
 }
 
-const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, time, type }) => {
+const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, type }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	return (
 		<article
@@ -61,9 +61,9 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 						{type === 'Sent'? '-': '+'}{amount} {amountType}
 					</span>
 				</p>
-				<p className='col-span-2'>
+				{/* <p className='col-span-2'>
 					{time}
-				</p>
+				</p> */}
 				<p className='col-span-2 flex items-center justify-end gap-x-4'>
 					<span className='text-success'>
 						{status}
@@ -90,14 +90,12 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 							amount={amount}
 							amountType={amountType}
 							date={date}
-							time={time}
 						/>
 						:
 						<SentInfo
 							amount={amount}
 							amountType={amountType}
 							date={date}
-							time={time}
 						/>
 				}
 			</div>
