@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
-import { initialUserDetailsContext, useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import logout from 'src/utils/logout';
 
@@ -34,7 +34,15 @@ const AddressDropdown = () => {
 
 	const handleDisconnect = () => {
 		logout();
-		setUserDetailsContextState(initialUserDetailsContext);
+		setUserDetailsContextState(prevState => {
+			return {
+				...prevState,
+				activeMultisig: localStorage.getItem('active_multisig') || '',
+				address: '',
+				addressBook: [],
+				multisigAddresses: []
+			};
+		});
 		toggleVisibility(false);
 		return navigate('/', { replace: true });
 	};
