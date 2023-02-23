@@ -3,35 +3,39 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Avatar } from 'antd';
-import React, { useState } from 'react';
+import Identicon from '@polkadot/react-identicon';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
 import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
-import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const DashboardCard = ({ className }: { className?: string }) => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy');
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
 			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-72 mt-3`}>
 				<div className="flex justify-between flex-wrap truncate">
 					<div className='flex gap-x-4 items-center mb-3 flex-wrap relative'>
-						<Avatar className='border-2 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
-						<div className="bg-primary rounded-lg absolute -bottom-2 mt-3 left-[18px] text-white px-2">2/3</div>
+						<Identicon
+							className='border-2 rounded-full bg-transparent border-primary p-1'
+							value={activeMultisig}
+							size={70}
+							theme='polkadot'
+						/>
+						<div className="bg-primary rounded-lg absolute -bottom-2 mt-3 left-[18px] text-white px-2">1/3</div>
 						<div>
-							{/* TODO: Use dynamic values */}
-							<div className='text-lg font-bold text-white'>John Doe</div>
+							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary truncate'>{address}</div>
-								<button onClick={() => navigator.clipboard.writeText(`${address}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
+								<div className='text-md font-normal text-text_secondary truncate'>{activeMultisig}</div>
+								<button onClick={() => navigator.clipboard.writeText(`${activeMultisig}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
 								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>
@@ -62,7 +66,9 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<Link to='/send-funds' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm'><PlusCircleOutlined /> New Transaction</PrimaryButton>
+						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
+							<PlusCircleOutlined /> New Transaction
+						</PrimaryButton>
 					</Link>
 					<Link to='/assets' className='w-[45%] group'>
 						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'><WalletIcon />View Asset</PrimaryButton>

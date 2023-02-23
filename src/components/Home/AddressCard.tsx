@@ -2,10 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import Identicon from '@polkadot/react-identicon';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AddAddrIcon from 'src/assets/icons/add-addr-icon.svg';
-import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import AddAdress from 'src/components/AddressBook/AddAddress';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -28,7 +28,12 @@ const AddressCard = ({ className }: { className?: string }) => {
 				<div className='flex flex-col items-center px-5 h-72 overflow-auto w-[100%] divide-y divide-gray-700'>
 					{addressBook.map((item, i) => (
 						<div key={`${i}-${item.address}`} className='flex justify-items-center items-center pt-5 mb-5'>
-							<img className='px-1 w-[30px]' src={userAvatarIcon} alt="user" />
+							<Identicon
+								className='rounded-full bg-transparent px-1'
+								value={item.address}
+								size={30}
+								theme='polkadot'
+							/>
 							<div className='px-1 text-sm text-white truncate'>{item.address}</div>
 						</div>
 					))}

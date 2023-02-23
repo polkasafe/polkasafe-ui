@@ -3,23 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, message } from 'antd';
+import Identicon from '@polkadot/react-identicon';
+import { message } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import userAvatarIcon from 'src/assets/icons/user-avatar.svg';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
+import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
 
 interface IAddress {
     value: string;
     imgSrc: string;
 }
-
 const AddressDropdown = () => {
-	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const navigate = useNavigate();
+	const network = getNetwork();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
@@ -78,9 +79,14 @@ const AddressDropdown = () => {
 			>
 				{selectedAddress? <div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
-						<Avatar className='border-2 bg-transparent border-primary p-1' size={74} icon={<img className='cursor-pointer' src={userAvatarIcon} alt="icon" />} />
+						<Identicon
+							className='border-2 rounded-full bg-transparent border-primary p-1'
+							value={address}
+							size={70}
+							theme='polkadot'
+						/>
 						<p className='text-white font-normal text-sm'>
-                        Jaski
+							{ addressBook.find(item => item.address === address)?.name }
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{selectedAddress.value}</span>
@@ -90,11 +96,11 @@ const AddressDropdown = () => {
 					<div className='w-full'>
 						<p className='border-t border-text_secondary flex items-center text-normal text-sm justify-between w-full p-3'>
 							<span className='text-text_secondary'>Wallet</span>
-							<span className='text-white'>Polkadot</span>
+							<span className='text-white'>Polkadot.js</span>
 						</p>
 						<p className='border-t border-b border-text_secondary flex items-center text-normal text-sm justify-between w-full p-3'>
 							<span className='text-text_secondary'>Network</span>
-							<span className='text-white'>Polkadot.js</span>
+							<span className='text-white'>{ network }</span>
 						</p>
 					</div>
 					<button onClick={handleDisconnect} className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>
