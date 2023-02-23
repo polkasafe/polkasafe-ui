@@ -76,6 +76,10 @@ export const GlobalStyle = createGlobalStyle`
 		text-decoration: none;
 	}
 
+	input {
+		color: #fff !important;
+	}
+
 	::selection {
 		background-color: white;
 		color: #1573FE;

@@ -11,6 +11,7 @@ import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
 import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
+import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -18,8 +19,12 @@ import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getNetwork from 'src/utils/getNetwork';
 
+import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
+
 const DashboardCard = ({ className }: { className?: string }) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	const { openModal } = useModalContext();
+
 	const [loading, setLoading] = useState(false);
 
 	const handleNewTransaction = async () => {
@@ -41,7 +46,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 		}
 
 		if(!isMultisigOnChainData.isOnChain) {
-			console.log('show existential deposit modal');
+			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			console.log('show new transaction modal');
 		}

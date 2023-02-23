@@ -9,8 +9,8 @@ import getNetwork from 'src/utils/getNetwork';
 
 import NetworkCard from './NetworkCard';
 
-export const ParachainIcon: FC<{ src: string }> = ({ src }) => {
-	return <img className='block w-full h-full rounded-full' src={src} alt="Chain logo" />;
+export const ParachainIcon: FC<{ src: string, className?:string, size?: number }> = ({ src, className, size = 20 }) => {
+	return <img className={`${className} block rounded-full`} height={size} width={size} src={src} alt="Chain logo" />;
 };
 
 interface INetworksDropdownProps {

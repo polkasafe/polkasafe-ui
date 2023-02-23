@@ -89,6 +89,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					</Divider>
 				</div>
 			</section>
+
 			<section className=''>
 				<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient</label>
 				<div className='flex items-center gap-x-[10px]'>
@@ -120,6 +121,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					</article>
 				</div>
 			</section>
+
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block'>Amount</label>
 				<div className='flex items-center gap-x-[10px]'>
@@ -151,6 +153,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					</article>
 				</div>
 			</section>
+
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
 				<div className='flex items-center gap-x-[10px]'>
@@ -175,6 +178,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					</article>
 				</div>
 			</section>
+
 			<section className='mt-[15px]'>
 				<div className='flex items-center gap-x-[10px]'>
 					<article className='w-[500px] flex items-center gap-x-3'>
@@ -192,6 +196,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					</article>
 				</div>
 			</section>
+
 			<section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
 				<span>
 					<WarningCircleIcon className='text-base' />
@@ -200,6 +205,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 					The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.
 				</p>
 			</section>
+
 			<section className='flex items-center gap-x-5 justify-center mt-10'>
 				<CancelBtn className='w-[300px]' onClick={onCancel} />
 				<ModalBtn className='w-[300px]' title='Make Transaction' />
