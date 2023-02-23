@@ -4,7 +4,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
-import { network, tokenSymbol } from './global/networkConstants';
+import { networks, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
     activeMultisig: string;
@@ -29,7 +29,7 @@ export interface Account {
     meta: AccountMeta;
 }
 
-export type Network = typeof network[keyof typeof network];
+export type Network = typeof networks[keyof typeof networks];
 export type TokenSymbol = typeof tokenSymbol[keyof typeof tokenSymbol];
 
 export interface ChainProps {
@@ -40,7 +40,6 @@ export interface ChainProps {
     'tokenSymbol': TokenSymbol;
     'chainId': number;
     'rpcEndpoint': string;
-    'category': string;
 }
 
 export type ChainPropType = {
