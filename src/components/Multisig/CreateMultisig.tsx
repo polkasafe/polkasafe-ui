@@ -69,14 +69,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				return;
 			}
 			else{
-				console.log(
-					{
-						signatories,
-						threshold,
-						multisigName,
-						network
-					}
-				);
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
