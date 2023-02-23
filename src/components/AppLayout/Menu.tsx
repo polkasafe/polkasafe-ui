@@ -114,7 +114,7 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 			<section>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses.length}</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses && multisigAddresses.length}</span>
 				</h2>
 				<div>
 					<ul className='flex flex-col py-2 text-white list-none'>
