@@ -6,6 +6,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { UserDetailsContextType } from 'src/types';
 
 export const initialUserDetailsContext : UserDetailsContextType = {
+	activeMultisig: localStorage.getItem('active_multisig') || '',
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	multisigAddresses: [],

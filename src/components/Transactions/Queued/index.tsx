@@ -5,33 +5,34 @@
 import React, { FC } from 'react';
 import { ITransactions } from 'src/components/Transactions/History';
 import Transaction from 'src/components/Transactions/History/Transaction';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
 
 interface IQueuedProps {
-    transactionsQueued: ITransactions[];
+    transactionsQueued?: ITransactions[];
 }
 const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
+	const { address } = useGlobalUserDetailsContext();
 	return (
 		<>
-			{transactionsQueued.length > 0? <div>
-				{transactionsQueued.map(({ date, transactions }, index) => {
-					return <section key={index} className='mt-[30.5px]'>
-						<h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
-							{date}
-						</h4>
-						<div className='flex flex-col gap-y-[10px]'>
-							{transactions.map((transaction, index) => {
-								return <Transaction
-									date={date}
-									key={index}
-									{...transaction}
-								/>;
-							})}
-						</div>
+			{(transactionsQueued && transactionsQueued.length > 0)? <div className='flex flex-col gap-y-[10px]'>
+				{transactionsQueued.map((transaction, index) => {
+					return <section key={index}>
+						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
+							{created_at}
+						</h4> */}
+						<Transaction
+							amount={String(transaction.amount_token)}
+							amountType={transaction.token}
+							date={transaction.created_at.getTime().toString()}
+							status={'Success'}
+							type={address === transaction.from ? 'Sent' : 'Received'}
+							id={Number(transaction.id)}
+						/>;
 					</section>;
 				})}
-			</div>: <NoTransactionsQueued />}
+			</div>: <NoTransactionsQueued/>}
 		</>
 	);
 };

@@ -16,8 +16,8 @@ import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
 const DashboardCard = ({ className }: { className?: string }) => {
-	const [address, setAddress] = useState('');
-	setAddress('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy');
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy');
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>

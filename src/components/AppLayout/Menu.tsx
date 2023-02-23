@@ -2,15 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar } from 'antd';
+import Identicon from '@polkadot/react-identicon';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect,useState } from 'react';
 import { Link } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
-import profileImg from 'src/assets/icons/profile-img.png';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
@@ -56,22 +55,33 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
-	const [selectedAddress, setSelectedAddress] = useState('');
-	const addresses = [
-		{
-			address: 'Jaski - 1',
-			imgSrc: profileImg
-		},
-		{
-			address: 'Jaski - 2',
-			imgSrc: profileImg
-		},
-		{
-			address: 'Jaski - 3',
-			imgSrc: profileImg
-		}
-	];
+	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState('');
 	const { openModal } = useModalContext();
+
+	useEffect(() => {
+		if(activeMultisig){
+			setSelectedMultisigAddress(activeMultisig);
+		}
+		else if(multisigAddresses && multisigAddresses[0]){
+			setSelectedMultisigAddress(multisigAddresses[0].address);
+			setUserDetailsContextState(prevState => {
+				return {
+					...prevState,
+					activeMultisig: multisigAddresses[0].address
+				};
+			});
+		}
+		else{
+			setSelectedMultisigAddress('');
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [multisigAddresses]);
+
+	useEffect(() => {
+		localStorage.setItem('active_multisig', selectedMultisigAddress);
+	}, [selectedMultisigAddress]);
+
 	return (
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5 overflow-auto [&::-webkit-scrollbar]:hidden')}>
 			<section>
@@ -104,19 +114,30 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 			<section>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>3</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses.length}</span>
 				</h2>
 				<div>
 					<ul className='flex flex-col py-2 text-white list-none'>
-						{addresses.map(({ address, imgSrc }) => {
-							return <li className='w-full' key={address}>
+						{multisigAddresses.map((multisig) => {
+							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
-									'bg-highlight text-primary': address === selectedAddress
-								})} onClick={() => setSelectedAddress(address)}>
-									<Avatar className={classNames('bg-white border-none outline-none',{
-										'bg-primary': address === selectedAddress
-									})} src={imgSrc} size="small" icon={<UserOutlined className='text-highlight' />}  />
-									{address}
+									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
+								})} onClick={() => {
+									setUserDetailsContextState((prevState) => {
+										return {
+											...prevState,
+											activeMultisig: multisig.address
+										};
+									});
+									setSelectedMultisigAddress(multisig.address);
+								}}>
+									<Identicon
+										className='image identicon mx-2'
+										value={multisig.address}
+										size={30}
+										theme={'polkadot'}
+									/>
+									{multisig.name}
 								</button>
 							</li>;
 						})}
