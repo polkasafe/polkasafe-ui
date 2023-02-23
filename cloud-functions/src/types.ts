@@ -56,3 +56,15 @@ export interface IAsset {
 	balance_usd: string;
 	balance_token: string;
 }
+
+export interface IFeedback {
+	address: string;
+	rating: number;
+	review: string;
+}
+
+export interface IContactFormResponse {
+	name: string;
+	email: string;
+	message: string;
+}
