@@ -4,6 +4,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { UserDetailsContextType } from 'src/types';
 import logout from 'src/utils/logout';
@@ -35,10 +36,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 		setLoading(true);
 		const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-			headers: {
-				'x-address': localStorage.getItem('address')!,
-				'x-signature': localStorage.getItem('signature')!
-			},
+			headers: firebaseFunctionsHeader,
 			method: 'POST'
 		});
 

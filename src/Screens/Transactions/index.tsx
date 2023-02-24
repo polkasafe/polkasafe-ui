@@ -8,6 +8,7 @@ import Filter from 'src/components/Transactions/Filter';
 import History, { ITransactions } from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import getNetwork from 'src/utils/getNetwork';
 
@@ -36,12 +37,7 @@ const Transactions = () => {
 					network: getNetwork(),
 					page: 1
 				}),
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-					'x-address': userAddress,
-					'x-signature': signature
-				},
+				headers: firebaseFunctionsHeader,
 				method: 'POST'
 			});
 

@@ -22,6 +22,7 @@ export const chainProperties: ChainPropType = {
 	[networks.POLKADOT]: {
 		blockTime: 6000,
 		chainId: 0,
+		existentialDeposit: 1.00,
 		logo: polkadotLogo,
 		rpcEndpoint: 'wss://rpc.polkadot.io',
 		ss58Format: 0,
@@ -31,6 +32,7 @@ export const chainProperties: ChainPropType = {
 	[networks.KUSAMA]: {
 		blockTime: 6000,
 		chainId: 0,
+		existentialDeposit: 0.000333333333,
 		logo: kusamaLogo,
 		rpcEndpoint: 'wss://kusama-rpc.polkadot.io',
 		ss58Format: 2,
@@ -40,6 +42,7 @@ export const chainProperties: ChainPropType = {
 	[networks.WESTEND]: {
 		blockTime: 6000,
 		chainId: 0,
+		existentialDeposit: 0.0100,
 		logo: polkadotLogo,
 		rpcEndpoint: 'wss://westend-rpc.dwellir.com',
 		ss58Format: 42,

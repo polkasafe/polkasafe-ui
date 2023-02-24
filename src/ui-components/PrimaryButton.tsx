@@ -12,11 +12,12 @@ interface Props {
 	children: ReactNode;
 	onClick?: () => void;
 	size?: SizeType;
+	loading?: boolean;
 }
 
-const PrimaryButton = ({ className, children, onClick, size }: Props) => {
+const PrimaryButton = ({ className, children, onClick, size, loading }: Props) => {
 	return (
-		<Button size={size} className={classNames('flex items-center border-none outline-none shadow-md rounded-lg bg-purple_secondary text-blue_primary font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
+		<Button size={size} loading={loading} className={classNames('flex items-center border-none outline-none shadow-md rounded-lg bg-purple_secondary text-blue_primary font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
 			{children}
 		</Button>
 	);
