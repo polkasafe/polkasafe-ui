@@ -4,28 +4,37 @@
 import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Form, Input } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
-import React from 'react';
+import BN from 'bn.js';
+import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import Balance from 'src/ui-components/Balance';
+import BalanceInput from 'src/ui-components/BalanceInput';
 import { PasteIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getNetwork from 'src/utils/getNetwork';
+import { transferFunds } from 'src/utils/transferFunds';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
 const network = getNetwork();
 
 const ExistentialDeposit = () => {
+	const { api, apiReady } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
+
+	const [selectedSender, setSelectedSender] = useState(addressBook[0].address);
+	const [amount, setAmount] = useState(new BN(0));
+	const [loading, setLoading] = useState(false);
 
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
 		label: a.name,
 		value: a.address
 	}));
 
-	const addRecipientHeading = () => {
+	const addSenderHeading = () => {
 		const elm = document.getElementById('recipient_list');
 		if (elm) {
 			const parentElm = elm.parentElement;
@@ -42,10 +51,28 @@ const ExistentialDeposit = () => {
 		}
 	};
 
-	return (
-		<div className='w-[35vw] max-w-[760px] min-w-[500px]'>
+	const handleSubmit = async () => {
+		if(!api || !apiReady ) return;
 
-			<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Sending from</p>
+		setLoading(true);
+		try {
+			await transferFunds({
+				amount: amount,
+				api,
+				recepientAddress: activeMultisig,
+				senderAddress: selectedSender
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return (
+		<div className='w-[35vw] max-w-[900px] min-w-[500px]'>
+
+			<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
 			{/* TODO: Make into reusable component */}
 			<div className='w-full p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
 				<div className='flex items-center justify-center w-10 h-10'>
@@ -63,21 +90,23 @@ const ExistentialDeposit = () => {
 				<Balance address={activeMultisig} />
 			</div>
 
-			<Form>
+			<Form disabled={ loading }>
 				<section className='mt-6'>
-					<label className='text-primary font-normal text-xs leading-[13px] block mb-2'>Recipient</label>
+					<label className='text-primary font-normal text-xs leading-[13px] block mb-2'>Sending from</label>
 					<div className='flex items-center gap-x-[10px]'>
 						<div className='w-full'>
 							<Form.Item
-								name="recipient"
+								name="sender"
 								className='border-0 outline-0 my-0 p-0'
+								initialValue={addressBook[0].address}
 							>
 								<div className="flex items-center">
 									<AutoComplete
-										onClick={addRecipientHeading}
+										onClick={addSenderHeading}
 										options={autocompleteAddresses}
-										id='recipient'
-										placeholder="Send to Address.."
+										id='sender'
+										placeholder="Send from Address.."
+										onChange={(value) => setSelectedSender(value)}
 									/>
 									<div className='absolute right-2'>
 										<PasteIcon className='mr-2 text-primary' />
@@ -87,31 +116,10 @@ const ExistentialDeposit = () => {
 							</Form.Item>
 						</div>
 					</div>
+					<Balance className='w-[25%] mt-2' address={selectedSender} />
 				</section>
 
-				<section className='mt-6'>
-					<label className='text-primary font-normal text-xs leading-[13px] block mb-2'>Amount</label>
-					<div className='flex items-center gap-x-[10px]'>
-						<article className='w-full'>
-							<Form.Item
-								name="amount"
-								className='border-0 outline-0 my-0 p-0'
-							>
-								<div className='flex items-center h-[40px]'>
-									<Input
-										placeholder="0"
-										className="h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
-										id="amount"
-									/>
-									<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
-										<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-										<span>{ chainProperties[network].tokenSymbol}</span>
-									</div>
-								</div>
-							</Form.Item>
-						</article>
-					</div>
-				</section>
+				<BalanceInput className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
 
 				<section className='mt-6'>
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
@@ -123,8 +131,9 @@ const ExistentialDeposit = () => {
 							>
 								<div className='flex items-center h-[40px]'>
 									<Input
+										disabled={true}
 										type='number'
-										placeholder="1.0000"
+										placeholder={String(chainProperties[network].existentialDeposit)}
 										className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
 										id="existential_deposit"
 									/>
@@ -142,14 +151,12 @@ const ExistentialDeposit = () => {
 					<span>
 						<WarningCircleIcon className='text-base' />
 					</span>
-					<p className=''>
-					The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.
-					</p>
+					<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
 				</section>
 
 				<section className='flex items-center gap-x-5 justify-center mt-10'>
-					<CancelBtn className='w-[300px]' onClick={() => {}} />
-					<ModalBtn className='w-[300px]' title='Make Transaction' />
+					<CancelBtn loading={loading} className='w-[300px]' onClick={() => {}} />
+					<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 				</section>
 			</Form>
 		</div>

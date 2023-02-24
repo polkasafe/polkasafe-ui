@@ -6,10 +6,13 @@ import '@polkadot/api-augment';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useContext, useEffect, useState } from 'react';
+import { chainProperties } from 'src/global/networkConstants';
+import getNetwork from 'src/utils/getNetwork';
 
 export interface ApiContextType {
 	api: ApiPromise | undefined;
 	apiReady: boolean;
+	setNetwork: React.Dispatch<React.SetStateAction<string>>
 }
 
 export const ApiContext: React.Context<ApiContextType> = React.createContext(
@@ -20,21 +23,16 @@ export interface ApiContextProviderProps {
 	children?: React.ReactElement;
 }
 
-// TODO:
-const WS_PROVIDER = process.env.REACT_APP_WS_PROVIDER || 'wss://kusama-rpc.polkadot.io';
-
-export function ApiContextProvider(
-	props: ApiContextProviderProps
-): React.ReactElement {
-	const { children = null } = props;
+export function ApiContextProvider({ children }: ApiContextProviderProps): React.ReactElement {
 	const [api, setApi] = useState<ApiPromise>();
 	const [apiReady, setApiReady] = useState(false);
+	const [network, setNetwork] = useState(getNetwork());
 
 	useEffect(() => {
-		const provider = new WsProvider(WS_PROVIDER);
+		const provider = new WsProvider(chainProperties[network].rpcEndpoint);
 		setApiReady(false);
 		setApi(new ApiPromise({ provider }));
-	},[]);
+	},[network]);
 
 	useEffect(() => {
 		if(api){
@@ -49,7 +47,7 @@ export function ApiContextProvider(
 	}, [api]);
 
 	return (
-		<ApiContext.Provider value={{ api, apiReady }}>
+		<ApiContext.Provider value={{ api, apiReady, setNetwork }}>
 			{children}
 		</ApiContext.Provider>
 	);
