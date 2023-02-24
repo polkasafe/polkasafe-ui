@@ -6,6 +6,8 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 
 interface Args {
 	api: ApiPromise,
@@ -47,9 +49,49 @@ export default async function initMultisigTransfer({
 	const TIME_POINT = null;
 
 	// 5. first call is approveAsMulti
-	const txHash = await api.tx.multisig
+	await api.tx.multisig
 		.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
-		.signAndSend(initiatorAddress);
+		.signAndSend(initiatorAddress, ({ status, txHash, events }) => {
+			if (status.isInvalid) {
+				console.log('Transaction invalid');
+			} else if (status.isReady) {
+				console.log('Transaction is ready');
+			} else if (status.isBroadcast) {
+				console.log('Transaction has been broadcasted');
+			} else if (status.isInBlock) {
+				console.log('Transaction is in block');
+			} else if (status.isFinalized) {
+				console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+				events.forEach(
+					({ event }) => {
+						if (event.method === 'ExtrinsicSuccess') {
+							queueNotification({
+								header: 'Success!',
+								message: 'Transaction Successful.',
+								status: NotificationStatus.SUCCESS
+							});
+							console.log(`Completed at block hash #${status.asInBlock.toString()}`);
+							console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+						} else if (event.method === 'ExtrinsicFailed') {
+							console.log('Transaction failed');
+							queueNotification({
+								header: 'Error!',
+								message: 'Transaction Failed',
+								status: NotificationStatus.ERROR
+							});
+						}
+					}
+				);
+			}
+		}).catch((error) => {
+			console.log(':( transaction failed');
+			console.error('ERROR:', error);
+			queueNotification({
+				header: 'Failed!',
+				message: error.message,
+				status: NotificationStatus.ERROR
+			});
+		});
 
 	console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
 	console.log(`Submitted values : approveAsMulti(${multisig.threshold},
@@ -58,5 +100,4 @@ export default async function initMultisigTransfer({
 		${call.method.hash},
 		${MAX_WEIGHT})\n`
 	);
-	console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 }
