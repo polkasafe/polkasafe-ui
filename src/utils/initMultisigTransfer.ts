@@ -51,7 +51,7 @@ export default async function initMultisigTransfer({
 		.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
 		.signAndSend(initiatorAddress);
 
-	console.log(`Sending ${displayAmount} from ${initiatorAddress} to ${multisig.address}`);
+	console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
 	console.log(`Submitted values : approveAsMulti(${multisig.threshold},
 		otherSignatories: ${JSON.stringify(otherSignatories)},
 		${TIME_POINT},
