@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import Balance from 'src/ui-components/Balance';
@@ -22,6 +23,7 @@ import { ParachainIcon } from '../NetworksDropdown';
 const network = getNetwork();
 
 const ExistentialDeposit = () => {
+	const { toggleVisibility } = useModalContext();
 	const { api, apiReady } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
 
@@ -155,7 +157,7 @@ const ExistentialDeposit = () => {
 				</section>
 
 				<section className='flex items-center gap-x-5 justify-center mt-10'>
-					<CancelBtn loading={loading} className='w-[300px]' onClick={() => {}} />
+					<CancelBtn loading={loading} className='w-[300px]' onClick={toggleVisibility} />
 					<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 				</section>
 			</Form>
