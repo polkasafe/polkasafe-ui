@@ -4,6 +4,7 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
+import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -16,6 +17,7 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
@@ -48,7 +50,8 @@ const addRecipientHeading = () => {
 const network = getNetwork();
 
 const SendFundsForm = (props: ISendFundsFormProps) => {
-	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel } = props;
 	const { api, apiReady } = useGlobalApiContext();
 	const [loading, setLoading] = useState(false);
@@ -59,13 +62,17 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 		value: a.address
 	}));
 
-	const signatories = multisigAddresses.find((multisig) => multisig.address === activeMultisig)?.signatories || [];
-	const [initiatorAddress, setInitiatorAddress] = useState(signatories[0]);
-
 	const handleSubmit = async () => {
-		if(!api || !apiReady ) return;
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			console.log(noAccounts, signersMap);
+			return;
+		}
 
-		if(!signatories.includes(initiatorAddress)) return;
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
 
 		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
 
@@ -76,7 +83,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 			await initMultisigTransfer({
 				amount,
 				api,
-				initiatorAddress,
+				initiatorAddress: address,
 				multisig,
 				network,
 				recipientAddress
@@ -138,38 +145,6 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 									id='recipient'
 									placeholder="Send to Address.."
 									onChange={(value) => setRecipientAddress(value)}
-								/>
-								<div className='absolute right-2'>
-									<PasteIcon className='mr-2 text-primary' />
-									<QRIcon className='text-text_secondary' />
-								</div>
-							</div>
-						</Form.Item>
-					</article>
-					<article className='w-[412px] flex items-center'>
-						<span className='-mr-1.5 z-0'>
-							<LineIcon className='text-5xl' />
-						</span>
-						<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>The beneficiary will have access to the transferred fees when the transaction is included in a block.</p>
-					</article>
-				</div>
-			</section>
-			<section className=''>
-				<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Initiators</label>
-				<div className='flex items-center gap-x-[10px]'>
-					<article className='w-[500px]'>
-						<Form.Item
-							name="initiator"
-							rules={[]}
-							className='border-0 outline-0 my-0 p-0'
-						>
-							<div className="flex items-center">
-								<AutoComplete
-									onClick={onClick}
-									options={autocompleteAddresses.filter((item) => signatories.includes(`${item.value}`))}
-									id='initiator'
-									placeholder="Add Initiator"
-									onChange={(value) => setInitiatorAddress(value)}
 								/>
 								<div className='absolute right-2'>
 									<PasteIcon className='mr-2 text-primary' />
