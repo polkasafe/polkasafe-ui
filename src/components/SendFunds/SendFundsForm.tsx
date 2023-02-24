@@ -20,7 +20,7 @@ import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getNetwork from 'src/utils/getNetwork';
-import sendFundsFromMultisig from 'src/utils/sendFunds';
+import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 import styled from 'styled-components';
 
 interface ISendFundsFormProps {
@@ -52,7 +52,6 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const { className, onCancel } = props;
 	const { api, apiReady } = useGlobalApiContext();
 	const [loading, setLoading] = useState(false);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
@@ -68,15 +67,19 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 
 		if(!signatories.includes(initiatorAddress)) return;
 
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
 		setLoading(true);
 		try {
-			await sendFundsFromMultisig({
+			await initMultisigTransfer({
+				amount,
+				api,
 				initiatorAddress,
-				multisigAddress: activeMultisig,
+				multisig,
 				network,
-				recipientAddress,
-				signatories,
-				threshold: signatories.length
+				recipientAddress
 			});
 		} catch (error) {
 			console.log(error);
