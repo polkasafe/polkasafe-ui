@@ -58,7 +58,7 @@ const ExistentialDeposit = () => {
 	};
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady || noAccounts ) return;
+		if(!api || !apiReady || noAccounts || !signersMap ) return;
 
 		const wallet = accountsMap[selectedSender];
 		if(!signersMap[wallet]) return;
