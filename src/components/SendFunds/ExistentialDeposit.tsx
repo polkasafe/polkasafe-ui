@@ -1,6 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Form, Input } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
@@ -12,6 +13,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { PasteIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
@@ -25,16 +27,18 @@ const network = getNetwork();
 const ExistentialDeposit = () => {
 	const { toggleVisibility } = useModalContext();
 	const { api, apiReady } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+
+	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 
 	const [selectedSender, setSelectedSender] = useState(addressBook[0].address);
 	const [amount, setAmount] = useState(new BN(0));
 	const [loading, setLoading] = useState(false);
 
-	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
-		label: a.name,
-		value: a.address
-	}));
+	const autocompleteAddresses: DefaultOptionType[] = [{
+		label: addressBook.find(a => a.address === address)?.name || 'My Address',
+		value: address
+	}];
 
 	const addSenderHeading = () => {
 		const elm = document.getElementById('recipient_list');
@@ -54,7 +58,13 @@ const ExistentialDeposit = () => {
 	};
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady ) return;
+		if(!api || !apiReady || noAccounts ) return;
+
+		const wallet = accountsMap[selectedSender];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
 
 		setLoading(true);
 		try {
