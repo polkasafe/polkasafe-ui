@@ -62,6 +62,8 @@ export default async function initMultisigTransfer({
 				console.log('Transaction is in block');
 			} else if (status.isFinalized) {
 				console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+				console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
 				events.forEach(
 					({ event }) => {
 						if (event.method === 'ExtrinsicSuccess') {
@@ -70,8 +72,6 @@ export default async function initMultisigTransfer({
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-							console.log(`Completed at block hash #${status.asInBlock.toString()}`);
-							console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 							queueNotification({
