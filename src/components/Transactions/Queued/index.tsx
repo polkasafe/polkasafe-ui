@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import dayjs from 'dayjs';
 import React, { FC } from 'react';
 import { ITransactions } from 'src/components/Transactions/History';
 import Transaction from 'src/components/Transactions/History/Transaction';
@@ -13,6 +14,7 @@ interface IQueuedProps {
     transactionsQueued?: ITransactions[];
 }
 const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
+	console.log(transactionsQueued);
 	const { address } = useGlobalUserDetailsContext();
 	return (
 		<>
@@ -25,7 +27,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 						<Transaction
 							amount={String(transaction.amount_token)}
 							amountType={transaction.token}
-							date={transaction.created_at.getTime().toString()}
+							date={dayjs(transaction.created_at).toISOString()}
 							status={'Success'}
 							type={address === transaction.from ? 'Sent' : 'Received'}
 							id={Number(transaction.id)}
