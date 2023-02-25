@@ -4,15 +4,25 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
+import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
+import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
-import NetworksDropdown from 'src/components/NetworksDropdown';
+import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { chainProperties } from 'src/global/networkConstants';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import Balance from 'src/ui-components/Balance';
+import BalanceInput from 'src/ui-components/BalanceInput';
 import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import getNetwork from 'src/utils/getNetwork';
+import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 import styled from 'styled-components';
 
 interface ISendFundsFormProps {
@@ -37,22 +47,54 @@ const addRecipientHeading = () => {
 	}
 };
 
-const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
+const network = getNetwork();
+
+const SendFundsForm = (props: ISendFundsFormProps) => {
+	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel } = props;
-	const recentAddresses: DefaultOptionType[] = [
-		{
-			label: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
-			value: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy'
-		},
-		{
-			label: 'QviecrnyiWrnqRhWNLy3J98t1WpEZ73CNm',
-			value: 'QviecrnyiWrnqRhWNLy3J98t1WpEZ73CNm'
-		},
-		{
-			label: 'WrnqRhWNLy3J98t1WpEZ73CNmQviecrnyi',
-			value: 'WrnqRhWNLy3J98t1WpEZ73CNmQviecrnyi'
+	const { api, apiReady } = useGlobalApiContext();
+	const [loading, setLoading] = useState(false);
+	const [amount, setAmount] = useState(new BN(0));
+	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
+	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
+		label: a.name,
+		value: a.address
+	}));
+
+	const handleSubmit = async () => {
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			console.log(noAccounts, signersMap);
+			return;
 		}
-	];
+
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
+		setLoading(true);
+		try {
+			await initMultisigTransfer({
+				amount,
+				api,
+				initiatorAddress: address,
+				multisig,
+				network,
+				recipientAddress
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const onClick = () => {
 		addRecipientHeading();
 	};
@@ -68,13 +110,10 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 							<img src={profileImg} className='w-full h-full' alt="profile img" />
 						</div>
 						<div className='flex flex-col gap-y-[6px]'>
-							<h4 className='font-medium text-sm leading-[15px] text-white'>Jaski - 1</h4>
-							<p className='text-text_secondary font-normal text-xs leading-[13px]'>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</p>
+							<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
+							<p className='text-text_secondary font-normal text-xs leading-[13px]'>{activeMultisig}</p>
 						</div>
-						<div className='bg-highlight rounded-lg px-[10px] py-[6px] ml-auto font-normal text-xs leading-[13px]'>
-							<span className='text-primary'>Balance: </span>
-							<span className='text-white'>0.00 DOT</span>
-						</div>
+						<Balance address={activeMultisig} />
 					</article>
 					<article className='w-[412px] flex items-center'>
 						<span className='-mr-1.5 z-0'>
@@ -102,9 +141,10 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 							<div className="flex items-center">
 								<AutoComplete
 									onClick={onClick}
-									options={recentAddresses}
+									options={autocompleteAddresses}
 									id='recipient'
 									placeholder="Send to Address.."
+									onChange={(value) => setRecipientAddress(value)}
 								/>
 								<div className='absolute right-2'>
 									<PasteIcon className='mr-2 text-primary' />
@@ -126,22 +166,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 				<label className='text-primary font-normal text-xs leading-[13px] block'>Amount</label>
 				<div className='flex items-center gap-x-[10px]'>
 					<article className='w-[500px]'>
-						<Form.Item
-							name="amount"
-							rules={[]}
-							className='border-0 outline-0 my-0 p-0'
-						>
-							<div className='flex items-center h-[40px]'>
-								<Input
-									placeholder="0"
-									className="h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
-									id="amount"
-								/>
-								<div className='absolute right-0'>
-									<NetworksDropdown className='bg-transparent text-primary gap-x-[12.83px] font-medium' isCardToken={true} iconClassName='h-3 w-3' titleClassName='ml-[4px]' />
-								</div>
-							</div>
-						</Form.Item>
+						<BalanceInput className='mt-6' onChange={(balance) => setAmount(balance)} />
 					</article>
 					<article className='w-[412px] flex items-center'>
 						<span className='-mr-1.5 z-0'>
@@ -165,13 +190,15 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 						>
 							<div className='flex items-center h-[40px]'>
 								<Input
+									disabled={true}
 									type='number'
-									placeholder="1.0000"
+									placeholder={String(chainProperties[network].existentialDeposit)}
 									className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
 									id="existential_deposit"
 								/>
-								<div className='absolute right-0'>
-									<NetworksDropdown className='bg-transparent text-primary gap-x-[12.83px] font-medium' isCardToken={true} iconClassName='h-3 w-3' titleClassName='ml-[4px]' />
+								<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
+									<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
+									<span>{ chainProperties[network].tokenSymbol}</span>
 								</div>
 							</div>
 						</Form.Item>
@@ -208,7 +235,7 @@ const SendFundsForm: FC<ISendFundsFormProps> = (props) => {
 
 			<section className='flex items-center gap-x-5 justify-center mt-10'>
 				<CancelBtn className='w-[300px]' onClick={onCancel} />
-				<ModalBtn className='w-[300px]' title='Make Transaction' />
+				<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 			</section>
 		</Form>
 	);

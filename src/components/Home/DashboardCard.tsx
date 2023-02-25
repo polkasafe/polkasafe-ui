@@ -20,10 +20,11 @@ import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getNetwork from 'src/utils/getNetwork';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
+import SendFundsForm from '../SendFunds/SendFundsForm';
 
 const DashboardCard = ({ className }: { className?: string }) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-	const { openModal } = useModalContext();
+	const { openModal, toggleVisibility } = useModalContext();
 
 	const [loading, setLoading] = useState(false);
 
@@ -49,6 +50,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			console.log('show new transaction modal');
+			openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />);
 		}
 
 		setLoading(false);
