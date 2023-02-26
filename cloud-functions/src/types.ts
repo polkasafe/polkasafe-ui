@@ -68,3 +68,12 @@ export interface IContactFormResponse {
 	email: string;
 	message: string;
 }
+
+export interface IQueueItem {
+	callHash: string;
+	network: string;
+	status: 'Approval' | 'Cancelled' | 'Executed';
+	created_at: Date;
+	approvals: string[];
+	threshold: number;
+}

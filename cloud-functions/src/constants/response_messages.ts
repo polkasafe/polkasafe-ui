@@ -13,6 +13,7 @@ export const responseMessages = {
 	invalid_limit: 'Min. and max. limit that can be fetched per page is 1 and 100 respectively.',
 	invalid_page: 'Min. value for page is 1.',
 	transfers_fetch_error: 'Error while fetching transfers.',
+	queue_fetch_error: 'Error while fetching queue.',
 	assets_fetch_error: 'Error while fetching assets.',
 	success: 'Success'
 };

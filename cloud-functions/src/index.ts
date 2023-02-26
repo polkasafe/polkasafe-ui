@@ -16,6 +16,7 @@ import _getAssetsForAddress from './utlils/_getAssetsForAddress';
 import { chainProperties } from './constants/network_constants';
 import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
+import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -490,6 +491,43 @@ export const isMultisigOnChain = functions.https.onRequest(async (req, res) => {
 			return res.status(200).json({ data: { isOnChain: true } });
 		} catch (err:unknown) {
 			functions.logger.error('Error in isMultisigOnChain :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, network, limit, page } = req.body;
+		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
+		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
+		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
+
+		try {
+			const { data: queueItemsArr, error: queueItemsError } = await getMultisigQueueByAddress(multisigAddress, network, Number(limit), Number(page));
+			if (queueItemsError || !queueItemsArr) return res.status(400).json({ error: queueItemsError || responseMessages.queue_fetch_error });
+
+			res.status(200).json({ data: queueItemsArr });
+
+			// TODO: make a copy to db after response is sent
+			// single batch will do because there'll never be more than 100 transactions
+			// const firestoreBatch = firestoreDB.batch();
+
+			// transactionsArr.forEach((transaction) => {
+			// const transactionRef = firestoreDB.collection('transactions').doc(transaction.id);
+			// firestoreBatch.set(transactionRef, transaction);
+			// });
+
+			// await firestoreBatch.commit();
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getMultisigQueue :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
