@@ -1,4 +1,6 @@
 export const responseMessages = {
+	missing_headers: 'Missing headers.',
+	invalid_headers: 'Invalid headers.',
 	missing_params: 'Missing parameters.',
 	invalid_params: 'Invalid parameters passed to the function call.',
 	invalid_signature: 'Invalid signature.',
