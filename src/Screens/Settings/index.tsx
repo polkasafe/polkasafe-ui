@@ -35,6 +35,7 @@ const Settings = () => {
 
 	return (
 		<div>
+			{/* TODO: Add coming soon */}
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl'>
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
