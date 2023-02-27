@@ -31,6 +31,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 							status={'Success'}
 							type={address === transaction.from ? 'Sent' : 'Received'}
 							id={Number(transaction.id)}
+							recipientAddress={transaction.to}
 						/>;
 					</section>;
 				})}

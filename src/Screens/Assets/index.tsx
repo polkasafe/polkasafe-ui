@@ -2,33 +2,78 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
-import chainIcon from 'src/assets/parachains-icons/polkadot.svg';
-import { IAsset } from 'src/components/Assets/AssetsTable';
+import React, { useCallback, useEffect, useState } from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
 import DropDown from 'src/components/Assets/DropDown';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IAsset } from 'src/types';
+import getNetwork from 'src/utils/getNetwork';
+
+const network = getNetwork();
 
 const Assets = () => {
-	const assets: IAsset[] = [
-		{
-			asset: 'Polkadot',
-			balance: '100 DOT',
-			imgSrc: chainIcon,
-			value: '500.00 USD'
-		},
-		{
-			asset: 'Chainlink',
-			balance: '100 LINK',
-			imgSrc: chainIcon,
-			value: '900.00 USD'
-		},
-		{
-			asset: 'Compound',
-			balance: '100 COMP',
-			imgSrc: chainIcon,
-			value: '300.00 USD'
+
+	const [loading, setLoading] = useState<boolean>(false);
+	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
+
+	const handleGetAssets = useCallback(async () => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!address || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+
+				setLoading(true);
+				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
+					body: JSON.stringify({
+						address,
+						network
+					}),
+					headers: firebaseFunctionsHeader,
+					method: 'POST'
+				});
+
+				const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
+
+				if(error) {
+					setLoading(false);
+					return;
+				}
+
+				if(data){
+					setAssetsData(data);
+					console.log('data:', data);
+					setLoading(false);
+
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			setLoading(false);
 		}
-	];
+	}, []);
+
+	useEffect(() => {
+		handleGetAssets();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	if(loading){
+		return (
+			<div className='h-[70vh] bg-bg-main rounded-lg flex justify-center items-center'>
+				<h2 className='font-bold text-xl leading-[22px] text-primary'>
+					Loading...
+				</h2>
+			</div>
+		);
+	}
+
 	return (
 		<div className='h-[70vh] bg-bg-main rounded-lg'>
 			<div className="grid grid-cols-12 gap-4">
@@ -44,7 +89,7 @@ const Assets = () => {
 					</div>
 				</div>
 				<div className='col-start-1 col-end-13 mx-5'>
-					<AssetsTable assets={ assets }/>
+					<AssetsTable assets={ assetsData }/>
 				</div>
 			</div>
 		</div>
