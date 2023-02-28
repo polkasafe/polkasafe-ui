@@ -30,7 +30,7 @@ const Transactions = () => {
 				console.log('ERROR');
 				return;
 			}
-			const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
+			const getTransactionsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
 				body: JSON.stringify({
 					limit: 10,
 					multisigAddress: activeMultisig,
@@ -41,7 +41,7 @@ const Transactions = () => {
 				method: 'POST'
 			});
 
-			const { data, error } = await addAddressRes.json();
+			const { data, error } = await getTransactionsRes.json();
 			if(error){
 				console.log('Error in Fetching Transactions: ', error);
 			}
@@ -58,7 +58,7 @@ const Transactions = () => {
 				className='bg-bg-main rounded-xl p-[20.5px]'
 			>
 				<div
-					className='flex items-center'
+					className='flex items-center mb-4'
 				>
 					<button
 						onClick={() => setTab(ETab.QUEUE)}

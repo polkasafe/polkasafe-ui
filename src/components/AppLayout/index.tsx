@@ -20,14 +20,10 @@ export interface IRouteInfo {
 
 const AppLayout = ({ className }: { className?: string }) => {
 	const [sideDrawer, setSideDrawer] = useState(false);
-	const [selectedRoute, setSelectedRoute] = useState<IRouteInfo>({
-		pathName: '/',
-		title: 'Home'
-	});
 
 	return (
 		<Layout className={className}>
-			<NavHeader selectedRoute={selectedRoute} setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} />
+			<NavHeader setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} />
 			<Layout hasSider>
 				<Sider
 					trigger={null}
@@ -35,7 +31,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 					collapsed={true}
 					className={'hidden overflow-y-hidden bg-bg-main sidebar lg:block top-0 bottom-0 left-0 h-screen fixed z-40 w-full max-w-[240px]'}
 				>
-					<Menu selectedRoute={selectedRoute} setSelectedRoute={setSelectedRoute} />
+					<Menu />
 				</Sider>
 				<Drawer
 					placement='left'
@@ -45,7 +41,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 					getContainer={false}
 					className='w-full max-w-[240px] p-0'
 				>
-					<Menu selectedRoute={selectedRoute} setSelectedRoute={setSelectedRoute} />
+					<Menu />
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
 					<div className='hidden lg:block w-full max-w-[240px]'></div>

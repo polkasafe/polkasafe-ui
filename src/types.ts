@@ -79,3 +79,12 @@ export interface IAsset {
 	balance_usd: string;
 	balance_token: string;
 }
+
+export interface IQueueItem {
+	callHash: string;
+	network: string;
+	status: 'Approval' | 'Cancelled' | 'Executed';
+	created_at: Date;
+	approvals: string[];
+	threshold: number;
+}

@@ -7,12 +7,13 @@ import Identicon from '@polkadot/react-identicon';
 import { message } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IAddress {
     value: string;
     imgSrc: string;
@@ -23,10 +24,6 @@ const AddressDropdown = () => {
 	const network = getNetwork();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [selectedAddress, setSelectedAddress] = useState<IAddress>({
-		imgSrc: '',
-		value: '3J98t...hWNLy'
-	});
 	const [isVisible, toggleVisibility] = useState(false);
 	const handleCopy = () => {
 		// navigator.clipboard.writeText(`${address}`);
@@ -48,23 +45,33 @@ const AddressDropdown = () => {
 		return navigate('/', { replace: true });
 	};
 
+	if(!address){
+		return (
+			<button className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+				<Link to={'/'}>
+					Connect Wallet
+				</Link>
+			</button>
+		);
+	}
+
 	return (
 		<div
 			className='relative'
 		>
 			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
-					{!selectedAddress?<WarningRoundedIcon className='text-base text-primary'/>
+					{!address?<WarningRoundedIcon className='text-base text-primary'/>
 						:<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
 							<UserOutlined className='text-white text-[10px]' />
 						</span>}
 					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{selectedAddress? selectedAddress.value:'Not Connected'}
+						{address? address :'Not Connected'}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
-					'text-primary': selectedAddress,
-					'text-white': !selectedAddress
+					'text-primary': address,
+					'text-white': !address
 				})} />
 			</button>
 
@@ -77,7 +84,7 @@ const AddressDropdown = () => {
 					}
 				)}
 			>
-				{selectedAddress? <div className='flex items-center justify-center flex-col gap-y-9'>
+				<div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
 						<Identicon
 							className='border-2 rounded-full bg-transparent border-primary p-1'
@@ -89,7 +96,7 @@ const AddressDropdown = () => {
 							{ addressBook.find(item => item.address === address)?.name }
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
-							<span className='text-text_secondary'>{selectedAddress.value}</span>
+							<span className='text-text_secondary'>{address}</span>
 							<button onClick={handleCopy}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>
@@ -106,7 +113,7 @@ const AddressDropdown = () => {
 					<button onClick={handleDisconnect} className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>
 						Disconnect
 					</button>
-				</div>: null}
+				</div>
 			</div>
 		</div>
 	);
