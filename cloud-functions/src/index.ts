@@ -25,8 +25,8 @@ const firestoreDB = admin.firestore();
 const corsHandler = cors({ origin: true });
 
 const isValidRequest = async (address?:string, signature?:string): Promise<{ isValid: boolean, error: string }> => {
-	if (!address || !signature) return { isValid: false, error: responseMessages.missing_params };
-	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_params };
+	if (!address || !signature) return { isValid: false, error: responseMessages.missing_headers };
+	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_headers };
 
 	const isValid = await isValidSignature(signature, address);
 	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };
@@ -276,17 +276,15 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 
 			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
 			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
-			if (multisigMetaData && isNaN(multisigMetaData.threshold) || multisigMetaData.signatories.length <= 1) {
-				return res.status(400).json({ error: responseMessages.multisig_not_found });
-			}
+			if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found });
 
 			const newMultisig: IMultisigAddress = {
 				address: multisigAddress,
 				created_at: new Date(),
 				name: DEFAULT_MULTISIG_NAME,
-				signatories: multisigMetaData.signatories,
+				signatories: multisigMetaData.signatories || [],
 				network: String(network).toLowerCase(),
-				threshold: Number(multisigMetaData.threshold)
+				threshold: Number(multisigMetaData.threshold) || 0
 			};
 
 			// make a copy to db
@@ -533,3 +531,5 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 	});
 });
 
+// TODO: return BE data first and then save data to BE and return data from BE;
+// store last updated at
