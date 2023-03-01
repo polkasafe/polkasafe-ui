@@ -287,6 +287,8 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				threshold: Number(multisigMetaData.threshold) || 0
 			};
 
+			if (!newMultisig.signatories.length || !newMultisig.threshold) return;
+
 			// make a copy to db
 			const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
 			await newMultisigRef.set(newMultisig);
