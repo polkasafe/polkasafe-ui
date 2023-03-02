@@ -51,7 +51,7 @@ const History: FC<IHistoryProps> = ({ transactionsHistory }) => {
 							status={'Success'}
 							type={address === transaction.from ? 'Sent' : 'Received'}
 							id={Number(transaction.id)}
-							recipientAddress={transaction.to}
+							recipient={transaction.to}
 						/>;
 					</section>;
 				})}

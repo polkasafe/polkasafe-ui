@@ -5,7 +5,6 @@
 import dayjs from 'dayjs';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { ITransactions } from 'src/components/Transactions/History';
-import Transaction from 'src/components/Transactions/History/Transaction';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -15,6 +14,7 @@ import { NotificationStatus } from 'src/ui-components/types';
 import getNetwork from 'src/utils/getNetwork';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
+import Transaction from './Transaction';
 
 interface IQueuedProps {
     transactionsQueued?: ITransactions[];
@@ -22,8 +22,10 @@ interface IQueuedProps {
 
 const network = getNetwork();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 	const [loading, setLoading] = useState<boolean>(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { address, activeMultisig } = useGlobalUserDetailsContext();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,6 +43,8 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 				return;
 			}
 			else{
+
+				console.log(activeMultisig);
 
 				const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
 					body: JSON.stringify({
@@ -96,20 +100,22 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 
 	return (
 		<>
-			{(transactionsQueued && transactionsQueued.length > 0)? <div className='flex flex-col gap-y-[10px]'>
-				{transactionsQueued.map((transaction, index) => {
+			{(queuedTransactions && queuedTransactions.length > 0)? <div className='flex flex-col gap-y-[10px]'>
+				{queuedTransactions.map((transaction, index) => {
 					return <section key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
 						</h4> */}
 						<Transaction
-							amount={String(transaction.amount_token)}
-							amountType={transaction.token}
+							amount={'0'}
+							amountType={'DOT'}
 							date={dayjs(transaction.created_at).toISOString()}
-							status={'Success'}
-							type={address === transaction.from ? 'Sent' : 'Received'}
-							id={Number(transaction.id)}
-							recipientAddress={transaction.to}
+							status={transaction.status}
+							type={ 'Sent' }
+							id={0}
+							recipientAddress={'5Gq84otocj45uGWqB4cacNnVeyCCFeKHg6EtK76BLvh2sM1s'}
+							approvals={transaction.approvals}
+							threshold={transaction.threshold}
 						/>;
 					</section>;
 				})}

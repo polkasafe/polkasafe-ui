@@ -48,7 +48,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			return;
 		}
 
-		if(isMultisigOnChainData.isOnChain) {
+		if(!isMultisigOnChainData.isOnChain) {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			console.log('show new transaction modal');
