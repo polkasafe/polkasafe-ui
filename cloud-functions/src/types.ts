@@ -37,15 +37,15 @@ export interface ChainProperties {
 }
 
 export interface ITransaction {
+	callData?: string;
 	callHash: string;
 	created_at: Date;
 	block_number: number;
 	from: string;
 	to: string;
-	id: string;
 	token: string;
-	amount_usd: number;
-	amount_token: number;
+	amount_usd: string;
+	amount_token: string;
 	network: string;
 }
 

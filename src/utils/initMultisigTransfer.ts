@@ -9,6 +9,8 @@ import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
+import { addNewTransaction } from './addNewTransaction';
+
 interface Args {
 	api: ApiPromise,
 	recipientAddress: string,
@@ -48,10 +50,12 @@ export default async function initMultisigTransfer({
 	// null for transaction initiation
 	const TIME_POINT = null;
 
+	let blockHash = '';
 	// 5. first call is approveAsMulti
 	await api.tx.multisig
 		.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
-		.signAndSend(initiatorAddress, ({ status, txHash, events }) => {
+		.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
+			// TODO: Make callback function reusable (pass onSuccess and onError functions)
 			if (status.isInvalid) {
 				console.log('Transaction invalid');
 			} else if (status.isReady) {
@@ -59,28 +63,42 @@ export default async function initMultisigTransfer({
 			} else if (status.isBroadcast) {
 				console.log('Transaction has been broadcasted');
 			} else if (status.isInBlock) {
+				blockHash = status.asInBlock.toHex();
 				console.log('Transaction is in block');
 			} else if (status.isFinalized) {
 				console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 				console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 
-				events.forEach(
-					({ event }) => {
-						if (event.method === 'ExtrinsicSuccess') {
-							queueNotification({
-								header: 'Success!',
-								message: 'Transaction Successful.',
-								status: NotificationStatus.SUCCESS
-							});
-						} else if (event.method === 'ExtrinsicFailed') {
-							console.log('Transaction failed');
-							queueNotification({
-								header: 'Error!',
-								message: 'Transaction Failed',
-								status: NotificationStatus.ERROR
-							});
-						}
+				const block = await api.rpc.chain.getBlock(blockHash);
+				const blockNumber = block.block.header.number.toNumber();
+
+				events.forEach(({ event }) => {
+					if (event.method === 'ExtrinsicSuccess') {
+						queueNotification({
+							header: 'Success!',
+							message: 'Transaction Successful.',
+							status: NotificationStatus.SUCCESS
+						});
+						// 6. store data to BE
+						// created_at should be set by BE for server time, amount_usd should be fetched by BE
+						addNewTransaction({
+							amount,
+							block_number: blockNumber,
+							callData: call.method.toHex(),
+							callHash: call.hash.toHex(),
+							from: multisig.address,
+							network,
+							to: recipientAddress
+						});
+					} else if (event.method === 'ExtrinsicFailed') {
+						console.log('Transaction failed');
+						queueNotification({
+							header: 'Error!',
+							message: 'Transaction Failed',
+							status: NotificationStatus.ERROR
+						});
 					}
+				}
 				);
 			}
 		}).catch((error) => {

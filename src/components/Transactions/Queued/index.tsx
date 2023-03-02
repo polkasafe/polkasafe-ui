@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { ITransactions } from 'src/components/Transactions/History';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IQueueItem } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -53,7 +53,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 						network,
 						page: 1
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: FIREBASE_FUNCTIONS_HEADER,
 					method: 'POST'
 				});
 
@@ -112,7 +112,6 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 							date={dayjs(transaction.created_at).toISOString()}
 							status={transaction.status}
 							type={ 'Sent' }
-							id={0}
 							recipientAddress={'5Gq84otocj45uGWqB4cacNnVeyCCFeKHg6EtK76BLvh2sM1s'}
 							approvals={transaction.approvals}
 							threshold={transaction.threshold}

@@ -34,10 +34,9 @@ export default async function getTransactionsByAddress(multisigAddress: string, 
 					created_at: dayjs(transfer.block_timestamp).toDate(),
 					from: transfer.from,
 					to: transfer.to,
-					id: transfer.hash,
 					token: transfer.asset_symbol,
-					amount_usd: Number(transfer.usd_amount),
-					amount_token: Number(transfer.amount),
+					amount_usd: String(transfer.usd_amount),
+					amount_token: String(transfer.amount),
 					block_number: Number(transfer.block_num),
 					network: network
 				};
