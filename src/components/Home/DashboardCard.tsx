@@ -13,7 +13,7 @@ import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -37,7 +37,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				multisigAddress: activeMultisig,
 				network: getNetwork()
 			}),
-			headers: firebaseFunctionsHeader,
+			headers: FIREBASE_FUNCTIONS_HEADER,
 			method: 'POST'
 		});
 

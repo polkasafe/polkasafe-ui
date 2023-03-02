@@ -30,7 +30,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 							date={dayjs(transaction.created_at).toISOString()}
 							status={'Success'}
 							type={address === transaction.from ? 'Sent' : 'Received'}
-							id={Number(transaction.id)}
+							id={Number(transaction.callHash)}
 						/>;
 					</section>;
 				})}
