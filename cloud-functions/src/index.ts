@@ -404,9 +404,10 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 		if (!review || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
 			const feedbackRef = firestoreDB.collection('feedbacks').doc();
 			const newFeedback: IFeedback = {
-				address: String(address),
+				address: substrateAddress,
 				rating: Number(rating),
 				review: String(review)
 			};
