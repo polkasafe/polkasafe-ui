@@ -9,12 +9,13 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
 
+// TODO: REMOVE ITransaction and ITransactions from here use ITransaction from src/types.ts
 export interface ITransaction {
     amount: string;
     amountType: string;
-    id: number;
     status: 'Success' | 'Failed';
     type: 'Sent' | 'Received';
+		id: number;
 }
 
 export interface ITransactions {
@@ -50,7 +51,7 @@ const History: FC<IHistoryProps> = ({ transactionsHistory }) => {
 							date={dayjs(transaction.created_at).toISOString()}
 							status={'Success'}
 							type={address === transaction.from ? 'Sent' : 'Received'}
-							id={Number(transaction.id)}
+							id={Number(transaction.callHash)}
 						/>;
 					</section>;
 				})}

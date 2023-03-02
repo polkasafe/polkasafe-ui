@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { chainProperties } from '../constants/network_constants';
 import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
 
-export default async function fetchTokenUSDValue(tokenSymbol:string, network: string): Promise<number | null> {
+export default async function fetchTokenUSDValue(network: string): Promise<number | null> {
 	const { data: response } = await axios.post(`https://${network}.api.subscan.io/api/open/price_converter`, {
-		from: tokenSymbol,
+		from: chainProperties[network].tokenSymbol,
 		quote: 'USD',
 		value: 1
 	}, {
