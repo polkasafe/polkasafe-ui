@@ -287,14 +287,14 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				threshold: Number(multisigMetaData.threshold) || 0
 			};
 
+			res.status(200).json({ data: newMultisig });
+
 			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
 				// make a copy to db
 				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
 				await newMultisigRef.set(newMultisig);
 			}
-
-			// TODO: after implementation, check if we should send this response before saving to db
-			return res.status(200).json({ data: newMultisig });
+			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
