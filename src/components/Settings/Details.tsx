@@ -4,7 +4,7 @@
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -32,7 +32,7 @@ const Details = () => {
 				body: JSON.stringify({
 					multisigAddress: activeMultisig
 				}),
-				headers: firebaseFunctionsHeader,
+				headers: FIREBASE_FUNCTIONS_HEADER,
 				method: 'POST'
 			});
 

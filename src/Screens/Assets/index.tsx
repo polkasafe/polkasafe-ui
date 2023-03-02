@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
 import DropDown from 'src/components/Assets/DropDown';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
 import getNetwork from 'src/utils/getNetwork';
@@ -34,7 +34,7 @@ const Assets = () => {
 						address,
 						network
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: FIREBASE_FUNCTIONS_HEADER,
 					method: 'POST'
 				});
 
