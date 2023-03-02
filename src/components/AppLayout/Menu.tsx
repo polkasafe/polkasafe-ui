@@ -5,15 +5,13 @@
 import Identicon from '@polkadot/react-identicon';
 import classNames from 'classnames';
 import React, { FC, useEffect,useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
-
-import { IRouteInfo } from '.';
 
 const menuItems = [
 	{
@@ -50,14 +48,14 @@ const menuItems = [
 
 interface Props {
 	className?: string;
-	selectedRoute: IRouteInfo;
-	setSelectedRoute: React.Dispatch<React.SetStateAction<IRouteInfo>>;
 }
 
-const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Menu: FC<Props> = ({ className }) => {
 	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState('');
 	const { openModal } = useModalContext();
+	const location = useLocation();
 
 	useEffect(() => {
 		if(activeMultisig){
@@ -97,12 +95,11 @@ const Menu: FC<Props> = ({ className, selectedRoute, setSelectedRoute }) => {
 					{
 						menuItems.map((item) => {
 							return <li className='w-full' key={item.key}>
-								<Link className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
-									'bg-highlight text-primary': item.title === selectedRoute.title
-								})} onClick={() => setSelectedRoute({
-									pathName: item.key,
-									title: item.title
-								})} to={item.key} >
+								<Link
+									className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+										'bg-highlight text-primary': item.key === location.pathname
+									})}
+									to={item.key} >
 									{item.icon}
 									{item.title}
 								</Link>

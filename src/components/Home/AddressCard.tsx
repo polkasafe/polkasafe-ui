@@ -24,8 +24,8 @@ const AddressCard = ({ className }: { className?: string }) => {
 					<RightArrowOutlined/>
 				</div>
 			</div>
-			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-72 mt-3`}>
-				<div className='flex flex-col items-center px-5 h-72 overflow-auto w-[100%] divide-y divide-gray-700'>
+			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-80 mt-3`}>
+				<div className='flex flex-col items-center px-5 h-80 overflow-auto w-[100%] divide-y divide-gray-700'>
 					{addressBook.map((item, i) => (
 						<div key={`${i}-${item.address}`} className='flex justify-items-center items-center pt-5 mb-5'>
 							<Identicon

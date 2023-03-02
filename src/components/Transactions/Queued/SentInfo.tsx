@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
@@ -13,16 +14,17 @@ interface ISentInfoProps {
 	amountType: string;
 	date: string;
 	// time: string;
+    approvals: string[]
+    threshold: number
     className?: string;
-	recipient: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, recipient } = props;
+	const { amount, amountType, className, date, approvals, threshold } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
-	const handleCopy = (address: string) => {
+	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
 	};
@@ -37,7 +39,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 				>
 					<span>
-							Sent
+							Received
 					</span>
 					<span
 						className='text-failure'
@@ -45,7 +47,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						{amount} {amountType}
 					</span>
 					<span>
-							to:
+							from:
 					</span>
 				</p>
 				<div
@@ -64,12 +66,12 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{recipient}
+								{address}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => handleCopy(recipient)}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
 								<ExternalLinkIcon />
 							</span>
 						</p>
@@ -177,7 +179,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-                                Confirmations <span className='text-text_secondary'>(3 of 3)</span>
+                                Confirmations <span className='text-text_secondary'>{approvals.length} of {threshold}</span>
 							</div>
 						</Timeline.Item>
 						<Timeline.Item
@@ -194,33 +196,36 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 									key={1}
 									className='bg-highlight rounded-md'
 									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}>
-									<div
-										className='mt-3 flex items-center gap-x-4'
-									>
-										<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+									{approvals.map((address, i) => (
 										<div
-											className='flex flex-col gap-y-[6px]'
+											key={i}
+											className='mt-3 flex items-center gap-x-4'
 										>
-											<p
-												className='font-medium text-sm leading-[15px] text-white'
+											<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+											<div
+												className='flex flex-col gap-y-[6px]'
 											>
-                                                    Akshit
-											</p>
-											<p
-												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-											>
-												<span>
-													fasgagdghdgege
-												</span>
-												<span
-													className='flex items-center gap-x-2 text-sm'
+												<p
+													className='font-medium text-sm leading-[15px] text-white'
 												>
-													<CopyIcon />
-													<ExternalLinkIcon />
-												</span>
-											</p>
+                                                    Akshit
+												</p>
+												<p
+													className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+												>
+													<span>
+														{shortenAddress(address)}
+													</span>
+													<span
+														className='flex items-center gap-x-2 text-sm'
+													>
+														<CopyIcon />
+														<ExternalLinkIcon />
+													</span>
+												</p>
+											</div>
 										</div>
-									</div>
+									))}
 								</Collapse.Panel>
 							</Collapse>
 						</Timeline.Item>
@@ -273,9 +278,9 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 };
 
 export default styled(SentInfo)`
-	.ant-collapse > .ant-collapse-item > .ant-collapse-header{
-		padding: 4px 8px;
-	}
+    .ant-collapse > .ant-collapse-item > .ant-collapse-header{
+        padding: 4px 8px;
+    }
     .ant-timeline-item-tail {
         border-inline-width: 0.5px !important;
     }

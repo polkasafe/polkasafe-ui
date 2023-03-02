@@ -71,3 +71,20 @@ export interface IMultisigAddress {
 export interface IUserResponse extends IUser {
 	multisigAddresses: IMultisigAddress[];
 }
+
+export interface IAsset {
+	name: string;
+	logoURI: string;
+	symbol: string;
+	balance_usd: string;
+	balance_token: string;
+}
+
+export interface IQueueItem {
+	callHash: string;
+	network: string;
+	status: 'Approval' | 'Cancelled' | 'Executed';
+	created_at: Date;
+	approvals: string[];
+	threshold: number;
+}

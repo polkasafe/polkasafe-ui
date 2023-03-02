@@ -2,22 +2,77 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Signer } from '@polkadot/api/types';
 import { Collapse, Divider } from 'antd';
+import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import getNetwork from 'src/utils/getNetwork';
 
-import { ITransaction } from '.';
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
-interface ITransactionProps extends ITransaction {
+interface ITransactionProps {
+    amount: string;
+    amountType: string;
+    id: number;
+    status: 'Approval' | 'Cancelled' | 'Executed';
+    type: 'Sent' | 'Received';
 	date: string;
-	recipient: string
+	recipientAddress: string;
+	approvals: string[];
+	threshold: number;
 }
 
-const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, type, recipient }) => {
+const network = getNetwork();
+
+const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, date, status, type, threshold, recipientAddress }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
+
+	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [loading, setLoading] = useState(false);
+	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { api, apiReady } = useGlobalApiContext();
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const handleApproveTransaction = async () => {
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			console.log(noAccounts, signersMap);
+			return;
+		}
+
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
+		setLoading(true);
+		try {
+			await approveMultisigTransfer({
+				amount: new BN(amount),
+				api,
+				approvingAddress: address,
+				multisig,
+				network,
+				recipientAddress
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<Collapse
@@ -104,7 +159,8 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 								amount={amount}
 								amountType={amountType}
 								date={date}
-								recipient={recipient}
+								approvals={approvals}
+								threshold={threshold}
 							/>
 					}
 				</div>

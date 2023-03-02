@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { stringToHex } from '@polkadot/util';
+import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -16,7 +17,8 @@ const ConnectWallet = () => {
 
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
-	const [address, setAddress] = useState('');
+	const [address, setAddress] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -39,6 +41,8 @@ const ConnectWallet = () => {
 				return;
 			}
 
+			setLoading(true);
+
 			const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressToken`, {
 				headers: {
 					'x-address': substrateAddress
@@ -51,12 +55,14 @@ const ConnectWallet = () => {
 			if(tokenError) {
 				// TODO extension
 				console.log('ERROR TODO', tokenError);
+				setLoading(false);
 				return;
 			} else {
 				const wallet = accountsMap[address];
 
 				if(!signersMap[wallet]){
 					// error state - please add ...
+					setLoading(false);
 					return;
 				}
 				// @ts-ignore
@@ -88,10 +94,12 @@ const ConnectWallet = () => {
 							multisigAddresses: userData?.multisigAddresses
 						};
 					});
+					setLoading(false);
 				}
 			}
 		} catch (error){
 			console.log('ERROR OCCURED', error);
+			setLoading(false);
 		}
 	};
 
@@ -116,15 +124,15 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
-							<button
+							<Button
+								icon={<WalletIcon/>}
+								size='large'
+								loading={loading}
 								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
-								className='mt-[60px] p-3 flex items-center justify-center bg-primary text-white gap-x-[10.5px] rounded-lg max-w-[350px] w-full'
+								className='mt-[60px] border-none outline-none flex items-center justify-center bg-primary text-white max-w-[350px] w-full'
 							>
-								<WalletIcon/>
-								<span className='font-normal text-sm leading-[15px]'>
 								Connect Wallet
-								</span>
-							</button>
+							</Button>
 						</>
 						: <h2 className='font-bold text-xl leading-[22px] text-primary'>
 							Loading...

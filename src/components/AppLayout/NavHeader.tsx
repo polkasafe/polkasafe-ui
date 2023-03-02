@@ -5,12 +5,11 @@
 import { MenuOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import React, { FC } from 'react';
+import { useLocation } from 'react-router-dom';
 import AddressDropdown from 'src/components/AddressDropdown';
 import DonateBtn from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
-
-import { IRouteInfo } from '.';
 
 const { Header } = Layout;
 
@@ -18,10 +17,10 @@ interface Props {
 	className?: string
 	sideDrawer: boolean
 	setSideDrawer: React.Dispatch<React.SetStateAction<boolean>>
-	selectedRoute: IRouteInfo;
 }
 
-const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
+const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
+	const location = useLocation();
 	return (
 		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
 			<section className='hidden lg:block w-[240px]'></section>
@@ -34,12 +33,15 @@ const NavHeader: FC<Props> = ({ sideDrawer, selectedRoute, setSideDrawer }) => {
 					</button>
 				</article>
 				<article className='hidden sm:block'>
-					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl'>{selectedRoute.title}</p>
+					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl capitalize'>
+						{location.pathname === '/' ? 'Home' :
+							location.pathname.slice(1).split('-').join(' ')}
+					</p>
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>
 					<Notification />
 					<NetworksDropdown />
-					<AddressDropdown />
+					<AddressDropdown/>
 					<DonateBtn />
 				</article>
 			</section>
