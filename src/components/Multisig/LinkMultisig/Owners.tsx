@@ -18,8 +18,8 @@ interface ISignatory{
 interface Props{
 	signatories: ISignatory[]
 	setSignatoriesWithName: React.Dispatch<React.SetStateAction<ISignatory[]>>
-	signatoriesArray: string[]
-	setSignatoriesArray: React.Dispatch<React.SetStateAction<string[]>>
+	signatoriesArray: ISignatory[]
+	setSignatoriesArray: React.Dispatch<React.SetStateAction<ISignatory[]>>
 	setThreshold: React.Dispatch<React.SetStateAction<number>>
 }
 
@@ -28,7 +28,18 @@ const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatories
 	const onSignatoryChange = (event: any, i: number) => {
 		setSignatoriesArray((prevState) => {
 			const copyArray = [...prevState];
-			copyArray[i] = event.target.value;
+			const copyObject = { ...copyArray[i] };
+			copyObject.address = event.target.value;
+			copyArray[i] = copyObject;
+			return copyArray;
+		});
+	};
+	const onNameChange = (event: any, i: number) => {
+		setSignatoriesArray((prevState) => {
+			const copyArray = [...prevState];
+			const copyObject = { ...copyArray[i] };
+			copyObject.name = event.target.value;
+			copyArray[i] = copyObject;
 			return copyArray;
 		});
 	};
@@ -36,7 +47,7 @@ const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatories
 	const onAddSignatory = () => {
 		setSignatoriesArray((prevState) => {
 			const copyOptionsArray = [...prevState];
-			copyOptionsArray.push('');
+			copyOptionsArray.push({ address: '', name: '' });
 			return copyOptionsArray;
 		});
 	};
@@ -71,8 +82,8 @@ const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatories
 						<p>Review</p>
 					</div>
 				</div>
-				<div className='px-4 overflow-auto'>
-					<p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>
+				<div className='px-4 overflow-auto w-full'>
+					{signatories.length !== 0 && <p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>}
 					<Form
 						className='my-0 mt-5'
 					>
@@ -119,7 +130,14 @@ const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatories
 												placeholder=""
 												disabled={i === 0}
 												className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-												value={signatory}
+												value={signatory.name}
+												onChange={(e) => onNameChange(e, i)}
+											/>
+											<Input
+												placeholder=""
+												disabled={i === 0}
+												className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+												value={signatory.address}
 												onChange={(e) => onSignatoryChange(e, i)}
 											/>
 											{i > 1 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}

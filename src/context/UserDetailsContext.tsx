@@ -36,7 +36,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 		setLoading(true);
 		const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-			headers: firebaseFunctionsHeader,
+			headers: firebaseFunctionsHeader(),
 			method: 'POST'
 		});
 

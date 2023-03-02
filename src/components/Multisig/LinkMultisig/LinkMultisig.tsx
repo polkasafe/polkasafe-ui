@@ -45,7 +45,7 @@ const LinkMultisig = () => {
 
 	const [signatoriesWithName, setSignatoriesWithName] = useState<ISignatory[]>([]);
 
-	const [signatoriesArray, setSignatoriesArray] = useState<string[]>([address, '']);
+	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
 	const [threshold, setThreshold] = useState<number>(0);
 
 	const viewNameAddress = () => {
@@ -199,7 +199,7 @@ const LinkMultisig = () => {
 						multisigAddress,
 						network
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 
@@ -255,26 +255,22 @@ const LinkMultisig = () => {
 		setViewReviews(false);
 	};
 
-	const checkMultisig = (signatories: string[]) => {
-		const address = _createMultisig(signatories, 2, 42);
+	const checkMultisig = (signatories: ISignatory[]) => {
+		const signatoryAddresses = signatories.map(item => item.address);
+		const address = _createMultisig(signatoryAddresses, 2, 42);
 		if(address && address.multisigAddress === multisigAddress){
 			setMultisigData(prevState => {
 				return {
 					...prevState,
 					name: multisigName,
 					address: multisigAddress,
-					signatories,
+					signatories: signatoryAddresses,
 					threshold,
 					network,
 					created_at: new Date()
 				};
 			});
-			setSignatoriesWithName(signatories.map((item) => {
-				return {
-					address: item,
-					name: 'Untitled'
-				};
-			}));
+			setSignatoriesWithName(signatories);
 			setNameAddress(false);
 			setViewOwners(false);
 			setViewReviews(false);

@@ -37,7 +37,7 @@ const Transactions = () => {
 					network: getNetwork(),
 					page: 1
 				}),
-				headers: firebaseFunctionsHeader,
+				headers: firebaseFunctionsHeader(),
 				method: 'POST'
 			});
 
@@ -82,7 +82,7 @@ const Transactions = () => {
 					>
 						History
 					</button>
-					<Filter />
+					{tab !== ETab.QUEUE && <Filter />}
 				</div>
 				{
 					tab === ETab.HISTORY?

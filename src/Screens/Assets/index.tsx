@@ -34,7 +34,7 @@ const Assets = () => {
 						address,
 						network
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 

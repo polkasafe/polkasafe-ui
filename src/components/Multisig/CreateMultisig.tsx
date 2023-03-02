@@ -77,7 +77,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						multisigName,
 						network
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 

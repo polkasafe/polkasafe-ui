@@ -53,7 +53,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 						network,
 						page: 1
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 
@@ -90,9 +90,9 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 
 	if(loading){
 		return (
-			<div className='flex justify-center items-center'>
+			<div className='flex justify-center items-center h-full'>
 				<h2 className='font-bold text-xl leading-[22px] text-primary'>
-						Loading...
+					Loading...
 				</h2>
 			</div>
 		);

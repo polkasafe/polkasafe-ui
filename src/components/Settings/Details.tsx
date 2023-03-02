@@ -32,7 +32,7 @@ const Details = () => {
 				body: JSON.stringify({
 					multisigAddress: activeMultisig
 				}),
-				headers: firebaseFunctionsHeader,
+				headers: firebaseFunctionsHeader(),
 				method: 'POST'
 			});
 

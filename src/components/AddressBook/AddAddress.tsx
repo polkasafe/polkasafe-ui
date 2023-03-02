@@ -53,7 +53,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						address,
 						name
 					}),
-					headers: firebaseFunctionsHeader,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 

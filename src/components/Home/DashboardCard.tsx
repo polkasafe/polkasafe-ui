@@ -37,7 +37,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				multisigAddress: activeMultisig,
 				network: getNetwork()
 			}),
-			headers: firebaseFunctionsHeader,
+			headers: firebaseFunctionsHeader(),
 			method: 'POST'
 		});
 
