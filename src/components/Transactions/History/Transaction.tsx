@@ -4,27 +4,26 @@
 
 import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
+import dayjs from 'dayjs';
 import React, { FC, useState } from 'react';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { IHistoryTransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 
-import { ITransaction } from '.';
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
-interface ITransactionProps extends ITransaction {
-	date: string;
-	recipient: string
-}
-
-const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, type, recipient }) => {
+const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
+	const { address } = useGlobalUserDetailsContext();
+	const type: 'Sent' | 'Received' = address === from ? 'Sent' : 'Received';
 
 	return (
 		<Collapse
 			className='bg-bg-secondary rounded-lg p-3'
 			bordered={false}
 		>
-			<Collapse.Panel showArrow={false} key={date} header={
+			<Collapse.Panel showArrow={false} key={1} header={
 				<div
 					onClick={() => {
 						toggleTransactionVisible(!transactionInfoVisible);
@@ -62,7 +61,7 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{amount} {amountType}
+							{type === 'Sent'? '-': '+'}{amount_token} {token}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -70,7 +69,7 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 				</p> */}
 					<p className='col-span-2 flex items-center justify-end gap-x-4'>
 						<span className='text-success'>
-							{status}
+							Success
 						</span>
 						<span className='text-white text-sm'>
 							{
@@ -95,16 +94,16 @@ const Transaction: FC<ITransactionProps> = ({ amount, amountType, date, status, 
 					{
 						type === 'Received'?
 							<ReceivedInfo
-								amount={amount}
-								amountType={amountType}
-								date={date}
+								amount={String(amount_token)}
+								amountType={token}
+								date={dayjs(created_at).toISOString()}
 							/>
 							:
 							<SentInfo
-								amount={amount}
-								amountType={amountType}
-								date={date}
-								recipient={recipient}
+								amount={String(amount_token)}
+								amountType={token}
+								date={dayjs(created_at).toISOString()}
+								recipient={to}
 							/>
 					}
 				</div>

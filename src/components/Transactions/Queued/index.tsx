@@ -4,10 +4,10 @@
 
 import dayjs from 'dayjs';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { ITransactions } from 'src/components/Transactions/History';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IHistoryTransaction } from 'src/types';
 import { IQueueItem } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
@@ -17,7 +17,7 @@ import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
 interface IQueuedProps {
-    transactionsQueued?: ITransactions[];
+    transactionsQueued?: IHistoryTransaction[];
 }
 
 const network = getNetwork();

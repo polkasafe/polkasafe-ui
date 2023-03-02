@@ -5,11 +5,12 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import Filter from 'src/components/Transactions/Filter';
-import History, { ITransactions } from 'src/components/Transactions/History';
+import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IHistoryTransaction } from 'src/types';
 import getNetwork from 'src/utils/getNetwork';
 
 enum ETab {
@@ -22,7 +23,7 @@ const Transactions = () => {
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
-	const [transactions, setTransactions] = useState<ITransactions[]>();
+	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
 
 	useEffect(() => {
 		const getTransactions = async () => {

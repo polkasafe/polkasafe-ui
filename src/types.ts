@@ -102,3 +102,16 @@ export interface ITransaction {
 	amount_token: number;
 	network: string;
 }
+
+export interface IHistoryTransaction {
+	callHash: string;
+	created_at: Date;
+	block_number: number;
+	from: string;
+	to: string;
+	id: string;
+	token: string;
+	amount_usd: number;
+	amount_token: number;
+	network: string;
+}
