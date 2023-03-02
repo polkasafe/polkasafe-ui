@@ -552,7 +552,14 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
 
 		try {
-			const { data: queueItemsArr, error: queueItemsError } = await getMultisigQueueByAddress(multisigAddress, network, Number(limit), Number(page));
+			const { data: queueItemsArr, error: queueItemsError } = await getMultisigQueueByAddress(
+				multisigAddress,
+				network,
+				Number(limit),
+				Number(page),
+				firestoreDB
+			);
+
 			if (queueItemsError || !queueItemsArr) return res.status(400).json({ error: queueItemsError || responseMessages.queue_fetch_error });
 
 			res.status(200).json({ data: queueItemsArr });

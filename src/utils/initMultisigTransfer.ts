@@ -72,7 +72,7 @@ export default async function initMultisigTransfer({
 				const block = await api.rpc.chain.getBlock(blockHash);
 				const blockNumber = block.block.header.number.toNumber();
 
-				events.forEach(({ event }) => {
+				for (const { event } of events) {
 					if (event.method === 'ExtrinsicSuccess') {
 						queueNotification({
 							header: 'Success!',
@@ -81,11 +81,12 @@ export default async function initMultisigTransfer({
 						});
 						// 6. store data to BE
 						// created_at should be set by BE for server time, amount_usd should be fetched by BE
-						addNewTransaction({
+
+						await addNewTransaction({
 							amount,
 							block_number: blockNumber,
 							callData: call.method.toHex(),
-							callHash: call.hash.toHex(),
+							callHash: call.method.hash.toHex(),
 							from: multisig.address,
 							network,
 							to: recipientAddress
@@ -99,7 +100,6 @@ export default async function initMultisigTransfer({
 						});
 					}
 				}
-				);
 			}
 		}).catch((error) => {
 			console.log(':( transaction failed');

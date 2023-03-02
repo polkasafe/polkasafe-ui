@@ -70,6 +70,7 @@ export interface IContactFormResponse {
 }
 
 export interface IQueueItem {
+	callData: string;
 	callHash: string;
 	network: string;
 	status: 'Approval' | 'Cancelled' | 'Executed';

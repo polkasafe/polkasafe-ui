@@ -1,15 +1,22 @@
 import axios from 'axios';
-import { IQueueItem } from '../types';
+import { IQueueItem, ITransaction } from '../types';
 import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
 import { responseMessages } from '../constants/response_messages';
 import dayjs from 'dayjs';
+import { firestore } from 'firebase-admin';
 
 interface IResponse {
 	error?: string | null;
 	data: IQueueItem[];
 }
 
-export default async function getMultisigQueueByAddress(multisigAddress: string, network: string, entries: number, page: number): Promise<IResponse> {
+export default async function getMultisigQueueByAddress(
+	multisigAddress: string,
+	network: string,
+	entries: number,
+	page: number,
+	firestoreDB: firestore.Firestore
+): Promise<IResponse> {
 	const returnValue: IResponse = {
 		error: '',
 		data: []
@@ -37,7 +44,11 @@ export default async function getMultisigQueueByAddress(multisigAddress: string,
 					headers: SUBSCAN_API_HEADERS
 				});
 
+				const transactionDoc = await firestoreDB.collection('transactions').doc(multisigQueueItem.call_hash).get();
+				const transaction: ITransaction = transactionDoc.data() as ITransaction;
+
 				const newQueueItem: IQueueItem = {
+					callData: transactionDoc.exists && transaction?.callData ? transaction?.callData : '',
 					callHash: multisigQueueItem.call_hash,
 					status: multisigQueueItem.status,
 					network: network,
