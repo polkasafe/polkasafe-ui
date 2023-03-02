@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookEntry, IContactFormResponse, IFeedback, IMultisigAddress, IUser, IUserResponse } from './types';
+import { IAddressBookEntry, IContactFormResponse, IFeedback, IMultisigAddress, ITransaction, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -17,6 +17,7 @@ import { chainProperties } from './constants/network_constants';
 import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
 import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
+import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -287,12 +288,14 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				threshold: Number(multisigMetaData.threshold) || 0
 			};
 
-			// make a copy to db
-			const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
-			await newMultisigRef.set(newMultisig);
+			res.status(200).json({ data: newMultisig });
 
-			// TODO: after implementation, check if we should send this response before saving to db
-			return res.status(200).json({ data: newMultisig });
+			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
+				// make a copy to db
+				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+				await newMultisigRef.set(newMultisig);
+			}
+			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
@@ -324,7 +327,7 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 			const firestoreBatch = firestoreDB.batch();
 
 			transactionsArr.forEach((transaction) => {
-				const transactionRef = firestoreDB.collection('transactions').doc(transaction.id);
+				const transactionRef = firestoreDB.collection('transactions').doc(transaction.callHash);
 				firestoreBatch.set(transactionRef, transaction);
 			});
 
@@ -401,9 +404,10 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 		if (!review || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
 			const feedbackRef = firestoreDB.collection('feedbacks').doc();
 			const newFeedback: IFeedback = {
-				address: String(address),
+				address: substrateAddress,
 				rating: Number(rating),
 				review: String(review)
 			};
@@ -518,7 +522,7 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 			// const firestoreBatch = firestoreDB.batch();
 
 			// transactionsArr.forEach((transaction) => {
-			// const transactionRef = firestoreDB.collection('transactions').doc(transaction.id);
+			// const transactionRef = firestoreDB.collection('transactions').doc(transaction.callHash);
 			// firestoreBatch.set(transactionRef, transaction);
 			// });
 
@@ -526,6 +530,43 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in getMultisigQueue :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { amount_token, block_number, callData, callHash, from, network, to } = req.body;
+		if (!amount_token || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const usdValue = await fetchTokenUSDValue(network);
+			const newTransaction: ITransaction = {
+				callData,
+				callHash,
+				created_at: new Date(),
+				block_number: Number(block_number),
+				from,
+				to,
+				token: chainProperties[network].tokenSymbol,
+				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
+				amount_token: String(amount_token),
+				network
+			};
+
+			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));
+			await transactionRef.set(newTransaction);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

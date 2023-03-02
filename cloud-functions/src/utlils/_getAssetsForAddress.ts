@@ -29,15 +29,15 @@ export default async function _getAssetsForAddress(address: string, network: str
 		if (response.data) {
 			for (const assetType of Object.keys(response.data)) {
 				for (const asset of response.data[assetType]) {
-					const usdValue = await fetchTokenUSDValue(asset.symbol, network);
+					const usdValue = await fetchTokenUSDValue(network);
 
 					const newAsset: IAsset = {
-						name: tokenProperties[asset.symbol as keyof typeof tokenProperties]?.name || 'N/A',
+						name: tokenProperties[asset.symbol as keyof typeof tokenProperties]?.name || '',
 						logoURI: tokenProperties[asset.symbol as keyof typeof tokenProperties]?.logoURI || '',
 						symbol: asset.symbol,
 						// TODO: cache token usd value
 						balance_usd: usdValue ?
-							`${usdValue * Number(formatBalance(asset.balance, asset.decimals, { numberAfterComma: 2, withThousandDelimitor: false }))}` : 'N/A',
+							`${usdValue * Number(formatBalance(asset.balance, asset.decimals, { numberAfterComma: 2, withThousandDelimitor: false }))}` : '',
 						balance_token: formatBalance(asset.balance, asset.decimals, { numberAfterComma: 2, withThousandDelimitor: false })
 					};
 

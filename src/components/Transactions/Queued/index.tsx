@@ -112,10 +112,10 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 							date={dayjs(transaction.created_at).toISOString()}
 							status={transaction.status}
 							type={ 'Sent' }
-							id={0}
 							recipientAddress={'5Gq84otocj45uGWqB4cacNnVeyCCFeKHg6EtK76BLvh2sM1s'}
 							approvals={transaction.approvals}
 							threshold={transaction.threshold}
+							id={Number(transaction.callHash)}
 						/>;
 					</section>;
 				})}
