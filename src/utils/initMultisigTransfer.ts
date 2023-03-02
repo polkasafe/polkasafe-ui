@@ -10,7 +10,6 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
-import { bufferToHex } from './bufferToHex';
 
 interface Args {
 	api: ApiPromise,
@@ -72,7 +71,6 @@ export default async function initMultisigTransfer({
 
 				const block = await api.rpc.chain.getBlock(blockHash);
 				const blockNumber = block.block.header.number.toNumber();
-				const callData = bufferToHex(call.method.data.buffer);
 
 				events.forEach(({ event }) => {
 					if (event.method === 'ExtrinsicSuccess') {
@@ -85,9 +83,9 @@ export default async function initMultisigTransfer({
 						// created_at should be set by BE for server time, amount_usd should be fetched by BE
 						addNewTransaction({
 							amount,
-							block_number: blockNumber, // TODO: change
-							callData,
-							callHash: txHash.toHex(),
+							block_number: blockNumber,
+							callData: call.method.toHex(),
+							callHash: call.hash.toHex(),
 							from: multisig.address,
 							network,
 							to: recipientAddress

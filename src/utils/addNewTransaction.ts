@@ -12,8 +12,6 @@ import formatBnBalance from './formatBnBalance';
 type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'id' | 'token'> & { amount: BN};
 
 export async function addNewTransaction ({ amount, network, block_number, callData, callHash, from, to } : Args): Promise<{data?: ITransaction, error: string} | any> {
-	// eslint-disable-next-line sort-keys
-	console.log('new transaction : ', { amount, network, block_number, callData, callHash, from, to });
 
 	const newTransactionData: Omit<Args, 'amount'> & { amount_token: Number} = {
 		amount_token: Number(formatBnBalance(amount, { numberAfterComma: 2, withThousandDelimitor: false, withUnit: false }, network)),
