@@ -9,11 +9,12 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookEntry, IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
+import _createMultisig from 'src/utils/_createMultisig';
 import getNetwork from 'src/utils/getNetwork';
 
 import NameAddress from '../LinkMultisig/NameAddress';
@@ -34,7 +35,7 @@ const LinkMultisig = () => {
 	const [nameAddress, setNameAddress] = useState(true);
 	const [viewOwners, setViewOwners] = useState(true);
 	const [viewReviews, setViewReviews] = useState(true);
-	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
 
@@ -43,6 +44,9 @@ const LinkMultisig = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const [signatoriesWithName, setSignatoriesWithName] = useState<ISignatory[]>([]);
+
+	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
+	const [threshold, setThreshold] = useState<number>(0);
 
 	const viewNameAddress = () => {
 		setNameAddress(false);
@@ -195,7 +199,7 @@ const LinkMultisig = () => {
 						multisigAddress,
 						network
 					}),
-					headers: FIREBASE_FUNCTIONS_HEADER,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 
@@ -213,6 +217,7 @@ const LinkMultisig = () => {
 				}
 
 				if(multisigDataRes){
+					console.log('link', multisigDataRes);
 
 					setLoading(false);
 
@@ -249,6 +254,36 @@ const LinkMultisig = () => {
 		setViewOwners(false);
 		setViewReviews(false);
 	};
+
+	const checkMultisig = (signatories: ISignatory[]) => {
+		const signatoryAddresses = signatories.map(item => item.address);
+		const address = _createMultisig(signatoryAddresses, 2, 42);
+		if(address && address.multisigAddress === multisigAddress){
+			setMultisigData(prevState => {
+				return {
+					...prevState,
+					name: multisigName,
+					address: multisigAddress,
+					signatories: signatoryAddresses,
+					threshold,
+					network,
+					created_at: new Date()
+				};
+			});
+			setSignatoriesWithName(signatories);
+			setNameAddress(false);
+			setViewOwners(false);
+			setViewReviews(false);
+		}
+		else{
+			queueNotification({
+				header: 'Error!',
+				message: 'No Multisig found with these Signatories.',
+				status: NotificationStatus.ERROR
+			});
+		}
+	};
+
 	const handleLinkMultisig = () => {
 		setLoading(true);
 		if(multisigData){
@@ -284,10 +319,14 @@ const LinkMultisig = () => {
 						</div>
 					</div>:<div>
 						{viewReviews?<div>
-							<Owners signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
+							<Owners setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={toggleVisibility} />
-								<AddBtn title='Continue' onClick={handleViewReviews}/>
+								{signatoriesWithName.length ?
+									<AddBtn title='Continue' onClick={handleViewReviews}/>
+									:
+									<AddBtn title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>
+								}
 							</div>
 						</div>: <div>
 							<Review multisigName={multisigName} multisigData={multisigData} signatories={signatoriesWithName} />

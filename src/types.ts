@@ -72,8 +72,38 @@ export interface IUserResponse extends IUser {
 	multisigAddresses: IMultisigAddress[];
 }
 
+export interface IAsset {
+	name: string;
+	logoURI: string;
+	symbol: string;
+	balance_usd: string;
+	balance_token: string;
+}
+
+export interface IQueueItem {
+	callHash: string;
+	network: string;
+	status: 'Approval' | 'Cancelled' | 'Executed';
+	created_at: Date;
+	approvals: string[];
+	threshold: number;
+}
+
 export interface ITransaction {
 	callData?: string;
+	callHash: string;
+	created_at: Date;
+	block_number: number;
+	from: string;
+	to: string;
+	id: string;
+	token: string;
+	amount_usd: number;
+	amount_token: number;
+	network: string;
+}
+
+export interface IHistoryTransaction {
 	callHash: string;
 	created_at: Date;
 	block_number: number;

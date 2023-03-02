@@ -8,7 +8,7 @@ import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookEntry } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -53,7 +53,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						address,
 						name
 					}),
-					headers: FIREBASE_FUNCTIONS_HEADER,
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 

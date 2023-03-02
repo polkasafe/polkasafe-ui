@@ -5,11 +5,12 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import Filter from 'src/components/Transactions/Filter';
-import History, { ITransactions } from 'src/components/Transactions/History';
+import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IHistoryTransaction } from 'src/types';
 import getNetwork from 'src/utils/getNetwork';
 
 enum ETab {
@@ -22,7 +23,7 @@ const Transactions = () => {
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
-	const [transactions, setTransactions] = useState<ITransactions[]>();
+	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
 
 	useEffect(() => {
 		const getTransactions = async () => {
@@ -30,18 +31,18 @@ const Transactions = () => {
 				console.log('ERROR');
 				return;
 			}
-			const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
+			const getTransactionsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
 				body: JSON.stringify({
 					limit: 10,
 					multisigAddress: activeMultisig,
 					network: getNetwork(),
 					page: 1
 				}),
-				headers: FIREBASE_FUNCTIONS_HEADER,
+				headers: firebaseFunctionsHeader(),
 				method: 'POST'
 			});
 
-			const { data, error } = await addAddressRes.json();
+			const { data, error } = await getTransactionsRes.json();
 			if(error){
 				console.log('Error in Fetching Transactions: ', error);
 			}
@@ -58,7 +59,7 @@ const Transactions = () => {
 				className='bg-bg-main rounded-xl p-[20.5px]'
 			>
 				<div
-					className='flex items-center'
+					className='flex items-center mb-4'
 				>
 					<button
 						onClick={() => setTab(ETab.QUEUE)}
@@ -82,7 +83,7 @@ const Transactions = () => {
 					>
 						History
 					</button>
-					<Filter />
+					{tab !== ETab.QUEUE && <Filter />}
 				</div>
 				{
 					tab === ETab.HISTORY?

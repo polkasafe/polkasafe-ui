@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import BN from 'bn.js';
-import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ITransaction } from 'src/types';
 
@@ -25,7 +25,7 @@ export async function addNewTransaction ({ amount, network, block_number, callDa
 
 	const setTransactionResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
 		body: JSON.stringify(newTransactionData),
-		headers: FIREBASE_FUNCTIONS_HEADER,
+		headers: firebaseFunctionsHeader(),
 		method: 'POST'
 	});
 

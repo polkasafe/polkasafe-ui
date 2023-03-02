@@ -2,28 +2,84 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Signer } from '@polkadot/api/types';
 import { Collapse, Divider } from 'antd';
+import BN from 'bn.js';
 import classNames from 'classnames';
-import dayjs from 'dayjs';
 import React, { FC, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { IHistoryTransaction } from 'src/types';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import getNetwork from 'src/utils/getNetwork';
 
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
-const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from }) => {
+interface ITransactionProps {
+    amount: string;
+    amountType: string;
+    id: number;
+    status: 'Approval' | 'Cancelled' | 'Executed';
+    type: 'Sent' | 'Received';
+	date: string;
+	recipientAddress: string;
+	approvals: string[];
+	threshold: number;
+}
+
+const network = getNetwork();
+
+const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, date, status, type, threshold, recipientAddress }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
-	const { address } = useGlobalUserDetailsContext();
-	const type: 'Sent' | 'Received' = address === from ? 'Sent' : 'Received';
+
+	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [loading, setLoading] = useState(false);
+	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { api, apiReady } = useGlobalApiContext();
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const handleApproveTransaction = async () => {
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			console.log(noAccounts, signersMap);
+			return;
+		}
+
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
+		setLoading(true);
+		try {
+			await approveMultisigTransfer({
+				amount: new BN(amount),
+				api,
+				approvingAddress: address,
+				multisig,
+				network,
+				recipientAddress
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<Collapse
 			className='bg-bg-secondary rounded-lg p-3'
 			bordered={false}
 		>
-			<Collapse.Panel showArrow={false} key={1} header={
+			<Collapse.Panel showArrow={false} key={date} header={
 				<div
 					onClick={() => {
 						toggleTransactionVisible(!transactionInfoVisible);
@@ -61,7 +117,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{amount_token} {token}
+							{type === 'Sent'? '-': '+'}{amount} {amountType}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -69,7 +125,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 				</p> */}
 					<p className='col-span-2 flex items-center justify-end gap-x-4'>
 						<span className='text-success'>
-							Success
+							{status}
 						</span>
 						<span className='text-white text-sm'>
 							{
@@ -94,16 +150,17 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 					{
 						type === 'Received'?
 							<ReceivedInfo
-								amount={String(amount_token)}
-								amountType={token}
-								date={dayjs(created_at).toISOString()}
+								amount={amount}
+								amountType={amountType}
+								date={date}
 							/>
 							:
 							<SentInfo
-								amount={String(amount_token)}
-								amountType={token}
-								date={dayjs(created_at).toISOString()}
-								recipient={to}
+								amount={amount}
+								amountType={amountType}
+								date={date}
+								approvals={approvals}
+								threshold={threshold}
 							/>
 					}
 				</div>

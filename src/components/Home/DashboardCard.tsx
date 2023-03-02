@@ -13,7 +13,7 @@ import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { FIREBASE_FUNCTIONS_HEADER } from 'src/global/firebaseFunctionsHeader';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -37,13 +37,15 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				multisigAddress: activeMultisig,
 				network: getNetwork()
 			}),
-			headers: FIREBASE_FUNCTIONS_HEADER,
+			headers: firebaseFunctionsHeader(),
 			method: 'POST'
 		});
 
 		const { data: isMultisigOnChainData, error: isMultisigOnChainErr } = await isMultisigOnChainRes.json();
 		if(isMultisigOnChainErr || !isMultisigOnChainData) {
 			console.log('show error state');
+			setLoading(false);
+			return;
 		}
 
 		if(!isMultisigOnChainData.isOnChain) {
@@ -59,20 +61,22 @@ const DashboardCard = ({ className }: { className?: string }) => {
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
-			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-72 mt-3`}>
+			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-80 mt-3`}>
 				<div className="flex justify-between flex-wrap truncate">
-					<div className='flex gap-x-4 items-center mb-3 flex-wrap relative'>
-						<Identicon
-							className='border-2 rounded-full bg-transparent border-primary p-1.5'
-							value={activeMultisig}
-							size={70}
-							theme='polkadot'
-						/>
-						<div className="bg-primary rounded-lg absolute -bottom-2 mt-3 left-[27px] text-white px-2">1/{multisigAddresses?.length}</div>
+					<div className='flex gap-x-4 items-center mb-3 flex-wrap'>
+						<div className='relative'>
+							<Identicon
+								className='border-2 rounded-full bg-transparent border-primary p-1.5'
+								value={activeMultisig}
+								size={70}
+								theme='polkadot'
+							/>
+							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">1/{multisigAddresses?.length}</div>
+						</div>
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary truncate'>{activeMultisig}</div>
+								<div className='text-md font-normal text-text_secondary'>{activeMultisig}</div>
 								<button onClick={() => navigator.clipboard.writeText(`${activeMultisig}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
 								<QRIcon className='cursor-pointer'/>
 							</div>
