@@ -184,6 +184,46 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 	});
 });
 
+export const removeFromAddressBook = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const { name, address: addressToAdd } = req.body;
+			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			const doc = await addressRef.get();
+			if (doc.exists) {
+				const addressDoc = {
+					...doc.data(),
+					created_at: doc.data()?.created_at.toDate()
+				} as IUser;
+				const addressBook = addressDoc.addressBook || [];
+
+				// check if address exists in address book
+				const addressIndex = addressBook.findIndex((a) => a.address == substrateAddressToAdd);
+				if (addressIndex > -1) {
+					addressBook.splice(addressIndex, 1);
+					await addressRef.set({ addressBook }, { merge: true });
+					return res.status(200).json({ data: addressBook });
+				}
+			}
+			return res.status(400).json({ error: responseMessages.invalid_params });
+		} catch (err:unknown) {
+			functions.logger.error('Error in removeFromAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
 export const createMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
