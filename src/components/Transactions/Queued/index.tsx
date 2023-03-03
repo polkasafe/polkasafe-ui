@@ -7,7 +7,6 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IHistoryTransaction } from 'src/types';
 import { IQueueItem } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
@@ -16,14 +15,9 @@ import getNetwork from 'src/utils/getNetwork';
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
-interface IQueuedProps {
-    transactionsQueued?: IHistoryTransaction[];
-}
-
 const network = getNetwork();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
+const Queued: FC = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { address, activeMultisig } = useGlobalUserDetailsContext();
@@ -116,6 +110,7 @@ const Queued: FC<IQueuedProps> = ({ transactionsQueued }) => {
 							approvals={transaction.approvals}
 							threshold={transaction.threshold}
 							id={Number(transaction.callHash)}
+							callData={transaction.callData}
 						/>;
 					</section>;
 				})}

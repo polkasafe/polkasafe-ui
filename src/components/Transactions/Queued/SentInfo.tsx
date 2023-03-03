@@ -1,10 +1,11 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Collapse, Divider, message,Timeline } from 'antd';
+import { Button, Collapse, Divider, message,Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -17,13 +18,15 @@ interface ISentInfoProps {
     approvals: string[]
     threshold: number
     className?: string;
+	handleApproveTransaction: () => Promise<void>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, approvals, threshold } = props;
+	const { amount, amountType, className, date, approvals, threshold, handleApproveTransaction } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
+	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
+	const { address } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -271,6 +274,11 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							</div>
 						</Timeline.Item>
 					</Timeline>
+					{!approvals.includes(address) &&
+						<Button onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+							Approve Transaction
+						</Button>
+					}
 				</div>
 			</article>
 		</div>

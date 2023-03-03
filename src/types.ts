@@ -81,6 +81,7 @@ export interface IAsset {
 }
 
 export interface IQueueItem {
+	callData: string;
 	callHash: string;
 	network: string;
 	status: 'Approval' | 'Cancelled' | 'Executed';
