@@ -88,7 +88,7 @@ const Transactions = () => {
 				{
 					tab === ETab.HISTORY?
 						<History transactionsHistory={transactions} />
-						:<Queued transactionsQueued={transactions} />
+						:<Queued />
 				}
 			</div>
 		</>

@@ -59,17 +59,14 @@ const Menu: FC<Props> = ({ className }) => {
 	const location = useLocation();
 
 	useEffect(() => {
+		const filteredMutisigs = multisigAddresses.filter((multisig) => multisig.network === network);
 
-		if(multisigAddresses.filter((multisig) => multisig.network === network).find((multisig) => multisig.address === activeMultisig)){
+		if(filteredMutisigs.find((multisig) => multisig.address === activeMultisig)){
 			setSelectedMultisigAddress(activeMultisig);
 		}
 		else{
-			if((multisigAddresses.filter((multisig) => multisig.network === network).length )){
-				setSelectedMultisigAddress((multisigAddresses.filter((multisig) => multisig.network === network)[0].address ));
-			}
-			else{
-				setSelectedMultisigAddress('');
-			}
+			if(filteredMutisigs.length) setSelectedMultisigAddress(filteredMutisigs[0].address );
+			else setSelectedMultisigAddress('');
 		}
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps

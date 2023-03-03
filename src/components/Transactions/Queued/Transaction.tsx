@@ -27,6 +27,7 @@ interface ITransactionProps {
 	recipientAddress: string;
 	approvals: string[];
 	threshold: number;
+	callData: string
 }
 
 const network = getNetwork();
@@ -161,6 +162,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, dat
 								date={date}
 								approvals={approvals}
 								threshold={threshold}
+								handleApproveTransaction={handleApproveTransaction}
 							/>
 					}
 				</div>
