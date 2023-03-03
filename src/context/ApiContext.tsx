@@ -12,6 +12,7 @@ import getNetwork from 'src/utils/getNetwork';
 export interface ApiContextType {
 	api: ApiPromise | undefined;
 	apiReady: boolean;
+	network: string;
 	setNetwork: React.Dispatch<React.SetStateAction<string>>
 }
 
@@ -47,7 +48,7 @@ export function ApiContextProvider({ children }: ApiContextProviderProps): React
 	}, [api]);
 
 	return (
-		<ApiContext.Provider value={{ api, apiReady, setNetwork }}>
+		<ApiContext.Provider value={{ api, apiReady, network, setNetwork }}>
 			{children}
 		</ApiContext.Provider>
 	);

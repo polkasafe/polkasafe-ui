@@ -10,15 +10,17 @@ import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
 	const { address, multisigAddresses } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	return (
 		<>
 			{
 				address ?
-					multisigAddresses && multisigAddresses.length > 0 ?
+					multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network).length > 0 ?
 						<section>
 							<EmailBadge/>
 							<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">

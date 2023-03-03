@@ -8,6 +8,7 @@ import React, { FC, useEffect,useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
@@ -50,34 +51,39 @@ interface Props {
 	className?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Menu: FC<Props> = ({ className }) => {
 	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState('');
 	const { openModal } = useModalContext();
 	const location = useLocation();
 
 	useEffect(() => {
-		if(activeMultisig){
+
+		if(multisigAddresses.filter((multisig) => multisig.network === network).find((multisig) => multisig.address === activeMultisig)){
 			setSelectedMultisigAddress(activeMultisig);
 		}
-		else if(multisigAddresses && multisigAddresses[0]){
-			setSelectedMultisigAddress(multisigAddresses[0].address);
-			setUserDetailsContextState(prevState => {
-				return {
-					...prevState,
-					activeMultisig: multisigAddresses[0].address
-				};
-			});
-		}
 		else{
-			setSelectedMultisigAddress('');
+			if((multisigAddresses.filter((multisig) => multisig.network === network).length )){
+				setSelectedMultisigAddress((multisigAddresses.filter((multisig) => multisig.network === network)[0].address ));
+			}
+			else{
+				setSelectedMultisigAddress('');
+			}
 		}
+
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [multisigAddresses]);
+	}, [multisigAddresses, network]);
 
 	useEffect(() => {
 		localStorage.setItem('active_multisig', selectedMultisigAddress);
+		setUserDetailsContextState((prevState) => {
+			return {
+				...prevState,
+				activeMultisig: selectedMultisigAddress
+			};
+		});
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedMultisigAddress]);
 
 	return (
@@ -111,12 +117,12 @@ const Menu: FC<Props> = ({ className }) => {
 			<section>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.length : '0'}</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => multisig.network === network).length : '0'}</span>
 				</h2>
 				<div>
 					{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
-						{multisigAddresses.map((multisig) => {
+						{multisigAddresses.filter((multisig) => multisig.network === network).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
