@@ -6,12 +6,13 @@ import { Signer } from '@polkadot/api/types';
 import { Collapse, Divider } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import decodeCallData from 'src/utils/decodeCallData';
 import getNetwork from 'src/utils/getNetwork';
 
 import ReceivedInfo from './ReceivedInfo';
@@ -32,7 +33,7 @@ interface ITransactionProps {
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, date, status, type, threshold, recipientAddress }) => {
+const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, callData, date, status, type, threshold, recipientAddress }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -40,6 +41,15 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, dat
 	const [loading, setLoading] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [decodedCallData, setDecodedCallData] = useState<any>(null);
+
+	useEffect(() => {
+		if(!api || !apiReady) return;
+		const { data, error } = decodeCallData(callData, api);
+		if(error || !data) return;
+		setDecodedCallData(data.extrinsicCall?.toJSON());
+	}, [api, apiReady, callData]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleApproveTransaction = async () => {

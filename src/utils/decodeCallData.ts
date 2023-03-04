@@ -7,7 +7,7 @@ import type { SubmittableExtrinsic, SubmittableExtrinsicFunction } from '@polkad
 import type { Call, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { compactToU8a, isHex, u8aConcat, u8aEq } from '@polkadot/util';
 
-interface ExtrinsicInfo {
+interface IExtrinsicInfo {
   decoded: SubmittableExtrinsic<'promise'> | null;
   extrinsicCall: Call | null;
   extrinsicError: string | null;
@@ -18,7 +18,7 @@ interface ExtrinsicInfo {
   isCall: boolean;
 }
 
-const DEFAULT_INFO: ExtrinsicInfo = {
+const DEFAULT_INFO: IExtrinsicInfo = {
 	decoded: null,
 	extrinsicCall: null,
 	extrinsicError: null,
@@ -29,7 +29,7 @@ const DEFAULT_INFO: ExtrinsicInfo = {
 	isCall: true
 };
 
-export default function decodeCallData (hex: string, api: ApiPromise) : { data?: any, error?: string } {
+export default function decodeCallData (hex: string, api: ApiPromise) : { data?: IExtrinsicInfo, error?: string } {
 	if(!isHex(hex)) return {
 		error: 'Invalid hex string'
 	};
@@ -95,7 +95,7 @@ export default function decodeCallData (hex: string, api: ApiPromise) : { data?:
 			decoded = extrinsicFn(...extrinsicCall.args);
 		}
 
-		const extrinsicInfo = { ...DEFAULT_INFO, decoded, extrinsicCall, extrinsicFn, extrinsicHex: hex, extrinsicKey, extrinsicPayload, isCall };
+		const extrinsicInfo: IExtrinsicInfo = { ...DEFAULT_INFO, decoded, extrinsicCall, extrinsicFn, extrinsicHex: hex, extrinsicKey, extrinsicPayload, isCall };
 
 		console.log('setExtrinsicInfo', extrinsicInfo);
 		console.log('setLast', { call: extrinsicCall, fn: extrinsicFn, hex });
