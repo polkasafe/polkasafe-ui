@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
@@ -41,7 +42,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 
-	const token = network === 'polkadot' ? 'DOT' : network === 'kusama' ? 'KSM' : 'WND';
+	const token = chainProperties[network].tokenSymbol;
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
