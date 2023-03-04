@@ -101,16 +101,13 @@ const Queued: FC = () => {
 							{created_at}
 						</h4> */}
 						<Transaction
-							amount={'0'}
-							amountType={'DOT'}
 							date={dayjs(transaction.created_at).toISOString()}
 							status={transaction.status}
 							type={ 'Sent' }
-							recipientAddress={'5Gq84otocj45uGWqB4cacNnVeyCCFeKHg6EtK76BLvh2sM1s'}
 							approvals={transaction.approvals}
 							threshold={transaction.threshold}
-							id={Number(transaction.callHash)}
 							callData={transaction.callData}
+							callHash={transaction.callHash}
 						/>;
 					</section>;
 				})}

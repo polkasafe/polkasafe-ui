@@ -15,18 +15,20 @@ interface ISentInfoProps {
 	amountType: string;
 	date: string;
 	// time: string;
+	loading: boolean
     approvals: string[]
     threshold: number
     className?: string;
+	callHash: string;
 	handleApproveTransaction: () => Promise<void>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, approvals, threshold, handleApproveTransaction } = props;
+	const { amount, amountType, className, callHash, date, approvals, loading, threshold, handleApproveTransaction } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
-	const { address } = useGlobalUserDetailsContext();
+	const { address, activeMultisig } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -69,7 +71,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{address}
+								{activeMultisig}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
@@ -95,7 +97,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-								0xfb92...ed36
+							{callHash}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
@@ -275,7 +277,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</Timeline.Item>
 					</Timeline>
 					{!approvals.includes(address) &&
-						<Button onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+						<Button loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 							Approve Transaction
 						</Button>
 					}

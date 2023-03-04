@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
@@ -19,21 +20,18 @@ import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
 interface ITransactionProps {
-	amount: string;
-	amountType: string;
-	id: number;
 	status: 'Approval' | 'Cancelled' | 'Executed';
 	type: 'Sent' | 'Received';
 	date: string;
-	recipientAddress: string;
 	approvals: string[];
 	threshold: number;
-	callData: string
+	callData: string;
+	callHash: string
 }
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, callData, date, status, type, threshold, recipientAddress }) => {
+const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, date, status, type, threshold }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -43,6 +41,8 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, cal
 	const { api, apiReady } = useGlobalApiContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
+
+	const token = chainProperties[network].tokenSymbol;
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
@@ -54,7 +54,6 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, cal
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
-			console.log(noAccounts, signersMap);
 			return;
 		}
 
@@ -70,13 +69,16 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, cal
 
 		setLoading(true);
 		try {
+			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+				return;
+			}
 			await approveMultisigTransfer({
-				amount: new BN(amount),
+				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
 				multisig,
 				network,
-				recipientAddress
+				recipientAddress: decodedCallData.args.dest.id
 			});
 		} catch (error) {
 			console.log(error);
@@ -128,7 +130,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, cal
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{amount} {amountType}
+							{type === 'Sent'? '-': '+'}{decodedCallData?.args?.value} {token}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -161,17 +163,19 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amount, amountType, cal
 					{
 						type === 'Received'?
 							<ReceivedInfo
-								amount={amount}
-								amountType={amountType}
+								amount={decodedCallData?.args?.value || ''}
+								amountType={token}
 								date={date}
 							/>
 							:
 							<SentInfo
-								amount={amount}
-								amountType={amountType}
+								amount={decodedCallData?.args?.value || ''}
+								amountType={token}
+								callHash={callHash}
 								date={date}
 								approvals={approvals}
 								threshold={threshold}
+								loading={loading}
 								handleApproveTransaction={handleApproveTransaction}
 							/>
 					}
