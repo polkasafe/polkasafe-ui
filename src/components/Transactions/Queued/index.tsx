@@ -101,7 +101,6 @@ const Queued: FC = () => {
 							{created_at}
 						</h4> */}
 						<Transaction
-							amountType={'DOT'}
 							date={dayjs(transaction.created_at).toISOString()}
 							status={transaction.status}
 							type={ 'Sent' }

@@ -19,7 +19,6 @@ import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
 interface ITransactionProps {
-	amountType: string;
 	status: 'Approval' | 'Cancelled' | 'Executed';
 	type: 'Sent' | 'Received';
 	date: string;
@@ -31,7 +30,7 @@ interface ITransactionProps {
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ approvals, amountType, callData, callHash, date, status, type, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, date, status, type, threshold }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -41,6 +40,8 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amountType, callData, c
 	const { api, apiReady } = useGlobalApiContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
+
+	const token = network === 'polkadot' ? 'DOT' : network === 'kusama' ? 'KSM' : 'WND';
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
@@ -67,16 +68,16 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amountType, callData, c
 
 		setLoading(true);
 		try {
-			if(!decodedCallData){
+			if(!decodedCallData || !decodedCallData?.args){
 				return;
 			}
 			await approveMultisigTransfer({
-				amount: new BN(decodedCallData?.args.value),
+				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
 				multisig,
 				network,
-				recipientAddress: decodedCallData?.args.dest.id
+				recipientAddress: decodedCallData.args.dest.id
 			});
 		} catch (error) {
 			console.log(error);
@@ -128,7 +129,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amountType, callData, c
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{decodedCallData?.args.value} {amountType}
+							{type === 'Sent'? '-': '+'}{decodedCallData?.args.value} {token}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -162,13 +163,13 @@ const Transaction: FC<ITransactionProps> = ({ approvals, amountType, callData, c
 						type === 'Received'?
 							<ReceivedInfo
 								amount={decodedCallData?.args.value || ''}
-								amountType={amountType}
+								amountType={token}
 								date={date}
 							/>
 							:
 							<SentInfo
 								amount={decodedCallData?.args.value || ''}
-								amountType={amountType}
+								amountType={token}
 								callHash={callHash}
 								date={date}
 								approvals={approvals}
