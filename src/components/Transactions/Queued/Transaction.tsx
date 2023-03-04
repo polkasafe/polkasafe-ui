@@ -18,11 +18,11 @@ import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
 interface ITransactionProps {
-    amount: string;
-    amountType: string;
-    id: number;
-    status: 'Approval' | 'Cancelled' | 'Executed';
-    type: 'Sent' | 'Received';
+	amount: string;
+	amountType: string;
+	id: number;
+	status: 'Approval' | 'Cancelled' | 'Executed';
+	type: 'Sent' | 'Received';
 	date: string;
 	recipientAddress: string;
 	approvals: string[];
