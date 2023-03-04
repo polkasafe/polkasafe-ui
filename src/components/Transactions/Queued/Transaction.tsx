@@ -130,7 +130,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{decodedCallData?.args.value} {token}
+							{type === 'Sent'? '-': '+'}{decodedCallData?.args?.value} {token}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -163,13 +163,13 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 					{
 						type === 'Received'?
 							<ReceivedInfo
-								amount={decodedCallData?.args.value || ''}
+								amount={decodedCallData?.args?.value || ''}
 								amountType={token}
 								date={date}
 							/>
 							:
 							<SentInfo
-								amount={decodedCallData?.args.value || ''}
+								amount={decodedCallData?.args?.value || ''}
 								amountType={token}
 								callHash={callHash}
 								date={date}
