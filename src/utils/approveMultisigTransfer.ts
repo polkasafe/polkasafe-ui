@@ -46,11 +46,11 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	let txHash;
 	if (numApprovals < multisig.threshold - 1) {
 		txHash = await api.tx.multisig
-			.approveAsMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
 			.signAndSend(approvingAddress);
 	} else {
 		txHash = await api.tx.multisig
-			.asMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.asMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
 			.signAndSend(approvingAddress);
 	}
 
