@@ -97,8 +97,6 @@ export default function decodeCallData (hex: string, api: ApiPromise) : { data?:
 
 		const extrinsicInfo: IExtrinsicInfo = { ...DEFAULT_INFO, decoded, extrinsicCall, extrinsicFn, extrinsicHex: hex, extrinsicKey, extrinsicPayload, isCall };
 
-		console.log('setExtrinsicInfo', extrinsicInfo);
-		console.log('setLast', { call: extrinsicCall, fn: extrinsicFn, hex });
 		return {
 			data: extrinsicInfo
 		};
