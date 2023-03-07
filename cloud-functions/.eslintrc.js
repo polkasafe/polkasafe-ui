@@ -33,7 +33,7 @@ module.exports = {
 		'arrow-spacing': ['warn', { 'before': true, 'after': true }],
 		'comma-dangle': ['error', 'never'],
 		'indent': ['error', 'tab'],
-		'max-len': ['error', { 'code': 160 }],
+		'max-len': ['error', { 'code': 180 }],
 		'no-multiple-empty-lines': ['error', { 'max': 1 }],
 		'no-tabs': ['error', { 'allowIndentationTabs': true }],
 		'no-trailing-spaces': ['warn'],

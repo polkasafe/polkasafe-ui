@@ -526,7 +526,7 @@ export const isMultisigOnChain = functions.https.onRequest(async (req, res) => {
 		try {
 			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
 			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
-			if (multisigMetaData && isNaN(multisigMetaData.threshold) || multisigMetaData.signatories.length <= 1) {
+			if (multisigMetaData && multisigMetaData.balance === '0') {
 				return res.status(200).json({ data: { isOnChain: false } });
 			}
 
