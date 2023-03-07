@@ -47,7 +47,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 5. Send asMulti if last approval call
 	if (numApprovals < multisig.threshold - 1) {
 		await api.tx.multisig
-			.approveAsMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
@@ -84,7 +84,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 			});
 	} else {
 		await api.tx.multisig
-			.asMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.asMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
