@@ -9,6 +9,7 @@ interface IResponse {
 		name: string;
 		signatories: string[];
 		threshold: number;
+		balance: string;
 	};
 }
 
@@ -18,7 +19,8 @@ export default async function getOnChainMultisigMetaData(multisigAddress: string
 		data: {
 			name: DEFAULT_MULTISIG_NAME,
 			signatories: [],
-			threshold: 0
+			threshold: 0,
+			balance: '0'
 		}
 	};
 
@@ -33,7 +35,8 @@ export default async function getOnChainMultisigMetaData(multisigAddress: string
 		returnValue.data = {
 			name: response?.data?.account?.account_display.display || DEFAULT_MULTISIG_NAME,
 			signatories: response?.data?.account?.multisig?.multi_account_member?.map((obj: any) => obj.address) || [],
-			threshold: response?.data?.account?.multisig?.threshold || null
+			threshold: response?.data?.account?.multisig?.threshold || null,
+			balance: response?.data?.account?.balance || '0'
 		};
 	} catch (err) {
 		console.log('Error in getAccountOnChainMultisigs:', err);
