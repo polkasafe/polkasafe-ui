@@ -13,6 +13,7 @@ import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
 import getNetwork from 'src/utils/getNetwork';
 
@@ -51,7 +52,6 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 		setDecodedCallData(data.extrinsicCall?.toJSON());
 	}, [api, apiReady, callData]);
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
 			return;
@@ -73,6 +73,41 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 				return;
 			}
 			await approveMultisigTransfer({
+				amount: new BN(decodedCallData.args.value),
+				api,
+				approvingAddress: address,
+				multisig,
+				network,
+				recipientAddress: decodedCallData.args.dest.id
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleCancelTransaction = async () => {
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			return;
+		}
+
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
+		setLoading(true);
+		try {
+			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+				return;
+			}
+			await cancelMultisigTransfer({
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
@@ -177,6 +212,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								threshold={threshold}
 								loading={loading}
 								handleApproveTransaction={handleApproveTransaction}
+								handleCancelTransaction={handleCancelTransaction}
 							/>
 					}
 				</div>
