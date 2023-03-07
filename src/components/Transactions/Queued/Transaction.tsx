@@ -40,17 +40,17 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 	const [loading, setLoading] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [callDataString, setCallDataString] = useState<string>(callData || '');
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 
 	const token = chainProperties[network].tokenSymbol;
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
-		const { data, error } = decodeCallData(callData, api);
+		const { data, error } = decodeCallData(callDataString, api);
 		if(error || !data) return;
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-	}, [api, apiReady, callData]);
+	}, [api, apiReady, callDataString]);
 
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -207,10 +207,12 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								amount={decodedCallData?.args?.value || ''}
 								amountType={token}
 								callHash={callHash}
+								callData={callDataString}
 								date={date}
 								approvals={approvals}
 								threshold={threshold}
 								loading={loading}
+								setCallDataString={setCallDataString}
 								handleApproveTransaction={handleApproveTransaction}
 								handleCancelTransaction={handleCancelTransaction}
 							/>

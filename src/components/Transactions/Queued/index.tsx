@@ -100,7 +100,7 @@ const Queued: FC = () => {
 							threshold={transaction.threshold}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
-						/>;
+						/>
 					</section>;
 				})}
 			</div>: <NoTransactionsQueued/>}
