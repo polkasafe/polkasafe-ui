@@ -54,7 +54,7 @@ interface Props {
 const Menu: FC<Props> = ({ className }) => {
 	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState('');
+	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const { openModal } = useModalContext();
 	const location = useLocation();
 

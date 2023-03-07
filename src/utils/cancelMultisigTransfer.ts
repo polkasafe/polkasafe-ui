@@ -49,7 +49,7 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, r
 		return;
 	} else {
 		await api.tx.multisig
-			.cancelAsMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex())
+			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex())
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
