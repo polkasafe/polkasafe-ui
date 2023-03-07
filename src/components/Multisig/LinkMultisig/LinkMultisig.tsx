@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -15,14 +16,11 @@ import { IAddressBookEntry, IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import _createMultisig from 'src/utils/_createMultisig';
-import getNetwork from 'src/utils/getNetwork';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
 import Owners from './Owners';
 import Review from './Review';
-
-const network = getNetwork();
 
 interface ISignatory{
 	name: string
@@ -36,6 +34,7 @@ const LinkMultisig = () => {
 	const [viewOwners, setViewOwners] = useState(true);
 	const [viewReviews, setViewReviews] = useState(true);
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
 

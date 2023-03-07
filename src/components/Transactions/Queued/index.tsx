@@ -8,8 +8,6 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IQueueItem } from 'src/types';
-import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import getNetwork from 'src/utils/getNetwork';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
@@ -54,12 +52,6 @@ const Queued: FC = () => {
 				const { data: queueTransactions, error: queueTransactionsError } = await getQueueTransactions.json() as { data: IQueueItem[], error: string };
 
 				if(queueTransactionsError) {
-
-					queueNotification({
-						header: 'Error!',
-						message: queueTransactionsError,
-						status: NotificationStatus.ERROR
-					});
 					setLoading(false);
 					return;
 				}

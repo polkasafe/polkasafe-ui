@@ -21,11 +21,12 @@ interface ISentInfoProps {
     className?: string;
 	callHash: string;
 	handleApproveTransaction: () => Promise<void>
+	handleCancelTransaction: () => Promise<void>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, callHash, date, approvals, loading, threshold, handleApproveTransaction } = props;
+	const { amount, amountType, className, callHash, date, approvals, loading, threshold, handleApproveTransaction, handleCancelTransaction } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
 	const { address, activeMultisig } = useGlobalUserDetailsContext();
@@ -276,11 +277,14 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							</div>
 						</Timeline.Item>
 					</Timeline>
-					{!approvals.includes(address) &&
-						<Button loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
-							Approve Transaction
+					<div className='w-full flex justify-between items-center gap-x-2'>
+						<Button disabled={approvals.includes(address)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+								Approve Transaction
 						</Button>
-					}
+						<Button disabled={approvals.includes(address) || approvals.length < threshold - 1} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+								Cancel Transaction
+						</Button>
+					</div>
 				</div>
 			</article>
 		</div>
