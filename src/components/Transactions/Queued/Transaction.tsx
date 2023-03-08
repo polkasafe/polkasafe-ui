@@ -15,6 +15,7 @@ import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUp
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getNetwork from 'src/utils/getNetwork';
 
 import ReceivedInfo from './ReceivedInfo';
@@ -165,7 +166,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{decodedCallData?.args?.value} {token}
+							{type === 'Sent'? '-': '+'}{formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network)}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
