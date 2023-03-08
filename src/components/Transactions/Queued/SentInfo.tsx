@@ -1,11 +1,12 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Button, Collapse, Divider, message,Timeline } from 'antd';
+import Identicon from '@polkadot/react-identicon';
+import { Button, Collapse, Divider, Input, message,Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -20,16 +21,19 @@ interface ISentInfoProps {
     threshold: number
     className?: string;
 	callHash: string;
+	callData: string;
+	recipientAddress?: string;
+	setCallDataString: React.Dispatch<React.SetStateAction<string>>
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, callHash, date, approvals, loading, threshold, handleApproveTransaction, handleCancelTransaction } = props;
+	const { amount, amountType, className, callData, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
-	const { address, activeMultisig } = useGlobalUserDetailsContext();
+	const { address, addressBook } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -45,7 +49,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 				>
 					<span>
-							Received
+							Sent
 					</span>
 					<span
 						className='text-failure'
@@ -53,26 +57,27 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						{amount} {amountType}
 					</span>
 					<span>
-							from:
+							To:
 					</span>
 				</p>
 				<div
 					className='mt-3 flex items-center gap-x-4'
 				>
-					<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+					{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
 					<div
 						className='flex flex-col gap-y-[6px]'
 					>
 						<p
 							className='font-medium text-sm leading-[15px] text-white'
 						>
-								Akshit
+							{recipientAddress ? (addressBook.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
 						</p>
+						{recipientAddress &&
 						<p
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{activeMultisig}
+								{recipientAddress}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
@@ -80,7 +85,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 								<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
 								<ExternalLinkIcon />
 							</span>
-						</p>
+						</p>}
 					</div>
 				</div>
 				<Divider className='bg-text_secondary my-5' />
@@ -126,7 +131,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</span>
 					</p>
 				</div>
-				<div
+				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
@@ -143,7 +148,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							{date}
 						</span>
 					</p>
-				</div>
+				</div> */}
 				<p
 					className='text-primary font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
 				>
@@ -207,14 +212,18 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 											key={i}
 											className='mt-3 flex items-center gap-x-4'
 										>
-											<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+											<Identicon
+												value={address}
+												size={30}
+												theme='polkadot'
+											/>
 											<div
 												className='flex flex-col gap-y-[6px]'
 											>
 												<p
 													className='font-medium text-sm leading-[15px] text-white'
 												>
-                                                    Akshit
+													{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 												</p>
 												<p
 													className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -235,7 +244,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 								</Collapse.Panel>
 							</Collapse>
 						</Timeline.Item>
-						<Timeline.Item
+						{/* <Timeline.Item
 							dot={
 								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
 									<CircleCheckIcon className='text-success text-sm' />
@@ -275,13 +284,14 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 									</div>
 								</div>
 							</div>
-						</Timeline.Item>
+						</Timeline.Item> */}
 					</Timeline>
-					<div className='w-full flex justify-between items-center gap-x-2'>
-						<Button disabled={approvals.includes(address)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+					{callData === '' && <Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />}
+					<div className='w-full flex flex-col gap-y-2 items-center'>
+						<Button disabled={approvals.includes(address) || callData === ''} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
 						</Button>
-						<Button disabled={approvals.includes(address) || approvals.length < threshold - 1} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+						<Button disabled={approvals.includes(address) || approvals.length < threshold - 1 || callData === ''} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 						</Button>
 					</div>
