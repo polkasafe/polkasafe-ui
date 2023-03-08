@@ -206,7 +206,6 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 							:
 							<SentInfo
 								amount={decodedCallData?.args?.value || ''}
-								amountType={token}
 								callHash={callHash}
 								callData={callDataString}
 								date={date}

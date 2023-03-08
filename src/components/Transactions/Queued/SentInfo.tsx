@@ -3,17 +3,19 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, message,Timeline } from 'antd';
+import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import formatBnBalance from 'src/utils/formatBnBalance';
+import getNetwork from 'src/utils/getNetwork';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
 	amount: string;
-	amountType: string;
 	date: string;
 	// time: string;
 	loading: boolean
@@ -30,9 +32,9 @@ interface ISentInfoProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, callData, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { amount, className, callData, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
+	const network = getNetwork();
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
@@ -54,7 +56,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					<span
 						className='text-failure'
 					>
-						{amount} {amountType}
+						{formatBnBalance(new BN(amount), { numberAfterComma: 2, withUnit: true }, network)}
 					</span>
 					<span>
 							To:
