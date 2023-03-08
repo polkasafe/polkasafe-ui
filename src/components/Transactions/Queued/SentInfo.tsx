@@ -293,7 +293,8 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<Button disabled={approvals.includes(address) || callData === ''} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
 						</Button>
-						<Button disabled={approvals.includes(address) || approvals.length < threshold - 1 || callData === ''} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+						{/* TODO: fix disabled condition */}
+						<Button loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 						</Button>
 					</div>

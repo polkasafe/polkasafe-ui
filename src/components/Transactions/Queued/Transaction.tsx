@@ -70,7 +70,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 
 		setLoading(true);
 		try {
-			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+			if(!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
 				return;
 			}
 			await approveMultisigTransfer({
@@ -112,6 +112,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
+				callHash,
 				multisig,
 				network,
 				recipientAddress: decodedCallData.args.dest.id
