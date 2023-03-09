@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookEntry, IContactFormResponse, IFeedback, IMultisigAddress, ITransaction, IUser, IUserResponse } from './types';
+import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, ITransaction, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -118,7 +118,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				}
 			}
 
-			const newAddress: IAddressBookEntry = {
+			const newAddress: IAddressBookItem = {
 				name: DEFAULT_USER_ADDRESS_NAME,
 				address: String(substrateAddress)
 			};
@@ -615,6 +615,37 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const renameMultisig = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { address: mutisigAddress, name } = req.body;
+		if (!mutisigAddress || !name ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(mutisigAddress);
+			const multisigAddressDoc = (await multisigRef.get()).data() as IMultisigAddress;
+
+			if (multisigAddressDoc.signatories.includes(substrateAddress)) {
+				multisigRef.update({ name: String(name) });
+			} else {
+				return res.status(400).json({ error: responseMessages.invalid_params });
+			}
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in renameMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

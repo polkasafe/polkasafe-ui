@@ -25,7 +25,7 @@ import DragDrop from '../Multisig/DragDrop';
 import Search from '../Multisig/Search';
 import AddSignatory from '../UserFlow/AddSignatory';
 import MultisigCreated from '../UserFlow/MultisigCreated';
-import Signotary from './Signotary';
+import Signatory from './Signatory';
 
 const network = getNetwork();
 
@@ -144,7 +144,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							</div>}
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signotary setSignatories={setSignatories} signatories={signatories}/> : <DragDrop/>}
+							{toggleSwitch? <Signatory setSignatories={setSignatories} signatories={signatories}/> : <DragDrop/>}
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />
