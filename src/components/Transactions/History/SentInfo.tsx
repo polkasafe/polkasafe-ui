@@ -1,10 +1,13 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import Identicon from '@polkadot/react-identicon';
 import { Collapse, Divider, message,Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
@@ -15,13 +18,13 @@ interface ISentInfoProps {
 	// time: string;
     className?: string;
 	recipient: string
+	callHash: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, recipient } = props;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
+	const { amount, amountType, className, date, recipient, callHash } = props;
+	const { addressBook } = useGlobalUserDetailsContext();
 	const handleCopy = (address: string) => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -51,14 +54,14 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 				<div
 					className='mt-3 flex items-center gap-x-4'
 				>
-					<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+					<Identicon size={30} value={recipient} theme='polkadot'  />
 					<div
 						className='flex flex-col gap-y-[6px]'
 					>
 						<p
 							className='font-medium text-sm leading-[15px] text-white'
 						>
-								Akshit
+							{addressBook.find((item) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
 						</p>
 						<p
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -90,12 +93,12 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-								0xfb92...ed36
+							{callHash}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<CopyIcon />
+							<button onClick={() => handleCopy(callHash)}><CopyIcon/></button>
 							<ExternalLinkIcon />
 						</span>
 					</p>

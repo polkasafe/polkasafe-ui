@@ -22,6 +22,7 @@ interface ISentInfoProps {
     className?: string;
 	callHash: string;
 	callData: string;
+	callDataString: string;
 	recipientAddress?: string;
 	setCallDataString: React.Dispatch<React.SetStateAction<string>>
 	handleApproveTransaction: () => Promise<void>
@@ -30,7 +31,7 @@ interface ISentInfoProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, callData, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
+	const { amount, amountType, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	// const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLs');
 	const { address, addressBook } = useGlobalUserDetailsContext();
@@ -286,12 +287,12 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							</div>
 						</Timeline.Item> */}
 					</Timeline>
-					{callData === '' && <Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />}
+					{(approvals.length === threshold - 1 && !callData) && <Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />}
 					<div className='w-full flex flex-col gap-y-2 items-center'>
-						<Button disabled={approvals.includes(address) || callData === ''} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+						<Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
 						</Button>
-						<Button disabled={approvals.includes(address) || approvals.length < threshold - 1 || callData === ''} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+						<Button disabled={approvals[0] !== address} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 						</Button>
 					</div>
