@@ -55,6 +55,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel } = props;
 	const { api, apiReady } = useGlobalApiContext();
+	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
@@ -85,6 +86,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				initiatorAddress: address,
 				multisig,
 				network,
+				note,
 				recipientAddress
 			});
 		} catch (error) {
@@ -222,6 +224,8 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 									className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
 									id="note"
 									rows={4}
+									value={note}
+									onChange={(e) => setNote(e.target.value)}
 								/>
 							</div>
 						</Form.Item>
