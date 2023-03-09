@@ -15,6 +15,7 @@ import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUp
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getNetwork from 'src/utils/getNetwork';
 
 import ReceivedInfo from './ReceivedInfo';
@@ -69,7 +70,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 
 		setLoading(true);
 		try {
-			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+			if(!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
 				return;
 			}
 			await approveMultisigTransfer({
@@ -111,6 +112,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
+				callHash,
 				multisig,
 				network,
 				recipientAddress: decodedCallData.args.dest.id
@@ -165,7 +167,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{decodedCallData?.args?.value} {token}
+							{type === 'Sent'? '-': '+'}{formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network)}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -205,7 +207,6 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 							:
 							<SentInfo
 								amount={decodedCallData?.args?.value || ''}
-								amountType={token}
 								callHash={callHash}
 								callDataString={callDataString}
 								callData={callData}
