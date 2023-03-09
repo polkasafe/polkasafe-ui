@@ -44,16 +44,6 @@ const RenameMultisig = () => {
 
 				if(changeNameError) {
 
-					setUserDetailsContextState((prev) => {
-						const copyMultisigAddresses = [...multisigAddresses];
-						const multisig = { ...copyMultisigAddresses.find((item) => item.address === activeMultisig) };
-						multisig.name = multisigName;
-						return {
-							...prev,
-							multisigAddresses: copyMultisigAddresses
-						};
-					});
-
 					queueNotification({
 						header: 'Error!',
 						message: changeNameError,
@@ -64,6 +54,18 @@ const RenameMultisig = () => {
 				}
 
 				if(changeNameData){
+
+					const copyMultisigAddresses = [...multisigAddresses];
+					const copyObject = copyMultisigAddresses.find((item) => item.address === activeMultisig);
+					if(copyObject){
+						copyObject.name = multisigName;
+						setUserDetailsContextState((prev) => {
+							return {
+								...prev,
+								multisigAddresses: copyMultisigAddresses
+							};
+						});
+					}
 
 					queueNotification({
 						header: 'Success!',

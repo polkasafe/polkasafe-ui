@@ -55,7 +55,6 @@ const Queued: FC = () => {
 				}
 
 				if(queueTransactions){
-					console.log('queue', queueTransactions);
 					setQueuedTransactions(queueTransactions);
 					setLoading(false);
 				}

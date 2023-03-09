@@ -1,6 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { OutlineCheckIcon } from 'src/ui-components/CustomIcons';
@@ -14,10 +15,11 @@ interface IModalBtnProps {
 
 const ModalBtn: FC<IModalBtnProps> = ({ className, title, loading, onClick }) => {
 	return (
-		<button
-			disabled={loading}
+		<Button
+			loading={loading}
 			onClick={onClick}
-			className={classNames('flex items-center gap-x-[10.83px] text-white text-sm font-normal leading-[15px] bg-primary p-3 rounded-lg min-w-[120px] justify-center', className)}
+			size='large'
+			className={classNames('flex items-center justify-center gap-x-[10.83px] border-none outline-none text-white text-sm bg-primary rounded-lg min-w-[120px]', className)}
 		>
 			<span
 				className='flex items-center justify-center p-2 border border-white rounded-full w-[14.33px] h-[14.33px] text-white'
@@ -27,7 +29,7 @@ const ModalBtn: FC<IModalBtnProps> = ({ className, title, loading, onClick }) =>
 			<span>
 				{title}
 			</span>
-		</button>
+		</Button>
 	);
 };
 
