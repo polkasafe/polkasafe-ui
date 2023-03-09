@@ -7,6 +7,8 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 
 interface Props {
 	api: ApiPromise,
@@ -15,9 +17,10 @@ interface Props {
 	amount: BN,
 	approvingAddress: string,
 	recipientAddress: string,
+	callHash: string,
 }
 
-export async function cancelMultisigTransfer ({ amount, api, approvingAddress, recipientAddress, multisig, network }: Props) {
+export async function cancelMultisigTransfer ({ amount, api, approvingAddress, callHash, recipientAddress, multisig, network }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -31,28 +34,55 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, r
 	// remove approving address address from signatories
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
 
-	// 3. tx call
-	const call = api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
-
-	// 4. Retrieve and unwrap the timepoint
-	const info = await api.query.multisig.multisigs(multisig.address, call.method.hash);
+	// 3. Retrieve and unwrap the timepoint
+	const info = await api.query.multisig.multisigs(multisig.address, callHash);
 	const TIME_POINT= info.unwrap().when;
 	console.log(`Time point is: ${TIME_POINT}`);
 
 	const numApprovals = info.unwrap().approvals.length;
 
-	// 5. Send cancelAsMulti if last approval call
-	let txHash;
+	// 4. Send cancelAsMulti if last approval call
 	if (numApprovals < multisig.threshold - 1) {
 		// cannot cancel if not last approval
 		return;
 	} else {
-		txHash = await api.tx.multisig
-			.cancelAsMulti(multisig.address, otherSignatories, TIME_POINT, call.method.toHex())
-			.signAndSend(approvingAddress);
+		await api.tx.multisig
+			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
+			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+				if (status.isInvalid) {
+					console.log('Transaction invalid');
+				} else if (status.isReady) {
+					console.log('Transaction is ready');
+				} else if (status.isBroadcast) {
+					console.log('Transaction has been broadcasted');
+				} else if (status.isInBlock) {
+					console.log('Transaction is in block');
+				} else if (status.isFinalized) {
+					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+					console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+					for (const { event } of events) {
+						if (event.method === 'ExtrinsicSuccess') {
+							queueNotification({
+								header: 'Success!',
+								message: 'Transaction Successful.',
+								status: NotificationStatus.SUCCESS
+							});
+							// 6. store data to BE
+							// created_at should be set by BE for server time, amount_usd should be fetched by BE
+						} else if (event.method === 'ExtrinsicFailed') {
+							console.log('Transaction failed');
+							queueNotification({
+								header: 'Error!',
+								message: 'Transaction Failed',
+								status: NotificationStatus.ERROR
+							});
+						}
+					}
+				}
+			});
 	}
 
 	console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-	console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${call.method.hash})\n`);
-	console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+	console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
 }

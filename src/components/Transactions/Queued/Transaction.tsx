@@ -13,7 +13,9 @@ import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getNetwork from 'src/utils/getNetwork';
 
 import ReceivedInfo from './ReceivedInfo';
@@ -39,20 +41,54 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 	const [loading, setLoading] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [callDataString, setCallDataString] = useState<string>(callData || '');
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 
 	const token = chainProperties[network].tokenSymbol;
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
-		const { data, error } = decodeCallData(callData, api);
+		const { data, error } = decodeCallData(callDataString, api);
 		if(error || !data) return;
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-	}, [api, apiReady, callData]);
+	}, [api, apiReady, callDataString]);
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleApproveTransaction = async () => {
+		if(!api || !apiReady || noAccounts || !signersMap || !address){
+			return;
+		}
+
+		const wallet = accountsMap[address];
+		if(!signersMap[wallet]) return;
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+
+		if(!multisig) return;
+
+		setLoading(true);
+		try {
+			if(!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+				return;
+			}
+			await approveMultisigTransfer({
+				amount: new BN(decodedCallData.args.value),
+				api,
+				approvingAddress: address,
+				multisig,
+				network,
+				recipientAddress: decodedCallData.args.dest.id
+			});
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleCancelTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
 			return;
 		}
@@ -72,10 +108,11 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
 				return;
 			}
-			await approveMultisigTransfer({
+			await cancelMultisigTransfer({
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
+				callHash,
 				multisig,
 				network,
 				recipientAddress: decodedCallData.args.dest.id
@@ -130,7 +167,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								}
 							)}
 						>
-							{type === 'Sent'? '-': '+'}{decodedCallData?.args?.value} {token}
+							{type === 'Sent'? '-': '+'}{formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network)}
 						</span>
 					</p>
 					{/* <p className='col-span-2'>
@@ -170,13 +207,15 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 							:
 							<SentInfo
 								amount={decodedCallData?.args?.value || ''}
-								amountType={token}
 								callHash={callHash}
+								callData={callDataString}
 								date={date}
 								approvals={approvals}
 								threshold={threshold}
 								loading={loading}
+								setCallDataString={setCallDataString}
 								handleApproveTransaction={handleApproveTransaction}
+								handleCancelTransaction={handleCancelTransaction}
 							/>
 					}
 				</div>

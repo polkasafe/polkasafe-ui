@@ -5,12 +5,12 @@
 // import { WarningOutlined } from '@ant-design/icons';
 
 import { Signer } from '@polkadot/api/types';
+import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
@@ -23,6 +23,7 @@ import BalanceInput from 'src/ui-components/BalanceInput';
 import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getNetwork from 'src/utils/getNetwork';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
+// import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISendFundsFormProps {
@@ -64,7 +65,6 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
-			console.log(noAccounts, signersMap);
 			return;
 		}
 
@@ -77,7 +77,6 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
 
 		if(!multisig) return;
-
 		setLoading(true);
 		try {
 			await initMultisigTransfer({
@@ -106,12 +105,14 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 				<div className='flex items-center gap-x-[10px] mt-[14px]'>
 					<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
-						<div className='flex items-center justify-center w-10 h-10'>
-							<img src={profileImg} className='w-full h-full' alt="profile img" />
-						</div>
-						<div className='flex flex-col gap-y-[6px]'>
+						<Identicon
+							value={activeMultisig}
+							size={30}
+							theme='polkadot'
+						/>
+						<div className='flex flex-col gap-y-[6px] truncate'>
 							<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
-							<p className='text-text_secondary font-normal text-xs leading-[13px]'>{activeMultisig}</p>
+							<p className='text-text_secondary font-normal text-xs leading-[13px]'>{(activeMultisig)}</p>
 						</div>
 						<Balance address={activeMultisig} />
 					</article>
