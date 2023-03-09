@@ -55,6 +55,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel } = props;
 	const { api, apiReady } = useGlobalApiContext();
+	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
@@ -85,6 +86,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				initiatorAddress: address,
 				multisig,
 				network,
+				note,
 				recipientAddress
 			});
 		} catch (error) {
@@ -164,10 +166,10 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 			</section>
 
 			<section className='mt-[15px]'>
-				<label className='text-primary font-normal text-xs leading-[13px] block'>Amount</label>
+				<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Amount</label>
 				<div className='flex items-center gap-x-[10px]'>
 					<article className='w-[500px]'>
-						<BalanceInput className='mt-6' onChange={(balance) => setAmount(balance)} />
+						<BalanceInput onChange={(balance) => setAmount(balance)} />
 					</article>
 					<article className='w-[412px] flex items-center'>
 						<span className='-mr-1.5 z-0'>
@@ -201,6 +203,30 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 									<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
 									<span>{ chainProperties[network].tokenSymbol}</span>
 								</div>
+							</div>
+						</Form.Item>
+					</article>
+				</div>
+			</section>
+
+			<section className='mt-[15px]'>
+				<label className='text-primary font-normal text-xs block mb-7'>Note</label>
+				<div className=''>
+					<article className='w-[500px]'>
+						<Form.Item
+							name="note"
+							rules={[]}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<div className='flex items-center h-[40px]'>
+								<Input.TextArea
+									placeholder='Note'
+									className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
+									id="note"
+									rows={4}
+									value={note}
+									onChange={(e) => setNote(e.target.value)}
+								/>
 							</div>
 						</Form.Item>
 					</article>

@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Button } from 'antd';
 import React, { useState } from 'react';
+import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -11,11 +12,14 @@ import { DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/Custom
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
+import RenameMultisig from './RenameMultisig';
+
 const Details = () => {
 
 	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState<boolean>(false);
+	const { openModal } = useModalContext();
 
 	const handleRemoveSafe = async () => {
 		try{
@@ -99,7 +103,9 @@ const Details = () => {
 					<span>Safe Name:</span>
 					<span className='text-white flex items-center gap-x-3'>
 						{multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
-						<EditIcon className='text-primary' />
+						<button onClick={() => openModal('Rename Multisig', <RenameMultisig />)}>
+							<EditIcon className='text-primary cursor-pointer' />
+						</button>
 					</span>
 				</div>
 				<Button disabled={!activeMultisig} size='large' onClick={handleRemoveSafe} loading={loading} className='border-none outline-none text-failure bg-failure bg-opacity-10 flex items-center gap-x-3 justify-center rounded-lg p-[10px] w-full mt-7'>

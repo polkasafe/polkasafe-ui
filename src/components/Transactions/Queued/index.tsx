@@ -55,7 +55,6 @@ const Queued: FC = () => {
 				}
 
 				if(queueTransactions){
-					console.log('queue', queueTransactions);
 					setQueuedTransactions(queueTransactions);
 					setLoading(false);
 				}
@@ -97,6 +96,7 @@ const Queued: FC = () => {
 							threshold={transaction.threshold}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
+							note={transaction.note || ''}
 						/>
 					</section>;
 				})}

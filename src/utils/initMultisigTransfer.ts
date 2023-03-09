@@ -17,7 +17,8 @@ interface Args {
 	initiatorAddress: string,
 	multisig: IMultisigAddress,
 	amount: BN,
-	network: string
+	network: string,
+	note: string
 }
 
 export default async function initMultisigTransfer({
@@ -26,7 +27,8 @@ export default async function initMultisigTransfer({
 	initiatorAddress,
 	multisig,
 	amount,
-	network
+	network,
+	note
 }: Args) {
 
 	// 1. Use formatBalance to display amounts
@@ -89,7 +91,7 @@ export default async function initMultisigTransfer({
 							callHash: call.method.hash.toHex(),
 							from: multisig.address,
 							network,
-							note: '',
+							note,
 							to: recipientAddress
 						});
 					} else if (event.method === 'ExtrinsicFailed') {
