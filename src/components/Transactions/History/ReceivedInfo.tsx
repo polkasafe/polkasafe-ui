@@ -1,9 +1,11 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import Identicon from '@polkadot/react-identicon';
 import { Divider, message } from 'antd';
-import React, { FC, useState } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
+import React, { FC } from 'react';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
 interface IReceivedInfoProps {
@@ -11,13 +13,14 @@ interface IReceivedInfoProps {
 	amountType: string;
 	date: string;
 	// time: string;
+	from: string
+	callHash: string
 }
 
 const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [address, setAddress] = useState('3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLp');
-	const { amount, amountType, date } = props;
-	const handleCopy = () => {
+	const { addressBook } = useGlobalUserDetailsContext();
+	const { amount, amountType, date, from, callHash } = props;
+	const handleCopy = (address: string) => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
 	};
@@ -43,25 +46,25 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 			<div
 				className='mt-3 flex items-center gap-x-4'
 			>
-				<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
+				<Identicon size={30} value={from} theme='polkadot'  />
 				<div
 					className='flex flex-col gap-y-[6px]'
 				>
 					<p
 						className='font-medium text-sm leading-[15px] text-white'
 					>
-								Akshit
+						{addressBook.find((item) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
 					</p>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						<span>
-							{address}
+							{from}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
+							<button onClick={() => handleCopy(from)}><CopyIcon className='hover:text-primary'/></button>
 							<ExternalLinkIcon />
 						</span>
 					</p>
@@ -82,12 +85,12 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					<span
 						className='text-white font-normal text-sm leading-[15px]'
 					>
-								0xfb92...ed36
+						{callHash}
 					</span>
 					<span
 						className='flex items-center gap-x-2 text-sm'
 					>
-						<button onClick={handleCopy}><CopyIcon/></button>
+						<button onClick={() => handleCopy(callHash)}><CopyIcon/></button>
 						<ExternalLinkIcon />
 					</span>
 				</p>

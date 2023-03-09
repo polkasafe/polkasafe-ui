@@ -17,10 +17,8 @@ const network = getNetwork();
 
 const Queued: FC = () => {
 	const [loading, setLoading] = useState<boolean>(false);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { address, activeMultisig } = useGlobalUserDetailsContext();
+	const { activeMultisig } = useGlobalUserDetailsContext();
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
 
 	const fetchQueuedTransactions = useCallback(async () => {
@@ -71,8 +69,7 @@ const Queued: FC = () => {
 
 	useEffect(() => {
 		fetchQueuedTransactions();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [fetchQueuedTransactions]);
 
 	if(loading){
 		return (

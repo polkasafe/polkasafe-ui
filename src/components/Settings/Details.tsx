@@ -4,6 +4,7 @@
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -97,7 +98,7 @@ const Details = () => {
 				<div className='flex items-center justify-between gap-x-5 mt-7'>
 					<span>Safe Name:</span>
 					<span className='text-white flex items-center gap-x-3'>
-						New-Safe
+						{multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
 						<EditIcon className='text-primary' />
 					</span>
 				</div>

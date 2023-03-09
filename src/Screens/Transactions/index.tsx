@@ -3,15 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Filter from 'src/components/Transactions/Filter';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
-import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IHistoryTransaction } from 'src/types';
-import getNetwork from 'src/utils/getNetwork';
 
 enum ETab {
 	QUEUE,
@@ -19,39 +14,6 @@ enum ETab {
 }
 
 const Transactions = () => {
-	const userAddress = localStorage.getItem('address');
-	const signature = localStorage.getItem('signature');
-	const { activeMultisig } = useGlobalUserDetailsContext();
-
-	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
-
-	useEffect(() => {
-		const getTransactions = async () => {
-			if(!userAddress || !signature || !activeMultisig) {
-				console.log('ERROR');
-				return;
-			}
-			const getTransactionsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
-				body: JSON.stringify({
-					limit: 10,
-					multisigAddress: activeMultisig,
-					network: getNetwork(),
-					page: 1
-				}),
-				headers: firebaseFunctionsHeader(),
-				method: 'POST'
-			});
-
-			const { data, error } = await getTransactionsRes.json();
-			if(error){
-				console.log('Error in Fetching Transactions: ', error);
-			}
-			if(data){
-				setTransactions(data);
-			}
-		};
-		getTransactions();
-	}, [activeMultisig, signature, userAddress]);
 	const [tab, setTab] = useState(ETab.QUEUE);
 	return (
 		<>
@@ -87,7 +49,7 @@ const Transactions = () => {
 				</div>
 				{
 					tab === ETab.HISTORY?
-						<History transactionsHistory={transactions} />
+						<History />
 						:<Queued />
 				}
 			</div>
