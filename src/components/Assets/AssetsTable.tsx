@@ -3,14 +3,18 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Divider } from 'antd';
 import React, { FC } from 'react';
+import { useModalContext } from 'src/context/ModalContext';
 import { IAsset } from 'src/types';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+
+import SendFundsForm from '../SendFunds/SendFundsForm';
 
 interface IAssetsProps {
     assets: IAsset[];
 }
 
 const AssetsTable: FC<IAssetsProps> = ({ assets }) => {
+	const { openModal, toggleVisibility } = useModalContext();
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -44,7 +48,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets }) => {
 								<p title={balance_usd} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
 									{balance_usd}
 								</p>
-								<PrimaryButton className='bg-primary text-white w-fit'>
+								<PrimaryButton onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)} className='bg-primary text-white w-fit'>
 									<p className='font-normal text-sm'>Send</p>
 								</PrimaryButton>
 							</article>
