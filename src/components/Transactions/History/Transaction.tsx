@@ -13,7 +13,7 @@ import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUp
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
-const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from }) => {
+const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const { address } = useGlobalUserDetailsContext();
 	const type: 'Sent' | 'Received' = address === from ? 'Sent' : 'Received';
@@ -97,6 +97,8 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 								amount={String(amount_token)}
 								amountType={token}
 								date={dayjs(created_at).toISOString()}
+								from={from}
+								callHash={callHash}
 							/>
 							:
 							<SentInfo
@@ -104,6 +106,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 								amountType={token}
 								date={dayjs(created_at).toISOString()}
 								recipient={to}
+								callHash={callHash}
 							/>
 					}
 				</div>

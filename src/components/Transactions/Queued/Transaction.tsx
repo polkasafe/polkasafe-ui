@@ -208,11 +208,13 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 							<SentInfo
 								amount={decodedCallData?.args?.value || ''}
 								callHash={callHash}
-								callData={callDataString}
+								callDataString={callDataString}
+								callData={callData}
 								date={date}
 								approvals={approvals}
 								threshold={threshold}
 								loading={loading}
+								recipientAddress={decodedCallData?.args?.dest?.id}
 								setCallDataString={setCallDataString}
 								handleApproveTransaction={handleApproveTransaction}
 								handleCancelTransaction={handleCancelTransaction}

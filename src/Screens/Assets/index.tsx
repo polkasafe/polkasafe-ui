@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
 import DropDown from 'src/components/Assets/DropDown';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
@@ -16,6 +17,7 @@ const Assets = () => {
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
+	const { activeMultisig } = useGlobalUserDetailsContext();
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -31,7 +33,7 @@ const Assets = () => {
 				setLoading(true);
 				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
 					body: JSON.stringify({
-						address,
+						address: activeMultisig,
 						network
 					}),
 					headers: firebaseFunctionsHeader(),
@@ -47,7 +49,6 @@ const Assets = () => {
 
 				if(data){
 					setAssetsData(data);
-					console.log('data:', data);
 					setLoading(false);
 
 				}
@@ -57,12 +58,11 @@ const Assets = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	}, []);
+	}, [activeMultisig]);
 
 	useEffect(() => {
 		handleGetAssets();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [handleGetAssets]);
 
 	if(loading){
 		return (
