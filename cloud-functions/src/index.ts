@@ -357,7 +357,7 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
 
 		try {
-			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(multisigAddress, network, Number(limit), Number(page));
+			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(multisigAddress, network, Number(limit), Number(page), firestoreDB);
 			if (transactionsError || !transactionsArr) return res.status(400).json({ error: transactionsError || responseMessages.transfers_fetch_error });
 
 			res.status(200).json({ data: transactionsArr });
@@ -590,7 +590,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { amount_token, block_number, callData, callHash, from, network, to } = req.body;
+		const { amount_token, block_number, callData, callHash, from, network, to, note } = req.body;
 		if (!amount_token || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
@@ -605,7 +605,8 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 				token: chainProperties[network].tokenSymbol,
 				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
 				amount_token: String(amount_token),
-				network
+				network,
+				note: note || ''
 			};
 
 			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));

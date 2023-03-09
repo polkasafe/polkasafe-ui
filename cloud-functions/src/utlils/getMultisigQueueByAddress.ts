@@ -56,7 +56,8 @@ export default async function getMultisigQueueByAddress(
 						return processObj?.timestamp < minTimestamp ? processObj?.timestamp : minTimestamp;
 					}, Infinity)).toDate(),
 					threshold: multisigQueueItem.threshold,
-					approvals: multisigData?.data?.process?.filter((item: any) => item.status === 'Approval').map((item: any) => item.account_display.address)
+					approvals: multisigData?.data?.process?.filter((item: any) => item.status === 'Approval').map((item: any) => item.account_display.address),
+					note: transactionDoc.exists && transaction?.note ? transaction?.note : ''
 				};
 
 				queueItems.push(newQueueItem);

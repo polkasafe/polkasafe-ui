@@ -88,6 +88,7 @@ export interface IQueueItem {
 	created_at: Date;
 	approvals: string[];
 	threshold: number;
+	note?: string;
 }
 
 export interface ITransaction {
@@ -102,6 +103,7 @@ export interface ITransaction {
 	amount_usd: number;
 	amount_token: number;
 	network: string;
+	note?: string;
 }
 
 export interface IHistoryTransaction {

@@ -89,6 +89,7 @@ export default async function initMultisigTransfer({
 							callHash: call.method.hash.toHex(),
 							from: multisig.address,
 							network,
+							note: '',
 							to: recipientAddress
 						});
 					} else if (event.method === 'ExtrinsicFailed') {

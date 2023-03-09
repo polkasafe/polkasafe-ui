@@ -3,13 +3,20 @@ import { ITransaction } from '../types';
 import dayjs from 'dayjs';
 import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
 import { responseMessages } from '../constants/response_messages';
+import { firestore } from 'firebase-admin';
 
 interface IResponse {
 	error?: string | null;
 	data: ITransaction[];
 }
 
-export default async function getTransactionsByAddress(multisigAddress: string, network: string, entries: number, page: number): Promise<IResponse> {
+export default async function getTransactionsByAddress(
+	multisigAddress: string,
+	network: string,
+	entries: number,
+	page: number,
+	firestoreDB: firestore.Firestore
+): Promise<IResponse> {
 	const returnValue: IResponse = {
 		error: '',
 		data: []
@@ -28,7 +35,10 @@ export default async function getTransactionsByAddress(multisigAddress: string, 
 		const transactions: ITransaction[] = [];
 
 		if (response.data && response.data.transfers?.length) {
-			response.data.transfers.forEach((transfer: any) => {
+			for (const transfer of response.data.transfers) {
+				const transactionDoc = await firestoreDB.collection('transactions').doc(transfer.hash).get();
+				const storedTransaction: ITransaction = transactionDoc.data() as ITransaction;
+
 				const newTransaction: ITransaction = {
 					callHash: transfer.hash,
 					created_at: dayjs(transfer.block_timestamp).toDate(),
@@ -38,11 +48,12 @@ export default async function getTransactionsByAddress(multisigAddress: string, 
 					amount_usd: String(transfer.usd_amount),
 					amount_token: String(transfer.amount),
 					block_number: Number(transfer.block_num),
-					network: network
+					network: network,
+					note: transactionDoc.exists && storedTransaction?.note ? storedTransaction?.note : ''
 				};
 
 				transactions.push(newTransaction);
-			});
+			}
 		}
 
 		returnValue.data = transactions;
