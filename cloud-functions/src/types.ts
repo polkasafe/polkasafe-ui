@@ -47,6 +47,7 @@ export interface ITransaction {
 	amount_usd: string;
 	amount_token: string;
 	network: string;
+	note?: string;
 }
 
 export interface IAsset {
@@ -77,4 +78,5 @@ export interface IQueueItem {
 	created_at: Date;
 	approvals: string[];
 	threshold: number;
+	note?: string;
 }
