@@ -29,11 +29,12 @@ interface ISentInfoProps {
 	setCallDataString: React.Dispatch<React.SetStateAction<string>>
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
+	note: string
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
+	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	const network = getNetwork();
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
@@ -130,6 +131,24 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='text-white font-normal text-sm leading-[15px]'
 						>
 							{date}
+						</span>
+					</p>
+				</div>
+				<div
+					className='flex items-center justify-between gap-x-5 mt-3'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+							Note:
+					</span>
+					<p
+						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+					>
+						<span
+							className='text-white font-normal text-sm leading-[15px]'
+						>
+							{note}
 						</span>
 					</p>
 				</div>

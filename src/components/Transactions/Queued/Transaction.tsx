@@ -28,12 +28,13 @@ interface ITransactionProps {
 	approvals: string[];
 	threshold: number;
 	callData: string;
-	callHash: string
+	callHash: string;
+	note: string
 }
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, date, status, type, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, status, type, threshold }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -218,6 +219,7 @@ const Transaction: FC<ITransactionProps> = ({ approvals, callData, callHash, dat
 								setCallDataString={setCallDataString}
 								handleApproveTransaction={handleApproveTransaction}
 								handleCancelTransaction={handleCancelTransaction}
+								note={note}
 							/>
 					}
 				</div>

@@ -97,6 +97,7 @@ const Queued: FC = () => {
 							threshold={transaction.threshold}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
+							note={transaction.note || ''}
 						/>
 					</section>;
 				})}
