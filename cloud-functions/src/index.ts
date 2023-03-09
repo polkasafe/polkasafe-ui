@@ -441,7 +441,7 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { review, rating } = req.body;
-		if (!review || isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (isNaN(rating) || rating <= 0 || rating > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -449,7 +449,7 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 			const newFeedback: IFeedback = {
 				address: substrateAddress,
 				rating: Number(rating),
-				review: String(review)
+				review: String(review) || ''
 			};
 
 			await feedbackRef.set(newFeedback);
