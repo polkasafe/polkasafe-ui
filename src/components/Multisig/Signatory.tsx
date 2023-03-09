@@ -20,7 +20,7 @@ interface ISignatoryProps{
 
 }
 
-const Signotary = ({ setSignatories, signatories }: ISignatoryProps) => {
+const Signatory = ({ setSignatories, signatories }: ISignatoryProps) => {
 
 	const { addressBook } = useGlobalUserDetailsContext();
 
@@ -81,4 +81,4 @@ const Signotary = ({ setSignatories, signatories }: ISignatoryProps) => {
 	);
 };
 
-export default Signotary;
+export default Signatory;
