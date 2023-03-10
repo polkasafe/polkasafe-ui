@@ -14,6 +14,7 @@ import { SearchIcon } from 'src/ui-components/CustomIcons';
 
 const Settings = () => {
 	const [searchTerm, setSearchTerm] = useState('');
+	const userAddress = localStorage.getItem('address');
 	const owners: IOwner[] = [
 		{
 			address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
@@ -38,7 +39,7 @@ const Settings = () => {
 			{/* TODO: Add coming soon */}
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
-				<div className='absolute w-full h-full bg-bg-main opacity-80 top-0 left-0 z-50 flex justify-center items-center text-primary font-bold text-[28px]'>Coming Soon...</div>
+				<div className='absolute w-full h-full bg-bg-main opacity-80 top-0 left-0 z-30 flex justify-center items-center text-primary font-bold text-[28px]'>Coming Soon...</div>
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
 					{/* <SearchOwner /> */}
 					<div className='rounded-lg bg-bg-secondary flex items-center p-1 text-xs gap-x-2 md:gap-x-4 md:text-sm'>
@@ -51,6 +52,7 @@ const Settings = () => {
 					<ListOwners owners={ filteredData } />
 				</section>
 			</div>
+			{userAddress &&
 			<div className='mt-[30px] grid md:grid-cols-2 gap-[30px]'>
 				<section className='col-span-1'>
 					<Details />
@@ -58,7 +60,7 @@ const Settings = () => {
 				<section className='col-span-1'>
 					<Feedback />
 				</section>
-			</div>
+			</div>}
 		</div>
 	);
 };

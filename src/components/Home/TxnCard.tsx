@@ -11,6 +11,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IHistoryTransaction, IQueueItem } from 'src/types';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
+import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
 import shortenAddress from 'src/utils/shortenAddress';
 
@@ -144,12 +145,11 @@ const TxnCard = () => {
 											{/* <p className='text-white text-right text-xs'>5173.42 USD</p> */}
 										</div>
 									</div>
-								);}) : <div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No queued transactions</p></div> :
-							<div className='flex justify-center items-center h-full'>
-								<h2 className='font-bold text-xl leading-[22px] text-primary'>
-									Loading...
-								</h2>
-							</div>}
+								);})
+							:
+							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No queued transactions</p></div>
+							:
+							<Loader />}
 					</div>
 				</div>
 				{/* Txn History */}
@@ -183,12 +183,10 @@ const TxnCard = () => {
 										</div>
 									</div>
 								);
-							}) : <div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No history transactions</p></div> :
-							<div className='flex justify-center items-center h-full'>
-								<h2 className='font-bold text-xl leading-[22px] text-primary'>
-									Loading...
-								</h2>
-							</div>}
+							}) :
+							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No history transactions</p></div>
+							:
+							<Loader />}
 						{/*TODO: Empty state */}
 						{/* <div className="flex flex-col items-center justify-center mt-5">
 							<img className='w-[150px] mt-3' src={emptyTxHistory} alt="tx"/>

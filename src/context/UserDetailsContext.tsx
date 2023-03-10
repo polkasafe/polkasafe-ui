@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { UserDetailsContextType } from 'src/types';
+import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
 const initialUserDetailsContext : UserDetailsContextType = {
@@ -83,7 +84,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 		<UserDetailsContext.Provider value={{ ...userDetailsContextState, setUserDetailsContextState }}>
 			{loading ?
 				<main className="h-screen w-screen flex items-center justify-center text-2xl bg-bg-main text-white">
-					Loading...
+					<Loader size='large' />
 				</main> :
 				children
 			}

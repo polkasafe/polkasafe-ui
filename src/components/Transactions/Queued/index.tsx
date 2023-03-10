@@ -8,6 +8,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IQueueItem } from 'src/types';
+import Loader from 'src/ui-components/Loader';
 import getNetwork from 'src/utils/getNetwork';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
@@ -68,15 +69,7 @@ const Queued: FC = () => {
 		fetchQueuedTransactions();
 	}, [fetchQueuedTransactions]);
 
-	if(loading){
-		return (
-			<div className='flex justify-center items-center h-full'>
-				<h2 className='font-bold text-xl leading-[22px] text-primary'>
-					Loading...
-				</h2>
-			</div>
-		);
-	}
+	if(loading) return <Loader size='large'/>;
 
 	return (
 		<>

@@ -8,6 +8,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IHistoryTransaction } from 'src/types';
+import Loader from 'src/ui-components/Loader';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
@@ -53,15 +54,7 @@ const History: FC = () => {
 		getTransactions();
 	}, [activeMultisig, network, signature, userAddress]);
 
-	if(loading){
-		return (
-			<div className='flex justify-center items-center h-full'>
-				<h2 className='font-bold text-xl leading-[22px] text-primary'>
-					Loading...
-				</h2>
-			</div>
-		);
-	}
+	if(loading) return <Loader size='large'/>;
 
 	return (
 		<>
