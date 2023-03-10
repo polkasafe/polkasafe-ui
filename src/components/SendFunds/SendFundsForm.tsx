@@ -148,6 +148,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 									id='recipient'
 									placeholder="Send to Address.."
 									onChange={(value) => setRecipientAddress(value)}
+									defaultValue={address}
 								/>
 								<div className='absolute right-2'>
 									<PasteIcon className='mr-2 text-primary' />

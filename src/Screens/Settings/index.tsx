@@ -38,7 +38,7 @@ const Settings = () => {
 			{/* TODO: Add coming soon */}
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
-				<div className='absolute w-full h-full bg-bg-secondary opacity-90 top-0 left-0 z-50 flex justify-center items-center text-primary font-bold text-xl'>Coming Soon...</div>
+				<div className='absolute w-full h-full bg-bg-main opacity-80 top-0 left-0 z-50 flex justify-center items-center text-primary font-bold text-[28px]'>Coming Soon...</div>
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
 					{/* <SearchOwner /> */}
 					<div className='rounded-lg bg-bg-secondary flex items-center p-1 text-xs gap-x-2 md:gap-x-4 md:text-sm'>
