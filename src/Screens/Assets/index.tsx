@@ -9,6 +9,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
+import Loader from 'src/ui-components/Loader';
 import getNetwork from 'src/utils/getNetwork';
 
 const network = getNetwork();
@@ -64,15 +65,7 @@ const Assets = () => {
 		handleGetAssets();
 	}, [handleGetAssets]);
 
-	if(loading){
-		return (
-			<div className='h-[70vh] bg-bg-main rounded-lg flex justify-center items-center'>
-				<h2 className='font-bold text-xl leading-[22px] text-primary'>
-					Loading...
-				</h2>
-			</div>
-		);
-	}
+	if(loading) return <Loader size='large'/>;
 
 	return (
 		<div className='h-[70vh] bg-bg-main rounded-lg'>

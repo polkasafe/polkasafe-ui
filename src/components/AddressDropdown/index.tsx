@@ -6,7 +6,7 @@ import { UserOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
 import { message } from 'antd';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
@@ -25,6 +25,7 @@ const AddressDropdown = () => {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isVisible, toggleVisibility] = useState(false);
+	const isMouseEnter = useRef(false);
 	const handleCopy = () => {
 		// navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -58,6 +59,11 @@ const AddressDropdown = () => {
 	return (
 		<div
 			className='relative'
+			onBlur={() => {
+				if (!isMouseEnter.current) {
+					(isVisible ? toggleVisibility(false) : null);
+				}
+			}}
 		>
 			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
@@ -77,12 +83,18 @@ const AddressDropdown = () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-10 min-w-[274px]',
+					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-40 min-w-[274px]',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
 					}
 				)}
+				onMouseEnter={() => {
+					isMouseEnter.current = true;
+				}}
+				onMouseLeave={() => {
+					isMouseEnter.current = false;
+				}}
 			>
 				<div className='flex items-center justify-center flex-col gap-y-9'>
 					<div className='flex items-center justify-center flex-col gap-y-[10px]'>

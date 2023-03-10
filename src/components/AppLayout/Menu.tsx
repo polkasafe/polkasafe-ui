@@ -12,40 +12,6 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
-import styled from 'styled-components';
-
-const menuItems = [
-	{
-		icon: <HomeIcon />,
-		key: '/',
-		title: 'Home'
-	},
-	{
-		icon: <AssetsIcon />,
-		key: '/assets',
-		title: 'Assets'
-	},
-	{
-		icon: <TransactionIcon />,
-		key: '/transactions',
-		title: 'Transactions'
-	},
-	{
-		icon: <AddressBookIcon />,
-		key: '/address-book',
-		title: 'Address Book'
-	},
-	{
-		icon: <AppsIcon />,
-		key: '/apps',
-		title: 'Apps'
-	},
-	{
-		icon: <SettingsIcon />,
-		key: '/settings',
-		title: 'Settings'
-	}
-];
 
 interface Props {
 	className?: string;
@@ -57,6 +23,44 @@ const Menu: FC<Props> = ({ className }) => {
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const { openModal } = useModalContext();
 	const location = useLocation();
+	const userAddress = localStorage.getItem('address');
+
+	const menuItems = [
+		{
+			icon: <HomeIcon />,
+			key: '/',
+			title: 'Home'
+		},
+		{
+			icon: <AssetsIcon />,
+			key: '/assets',
+			title: 'Assets'
+		},
+		{
+			icon: <TransactionIcon />,
+			key: '/transactions',
+			title: 'Transactions'
+		},
+		{
+			icon: <AddressBookIcon />,
+			key: '/address-book',
+			title: 'Address Book'
+		},
+		{
+			icon: <AppsIcon />,
+			key: '/apps',
+			title: 'Apps'
+		}
+	];
+	if(userAddress){
+		menuItems.push(
+			{
+				icon: <SettingsIcon />,
+				key: '/settings',
+				title: 'Settings'
+			}
+		);
+	}
 
 	useEffect(() => {
 		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network) || [];
@@ -145,15 +149,17 @@ const Menu: FC<Props> = ({ className }) => {
 					</ul>}
 				</div>
 			</section>
-			<section className='mt-auto'>
-				<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
-					onClick={() => openModal('', <AddMultisig isModalPopup = {true} />) }>
-					<UserPlusIcon className='text-xl' />
-					<span className='font-normal text-sm'>Add Multisig</span>
-				</button>
-			</section>
+			{userAddress &&
+				<section className='mt-auto'>
+					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+						onClick={() => openModal('', <AddMultisig isModalPopup = {true} />) }>
+						<UserPlusIcon className='text-xl' />
+						<span className='font-normal text-sm'>Add Multisig</span>
+					</button>
+				</section>
+			}
 		</div>
 	);
 };
 
-export default styled(Menu)``;
+export default Menu;

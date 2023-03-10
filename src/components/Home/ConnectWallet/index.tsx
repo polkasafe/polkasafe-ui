@@ -9,6 +9,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
+import Loader from 'src/ui-components/Loader';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const ConnectWallet = () => {
@@ -134,9 +135,7 @@ const ConnectWallet = () => {
 								Connect Wallet
 							</Button>
 						</>
-						: <h2 className='font-bold text-xl leading-[22px] text-primary'>
-							Loading...
-						</h2>
+						: <Loader size='large' />
 
 				}
 			</div>

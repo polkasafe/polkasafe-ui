@@ -69,7 +69,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 			</button>
 			<div
 				className={classNames(
-					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-10 min-w-[214px]',
+					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-50 min-w-[214px]',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
