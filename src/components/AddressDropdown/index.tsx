@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { UserOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
 import { message } from 'antd';
 import classNames from 'classnames';
@@ -12,6 +11,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
+import shortenAddress from 'src/utils/shortenAddress';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IAddress {
@@ -48,11 +48,10 @@ const AddressDropdown = () => {
 
 	if(!address){
 		return (
-			<button className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
-				<Link to={'/'}>
-					Connect Wallet
-				</Link>
-			</button>
+			<Link to={'/'} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+				<WarningRoundedIcon className='text-base text-primary'/>
+				Not Connected
+			</Link>
 		);
 	}
 
@@ -69,10 +68,10 @@ const AddressDropdown = () => {
 				<p className='flex items-center gap-x-3'>
 					{!address?<WarningRoundedIcon className='text-base text-primary'/>
 						:<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
-							<UserOutlined className='text-white text-[10px]' />
+							<Identicon size={20} value={address} theme='polkadot' />
 						</span>}
 					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{address? address :'Not Connected'}
+						{address? shortenAddress(address) :'Not Connected'}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {

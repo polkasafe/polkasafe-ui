@@ -27,7 +27,7 @@ const Review = ({ review, setReview }: { review: string, setReview: React.Dispat
 				>
 					<Input.TextArea
 						placeholder="Share Feedback..."
-						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
+						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="review"
 						value={review}
 						onChange={(e) => setReview(e.target.value)}

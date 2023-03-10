@@ -161,7 +161,7 @@ const TxnCard = () => {
 							<RightArrowOutlined/>
 						</Link>
 					</div>
-					<div className='bg-bg-main p-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto'>
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?

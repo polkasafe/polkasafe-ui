@@ -58,7 +58,9 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={handleCopy}><CopyIcon /></button>
-										<ExternalLinkIcon />
+										<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
+											<ExternalLinkIcon  />
+										</a>
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center justify-right gap-x-[10px]'>

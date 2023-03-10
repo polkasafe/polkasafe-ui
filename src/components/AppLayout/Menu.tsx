@@ -142,7 +142,7 @@ const Menu: FC<Props> = ({ className }) => {
 										size={30}
 										theme={'polkadot'}
 									/>
-									{multisig.name}
+									<span className='truncate'>{multisig.name}</span>
 								</button>
 							</li>;
 						})}

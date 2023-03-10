@@ -86,7 +86,9 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 								className='flex items-center gap-x-2 text-sm'
 							>
 								<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
-								<ExternalLinkIcon />
+								<a href={`https://www.subscan.io/account/${recipientAddress}`} target='_blank' rel="noreferrer" >
+									<ExternalLinkIcon />
+								</a>
 							</span>
 						</p>}
 					</div>
@@ -112,7 +114,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-2 text-sm'
 						>
 							<CopyIcon />
-							<ExternalLinkIcon />
+							{/* <ExternalLinkIcon /> */}
 						</span>
 					</p>
 				</div>
