@@ -65,7 +65,9 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 							className='flex items-center gap-x-2 text-sm'
 						>
 							<button onClick={() => handleCopy(from)}><CopyIcon className='hover:text-primary'/></button>
-							<ExternalLinkIcon />
+							<a href={`https://www.subscan.io/account/${from}`} target='_blank' rel="noreferrer" >
+								<ExternalLinkIcon />
+							</a>
 						</span>
 					</p>
 				</div>
@@ -91,7 +93,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						className='flex items-center gap-x-2 text-sm'
 					>
 						<button onClick={() => handleCopy(callHash)}><CopyIcon/></button>
-						<ExternalLinkIcon />
+						{/* <ExternalLinkIcon /> */}
 					</span>
 				</p>
 			</div>

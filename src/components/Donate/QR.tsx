@@ -2,13 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { message } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import qr from 'src/assets/icons/qr.svg';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import shortenAddress from 'src/utils/shortenAddress';
 
 const QR = () => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [address, setAddress] = useState('3J98t1W...RhWNLy');
+	const { address } = useGlobalUserDetailsContext();
 	const handleCopy = () => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -25,12 +26,14 @@ const QR = () => {
                         dot:
 					</span>
 					<span className='font-normal ml-[6px]'>
-						{address}
+						{shortenAddress(address)}
 					</span>
 				</p>
 				<p className='text-sm md:text-base text-text_secondary flex items-center gap-x-[9px]'>
 					<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
-					<ExternalLinkIcon />
+					<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
+						<ExternalLinkIcon  />
+					</a>
 				</p>
 			</div>
 		</div>

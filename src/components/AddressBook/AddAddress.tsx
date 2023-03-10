@@ -114,7 +114,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 				>
 					<Input
 						placeholder="Give the address a name"
-						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
+						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="name"
 						onChange={(e) => setName(e.target.value)}
 						value={name}
@@ -135,7 +135,7 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 				>
 					<Input
 						placeholder="Unique Address"
-						className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
+						className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="address"
 						onChange={(e) => setAddress(e.target.value)}
 						value={address}
