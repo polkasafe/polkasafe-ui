@@ -74,8 +74,6 @@ const TxnCard = () => {
 				}
 				else{
 
-					console.log(activeMultisig);
-
 					const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
 						body: JSON.stringify({
 							limit: 10,
@@ -95,7 +93,6 @@ const TxnCard = () => {
 					}
 
 					if(queueTransactions){
-						console.log('queue', queueTransactions);
 						setQueuedTransactions(queueTransactions);
 						setQueueLoading(false);
 					}

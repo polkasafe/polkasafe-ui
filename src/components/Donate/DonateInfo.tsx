@@ -40,13 +40,15 @@ const DonateInfo = () => {
                         If you don{'\''}t have a polkadot wallet, don{'\''}t worry, you can create one for free at
 					</span>
 					<span className='text-primary'>
-                        Polkadot.io
-						<ExternalLinkIcon className='w-[11px] h-[11px] ml-[6.62px]' />
+						<a href='https://polkadot.js.org/extension/' target={'_blank'} rel="noreferrer" className='flex items-center'>
+							Polkadot{'{.js}'}
+							<ExternalLinkIcon className='w-[11px] h-[11px] ml-[6.62px]' />
+						</a>
 					</span>
 				</p>
 				<button className='text-primary px-[10px] py-3 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
 					<WalletIcon className='text-base'/>
-					<a href='https://polkadot.network/' target={'_blank'} className='font-bold text-sm cursor-pointer' rel="noreferrer">
+					<a href='https://polkadot.js.org/extension/' target={'_blank'} className='font-bold text-sm cursor-pointer' rel="noreferrer">
                         Create Wallet
 					</a>
 				</button>

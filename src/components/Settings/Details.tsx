@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Button } from 'antd';
 import React, { useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
@@ -17,6 +18,7 @@ import RenameMultisig from './RenameMultisig';
 const Details = () => {
 
 	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const { openModal } = useModalContext();
@@ -97,7 +99,7 @@ const Details = () => {
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-5'>
 					<span>Blockchain:</span>
-					<span className='text-white'>Polkadot</span>
+					<span className='text-white capitalize'>{network}</span>
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-7'>
 					<span>Safe Name:</span>

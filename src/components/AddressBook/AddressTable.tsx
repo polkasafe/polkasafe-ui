@@ -9,6 +9,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 
+import SendFundsForm from '../SendFunds/SendFundsForm';
 import EditAddress from './Edit';
 import RemoveAddress from './Remove';
 
@@ -21,7 +22,7 @@ interface IAddressProps {
 }
 
 const AddAddress: FC<IAddressProps> = ({ address }) => {
-	const { openModal } = useModalContext();
+	const { openModal, toggleVisibility } = useModalContext();
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -60,18 +61,19 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										<ExternalLinkIcon />
 									</div>
 								</div>
-								<div className='col-span-1 flex items-center gap-x-[10px]'>
+								<div className='col-span-1 flex items-center justify-right gap-x-[10px]'>
 									<button
-										onClick={() => openModal('Edit Address', <EditAddress />) }
+										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={address} nameToEdit={name} />) }
 										className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon />
 									</button>
+									{index > 0 &&
 									<button
-										onClick={() => openModal('Remove Address', <RemoveAddress />) }
+										onClick={() => openModal('Remove Address', <RemoveAddress addressToRemove={address} name={name} />) }
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
-									</button>
-									<PrimaryButton className='bg-primary text-white w-fit'>
+									</button>}
+									<PrimaryButton className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)}>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</div>

@@ -2,13 +2,86 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Form, Input } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IAddressBookEntry } from 'src/types';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 
-const EditAddress = () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nameToEdit: string }) => {
 	const { toggleVisibility } = useModalContext();
+	const [loading, setLoading] = useState<boolean>(false);
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const [newName, setNewName] = useState<string>(nameToEdit);
+
+	const handleAddAddress = async () => {
+		try{
+			setLoading(true);
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				setLoading(false);
+				return;
+			}
+			else{
+
+				console.log(addressToEdit, newName);
+
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+					body: JSON.stringify({
+						address: addressToEdit,
+						name: newName
+					}),
+					headers: firebaseFunctionsHeader(),
+					method: 'POST'
+				});
+
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookEntry[], error: string };
+
+				if(addAddressError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addAddressError,
+						status: NotificationStatus.ERROR
+					});
+					setLoading(false);
+					return;
+				}
+
+				if(addAddressData){
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							addressBook: addAddressData
+						};
+					});
+
+					queueNotification({
+						header: 'Success!',
+						message: 'Your address has been added successfully!',
+						status: NotificationStatus.SUCCESS
+					});
+					setLoading(false);
+					toggleVisibility();
+
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			setLoading(false);
+		}
+	};
+
 	return (
 		<Form
 			className='my-0 w-[560px]'
@@ -30,25 +103,13 @@ const EditAddress = () => {
 						required
 						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="name"
+						onChange={(e) => setNewName(e.target.value)}
 					/>
 				</Form.Item>
 			</div>
-			<div className="flex flex-col gap-y-3 mt-5">
-				<label
-					className="text-primary text-xs leading-[13px] font-normal"
-					htmlFor="address"
-				>
-                    Address
-				</label>
-				<p
-					className="text-sm font-normal m-0 leading-[15px] p-3 rounded-lg text-[#505050] border border-dashed border-[#505050]"
-				>
-                    3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
-				</p>
-			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn onClick={toggleVisibility}/>
-				<AddBtn title='Save' />
+				<AddBtn loading={loading} onClick={handleAddAddress} title='Save' />
 			</div>
 		</Form>
 	);

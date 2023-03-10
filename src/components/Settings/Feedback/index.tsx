@@ -17,7 +17,7 @@ const Feedback = () => {
 	const { openModal } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [review, setReview] = useState<string>('');
-	const [rating, setRating] = useState<number>(5);
+	const [rating, setRating] = useState<number | null>(null);
 
 	const handleSubmitFeedback = async () => {
 		try{
@@ -31,16 +31,15 @@ const Feedback = () => {
 				return;
 			}
 			else{
-				if(!review){
+				if(!rating){
 					queueNotification({
 						header: 'Error!',
-						message: '',
+						message: 'Please add rating.',
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
+					return;
 				}
-
-				console.log('headers', firebaseFunctionsHeader());
-
 				const addFeedbackRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addFeedback`, {
 					body: JSON.stringify({
 						rating,
@@ -98,12 +97,10 @@ const Feedback = () => {
 				</div>
 				<div className='my-[34.5px] flex items-center justify-center gap-x-5'>
 					{emojis.map((emoji, i) => {
-						return <span onClick={() => {
-							setRating(5-i);
-							openModal('Write a review', <Review review={review} setReview={setReview} />);
-						}}
-						key={emoji}
-						className='p-[10px] text-[32px] flex items-center justify-center bg-bg-secondary cursor-pointer rounded-lg leading-none w-[52px] h-[52px]'
+						return <span
+							onClick={() => setRating(5-i)}
+							key={emoji}
+							className={`p-[10px] text-[32px] flex items-center justify-center ${rating === (5-i) ? 'bg-highlight' : 'bg-bg-secondary'} cursor-pointer rounded-lg leading-none w-[52px] h-[52px]`}
 						>
 							{emoji}
 						</span>;
