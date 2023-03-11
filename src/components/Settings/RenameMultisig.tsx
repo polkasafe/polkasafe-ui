@@ -12,7 +12,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
-const RenameMultisig = () => {
+const RenameMultisig = ({ name }: { name: string }) => {
 	const { toggleVisibility } = useModalContext();
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
@@ -102,9 +102,10 @@ const RenameMultisig = () => {
 				>
 					<Input
 						placeholder="Mutlisig Name"
-						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-[#505050]"
+						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="multisig_name"
 						value={multisigName}
+						defaultValue={name}
 						onChange={(e) => setMultisigName(e.target.value)}
 					/>
 				</Form.Item>

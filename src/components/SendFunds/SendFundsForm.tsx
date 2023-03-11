@@ -6,11 +6,11 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, message } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
@@ -20,7 +20,9 @@ import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 import getNetwork from 'src/utils/getNetwork';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
@@ -29,6 +31,7 @@ import styled from 'styled-components';
 interface ISendFundsFormProps {
 	onCancel?: () => void;
 	className?: string;
+	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const addRecipientHeading = () => {
@@ -53,17 +56,29 @@ const network = getNetwork();
 const SendFundsForm = (props: ISendFundsFormProps) => {
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
-	const { className, onCancel } = props;
+	const { className, onCancel, setNewTxn } = props;
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [transferKeepAlive, setTransferKeepAlive] = useState<boolean>(true);
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0]?.address);
+	const [callData, setCallData] = useState<string>('');
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
 		label: a.name,
 		value: a.address
 	}));
+
+	useEffect(() => {
+		if(api && apiReady && recipientAddress && amount){
+			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
+			setCallData(call.method.toHex());
+		}
+	}, [amount, api, apiReady, recipientAddress]);
+
+	const handleCopy = (address: string) => {
+		navigator.clipboard.writeText(`${address}`);
+		message.success('Copied!');
+	};
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -78,7 +93,14 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 
 		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
 
-		if(!multisig) return;
+		if(!multisig || !recipientAddress || !amount){
+			queueNotification({
+				header: 'Error!',
+				message: 'Invalid Input.',
+				status: NotificationStatus.ERROR
+			});
+			return;
+		}
 		setLoading(true);
 		try {
 			await initMultisigTransfer({
@@ -89,12 +111,15 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				network,
 				note,
 				recipientAddress,
-				transferKeepAlive
+				transferKeepAlive: true
 			});
 		} catch (error) {
 			console.log(error);
 		} finally {
 			setLoading(false);
+			if(setNewTxn){
+				setNewTxn(prev => !prev);
+			}
 		}
 	};
 
@@ -185,6 +210,21 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				</div>
 			</section>
 
+			{callData && !!Number(amount) && recipientAddress &&
+			<section className='mt-[15px]'>
+				<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Call Data</label>
+				<div className='flex items-center gap-x-[10px]'>
+					<div
+						className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
+						onClick={() => handleCopy(callData)}
+					>
+						{callData}
+						<button className='text-primary'><CopyIcon /></button>
+					</div>
+				</div>
+			</section>
+			}
+
 			<section className='mt-[15px]'>
 				<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
 				<div className='flex items-center gap-x-[10px]'>
@@ -236,7 +276,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				</div>
 			</section>
 
-			<section className='mt-[15px]'>
+			{/* <section className='mt-[15px]'>
 				<div className='flex items-center gap-x-[10px]'>
 					<article className='w-[500px] flex items-center gap-x-3'>
 						<p className='text-white text-sm font-normal leading-[15px]'>
@@ -252,7 +292,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 						</p>
 					</article>
 				</div>
-			</section>
+			</section> */}
 
 			<section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
 				<span>

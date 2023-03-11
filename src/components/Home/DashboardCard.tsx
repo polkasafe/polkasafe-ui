@@ -24,7 +24,7 @@ import getNetwork from 'src/utils/getNetwork';
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
-const DashboardCard = ({ className }: { className?: string }) => {
+const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
@@ -58,7 +58,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			console.log('show new transaction modal');
-			openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />);
+			openModal('Send Funds', <SendFundsForm setNewTxn={setNewTxn} onCancel={() => toggleVisibility()} />);
 		}
 
 		setTransactionLoading(false);

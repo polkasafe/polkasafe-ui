@@ -105,7 +105,7 @@ const Details = () => {
 					<span>Safe Name:</span>
 					<span className='text-white flex items-center gap-x-3'>
 						{multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
-						<button onClick={() => openModal('Rename Multisig', <RenameMultisig />)}>
+						<button onClick={() => openModal('Rename Multisig', <RenameMultisig name={multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME} />)}>
 							<EditIcon className='text-primary cursor-pointer' />
 						</button>
 					</span>
