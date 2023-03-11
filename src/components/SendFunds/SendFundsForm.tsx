@@ -59,7 +59,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [transferKeepAlive, setTransferKeepAlive] = useState<boolean>(true);
-	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
+	const [recipientAddress, setRecipientAddress] = useState(addressBook[0]?.address);
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
 		label: a.name,
 		value: a.address
