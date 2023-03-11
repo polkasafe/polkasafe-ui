@@ -39,16 +39,11 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const callDataInner = api.createType('Call', callDataHex);
-	const { weight: MAX_WEIGHT } = await calcWeight(callDataInner, api);
+	const callData = api.createType('Call', callDataHex);
+	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
 
 	// invalid call data for this call hash
-	if (!callDataInner.hash.eq(callHash)) return;
-
-	// const callInfo = api.registry.findMetaCall(callDataInner.callIndex);
-	// const callData: CallData = { callData: callDataInner, callError: null, callInfo };
-
-	// console.log({ callData });
+	if (!callData.hash.eq(callHash)) return;
 
 	// 2. Set relevant constants
 	const ZERO_MAX_WEIGHT = new Uint8Array(0);
