@@ -4,17 +4,19 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect,useState } from 'react';
 import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
 import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { IAsset } from 'src/types';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getNetwork from 'src/utils/getNetwork';
@@ -24,12 +26,16 @@ import SendFundsForm from '../SendFunds/SendFundsForm';
 
 const DashboardCard = ({ className }: { className?: string }) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
+	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [loading, setLoading] = useState(false);
+	const [transactionLoading, setTransactionLoading] = useState(false);
 
 	const handleNewTransaction = async () => {
-		setLoading(true);
+		setTransactionLoading(true);
 
 		// check if wallet exists onchain (has existential deposit)
 		const isMultisigOnChainRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/isMultisigOnChain`, {
@@ -44,7 +50,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 		const { data: isMultisigOnChainData, error: isMultisigOnChainErr } = await isMultisigOnChainRes.json();
 		if(isMultisigOnChainErr || !isMultisigOnChainData) {
 			console.log('show error state');
-			setLoading(false);
+			setTransactionLoading(false);
 			return;
 		}
 
@@ -55,8 +61,53 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />);
 		}
 
-		setLoading(false);
+		setTransactionLoading(false);
 	};
+
+	const handleGetAssets = useCallback(async () => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!address || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+
+				setLoading(true);
+				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
+					body: JSON.stringify({
+						address: activeMultisig,
+						network
+					}),
+					headers: firebaseFunctionsHeader(),
+					method: 'POST'
+				});
+
+				const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
+
+				if(error) {
+					setLoading(false);
+					return;
+				}
+
+				if(data){
+					setAssetsData(data);
+					setLoading(false);
+
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			setLoading(false);
+		}
+	}, [activeMultisig, network]);
+
+	useEffect(() => {
+		handleGetAssets();
+	}, [handleGetAssets]);
 
 	return (
 		<div>
@@ -95,19 +146,17 @@ const DashboardCard = ({ className }: { className?: string }) => {
 				<div className="flex flex-wrap">
 					<div className='m-2'>
 						<div className='text-white'>Tokens</div>
-						<div className='font-bold text-xl text-primary'>2</div>
+						<div className='font-bold text-xl text-primary'>{assetsData.length}</div>
 					</div>
 					<div className='m-2'>
 						<div className='text-white'>USD Amount</div>
-						<div className='font-bold text-xl text-primary'>1000</div>
-					</div>
-					<div className='m-2'>
-						<div className='text-white'>NFTs</div>
-						<div className='font-bold text-xl text-primary'>3</div>
+						<div className='font-bold text-xl text-primary'>
+							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0)}
+						</div>
 					</div>
 				</div>
 				<div className="flex justify-around w-full mt-5">
-					<PrimaryButton onClick={handleNewTransaction} loading={loading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
+					<PrimaryButton onClick={handleNewTransaction} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
 						<PlusCircleOutlined /> New Transaction
 					</PrimaryButton>
 					<Link to='/assets' className='w-[45%] group'>
