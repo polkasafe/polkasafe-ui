@@ -13,6 +13,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
+import { getMultisigInfo } from './getMultisigInfo';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CallData {
@@ -56,17 +57,19 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 3. tx call
 	const call = api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
 
-	// 4. Retrieve and unwrap the timepoint
-	const info = await api.query.multisig.multisigs(multisig.address, call.method.hash);
-	const TIME_POINT= info.unwrap().when;
-	console.log(`Time point is: ${TIME_POINT}`);
+	const multisigInfos = await getMultisigInfo(multisig.address, api);
+	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 
-	const numApprovals = info.unwrap().approvals.length;
+	if(!multisigInfo) return;
+
+	console.log(`Time point is: ${multisigInfo?.when}`);
+
+	const numApprovals = multisigInfo.approvals.length;
 
 	// 5. Send asMulti if last approval call
 	if (numApprovals < multisig.threshold - 1) {
 		await api.tx.multisig
-			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), ZERO_MAX_WEIGHT)
+			.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), ZERO_MAX_WEIGHT)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
@@ -103,7 +106,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 			});
 	} else {
 		await api.tx.multisig
-			.asMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT as any)
+			.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), MAX_WEIGHT as any)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
@@ -141,5 +144,5 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	}
 
 	console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-	console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${call.method.hash}, ${MAX_WEIGHT})\n`);
+	console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${MAX_WEIGHT})\n`);
 }
