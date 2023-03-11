@@ -39,7 +39,6 @@ const Notification= () => {
 			console.log('Error in Fetching notifications: ', error);
 		}
 		if(data){
-			console.log(data);
 			setNotifications(data as INotification[]);
 		}
 		setLoading(false);
