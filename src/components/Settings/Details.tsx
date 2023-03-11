@@ -9,7 +9,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { DeleteIcon, EditIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
@@ -90,11 +90,11 @@ const Details = () => {
 			<article className='bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
 				<div className='flex items-center justify-between gap-x-5'>
 					<span>
-						Contract Version:
+						Version:
 					</span>
 					<span className='bg-highlight text-primary flex items-center gap-x-3 rounded-lg px-2 py-[10px] font-medium'>
-						1.3.0
-						<ExternalLinkIcon className='text-primary' />
+						1.0
+						{/* <ExternalLinkIcon className='text-primary' /> */}
 					</span>
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-5'>
