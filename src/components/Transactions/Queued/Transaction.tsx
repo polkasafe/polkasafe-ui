@@ -78,6 +78,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
+				callDataHex: callData,
+				callHash,
 				multisig,
 				network,
 				recipientAddress: decodedCallData.args.dest.id

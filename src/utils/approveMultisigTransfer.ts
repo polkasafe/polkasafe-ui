@@ -3,6 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ApiPromise } from '@polkadot/api';
+import type { Call } from '@polkadot/types/interfaces';
+import type { CallFunction } from '@polkadot/types/types';
 import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
@@ -10,24 +12,46 @@ import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
+import { calcWeight } from './calcWeight';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface CallData {
+  callData: Call | null;
+  callError: string | null;
+  callInfo: CallFunction | null;
+}
+
 interface Props {
 	api: ApiPromise,
 	network: string,
 	multisig: IMultisigAddress,
+	callDataHex: string,
+	callHash: string,
 	amount: BN,
 	approvingAddress: string,
 	recipientAddress: string,
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, recipientAddress, multisig, network }: Props) {
+export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
 	});
 
+	const callDataInner = api.createType('Call', callDataHex);
+	const { weight: MAX_WEIGHT } = await calcWeight(callDataInner, api);
+
+	// invalid call data for this call hash
+	if (!callDataInner.hash.eq(callHash)) return;
+
+	// const callInfo = api.registry.findMetaCall(callDataInner.callIndex);
+	// const callData: CallData = { callData: callDataInner, callError: null, callInfo };
+
+	// console.log({ callData });
+
 	// 2. Set relevant constants
-	const MAX_WEIGHT = new Uint8Array(640000000);
+	const ZERO_MAX_WEIGHT = new Uint8Array(0);
 	const AMOUNT_TO_SEND = amount.toNumber();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND);
 
@@ -47,7 +71,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 5. Send asMulti if last approval call
 	if (numApprovals < multisig.threshold - 1) {
 		await api.tx.multisig
-			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), ZERO_MAX_WEIGHT)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
@@ -84,7 +108,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 			});
 	} else {
 		await api.tx.multisig
-			.asMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT)
+			.asMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.toHex(), MAX_WEIGHT as any)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 				// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
