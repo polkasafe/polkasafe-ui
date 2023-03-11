@@ -119,7 +119,7 @@ export interface IHistoryTransaction {
 	network: string;
 }
 
-export interface INotificaion {
+export interface INotification {
 	id: string,
 	addresses: string[],
 	created_at: Date,

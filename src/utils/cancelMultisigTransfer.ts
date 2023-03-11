@@ -73,7 +73,7 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 
 							await sendNotificationToAddresses({
 								addresses: otherSignatories,
-								callHash,
+								link: '',
 								message: 'Transaction cancelled.',
 								type: 'cancelled'
 							});

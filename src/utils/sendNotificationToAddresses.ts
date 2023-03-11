@@ -4,16 +4,12 @@
 
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { INotificaion } from 'src/types';
+import { INotification } from 'src/types';
 
-interface Args extends Omit<INotificaion, 'created_at' | 'id'> {
-	callHash: string
-}
-
-export default async function sendNotificationToAddresses({ addresses, callHash, message, type }: Args) {
-	const newNotificationData: Omit<INotificaion, 'created_at' | 'id'>  = {
+export default async function sendNotificationToAddresses({ addresses, link = '', message, type }: Omit<INotification, 'created_at' | 'id'>) {
+	const newNotificationData: Omit<INotification, 'created_at' | 'id'>  = {
 		addresses,
-		link: `/transactions#${callHash}`,
+		link,
 		message,
 		type
 	};
