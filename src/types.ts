@@ -118,3 +118,12 @@ export interface IHistoryTransaction {
 	amount_token: number;
 	network: string;
 }
+
+export interface INotificaion {
+	id: string,
+	addresses: string[],
+	created_at: Date,
+	message: string,
+	link?: string,
+	type: 'sent' | 'recieved' | 'cancelled' | 'info'
+}

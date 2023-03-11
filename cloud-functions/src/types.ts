@@ -80,3 +80,12 @@ export interface IQueueItem {
 	threshold: number;
 	note?: string;
 }
+
+export interface INotificaion {
+	id: string,
+	addresses: string[],
+	created_at: Date,
+	message: string,
+	link?: string,
+	type: 'sent' | 'recieved' | 'cancelled' | 'info'
+}

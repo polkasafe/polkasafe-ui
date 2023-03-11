@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, ITransaction, IUser, IUserResponse } from './types';
+import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, INotificaion, ITransaction, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -646,6 +646,39 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in renameMultisig :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const sendNotification = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { addresses, link, message, type } = req.body;
+		if (!addresses || !Array.isArray(addresses) || !message ) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const newNotificationRef = firestoreDB.collection('notifications').doc();
+
+			const newNotification: INotificaion = {
+				id: newNotificationRef.id,
+				addresses: addresses,
+				created_at: new Date(),
+				message,
+				link: link ? String(link) : '',
+				type
+			};
+
+			await newNotificationRef.set(newNotification);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in sendNotification :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

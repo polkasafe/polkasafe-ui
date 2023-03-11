@@ -10,6 +10,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
+import sendNotificationToSignatories from './sendNotificationToSignatories';
 
 interface Args {
 	api: ApiPromise,
@@ -95,6 +96,13 @@ export default async function initMultisigTransfer({
 							network,
 							note,
 							to: recipientAddress
+						});
+
+						await sendNotificationToSignatories({
+							addresses: [...otherSignatories],
+							callHash: call.method.hash.toHex(),
+							message: 'New transaction to sign',
+							type: 'sent'
 						});
 					} else if (event.method === 'ExtrinsicFailed') {
 						console.log('Transaction failed');
