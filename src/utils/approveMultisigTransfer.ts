@@ -55,7 +55,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
 
 	// 3. tx call
-	const call = api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
+	const call = api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND);
 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
