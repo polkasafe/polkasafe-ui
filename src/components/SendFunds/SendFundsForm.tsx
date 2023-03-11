@@ -58,6 +58,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
+	const [transferKeepAlive, setTransferKeepAlive] = useState<boolean>(true);
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0].address);
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
 		label: a.name,
@@ -87,7 +88,8 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				multisig,
 				network,
 				note,
-				recipientAddress
+				recipientAddress,
+				transferKeepAlive
 			});
 		} catch (error) {
 			console.log(error);
@@ -240,7 +242,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 						<p className='text-white text-sm font-normal leading-[15px]'>
 							Transfer with account keep-alive checks
 						</p>
-						<Switch size='small' className='text-primary' defaultChecked onChange={() => {}} />
+						<Switch size='small' className='text-primary' defaultChecked onChange={(checked) => setTransferKeepAlive(checked)} />
 					</article>
 					<article className='w-[412px] flex items-center'>
 						<span className='-mr-1.5 z-0'>
