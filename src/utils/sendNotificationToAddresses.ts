@@ -10,7 +10,7 @@ interface Args extends Omit<INotificaion, 'created_at' | 'id'> {
 	callHash: string
 }
 
-export default async function sendNotificationToSignatories({ addresses, callHash, message, type }: Args) {
+export default async function sendNotificationToAddresses({ addresses, callHash, message, type }: Args) {
 	const newNotificationData: Omit<INotificaion, 'created_at' | 'id'>  = {
 		addresses,
 		link: `/transactions#${callHash}`,
