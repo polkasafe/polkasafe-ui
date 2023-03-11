@@ -6,14 +6,16 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { INotification } from 'src/types';
 import { ArrowDownLeftIcon } from 'src/ui-components/CustomIcons';
 
 import { ENotificationStatus } from '.';
 
 const NotificationCard: FC<INotification> = ({ message, created_at, link }) => {
-	const status = ENotificationStatus.UNREAD;
+	const { notifiedTill } = useGlobalUserDetailsContext();
 
+	const status = notifiedTill && dayjs(notifiedTill).isAfter(created_at) ? ENotificationStatus.READ : ENotificationStatus.UNREAD;
 	return (
 		<Link to={link || '#'} className={classNames('flex items-center gap-x-4 rounded-lg p-3', {
 			'bg-highlight': status === ENotificationStatus.UNREAD

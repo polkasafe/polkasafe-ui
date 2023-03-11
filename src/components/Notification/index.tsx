@@ -20,7 +20,7 @@ export enum ENotificationStatus {
 }
 
 const Notification= () => {
-	const { address } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState(true);
 	const [notifications, setNotifications] = useState<INotification[]>([]);
@@ -28,6 +28,8 @@ const Notification= () => {
 	const isMouseEnter = useRef(false);
 
 	const getNotifications = useCallback(async () => {
+		if(!address) return;
+
 		setLoading(true);
 		const getNotificationsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getNotifications`, {
 			headers: firebaseFunctionsHeader(),
@@ -42,10 +44,22 @@ const Notification= () => {
 			setNotifications(data as INotification[]);
 		}
 		setLoading(false);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address]);
 
+	const markAllRead = useCallback(async () => {
+		const newNotifiedTill = new Date();
+		localStorage.setItem('notifiedTill', newNotifiedTill.toISOString());
+		setUserDetailsContextState((prevState) => {
+			return {
+				...prevState,
+				notifiedTill: newNotifiedTill
+			};
+		});
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	useEffect(() => {
+		if(!address) return;
 		getNotifications();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address]);
@@ -67,7 +81,7 @@ const Notification= () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px]',
+					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px] max-h-[300px] overflow-y-auto',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
@@ -83,9 +97,9 @@ const Notification= () => {
 			>
 				<div className='flex gap-x-5 items-center justify-between mb-5'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
-					<button onClick={() => {
-						setNotifications([]);
-					}} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>Clear All</button>
+					<button onClick={() => markAllRead()} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>
+						Mark all as read
+					</button>
 				</div>
 
 				<div>

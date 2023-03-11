@@ -11,6 +11,7 @@ export interface UserDetailsContextType {
     address: string;
     multisigAddresses: IMultisigAddress[];
     addressBook: IAddressBookEntry[];
+		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 
