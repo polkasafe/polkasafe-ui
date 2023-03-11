@@ -99,7 +99,7 @@ export default async function initMultisigTransfer({
 						});
 
 						await sendNotificationToAddresses({
-							addresses: [...otherSignatories],
+							addresses: otherSignatories,
 							callHash: call.method.hash.toHex(),
 							message: 'New transaction to sign',
 							type: 'sent'
