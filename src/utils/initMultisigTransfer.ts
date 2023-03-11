@@ -18,7 +18,8 @@ interface Args {
 	multisig: IMultisigAddress,
 	amount: BN,
 	network: string,
-	note: string
+	note: string,
+	transferKeepAlive: boolean
 }
 
 export default async function initMultisigTransfer({
@@ -28,7 +29,8 @@ export default async function initMultisigTransfer({
 	multisig,
 	amount,
 	network,
-	note
+	note,
+	transferKeepAlive
 }: Args) {
 
 	// 1. Use formatBalance to display amounts
@@ -46,7 +48,7 @@ export default async function initMultisigTransfer({
 	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
-	const call = api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
+	const call = transferKeepAlive ?  api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
 
 	// 4. Set the timepoint
 	// null for transaction initiation
