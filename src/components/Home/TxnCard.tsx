@@ -68,7 +68,7 @@ const TxnCard = () => {
 				const userAddress = localStorage.getItem('address');
 				const signature = localStorage.getItem('signature');
 
-				if(!userAddress || !signature) {
+				if(!userAddress || !signature || !activeMultisig) {
 					console.log('ERROR');
 					setQueueLoading(false);
 					return;
