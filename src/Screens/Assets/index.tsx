@@ -5,20 +5,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
 import DropDown from 'src/components/Assets/DropDown';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
 import Loader from 'src/ui-components/Loader';
-import getNetwork from 'src/utils/getNetwork';
-
-const network = getNetwork();
 
 const Assets = () => {
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -59,7 +58,7 @@ const Assets = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	}, [activeMultisig]);
+	}, [activeMultisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
