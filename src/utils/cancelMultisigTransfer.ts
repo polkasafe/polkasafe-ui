@@ -43,53 +43,57 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 
 	const numApprovals = info.unwrap().approvals.length;
 
-	// 4. Send cancelAsMulti if last approval call
-	if (numApprovals < multisig.threshold - 1) {
+	return new Promise<void>((resolve, reject) => {
+		// 4. Send cancelAsMulti if last approval call
+		if (numApprovals < multisig.threshold - 1) {
 		// cannot cancel if not last approval
-		return;
-	} else {
-		await api.tx.multisig
-			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
-			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
-				if (status.isInvalid) {
-					console.log('Transaction invalid');
-				} else if (status.isReady) {
-					console.log('Transaction is ready');
-				} else if (status.isBroadcast) {
-					console.log('Transaction has been broadcasted');
-				} else if (status.isInBlock) {
-					console.log('Transaction is in block');
-				} else if (status.isFinalized) {
-					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
-					console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+			return;
+		} else {
+			api.tx.multisig
+				.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
+				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+					if (status.isInvalid) {
+						console.log('Transaction invalid');
+					} else if (status.isReady) {
+						console.log('Transaction is ready');
+					} else if (status.isBroadcast) {
+						console.log('Transaction has been broadcasted');
+					} else if (status.isInBlock) {
+						console.log('Transaction is in block');
+					} else if (status.isFinalized) {
+						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+						console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 
-					for (const { event } of events) {
-						if (event.method === 'ExtrinsicSuccess') {
-							queueNotification({
-								header: 'Success!',
-								message: 'Transaction Successful.',
-								status: NotificationStatus.SUCCESS
-							});
+						for (const { event } of events) {
+							if (event.method === 'ExtrinsicSuccess') {
+								queueNotification({
+									header: 'Success!',
+									message: 'Transaction Successful.',
+									status: NotificationStatus.SUCCESS
+								});
 
-							await sendNotificationToAddresses({
-								addresses: otherSignatories,
-								link: '',
-								message: 'Transaction cancelled.',
-								type: 'cancelled'
-							});
-						} else if (event.method === 'ExtrinsicFailed') {
-							console.log('Transaction failed');
-							queueNotification({
-								header: 'Error!',
-								message: 'Transaction Failed',
-								status: NotificationStatus.ERROR
-							});
+								await sendNotificationToAddresses({
+									addresses: otherSignatories,
+									link: '',
+									message: 'Transaction cancelled.',
+									type: 'cancelled'
+								});
+								resolve();
+							} else if (event.method === 'ExtrinsicFailed') {
+								console.log('Transaction failed');
+								queueNotification({
+									header: 'Error!',
+									message: 'Transaction Failed',
+									status: NotificationStatus.ERROR
+								});
+								reject();
+							}
 						}
 					}
-				}
-			});
-	}
+				});
+		}
 
-	console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-	console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
+		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
+		console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
+	});
 }
