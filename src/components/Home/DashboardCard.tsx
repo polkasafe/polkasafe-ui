@@ -19,6 +19,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
@@ -127,8 +128,8 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary'>{activeMultisig}</div>
-								<button onClick={() => navigator.clipboard.writeText(`${activeMultisig}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
+								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig)}</div>
+								<button onClick={() => navigator.clipboard.writeText(`${getEncodedAddress(activeMultisig)}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
 								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>

@@ -10,6 +10,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import formatBnBalance from 'src/utils/formatBnBalance';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -37,7 +38,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	const network = getNetwork();
 	const { address, addressBook } = useGlobalUserDetailsContext();
-	const handleCopy = () => {
+	const handleCopy = (address: string) => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
 	};
@@ -80,13 +81,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{recipientAddress}
+								{getEncodedAddress(recipientAddress)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={handleCopy}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${recipientAddress}`} target='_blank' rel="noreferrer" >
+								<button onClick={() => handleCopy(getEncodedAddress(recipientAddress) || '')}><CopyIcon className='hover:text-primary'/></button>
+								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>

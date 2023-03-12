@@ -21,6 +21,7 @@ const Queued: FC = () => {
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
+	const [refetch, setRefetch] = useState<boolean>(false);
 
 	const fetchQueuedTransactions = useCallback(async () => {
 		try{
@@ -67,7 +68,7 @@ const Queued: FC = () => {
 
 	useEffect(() => {
 		fetchQueuedTransactions();
-	}, [fetchQueuedTransactions]);
+	}, [fetchQueuedTransactions, refetch]);
 
 	if(loading) return <Loader size='large'/>;
 
@@ -88,6 +89,7 @@ const Queued: FC = () => {
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
+							setRefetch={setRefetch}
 						/>
 					</section>;
 				})}

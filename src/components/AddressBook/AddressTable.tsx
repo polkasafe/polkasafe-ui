@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 import SendFundsForm from '../SendFunds/SendFundsForm';
 import EditAddress from './Edit';
@@ -55,7 +56,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										size={30}
 										theme={'polkadot'}
 									/>
-									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
+									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={handleCopy}><CopyIcon /></button>
 										<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >

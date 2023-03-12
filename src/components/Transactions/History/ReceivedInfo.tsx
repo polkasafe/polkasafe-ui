@@ -7,6 +7,7 @@ import React, { FC } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 interface IReceivedInfoProps {
 	amount: string;
@@ -59,13 +60,13 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						<span>
-							{from}
+							{getEncodedAddress(from)}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => handleCopy(from)}><CopyIcon className='hover:text-primary'/></button>
-							<a href={`https://www.subscan.io/account/${from}`} target='_blank' rel="noreferrer" >
+							<button onClick={() => handleCopy(getEncodedAddress(from) || '')}><CopyIcon className='hover:text-primary'/></button>
+							<a href={`https://www.subscan.io/account/${getEncodedAddress(from)}`} target='_blank' rel="noreferrer" >
 								<ExternalLinkIcon />
 							</a>
 						</span>

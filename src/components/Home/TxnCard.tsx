@@ -95,7 +95,6 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 					}
 
 					if(queueTransactions){
-						console.log(queueTransactions);
 						setQueuedTransactions(queueTransactions);
 						setQueueLoading(false);
 					}
