@@ -11,6 +11,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 const AddressCard = ({ className }: { className?: string }) => {
 	const { openModal } = useModalContext();
@@ -34,7 +35,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 								size={30}
 								theme='polkadot'
 							/>
-							<div className='px-1 text-sm text-white truncate'>{item.address}</div>
+							<div className='px-1 text-sm text-white truncate'>{getEncodedAddress(item.address)}</div>
 						</div>
 					))}
 				</div>

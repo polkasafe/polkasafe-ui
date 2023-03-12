@@ -20,7 +20,7 @@ import shortenAddress from 'src/utils/shortenAddress';
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
 import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 
-const TxnCard = () => {
+const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, address } = useGlobalUserDetailsContext();
@@ -60,7 +60,7 @@ const TxnCard = () => {
 			}
 		};
 		getTransactions();
-	}, [activeMultisig, network, signature, userAddress]);
+	}, [activeMultisig, network, signature, userAddress, newTxn]);
 
 	useEffect(() => {
 		const getQueue = async () => {
@@ -106,7 +106,7 @@ const TxnCard = () => {
 			}
 		};
 		getQueue();
-	}, [activeMultisig, network]);
+	}, [activeMultisig, network, newTxn]);
 
 	return (
 		<div>

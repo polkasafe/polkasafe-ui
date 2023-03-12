@@ -9,6 +9,7 @@ import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -71,7 +72,7 @@ const AddressDropdown = () => {
 							<Identicon size={20} value={address} theme='polkadot' />
 						</span>}
 					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{address? shortenAddress(address) :'Not Connected'}
+						{address? shortenAddress(getEncodedAddress(address) || '') :'Not Connected'}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
@@ -107,7 +108,7 @@ const AddressDropdown = () => {
 							{ addressBook.find(item => item.address === address)?.name }
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
-							<span className='text-text_secondary'>{address}</span>
+							<span className='text-text_secondary'>{getEncodedAddress(address)}</span>
 							<button onClick={handleCopy}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>

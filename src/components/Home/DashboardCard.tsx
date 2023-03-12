@@ -19,12 +19,13 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
-const DashboardCard = ({ className }: { className?: string }) => {
+const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
@@ -58,7 +59,7 @@ const DashboardCard = ({ className }: { className?: string }) => {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			console.log('show new transaction modal');
-			openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />);
+			openModal('Send Funds', <SendFundsForm setNewTxn={setNewTxn} onCancel={() => toggleVisibility()} />);
 		}
 
 		setTransactionLoading(false);
@@ -127,8 +128,8 @@ const DashboardCard = ({ className }: { className?: string }) => {
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary'>{activeMultisig}</div>
-								<button onClick={() => navigator.clipboard.writeText(`${activeMultisig}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
+								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig)}</div>
+								<button onClick={() => navigator.clipboard.writeText(`${getEncodedAddress(activeMultisig)}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
 								<QRIcon className='cursor-pointer'/>
 							</div>
 						</div>

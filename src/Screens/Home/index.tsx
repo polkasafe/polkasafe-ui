@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
+import React, { useState } from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
 import ConnectWallet from 'src/components/Home/ConnectWallet';
 import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalletWrapper';
@@ -16,6 +16,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 const Home = () => {
 	const { address, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const [newTxn, setNewTxn] = useState<boolean>(false);
 	return (
 		<>
 			{
@@ -25,7 +26,7 @@ const Home = () => {
 							<EmailBadge/>
 							<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
 								<div className='col-start-1 col-end-13 xl:col-end-10'>
-									<DashboardCard className='mt-3' />
+									<DashboardCard setNewTxn={setNewTxn} className='mt-3' />
 								</div>
 								<div className='col-start-1 col-end-13 xl:col-start-10'>
 									<AddressCard className='mt-3' />
@@ -33,7 +34,7 @@ const Home = () => {
 							</div>
 							<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
 								<div className='col-start-1 col-end-13 lg:col-end-13'>
-									<TxnCard />
+									<TxnCard newTxn={newTxn} />
 								</div>
 							</div>
 						</section>

@@ -9,6 +9,7 @@ import profileImg from 'src/assets/icons/profile-img.png';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
@@ -67,13 +68,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{recipient}
+								{getEncodedAddress(recipient)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => handleCopy(recipient)}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${recipient}`} target='_blank' rel="noreferrer" >
+								<button onClick={() => handleCopy(getEncodedAddress(recipient) || '')}><CopyIcon className='hover:text-primary'/></button>
+								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipient)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>
