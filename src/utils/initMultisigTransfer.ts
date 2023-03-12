@@ -34,101 +34,109 @@ export default async function initMultisigTransfer({
 	transferKeepAlive
 }: Args) {
 
-	// 1. Use formatBalance to display amounts
-	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
-	});
+	//promise to be resolved when transaction is finalized
+	return new Promise<void>((resolve, reject) => {
 
-	// 2. Define relevant constants
-	const MAX_WEIGHT = new Uint8Array([640000000]);
-	const AMOUNT_TO_SEND = amount.toNumber();
-	const displayAmount = formatBalance(AMOUNT_TO_SEND);
-
-	// remove initator address from signatories
-	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
-
-	// 3. API calls - info is necessary for the timepoint
-	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
-
-	// 4. Set the timepoint
-	// null for transaction initiation
-	const TIME_POINT = null;
-
-	let blockHash = '';
-	// 5. first call is approveAsMulti
-	await api.tx.multisig
-		.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
-		.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
-			// TODO: Make callback function reusable (pass onSuccess and onError functions)
-			if (status.isInvalid) {
-				console.log('Transaction invalid');
-			} else if (status.isReady) {
-				console.log('Transaction is ready');
-			} else if (status.isBroadcast) {
-				console.log('Transaction has been broadcasted');
-			} else if (status.isInBlock) {
-				blockHash = status.asInBlock.toHex();
-				console.log('Transaction is in block');
-			} else if (status.isFinalized) {
-				console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
-				console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
-
-				const block = await api.rpc.chain.getBlock(blockHash);
-				const blockNumber = block.block.header.number.toNumber();
-
-				for (const { event } of events) {
-					if (event.method === 'ExtrinsicSuccess') {
-						queueNotification({
-							header: 'Success!',
-							message: 'Transaction Successful.',
-							status: NotificationStatus.SUCCESS
-						});
-						// 6. store data to BE
-						// created_at should be set by BE for server time, amount_usd should be fetched by BE
-
-						await addNewTransaction({
-							amount,
-							block_number: blockNumber,
-							callData: call.method.toHex(),
-							callHash: call.method.hash.toHex(),
-							from: multisig.address,
-							network,
-							note,
-							to: recipientAddress
-						});
-
-						await sendNotificationToAddresses({
-							addresses: otherSignatories,
-							link: `/transactions#${call.method.hash.toHex()}`,
-							message: 'New transaction to sign',
-							type: 'sent'
-						});
-					} else if (event.method === 'ExtrinsicFailed') {
-						console.log('Transaction failed');
-						queueNotification({
-							header: 'Error!',
-							message: 'Transaction Failed',
-							status: NotificationStatus.ERROR
-						});
-					}
-				}
-			}
-		}).catch((error) => {
-			console.log(':( transaction failed');
-			console.error('ERROR:', error);
-			queueNotification({
-				header: 'Failed!',
-				message: error.message,
-				status: NotificationStatus.ERROR
-			});
+		// 1. Use formatBalance to display amounts
+		formatBalance.setDefaults({
+			decimals: chainProperties[network].tokenDecimals,
+			unit: chainProperties[network].tokenSymbol
 		});
 
-	console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
-	console.log(`Submitted values : approveAsMulti(${multisig.threshold},
+		// 2. Define relevant constants
+		const MAX_WEIGHT = new Uint8Array([640000000]);
+		const AMOUNT_TO_SEND = amount.toNumber();
+		const displayAmount = formatBalance(AMOUNT_TO_SEND);
+
+		// remove initator address from signatories
+		const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
+
+		// 3. API calls - info is necessary for the timepoint
+		const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
+
+		// 4. Set the timepoint
+		// null for transaction initiation
+		const TIME_POINT = null;
+
+		let blockHash = '';
+		// 5. first call is approveAsMulti
+		api.tx.multisig
+			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
+			.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
+			// TODO: Make callback function reusable (pass onSuccess and onError functions)
+				if (status.isInvalid) {
+					console.log('Transaction invalid');
+				} else if (status.isReady) {
+					console.log('Transaction is ready');
+				} else if (status.isBroadcast) {
+					console.log('Transaction has been broadcasted');
+				} else if (status.isInBlock) {
+					blockHash = status.asInBlock.toHex();
+					console.log('Transaction is in block');
+				} else if (status.isFinalized) {
+					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+					console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+					const block = await api.rpc.chain.getBlock(blockHash);
+					const blockNumber = block.block.header.number.toNumber();
+
+					for (const { event } of events) {
+						if (event.method === 'ExtrinsicSuccess') {
+							queueNotification({
+								header: 'Success!',
+								message: 'Transaction Successful.',
+								status: NotificationStatus.SUCCESS
+							});
+							// 6. store data to BE
+							// created_at should be set by BE for server time, amount_usd should be fetched by BE
+
+							await addNewTransaction({
+								amount,
+								block_number: blockNumber,
+								callData: call.method.toHex(),
+								callHash: call.method.hash.toHex(),
+								from: multisig.address,
+								network,
+								note,
+								to: recipientAddress
+							});
+
+							await sendNotificationToAddresses({
+								addresses: otherSignatories,
+								link: `/transactions#${call.method.hash.toHex()}`,
+								message: 'New transaction to sign',
+								type: 'sent'
+							});
+
+							resolve();
+						} else if (event.method === 'ExtrinsicFailed') {
+							console.log('Transaction failed');
+							queueNotification({
+								header: 'Error!',
+								message: 'Transaction Failed',
+								status: NotificationStatus.ERROR
+							});
+							reject();
+						}
+					}
+				}
+			}).catch((error) => {
+				console.log(':( transaction failed');
+				console.error('ERROR:', error);
+				queueNotification({
+					header: 'Failed!',
+					message: error.message,
+					status: NotificationStatus.ERROR
+				});
+				reject();
+			});
+
+		console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
+		console.log(`Submitted values : approveAsMulti(${multisig.threshold},
 		otherSignatories: ${JSON.stringify(otherSignatories)},
 		${TIME_POINT},
 		${call.method.hash},
 		${MAX_WEIGHT})\n`
-	);
+		);
+	});
 }

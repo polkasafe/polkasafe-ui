@@ -66,83 +66,87 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 
 	const numApprovals = multisigInfo.approvals.length;
 
-	// 5. Send asMulti if last approval call
-	if (numApprovals < multisig.threshold - 1) {
-		await api.tx.multisig
-			.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), ZERO_MAX_WEIGHT)
-			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
-				// TODO: Make callback function reusable (pass onSuccess and onError functions)
-				if (status.isInvalid) {
-					console.log('Transaction invalid');
-				} else if (status.isReady) {
-					console.log('Transaction is ready');
-				} else if (status.isBroadcast) {
-					console.log('Transaction has been broadcasted');
-				} else if (status.isInBlock) {
-					console.log('Transaction is in block');
-				} else if (status.isFinalized) {
-					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
-					console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+	return new Promise<void>((resolve, reject) => {
 
-					for (const { event } of events) {
-						if (event.method === 'ExtrinsicSuccess') {
-							queueNotification({
-								header: 'Success!',
-								message: 'Transaction Successful.',
-								status: NotificationStatus.SUCCESS
-							});
-							// 6. store data to BE
-							// created_at should be set by BE for server time, amount_usd should be fetched by BE
-						} else if (event.method === 'ExtrinsicFailed') {
-							console.log('Transaction failed');
-							queueNotification({
-								header: 'Error!',
-								message: 'Transaction Failed',
-								status: NotificationStatus.ERROR
-							});
+		// 5. Send asMulti if last approval call
+		if (numApprovals < multisig.threshold - 1) {
+			api.tx.multisig
+				.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), ZERO_MAX_WEIGHT)
+				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+					if (status.isInvalid) {
+						console.log('Transaction invalid');
+					} else if (status.isReady) {
+						console.log('Transaction is ready');
+					} else if (status.isBroadcast) {
+						console.log('Transaction has been broadcasted');
+					} else if (status.isInBlock) {
+						console.log('Transaction is in block');
+					} else if (status.isFinalized) {
+						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+						console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+						for (const { event } of events) {
+							if (event.method === 'ExtrinsicSuccess') {
+								queueNotification({
+									header: 'Success!',
+									message: 'Transaction Successful.',
+									status: NotificationStatus.SUCCESS
+								});
+								resolve();
+							} else if (event.method === 'ExtrinsicFailed') {
+								console.log('Transaction failed');
+								queueNotification({
+									header: 'Error!',
+									message: 'Transaction Failed',
+									status: NotificationStatus.ERROR
+								});
+								reject();
+							}
 						}
 					}
-				}
-			});
-	} else {
-		await api.tx.multisig
-			.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), MAX_WEIGHT as any)
-			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
-				// TODO: Make callback function reusable (pass onSuccess and onError functions)
-				if (status.isInvalid) {
-					console.log('Transaction invalid');
-				} else if (status.isReady) {
-					console.log('Transaction is ready');
-				} else if (status.isBroadcast) {
-					console.log('Transaction has been broadcasted');
-				} else if (status.isInBlock) {
-					console.log('Transaction is in block');
-				} else if (status.isFinalized) {
-					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
-					console.log(`asMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+				});
+		} else {
+			api.tx.multisig
+				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), MAX_WEIGHT as any)
+				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+					if (status.isInvalid) {
+						console.log('Transaction invalid');
+					} else if (status.isReady) {
+						console.log('Transaction is ready');
+					} else if (status.isBroadcast) {
+						console.log('Transaction has been broadcasted');
+					} else if (status.isInBlock) {
+						console.log('Transaction is in block');
+					} else if (status.isFinalized) {
+						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+						console.log(`asMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 
-					for (const { event } of events) {
-						if (event.method === 'ExtrinsicSuccess') {
-							queueNotification({
-								header: 'Success!',
-								message: 'Transaction Successful.',
-								status: NotificationStatus.SUCCESS
-							});
-							// 6. store data to BE
-							// created_at should be set by BE for server time, amount_usd should be fetched by BE
-						} else if (event.method === 'ExtrinsicFailed') {
-							console.log('Transaction failed');
-							queueNotification({
-								header: 'Error!',
-								message: 'Transaction Failed',
-								status: NotificationStatus.ERROR
-							});
+						for (const { event } of events) {
+							if (event.method === 'ExtrinsicSuccess') {
+								queueNotification({
+									header: 'Success!',
+									message: 'Transaction Successful.',
+									status: NotificationStatus.SUCCESS
+								});
+
+								// TODO: send notification
+
+								resolve();
+							} else if (event.method === 'ExtrinsicFailed') {
+								console.log('Transaction failed');
+								queueNotification({
+									header: 'Error!',
+									message: 'Transaction Failed',
+									status: NotificationStatus.ERROR
+								});
+								reject();
+							}
 						}
 					}
-				}
-			});
-	}
+				});
+		}
 
-	console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-	console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${MAX_WEIGHT})\n`);
+		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
+		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${MAX_WEIGHT})\n`);
+	});
 }
