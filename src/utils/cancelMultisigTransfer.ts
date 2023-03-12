@@ -10,6 +10,8 @@ import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
+import sendNotificationToAddresses from './sendNotificationToAddresses';
+
 interface Props {
 	api: ApiPromise,
 	network: string,
@@ -68,8 +70,13 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-							// 6. store data to BE
-							// created_at should be set by BE for server time, amount_usd should be fetched by BE
+
+							await sendNotificationToAddresses({
+								addresses: otherSignatories,
+								link: '',
+								message: 'Transaction cancelled.',
+								type: 'cancelled'
+							});
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 							queueNotification({

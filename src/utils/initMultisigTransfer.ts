@@ -10,6 +10,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
+import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Args {
 	api: ApiPromise,
@@ -48,7 +49,7 @@ export default async function initMultisigTransfer({
 	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
-	const call = transferKeepAlive ?  api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
+	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
 
 	// 4. Set the timepoint
 	// null for transaction initiation
@@ -95,6 +96,13 @@ export default async function initMultisigTransfer({
 							network,
 							note,
 							to: recipientAddress
+						});
+
+						await sendNotificationToAddresses({
+							addresses: otherSignatories,
+							link: `/transactions#${call.method.hash.toHex()}`,
+							message: 'New transaction to sign',
+							type: 'sent'
 						});
 					} else if (event.method === 'ExtrinsicFailed') {
 						console.log('Transaction failed');

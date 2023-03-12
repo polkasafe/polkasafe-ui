@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import dayjs from 'dayjs';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -15,6 +16,7 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	multisigAddresses: [],
+	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	}

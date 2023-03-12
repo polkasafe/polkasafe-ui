@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ReloadOutlined } from '@ant-design/icons';
+import BN from 'bn.js';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -13,6 +14,7 @@ import { IHistoryTransaction, IQueueItem } from 'src/types';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
@@ -33,7 +35,6 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	useEffect(() => {
 		const getTransactions = async () => {
 			if(!userAddress || !signature || !activeMultisig) {
-				console.log('ERROR');
 				return;
 			}
 			setHistoryLoading(true);
@@ -131,7 +132,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 								if(!res || !res.args || !res.args?.value){
 									return;
 								}
-								const amount = res.args.value;
+								const amount = formatBnBalance(new BN(res.args.value), { numberAfterComma: 2, withUnit: true }, network);
+
 								return (
 									<div key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
@@ -142,8 +144,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 											</div>
 										</div>
 										<div>
-											<h1 className='text-md text-white'>-{amount} DOT</h1>
-											{/* <p className='text-white text-right text-xs'>5173.42 USD</p> */}
+											<h1 className='text-md text-white'>- {amount}</h1>
+											{/* TODO: <p className='text-white text-right text-xs'>5173.42 USD</p> */}
 										</div>
 									</div>
 								);})

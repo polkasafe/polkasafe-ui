@@ -11,6 +11,7 @@ export interface UserDetailsContextType {
     address: string;
     multisigAddresses: IMultisigAddress[];
     addressBook: IAddressBookEntry[];
+		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 
@@ -117,4 +118,13 @@ export interface IHistoryTransaction {
 	amount_usd: number;
 	amount_token: number;
 	network: string;
+}
+
+export interface INotification {
+	id: string,
+	addresses: string[],
+	created_at: Date,
+	message: string,
+	link?: string,
+	type: 'sent' | 'recieved' | 'cancelled' | 'info'
 }
