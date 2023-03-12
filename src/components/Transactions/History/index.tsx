@@ -47,6 +47,7 @@ const History: FC = () => {
 				console.log('Error in Fetching Transactions: ', error);
 			}
 			if(data){
+				console.log(data);
 				setLoading(false);
 				setTransactions(data);
 			}

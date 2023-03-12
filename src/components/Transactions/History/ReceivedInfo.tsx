@@ -98,13 +98,14 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					</span>
 				</p>
 			</div>
+			{date &&
 			<div
 				className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
 			>
 				<span
 					className='text-text_secondary font-normal text-sm leading-[15px]'
 				>
-							Executed:
+						Executed:
 				</span>
 				<p
 					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -115,7 +116,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						{date}
 					</span>
 				</p>
-			</div>
+			</div>}
 		</article>
 	);
 };

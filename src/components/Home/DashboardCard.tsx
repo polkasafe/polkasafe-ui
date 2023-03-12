@@ -152,7 +152,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='m-2'>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-xl text-primary'>
-							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0)}
+							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0) || 'N/A'}
 						</div>
 					</div>
 				</div>

@@ -4,7 +4,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import AssetsTable from 'src/components/Assets/AssetsTable';
-import DropDown from 'src/components/Assets/DropDown';
+// import DropDown from 'src/components/Assets/DropDown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -74,10 +74,10 @@ const Assets = () => {
 						<div className='flex items-center'>
 							<h2 className="text-lg font-bold text-white mt-3 ml-5">Tokens</h2>
 						</div>
-						<div className='flex items-center justify-center mr-5 mt-3'>
+						{/* <div className='flex items-center justify-center mr-5 mt-3'>
 							<p className='text-text_secondary mx-2'>Currency:</p>
 							<DropDown />
-						</div>
+						</div> */}
 					</div>
 				</div>
 				<div className='col-start-1 col-end-13 mx-5'>

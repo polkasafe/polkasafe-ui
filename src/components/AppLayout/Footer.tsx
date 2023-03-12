@@ -24,6 +24,9 @@ const Footer = () => {
 					<Link to='/privacy-policy'>
 						Privacy Policy
 					</Link>
+					<Link to='/contact-us'>
+						Contact Us
+					</Link>
 				</div>
 				<p className='flex items-center gap-x-2'>
 					<PolkadotIcon className='text-sm'/>

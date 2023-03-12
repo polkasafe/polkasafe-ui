@@ -14,9 +14,12 @@ import getNetwork from 'src/utils/getNetwork';
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
+const LocalizedFormat = require('dayjs/plugin/localizedFormat');
+
 const network = getNetwork();
 
 const Queued: FC = () => {
+	dayjs.extend(LocalizedFormat);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
@@ -81,7 +84,7 @@ const Queued: FC = () => {
 							{created_at}
 						</h4> */}
 						<Transaction
-							date={dayjs(transaction.created_at).toISOString()}
+							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							type={ 'Sent' }
 							approvals={transaction.approvals}

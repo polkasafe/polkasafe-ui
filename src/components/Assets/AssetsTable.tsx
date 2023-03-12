@@ -48,7 +48,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets }) => {
 										{balance_token} {symbol}
 									</p>
 									<p title={balance_usd} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
-										{balance_usd}
+										{balance_usd ? balance_usd : '-'}
 									</p>
 									<PrimaryButton onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)} className='bg-primary text-white w-fit'>
 										<p className='font-normal text-sm'>Send</p>

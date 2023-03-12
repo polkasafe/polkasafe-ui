@@ -6,14 +6,17 @@ import { Button, Collapse, Divider, Input, message,Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC } from 'react';
+import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
+
+import EditNote from './EditNote';
 
 interface ISentInfoProps {
 	amount: string;
@@ -33,11 +36,11 @@ interface ISentInfoProps {
 	note: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	const network = getNetwork();
 	const { address, addressBook } = useGlobalUserDetailsContext();
+	const { openModal } = useModalContext();
 	const handleCopy = (address: string) => {
 		navigator.clipboard.writeText(`${address}`);
 		message.success('Copied!');
@@ -138,22 +141,27 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</p>
 				</div>
 				<div
-					className='flex items-center justify-between gap-x-5 mt-3'
+					className='flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
 							Note:
 					</span>
-					<p
+					<span
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
-						<span
-							className='text-white font-normal text-sm leading-[15px]'
-						>
-							{note}
-						</span>
-					</p>
+						{note ?
+							<span className='text-white font-normal flex items-center gap-x-3'>
+								{note}
+								<button onClick={() => openModal('Edit Note', <EditNote note={note} callHash={callHash} />)}>
+									<EditIcon className='text-primary cursor-pointer' />
+								</button>
+							</span> :
+							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} />)}>
+								<EditIcon className='text-primary cursor-pointer' />
+							</button>}
+					</span>
 				</div>
 				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'

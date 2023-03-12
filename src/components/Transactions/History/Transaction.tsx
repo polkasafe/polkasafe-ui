@@ -13,10 +13,13 @@ import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUp
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
+const LocalizedFormat = require('dayjs/plugin/localizedFormat');
+
 const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
+	dayjs.extend(LocalizedFormat);
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
-	const { address } = useGlobalUserDetailsContext();
-	const type: 'Sent' | 'Received' = address === from ? 'Sent' : 'Received';
+	const { activeMultisig } = useGlobalUserDetailsContext();
+	const type: 'Sent' | 'Received' = activeMultisig === from ? 'Sent' : 'Received';
 
 	return (
 		<Collapse
@@ -96,7 +99,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 							<ReceivedInfo
 								amount={String(amount_token)}
 								amountType={token}
-								date={dayjs(created_at).toISOString()}
+								date={dayjs(created_at).format('llll')}
 								from={from}
 								callHash={callHash}
 							/>
@@ -104,7 +107,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 							<SentInfo
 								amount={String(amount_token)}
 								amountType={token}
-								date={dayjs(created_at).toISOString()}
+								date={dayjs(created_at).format('llll')}
 								recipient={to}
 								callHash={callHash}
 							/>

@@ -23,7 +23,7 @@ import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
-	const { activeMultisig, address } = useGlobalUserDetailsContext();
+	const { activeMultisig } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
@@ -168,7 +168,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?
 							transactions.map((transaction, i) => {
-								const sent = transaction.from === address;
+								const sent = transaction.from === activeMultisig;
 								return (
 									<div key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
