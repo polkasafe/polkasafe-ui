@@ -3,7 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Drawer, Layout } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import Loader from 'src/ui-components/Loader';
 import styled from 'styled-components';
 
 import Footer from './Footer';
@@ -20,6 +22,15 @@ export interface IRouteInfo {
 
 const AppLayout = ({ className }: { className?: string }) => {
 	const [sideDrawer, setSideDrawer] = useState(false);
+	const [multisigChanged, setMultisigChanged] = useState(false);
+	const { activeMultisig } = useGlobalUserDetailsContext();
+
+	useEffect(() => {
+		setMultisigChanged(true);
+		setTimeout(() => {
+			setMultisigChanged(false);
+		}, 500);
+	}, [activeMultisig]);
 
 	return (
 		<Layout className={className}>
@@ -46,7 +57,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
 					<div className='hidden lg:block w-full max-w-[240px]'></div>
 					<Content className='bg-bg-secondary p-[30px] rounded-lg'>
-						<SwitchRoutes />
+						{ multisigChanged ? <Loader size='large' /> :  <SwitchRoutes />}
 					</Content>
 				</Layout>
 			</Layout>

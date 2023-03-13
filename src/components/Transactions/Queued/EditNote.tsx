@@ -86,12 +86,13 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 					rules={[]}
 					className='border-0 outline-0 my-0 p-0'
 				>
-					<Input
+					<Input.TextArea
 						placeholder="Note"
 						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="editNote"
 						value={newNote}
 						defaultValue={note}
+						rows={4}
 						onChange={(e) => setNewNote(e.target.value)}
 					/>
 				</Form.Item>

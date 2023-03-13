@@ -9,7 +9,7 @@ import React, { FC, useState } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -40,9 +40,10 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	const network = getNetwork();
-	const { address, addressBook } = useGlobalUserDetailsContext();
+	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
+	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -140,7 +141,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 				{showDetails &&
 				<>
 					<div
-						className='flex items-center justify-between gap-x-5'
+						className='flex items-center justify-between gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -164,7 +165,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</p>
 					</div>
 					<div
-						className='flex items-center justify-between gap-x-5'
+						className='flex items-center justify-between gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -207,7 +208,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</p>
 				</div> */}
 				<p
-					className='text-primary font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
+					className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
 				>
 					<span onClick={() => setShowDetails(prev => !prev)}>
 						{showDetails ? 'Hide' : 'Advanced'} Details
@@ -265,38 +266,94 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 									className='bg-highlight rounded-md'
 									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}>
 									{approvals.map((address, i) => (
-										<div
+										<Timeline.Item
 											key={i}
-											className='mt-3 flex items-center gap-x-4'
+											dot={
+												<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+													<Circle3DotsIcon className='text-success text-sm' />
+												</span>
+											}
+											className='success'
 										>
-											<Identicon
-												value={address}
-												size={30}
-												theme='polkadot'
-											/>
 											<div
-												className='flex flex-col gap-y-[6px]'
+												className='mb-3 flex items-center gap-x-4'
 											>
-												<p
-													className='font-medium text-sm leading-[15px] text-white'
+												<Identicon
+													value={address}
+													size={30}
+													theme='polkadot'
+												/>
+												<div
+													className='flex flex-col gap-y-[6px]'
 												>
-													{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
-												</p>
-												<p
-													className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-												>
-													<span>
-														{shortenAddress(getEncodedAddress(address) || '')}
-													</span>
-													<span
-														className='flex items-center gap-x-2 text-sm'
+													<p
+														className='font-medium text-sm leading-[15px] text-white'
 													>
-														<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
-														<ExternalLinkIcon />
-													</span>
-												</p>
+														{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+													</p>
+													<p
+														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+													>
+														<span>
+															{shortenAddress(getEncodedAddress(address) || '')}
+														</span>
+														<span
+															className='flex items-center gap-x-2 text-sm'
+														>
+															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+																<ExternalLinkIcon  />
+															</a>
+														</span>
+													</p>
+												</div>
 											</div>
-										</div>
+										</Timeline.Item>
+									))}
+									{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => (
+										<Timeline.Item
+											key={i}
+											dot={
+												<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+													<CircleWatchIcon className='text-waiting text-sm' />
+												</span>
+											}
+											className='warning'
+										>
+											<div
+												className='mb-3 flex items-center gap-x-4'
+											>
+												<Identicon
+													value={address}
+													size={30}
+													theme='polkadot'
+												/>
+												<div
+													className='flex flex-col gap-y-[6px]'
+												>
+													<p
+														className='font-medium text-sm leading-[15px] text-white'
+													>
+														{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+													</p>
+													<p
+														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+													>
+														<span>
+															{shortenAddress(getEncodedAddress(address) || '')}
+														</span>
+														<span
+															className='flex items-center gap-x-2 text-sm'
+														>
+															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+																<ExternalLinkIcon  />
+															</a>
+														</span>
+													</p>
+												</div>
+											</div>
+										</Timeline.Item>
 									))}
 								</Collapse.Panel>
 							</Collapse>
