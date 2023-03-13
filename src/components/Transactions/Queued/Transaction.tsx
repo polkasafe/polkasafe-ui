@@ -36,7 +36,7 @@ interface ITransactionProps {
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, status, type, setRefetch, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, type, setRefetch, threshold }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -188,8 +188,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 					{time}
 				</p> */}
 					<p className='col-span-2 flex items-center justify-end gap-x-4'>
-						<span className='text-success'>
-							{status}
+						<span className='text-waiting'>
+							{approvals.includes(address) && 'Awaiting your Confirmation'} {approvals.length}/{threshold}
 						</span>
 						<span className='text-white text-sm'>
 							{
