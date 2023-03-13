@@ -86,10 +86,18 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 									message: 'Transaction Failed',
 									status: NotificationStatus.ERROR
 								});
-								reject();
+								reject('ExtrinsicFailed');
 							}
 						}
 					}
+				}).catch((error) => {
+					console.log(error);
+					reject(error);
+					queueNotification({
+						header: 'Failed!',
+						message: error.message,
+						status: NotificationStatus.ERROR
+					});
 				});
 		}
 

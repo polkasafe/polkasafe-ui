@@ -123,12 +123,12 @@ export default async function initMultisigTransfer({
 			}).catch((error) => {
 				console.log(':( transaction failed');
 				console.error('ERROR:', error);
+				reject();
 				queueNotification({
 					header: 'Failed!',
 					message: error.message,
 					status: NotificationStatus.ERROR
 				});
-				reject();
 			});
 
 		console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
