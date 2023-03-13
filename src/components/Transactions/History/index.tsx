@@ -2,7 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { FC } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -19,9 +21,18 @@ const History: FC = () => {
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const location = useLocation();
 
 	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
 	const [loading, setLoading] = useState<boolean>(false);
+
+	useEffect(() => {
+		const hash = location.hash.slice(1);
+		const elem = document.getElementById(hash);
+		if (elem) {
+			elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}, [location.hash, transactions]);
 
 	useEffect(() => {
 		const getTransactions = async () => {
@@ -47,7 +58,6 @@ const History: FC = () => {
 				console.log('Error in Fetching Transactions: ', error);
 			}
 			if(data){
-				console.log(data);
 				setLoading(false);
 				setTransactions(data);
 			}
@@ -61,7 +71,7 @@ const History: FC = () => {
 		<>
 			{(transactions && transactions.length > 0)? <div className='flex flex-col gap-y-[10px]'>
 				{transactions.map((transaction, index) => {
-					return <section key={index}>
+					return <section id={transaction.callHash} key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
 						</h4> */}

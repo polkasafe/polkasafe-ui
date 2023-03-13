@@ -6,6 +6,7 @@ import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { IHistoryTransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
@@ -20,13 +21,16 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const type: 'Sent' | 'Received' = activeMultisig === from ? 'Sent' : 'Received';
+	const location = useLocation();
+	const hash = location.hash.slice(1);
 
 	return (
 		<Collapse
 			className='bg-bg-secondary rounded-lg p-3'
 			bordered={false}
+			defaultActiveKey={[`${hash}`]}
 		>
-			<Collapse.Panel showArrow={false} key={1} header={
+			<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 				<div
 					onClick={() => {
 						toggleTransactionVisible(!transactionInfoVisible);
@@ -85,14 +89,7 @@ const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at,
 				</div>
 			}>
 
-				<div
-				// className={classNames(
-				// 'h-0 transition-all overflow-hidden',
-				// {
-				// 'h-auto overflow-auto': transactionInfoVisible
-				// }
-				// )}
-				>
+				<div>
 					<Divider className='bg-text_secondary my-5' />
 					{
 						type === 'Received'?

@@ -3,12 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { message } from 'antd';
 import classNames from 'classnames';
 import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
@@ -27,10 +27,6 @@ const AddressDropdown = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
-	const handleCopy = () => {
-		// navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
-	};
 
 	const handleDisconnect = () => {
 		logout();
@@ -67,12 +63,11 @@ const AddressDropdown = () => {
 		>
 			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
-					{!address?<WarningRoundedIcon className='text-base text-primary'/>
-						:<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
-							<Identicon size={20} value={address} theme='polkadot' />
-						</span>}
+					{<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
+						<Identicon size={20} value={address} theme='polkadot' />
+					</span>}
 					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{address? shortenAddress(getEncodedAddress(address) || '') :'Not Connected'}
+						{shortenAddress(getEncodedAddress(address) || '')}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
@@ -109,7 +104,7 @@ const AddressDropdown = () => {
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{getEncodedAddress(address)}</span>
-							<button onClick={handleCopy}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+							<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>
 					<div className='w-full'>

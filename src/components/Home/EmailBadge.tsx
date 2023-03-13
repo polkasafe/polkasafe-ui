@@ -4,19 +4,73 @@
 
 import { Button, Input } from 'antd';
 import React, { useState } from 'react';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CheckOutlined, Disc, NotifyMail } from 'src/ui-components/CustomIcons';
 import { CloseIcon } from 'src/ui-components/CustomIcons';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 
 const EmailBadge = () => {
-	const [showBadge, setShowBadge] = useState(true);
-	const [showDiv, setShowDiv] = useState(true);
-	const [inputValue, setInputValue] = useState('');
+	const [showBadge, setShowBadge] = useState<boolean>(true);
+	const [showDiv, setShowDiv] = useState<boolean>(true);
+	const [inputValue, setInputValue] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(false);
 
 	function handleChange(event: { target: { value: React.SetStateAction<string>; }; }) {
 		setInputValue(event.target.value);
 	}
-	const handleClick = () => {
-		setShowBadge(false);
+
+	const handleAddEmail = async () => {
+		try{
+			setLoading(true);
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				setLoading(false);
+				return;
+			}
+			else{
+
+				const addEmailRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateEmail`, {
+					body: JSON.stringify({
+						email: inputValue
+					}),
+					headers: firebaseFunctionsHeader(),
+					method: 'POST'
+				});
+
+				const { data: addEmailData, error: addEmailError } = await addEmailRes.json() as { data: string, error: string };
+
+				if(addEmailError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addEmailError,
+						status: NotificationStatus.ERROR
+					});
+					setLoading(false);
+					return;
+				}
+
+				if(addEmailData){
+					queueNotification({
+						header: 'Success!',
+						message: 'Your Email has been added successfully!',
+						status: NotificationStatus.SUCCESS
+					});
+					setLoading(false);
+					setShowBadge(false);
+
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			setLoading(false);
+		}
 	};
 	function handleCancel() {
 		setShowDiv(false);
@@ -33,7 +87,7 @@ const EmailBadge = () => {
 				</div>
 				<div className="flex items-center justify-around mr-5">
 					<Input value={inputValue} className='placeholder-text_placeholder text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
-					<Button disabled={!inputValue} className='flex items-center justify-center bg-primary text-white border-none ml-1 py-4' onClick={handleClick} ><NotifyMail />Notify me</Button>
+					<Button loading={loading} disabled={!inputValue} className='flex items-center justify-center bg-primary text-white border-none ml-1 py-4' onClick={handleAddEmail} ><NotifyMail />Notify me</Button>
 				</div>
 			</div>:
 				<div>

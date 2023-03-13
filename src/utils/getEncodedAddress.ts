@@ -3,17 +3,20 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { encodeAddress } from '@polkadot/util-crypto';
+// import { useGlobalApiContext } from 'src/context/ApiContext';
 import { chainProperties } from 'src/global/networkConstants';
-import getNetwork from 'src/utils/getNetwork';
 
+import getNetwork from './getNetwork';
 /**
  * Return an address encoded for the current network
  *
  * @param address An address
  *
  */
+const network = getNetwork();
 export default function getEncodedAddress(address: string): string | null {
-	const network = getNetwork();
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	// const { network } = useGlobalApiContext();
 	const ss58Format = chainProperties?.[network]?.ss58Format;
 
 	if (!network || ss58Format === undefined) {

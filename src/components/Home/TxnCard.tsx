@@ -134,7 +134,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 								const amount = formatBnBalance(new BN(res.args.value), { numberAfterComma: 2, withUnit: true }, network);
 
 								return (
-									<div key={i} className="flex items-center justify-between pb-2 mb-2">
+									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
 											<div className='ml-3'>
@@ -146,7 +146,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 											<h1 className='text-md text-white'>- {amount}</h1>
 											{/* TODO: <p className='text-white text-right text-xs'>5173.42 USD</p> */}
 										</div>
-									</div>
+									</Link>
 								);})
 							:
 							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No queued transactions</p></div>
@@ -170,7 +170,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 							transactions.map((transaction, i) => {
 								const sent = transaction.from === activeMultisig;
 								return (
-									<div key={i} className="flex items-center justify-between pb-2 mb-2">
+									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
@@ -183,7 +183,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
 											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd} USD</p>
 										</div>
-									</div>
+									</Link>
 								);
 							}) :
 							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No history transactions</p></div>

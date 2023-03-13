@@ -6,6 +6,7 @@ import Identicon from '@polkadot/react-identicon';
 import React from 'react';
 import { IMultisigAddress } from 'src/types';
 import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
@@ -68,7 +69,7 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 										theme={'polkadot'}
 									/>
 									<p className='mx-2'>{shortenAddress(multisigData?.address || '')}</p>
-									<button onClick={() => navigator.clipboard.writeText(multisigData?.address || '')}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
+									<button onClick={() => copyAddress(multisigData?.address || '')}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
 									<ShareIcon/>
 								</div>
 							</div>

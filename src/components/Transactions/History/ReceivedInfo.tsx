@@ -2,11 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider, message } from 'antd';
+import { Divider } from 'antd';
 import React, { FC } from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 interface IReceivedInfoProps {
@@ -21,10 +22,6 @@ interface IReceivedInfoProps {
 const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { amount, amountType, date, from, callHash } = props;
-	const handleCopy = (address: string) => {
-		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
-	};
 	return (
 		<article
 			className='p-4 rounded-lg bg-bg-main'
@@ -65,7 +62,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => handleCopy(getEncodedAddress(from) || '')}><CopyIcon className='hover:text-primary'/></button>
+							<button onClick={() => copyAddress(getEncodedAddress(from))}><CopyIcon className='hover:text-primary'/></button>
 							<a href={`https://www.subscan.io/account/${getEncodedAddress(from)}`} target='_blank' rel="noreferrer" >
 								<ExternalLinkIcon />
 							</a>
@@ -93,7 +90,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = (props) => {
 					<span
 						className='flex items-center gap-x-2 text-sm'
 					>
-						<button onClick={() => handleCopy(callHash)}><CopyIcon/></button>
+						<button onClick={() => copyAddress(callHash)}><CopyIcon/></button>
 						{/* <ExternalLinkIcon /> */}
 					</span>
 				</p>

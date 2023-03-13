@@ -17,8 +17,10 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
+import AddressQr from 'src/ui-components/AddressQr';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 
@@ -129,18 +131,28 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig)}</div>
-								<button onClick={() => navigator.clipboard.writeText(`${getEncodedAddress(activeMultisig)}`)}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
-								<QRIcon className='cursor-pointer'/>
+								<button onClick={() => copyAddress((activeMultisig))}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
+								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} genesisHash='hjhjhghhj'/>)}>
+									<QRIcon className='cursor-pointer'/>
+								</button>
 							</div>
 						</div>
 					</div>
 					<div className='text-right'>
 						<div className="flex gap-x-4 my-3 overflow-auto items-center">
 							<img className='w-5 cursor-pointer' src={psIcon} alt="icon" />
-							<img className='w-5 cursor-pointer' src={brainIcon} alt="icon" />
-							<img className='w-5 cursor-pointer' src={dotIcon} alt="icon" />
-							<img className='w-5 cursor-pointer' src={chainIcon} alt="icon" />
-							<img className='w-5 cursor-pointer' src={subscanIcon} alt="icon" />
+							<a target='_blank' href={`https://explorer.polkascan.io/${network}/account/${activeMultisig}`} rel="noreferrer">
+								<img className='w-5 cursor-pointer' src={brainIcon} alt="icon" />
+							</a>
+							<a target='_blank' href={`https://dotscanner.com/${network}/account/${activeMultisig}?utm_source=polkadotjs`} rel="noreferrer">
+								<img className='w-5 cursor-pointer' src={dotIcon} alt="icon" />
+							</a>
+							<a target='_blank' href={`https://${network}.polkaholic.io/account/${activeMultisig}?group=overview&chainfilters=all`} rel="noreferrer">
+								<img className='w-5 cursor-pointer' src={chainIcon} alt="icon" />
+							</a>
+							<a target='_blank' href={`https://${network}.subscan.io/account/${activeMultisig}`} rel="noreferrer">
+								<img className='w-5 cursor-pointer' src={subscanIcon} alt="icon" />
+							</a>
 						</div>
 					</div>
 				</div>

@@ -2,14 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input, message,Timeline } from 'antd';
+import { Button, Collapse, Divider, Input,Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
@@ -40,11 +41,8 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
 	const network = getNetwork();
 	const { address, addressBook } = useGlobalUserDetailsContext();
+	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
-	const handleCopy = (address: string) => {
-		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
-	};
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -89,7 +87,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => handleCopy(getEncodedAddress(recipientAddress) || '')}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress))}><CopyIcon className='hover:text-primary'/></button>
 								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
@@ -98,30 +96,6 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</div>
 				</div>
 				<Divider className='bg-text_secondary my-5' />
-				<div
-					className='flex items-center justify-between gap-x-5'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
-							Txn Hash:
-					</span>
-					<p
-						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-					>
-						<span
-							className='text-white font-normal text-sm leading-[15px]'
-						>
-							{callHash}
-						</span>
-						<span
-							className='flex items-center gap-x-2 text-sm'
-						>
-							<CopyIcon />
-							{/* <ExternalLinkIcon /> */}
-						</span>
-					</p>
-				</div>
 				<div
 					className='flex items-center justify-between gap-x-5 mt-3'
 				>
@@ -163,6 +137,57 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							</button>}
 					</span>
 				</div>
+				{showDetails &&
+				<>
+					<div
+						className='flex items-center justify-between gap-x-5'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+								Txn Hash:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{callHash}
+							</span>
+							<span
+								className='flex items-center gap-x-2 text-sm'
+							>
+								<button onClick={() => copyAddress(callHash)}><CopyIcon className='hover:text-primary'/></button>
+								{/* <ExternalLinkIcon /> */}
+							</span>
+						</p>
+					</div>
+					<div
+						className='flex items-center justify-between gap-x-5'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+								Call Data:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{callData}
+							</span>
+							<span
+								className='flex items-center gap-x-2 text-sm'
+							>
+								<button onClick={() => copyAddress(callData)}><CopyIcon className='hover:text-primary'/></button>
+								{/* <ExternalLinkIcon /> */}
+							</span>
+						</p>
+					</div>
+				</>}
 				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'
 				>
@@ -184,8 +209,8 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 				<p
 					className='text-primary font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
 				>
-					<span>
-                        Advanced Details
+					<span onClick={() => setShowDetails(prev => !prev)}>
+						{showDetails ? 'Hide' : 'Advanced'} Details
 					</span>
 					<ArrowRightIcon />
 				</p>
@@ -261,12 +286,12 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 													className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 												>
 													<span>
-														{shortenAddress(address)}
+														{shortenAddress(getEncodedAddress(address) || '')}
 													</span>
 													<span
 														className='flex items-center gap-x-2 text-sm'
 													>
-														<CopyIcon />
+														<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
 														<ExternalLinkIcon />
 													</span>
 												</p>
