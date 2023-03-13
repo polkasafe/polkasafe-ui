@@ -1,8 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { QrDisplayAddress } from '@polkadot/react-qr';
 import React from 'react';
+import AddressQr from 'src/ui-components/AddressQr';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -12,7 +12,7 @@ const QR = () => {
 		<div className='flex flex-col gap-y-5 p-5 bg-bg-secondary rounded-xl items-center'>
 			<p className='text-xs md:text-sm text-normal text-text_secondary'>Scan this QR Code with your wallet application</p>
 			<div className='flex items-center justify-center'>
-				<QrDisplayAddress className='h-80 w-60' address='165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb' genesisHash='afsfhaehfoiho' />
+				<AddressQr address='165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb' />
 			</div>
 			<div className='flex items-center gap-x-3 justify-center bg-highlight rounded-lg py-[10px] px-5'>
 				<p className='text-xs md:text-sm leading-[15px]'>

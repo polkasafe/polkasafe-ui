@@ -132,7 +132,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig)}</div>
 								<button onClick={() => copyAddress((activeMultisig))}><CopyIcon className='cursor-pointer ml-2 w-5 text-primary' /></button>
-								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} genesisHash='hjhjhghhj'/>)}>
+								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} />)}>
 									<QRIcon className='cursor-pointer'/>
 								</button>
 							</div>

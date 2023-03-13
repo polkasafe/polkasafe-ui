@@ -32,7 +32,7 @@ const AddressBook = () => {
 							</div>
 							<div className='flex mr-3'>
 								<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Import Address Book', <ImportAdress/>) }><ImportArrowIcon/>Import</Button>
-								<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Export Address Book', <ExportAdress/>) }><ExportArrowIcon/>Export</Button>
+								<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Export Address Book', <ExportAdress addresses={filteredData} />) }><ExportArrowIcon/>Export</Button>
 								<Button className='flex items-center justify-center bg-primary text-white mr-2 mt-4 border-none' onClick={() => openModal('Add Address', <AddAdress/>)}><AddBoxIcon/> Add Address</Button>
 							</div>
 						</div>
