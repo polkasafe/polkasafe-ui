@@ -116,7 +116,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</p>
 				</div>
 				<div
-					className='flex items-center gap-x-5 mt-3'
+					className='flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -127,7 +127,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						{note ?
-							<span className='text-white font-normal flex items-center gap-x-3'>
+							<span className='text-white font-normal flex items-center flex-wrap gap-x-3'>
 								{note}
 								<button onClick={() => openModal('Edit Note', <EditNote note={note} callHash={callHash} />)}>
 									<EditIcon className='text-primary cursor-pointer' />
@@ -270,10 +270,10 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 											key={i}
 											dot={
 												<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-													<Circle3DotsIcon className='text-success text-sm' />
+													<CircleCheckIcon className='text-success text-sm' />
 												</span>
 											}
-											className='success'
+											className='success bg-transaparent'
 										>
 											<div
 												className='mb-3 flex items-center gap-x-4'
@@ -318,7 +318,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 													<CircleWatchIcon className='text-waiting text-sm' />
 												</span>
 											}
-											className='warning'
+											className='warning bg-transaparent'
 										>
 											<div
 												className='mb-3 flex items-center gap-x-4'
