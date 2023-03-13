@@ -4,6 +4,7 @@
 
 import dayjs from 'dayjs';
 import React, { FC, useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -14,14 +15,26 @@ import getNetwork from 'src/utils/getNetwork';
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
+const LocalizedFormat = require('dayjs/plugin/localizedFormat');
+
 const network = getNetwork();
 
 const Queued: FC = () => {
+	dayjs.extend(LocalizedFormat);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
 	const [refetch, setRefetch] = useState<boolean>(false);
+	const location = useLocation();
+
+	useEffect(() => {
+		const hash = location.hash.slice(1);
+		const elem = document.getElementById(hash);
+		if (elem) {
+			elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}, [location.hash, queuedTransactions]);
 
 	const fetchQueuedTransactions = useCallback(async () => {
 		try{
@@ -76,12 +89,12 @@ const Queued: FC = () => {
 		<>
 			{(queuedTransactions && queuedTransactions.length > 0)? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
-					return <section key={index}>
+					return <section id={transaction.callHash} key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
 						</h4> */}
 						<Transaction
-							date={dayjs(transaction.created_at).toISOString()}
+							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							type={ 'Sent' }
 							approvals={transaction.approvals}

@@ -16,6 +16,7 @@
     "@polkadot/extension-dapp": "^0.45.2",
     "@polkadot/extension-inject": "^0.45.2",
     "@polkadot/react-identicon": "^3.0.2",
+    "@polkadot/react-qr": "^3.0.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

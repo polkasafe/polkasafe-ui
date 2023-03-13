@@ -101,15 +101,17 @@ const Details = () => {
 					<span>Blockchain:</span>
 					<span className='text-white capitalize'>{network}</span>
 				</div>
-				<div className='flex items-center justify-between gap-x-5 mt-7'>
-					<span>Safe Name:</span>
-					<span className='text-white flex items-center gap-x-3'>
-						{multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
-						<button onClick={() => openModal('Rename Multisig', <RenameMultisig name={multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME} />)}>
-							<EditIcon className='text-primary cursor-pointer' />
-						</button>
-					</span>
-				</div>
+				{activeMultisig &&
+					<div className='flex items-center justify-between gap-x-5 mt-7'>
+						<span>Safe Name:</span>
+						<span className='text-white flex items-center gap-x-3'>
+							{multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+							<button onClick={() => openModal('Rename Multisig', <RenameMultisig name={multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME} />)}>
+								<EditIcon className='text-primary cursor-pointer' />
+							</button>
+						</span>
+					</div>
+				}
 				<Button disabled={!activeMultisig} size='large' onClick={handleRemoveSafe} loading={loading} className='border-none outline-none text-failure bg-failure bg-opacity-10 flex items-center gap-x-3 justify-center rounded-lg p-[10px] w-full mt-7'>
 					<DeleteIcon />
 					<span>Remove Safe</span>

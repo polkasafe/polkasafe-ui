@@ -6,7 +6,7 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, message } from 'antd';
+import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -23,6 +23,7 @@ import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
+import copyAddress from 'src/utils/copyAddress';
 import getNetwork from 'src/utils/getNetwork';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
@@ -74,11 +75,6 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 			setCallData(call.method.toHex());
 		}
 	}, [amount, api, apiReady, recipientAddress]);
-
-	const handleCopy = (address: string) => {
-		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
-	};
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -216,7 +212,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				<div className='flex items-center gap-x-[10px]'>
 					<div
 						className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-						onClick={() => handleCopy(callData)}
+						onClick={() => copyAddress(callData)}
 					>
 						{callData}
 						<button className='text-primary'><CopyIcon /></button>
@@ -276,13 +272,13 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				</div>
 			</section>
 
-			{/* <section className='mt-[15px]'>
+			<section className='mt-[15px]'>
 				<div className='flex items-center gap-x-[10px]'>
 					<article className='w-[500px] flex items-center gap-x-3'>
 						<p className='text-white text-sm font-normal leading-[15px]'>
 							Transfer with account keep-alive checks
 						</p>
-						<Switch size='small' className='text-primary' defaultChecked onChange={(checked) => setTransferKeepAlive(checked)} />
+						<Switch disabled size='small' className='text-primary' defaultChecked />
 					</article>
 					<article className='w-[412px] flex items-center'>
 						<span className='-mr-1.5 z-0'>
@@ -292,7 +288,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 						</p>
 					</article>
 				</div>
-			</section> */}
+			</section>
 
 			<section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
 				<span>

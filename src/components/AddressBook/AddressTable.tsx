@@ -3,11 +3,13 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Divider, message } from 'antd';
+import { Divider } from 'antd';
 import React, { FC } from 'react';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -24,6 +26,7 @@ interface IAddressProps {
 
 const AddAddress: FC<IAddressProps> = ({ address }) => {
 	const { openModal, toggleVisibility } = useModalContext();
+	const { activeMultisig } = useGlobalUserDetailsContext();
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -39,10 +42,6 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 			</article>
 			{
 				address.map(({ address, name }, index) => {
-					const handleCopy = () => {
-						navigator.clipboard.writeText(`${address}`);
-						message.success('Copied!');
-					};
 					return (
 						<>
 							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white' key={index}>
@@ -58,7 +57,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									/>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<button className='hover:text-primary' onClick={handleCopy}><CopyIcon /></button>
+										<button className='hover:text-primary' onClick={() => copyAddress(address)}><CopyIcon /></button>
 										<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
 											<ExternalLinkIcon  />
 										</a>
@@ -76,7 +75,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>}
-									<PrimaryButton className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)}>
+									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)}>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</div>

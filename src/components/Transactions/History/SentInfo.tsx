@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Collapse, Divider, message,Timeline } from 'antd';
+import { Divider } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
@@ -26,10 +26,6 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { amount, amountType, className, date, recipient, callHash } = props;
 	const { addressBook } = useGlobalUserDetailsContext();
-	const handleCopy = (address: string) => {
-		navigator.clipboard.writeText(`${address}`);
-		message.success('Copied!');
-	};
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -73,7 +69,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => handleCopy(getEncodedAddress(recipient) || '')}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyAddress(getEncodedAddress(recipient))}><CopyIcon className='hover:text-primary'/></button>
 								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipient)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
@@ -101,7 +97,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => handleCopy(callHash)}><CopyIcon/></button>
+							<button onClick={() => copyAddress(callHash)}><CopyIcon/></button>
 							{/* <ExternalLinkIcon /> */}
 						</span>
 					</p>
@@ -150,129 +146,6 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</span>
 					<ArrowRightIcon />
 				</p>
-			</article>
-			<article
-				className='p-8 rounded-lg bg-bg-main max-w-[328px] w-full'
-			>
-				<div>
-					<Timeline
-						className=''
-					>
-						<Timeline.Item
-							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CirclePlusIcon className='text-success text-sm' />
-								</span>
-							}
-							className='success'
-						>
-							<div
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-                                Created
-							</div>
-						</Timeline.Item>
-						<Timeline.Item
-							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CircleCheckIcon className='text-success text-sm' />
-								</span>
-							}
-							className='success'
-						>
-							<div
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-                                Confirmations <span className='text-text_secondary'>(3 of 3)</span>
-							</div>
-						</Timeline.Item>
-						<Timeline.Item
-							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<Circle3DotsIcon className='text-success text-sm' />
-								</span>
-							}
-							className='success'
-						>
-							<Collapse bordered={false}>
-								<Collapse.Panel
-									showArrow={false}
-									key={1}
-									className='bg-highlight rounded-md'
-									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}>
-									<div
-										className='mt-3 flex items-center gap-x-4'
-									>
-										<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
-										<div
-											className='flex flex-col gap-y-[6px]'
-										>
-											<p
-												className='font-medium text-sm leading-[15px] text-white'
-											>
-                                                    Akshit
-											</p>
-											<p
-												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-											>
-												<span>
-													fasgagdghdgege
-												</span>
-												<span
-													className='flex items-center gap-x-2 text-sm'
-												>
-													<CopyIcon />
-													<ExternalLinkIcon />
-												</span>
-											</p>
-										</div>
-									</div>
-								</Collapse.Panel>
-							</Collapse>
-						</Timeline.Item>
-						<Timeline.Item
-							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CircleCheckIcon className='text-success text-sm' />
-								</span>
-							}
-							className='success'
-						>
-							<div
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-								<p>Executed</p>
-								<div
-									className='mt-3 flex items-center gap-x-4'
-								>
-									<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
-									<div
-										className='flex flex-col gap-y-[6px]'
-									>
-										<p
-											className='font-medium text-sm leading-[15px] text-white'
-										>
-                                            Akshit
-										</p>
-										<p
-											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-										>
-											<span>
-                                                3J98t1W...hWNL2
-											</span>
-											<span
-												className='flex items-center gap-x-2 text-sm'
-											>
-												<CopyIcon />
-												<ExternalLinkIcon />
-											</span>
-										</p>
-									</div>
-								</div>
-							</div>
-						</Timeline.Item>
-					</Timeline>
-				</div>
 			</article>
 		</div>
 	);

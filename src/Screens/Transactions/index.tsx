@@ -3,7 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Filter from 'src/components/Transactions/Filter';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
@@ -15,6 +16,17 @@ enum ETab {
 
 const Transactions = () => {
 	const [tab, setTab] = useState(ETab.QUEUE);
+	const location = useLocation();
+	useEffect(() => {
+		const search = location.search.split('=')[1];
+		if(search === 'History'){
+			setTab(ETab.HISTORY);
+		}
+		if(search === 'Queue'){
+			setTab(ETab.QUEUE);
+		}
+	}, [location.search]);
+
 	return (
 		<>
 			<div
