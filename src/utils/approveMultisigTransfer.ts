@@ -100,10 +100,13 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									message: 'Transaction Failed',
 									status: NotificationStatus.ERROR
 								});
-								reject();
+								reject('ExtrinsicFailed');
 							}
 						}
 					}
+				}).catch((error) => {
+					console.log(error);
+					reject(error);
 				});
 		} else {
 			api.tx.multisig
@@ -128,9 +131,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
 								});
-
-								// TODO: send notification
-
 								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
@@ -139,10 +139,18 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									message: 'Transaction Failed',
 									status: NotificationStatus.ERROR
 								});
-								reject();
+								reject('ExtrinsicFailed');
 							}
 						}
 					}
+				}).catch((error) => {
+					console.log(error);
+					queueNotification({
+						header: 'Failed!',
+						message: error.message,
+						status: NotificationStatus.ERROR
+					});
+					reject(error);
 				});
 		}
 

@@ -81,7 +81,7 @@ const Notification= () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px] max-h-[300px] overflow-y-auto',
+					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px] max-h-[420px] overflow-y-auto',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
