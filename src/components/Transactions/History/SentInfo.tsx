@@ -139,7 +139,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					</p>
 				</div>
 				<p
-					className='text-primary font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
+					className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
 				>
 					<span>
                         Advanced Details

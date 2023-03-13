@@ -116,16 +116,35 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
 			<div className={`${className} bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-80 mt-3`}>
-				<div className="flex justify-between flex-wrap truncate">
-					<div className='flex gap-x-4 items-center mb-3 flex-wrap'>
-						<div className='relative'>
-							<Identicon
-								className='border-2 rounded-full bg-transparent border-primary p-1.5'
-								value={activeMultisig}
-								size={70}
-								theme='polkadot'
-							/>
-							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">1/{multisigAddresses?.length}</div>
+				<div className="flex justify-between">
+					<div className='mb-3 w-full'>
+						<div className='flex justify-between '>
+							<div className='relative'>
+								<Identicon
+									className='border-2 rounded-full bg-transparent border-primary p-1.5'
+									value={activeMultisig}
+									size={70}
+									theme='polkadot'
+								/>
+								<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">1/{multisigAddresses?.length}</div>
+							</div>
+							<div>
+								<div className="flex gap-x-4 my-3 items-center">
+									<img className='w-5 cursor-pointer' src={psIcon} alt="icon" />
+									<a className='w-5' target='_blank' href={`https://explorer.polkascan.io/${network}/account/${activeMultisig}`} rel="noreferrer">
+										<img className='w-5' src={brainIcon} alt="icon" />
+									</a>
+									<a className='w-5' target='_blank' href={`https://dotscanner.com/${network}/account/${activeMultisig}?utm_source=polkadotjs`} rel="noreferrer">
+										<img className='w-5 cursor-pointer' src={dotIcon} alt="icon" />
+									</a>
+									<a className='w-5' target='_blank' href={`https://${network}.polkaholic.io/account/${activeMultisig}?group=overview&chainfilters=all`} rel="noreferrer">
+										<img className='w-5 cursor-pointer' src={chainIcon} alt="icon" />
+									</a>
+									<a className='w-5' target='_blank' href={`https://${network}.subscan.io/account/${activeMultisig}`} rel="noreferrer">
+										<img className='w-5 cursor-pointer' src={subscanIcon} alt="icon" />
+									</a>
+								</div>
+							</div>
 						</div>
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
@@ -136,23 +155,6 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 									<QRIcon className='cursor-pointer'/>
 								</button>
 							</div>
-						</div>
-					</div>
-					<div className='text-right'>
-						<div className="flex gap-x-4 my-3 overflow-auto items-center">
-							<img className='w-5 cursor-pointer' src={psIcon} alt="icon" />
-							<a target='_blank' href={`https://explorer.polkascan.io/${network}/account/${activeMultisig}`} rel="noreferrer">
-								<img className='w-5 cursor-pointer' src={brainIcon} alt="icon" />
-							</a>
-							<a target='_blank' href={`https://dotscanner.com/${network}/account/${activeMultisig}?utm_source=polkadotjs`} rel="noreferrer">
-								<img className='w-5 cursor-pointer' src={dotIcon} alt="icon" />
-							</a>
-							<a target='_blank' href={`https://${network}.polkaholic.io/account/${activeMultisig}?group=overview&chainfilters=all`} rel="noreferrer">
-								<img className='w-5 cursor-pointer' src={chainIcon} alt="icon" />
-							</a>
-							<a target='_blank' href={`https://${network}.subscan.io/account/${activeMultisig}`} rel="noreferrer">
-								<img className='w-5 cursor-pointer' src={subscanIcon} alt="icon" />
-							</a>
 						</div>
 					</div>
 				</div>

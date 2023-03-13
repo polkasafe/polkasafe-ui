@@ -7,6 +7,7 @@ import { Collapse, Divider } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
@@ -47,6 +48,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 
 	const token = chainProperties[network].tokenSymbol;
+	const location = useLocation();
+	const hash = location.hash.slice(1);
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
@@ -138,8 +141,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 		<Collapse
 			className='bg-bg-secondary rounded-lg p-3'
 			bordered={false}
+			defaultActiveKey={[`${hash}`]}
 		>
-			<Collapse.Panel showArrow={false} key={date} header={
+			<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 				<div
 					onClick={() => {
 						toggleTransactionVisible(!transactionInfoVisible);

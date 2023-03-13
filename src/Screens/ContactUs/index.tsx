@@ -60,7 +60,7 @@ const ContactUs = () => {
 	};
 
 	return (
-		<div className='bg-bg-main rounded-lg m-auto p-5'>
+		<div className='bg-bg-main rounded-lg m-auto p-5 h-screen'>
 			<h1 className='font-bold text-xl text-white ml-[1rem]'>Get in Touch</h1>
 			<p className='text-sm text-text_secondary mt-1 mb-3 ml-[1rem]'>We are here for you! How can we help?</p>
 			<div className='flex items-center justify-between ml-[1rem]'>
@@ -123,7 +123,7 @@ const ContactUs = () => {
 						>
 							<Input.TextArea
 								placeholder="Go ahead...we are listening..."
-								rows={4}
+								rows={6}
 								className="text-sm font-normal leading-[15px] border-0 outline-0 mb-2 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 								id="message"
 								value={message}

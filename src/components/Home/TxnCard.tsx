@@ -123,7 +123,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
 						{!queueLoading ? (queuedTransactions && queuedTransactions.length > 0) ?
-							queuedTransactions.map((transaction, i) => {
+							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
 								if(!api || !apiReady) return;
 								const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
 								if(error || !data) return;
@@ -167,7 +167,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?
-							transactions.map((transaction, i) => {
+							transactions.filter((_, i) => i < 10).map((transaction, i) => {
 								const sent = transaction.from === activeMultisig;
 								return (
 									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">

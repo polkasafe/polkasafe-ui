@@ -15,6 +15,7 @@ import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
@@ -56,6 +57,7 @@ const network = getNetwork();
 
 const SendFundsForm = (props: ISendFundsFormProps) => {
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { toggleVisibility } = useModalContext();
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel, setNewTxn } = props;
 	const { api, apiReady } = useGlobalApiContext();
@@ -109,6 +111,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				recipientAddress,
 				transferKeepAlive: true
 			});
+			toggleVisibility();
 		} catch (error) {
 			console.log(error);
 		} finally {
