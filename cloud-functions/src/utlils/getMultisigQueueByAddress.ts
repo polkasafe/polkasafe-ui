@@ -52,9 +52,10 @@ export default async function getMultisigQueueByAddress(
 					callHash: multisigQueueItem.call_hash,
 					status: multisigQueueItem.status,
 					network: network,
-					created_at: dayjs(multisigData?.data?.process?.reduce((minTimestamp: number, processObj: any) => {
-						return processObj?.timestamp < minTimestamp ? processObj?.timestamp : minTimestamp;
-					}, Infinity)).toDate(),
+					created_at: dayjs(multisigData?.data?.process?.reduce((min: any, current: any) => {
+						if (current.timestamp && current.timestamp < min) return current.timestamp;
+						return min;
+					}, Number.MAX_SAFE_INTEGER) * 1000).toDate(),
 					threshold: multisigQueueItem.threshold,
 					approvals: multisigData?.data?.process?.filter((item: any) => item.status === 'Approval').map((item: any) => item.account_display.address),
 					note: transactionDoc.exists && transaction?.note ? transaction?.note : ''
