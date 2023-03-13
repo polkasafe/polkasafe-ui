@@ -9,7 +9,16 @@ import { UploadBoxIcon } from 'src/ui-components/CustomIcons';
 const { Dragger } = Upload;
 
 const props: UploadProps = {
-	action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+	// action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+	// accept: '.docx, .doc',
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	customRequest:({ file, onSuccess }) => {
+		setTimeout(() => {
+			if(onSuccess){
+				onSuccess(file.toString());
+			}
+		}, 0);
+	},
 	multiple: false,
 	name: 'file',
 	onChange(info) {
