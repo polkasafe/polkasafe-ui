@@ -60,7 +60,6 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 		if(!isMultisigOnChainData.isOnChain) {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
-			console.log('show new transaction modal');
 			openModal('Send Funds', <SendFundsForm setNewTxn={setNewTxn} onCancel={() => toggleVisibility()} />);
 		}
 
