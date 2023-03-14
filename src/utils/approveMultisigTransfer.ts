@@ -14,6 +14,7 @@ import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
+import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -136,6 +137,15 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 
 								// update note for transaction history
 								await updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, note });
+
+								sendNotificationToAddresses({
+									addresses: otherSignatories,
+									link: `/transactions?tab=History#${txHash.toHex()}`,
+									message: 'Transaction Executed!',
+									network,
+									type: 'sent'
+								});
+
 								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');

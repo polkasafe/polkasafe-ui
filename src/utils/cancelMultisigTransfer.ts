@@ -76,6 +76,7 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 									addresses: otherSignatories,
 									link: '',
 									message: 'Transaction cancelled.',
+									network,
 									type: 'cancelled'
 								});
 								resolve();
