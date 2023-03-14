@@ -3,10 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Form, Input } from 'antd';
+import { AutoComplete, Form, Input, Modal } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -14,9 +14,11 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { PasteIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import copyAddress from 'src/utils/copyAddress';
 import getNetwork from 'src/utils/getNetwork';
 import { transferFunds } from 'src/utils/transferFunds';
 
@@ -34,6 +36,7 @@ const ExistentialDeposit = () => {
 	const [selectedSender, setSelectedSender] = useState(addressBook[0].address);
 	const [amount, setAmount] = useState(new BN(0));
 	const [loading, setLoading] = useState(false);
+	const [showQrModal, setShowQrModal] = useState(false);
 
 	const autocompleteAddresses: DefaultOptionType[] = [{
 		label: addressBook.find(a => a.address === address)?.name || 'My Address',
@@ -81,6 +84,17 @@ const ExistentialDeposit = () => {
 		}
 	};
 
+	const QrModal: FC = () => {
+		return (
+			<>
+				<button onClick={() => setShowQrModal(true)}><QRIcon className='text-text_secondary' /></button>
+				<Modal title={<span className='font-bold text-lg text-white' >Address QR</span>} onCancel={() => setShowQrModal(false)} open={showQrModal} footer={null}>
+					<AddressQr address={selectedSender} />
+				</Modal>
+			</>
+		);
+	};
+
 	return (
 		<div className='w-[35vw] max-w-[900px] min-w-[500px]'>
 
@@ -121,8 +135,10 @@ const ExistentialDeposit = () => {
 										onChange={(value) => setSelectedSender(value)}
 									/>
 									<div className='absolute right-2'>
-										<PasteIcon className='mr-2 text-primary' />
-										<QRIcon className='text-text_secondary' />
+										<button onClick={() => copyAddress(selectedSender)}>
+											<CopyIcon className='mr-2 text-primary' />
+										</button>
+										<QrModal />
 									</div>
 								</div>
 							</Form.Item>

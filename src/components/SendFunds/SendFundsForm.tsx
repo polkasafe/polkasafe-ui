@@ -6,11 +6,11 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Modal, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
@@ -19,9 +19,10 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, PasteIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyAddress from 'src/utils/copyAddress';
@@ -65,6 +66,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAddress, setRecipientAddress] = useState(addressBook[0]?.address);
+	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
 		label: a.name,
@@ -125,6 +127,18 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 	const onClick = () => {
 		addRecipientHeading();
 	};
+
+	const QrModal: FC = () => {
+		return (
+			<>
+				<button onClick={() => setShowQrModal(true)}><QRIcon className='text-text_secondary' /></button>
+				<Modal title={<span className='font-bold text-lg text-white' >Address QR</span>} onCancel={() => setShowQrModal(false)} open={showQrModal} footer={null}>
+					<AddressQr address={recipientAddress} />
+				</Modal>
+			</>
+		);
+	};
+
 	return (
 		<Form
 			className={classNames(className)}
@@ -177,8 +191,10 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 									defaultValue={address}
 								/>
 								<div className='absolute right-2'>
-									<PasteIcon className='mr-2 text-primary' />
-									<QRIcon className='text-text_secondary' />
+									<button onClick={() => copyAddress(recipientAddress)}>
+										<CopyIcon className='mr-2 text-primary' />
+									</button>
+									<QrModal />
 								</div>
 							</div>
 						</Form.Item>

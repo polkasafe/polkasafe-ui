@@ -15,6 +15,8 @@ import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
@@ -35,28 +37,28 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	useEffect(() => {
 		const getTransactions = async () => {
 			if(!userAddress || !signature || !activeMultisig) {
+				console.log('ERROR');
 				return;
 			}
 			setHistoryLoading(true);
-			const getTransactionsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
-				body: JSON.stringify({
-					limit: 10,
-					multisigAddress: activeMultisig,
+			try{
+				const { data, error } = await getHistoryTransactions(
+					activeMultisig,
 					network,
-					page: 1
-				}),
-				headers: firebaseFunctionsHeader(),
-				method: 'POST'
-			});
-
-			const { data, error } = await getTransactionsRes.json();
-			if(error){
+					10,
+					1
+				);
+				if(error){
+					setHistoryLoading(false);
+					console.log('Error in Fetching Transactions: ', error);
+				}
+				if(data){
+					setHistoryLoading(false);
+					setTransactions(data);
+				}
+			} catch (error) {
+				console.log(error);
 				setHistoryLoading(false);
-				console.log('Error in Fetching Transactions: ', error);
-			}
-			if(data){
-				setHistoryLoading(false);
-				setTransactions(data);
 			}
 		};
 		getTransactions();
@@ -128,7 +130,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 								const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
 								if(error || !data) return;
 								const res = data.extrinsicCall?.toJSON();
-								if(!res || !res.args || !res.args?.value){
+								if(!res || !res.args || !res.args?.value || res.args?.dest?.id){
 									return;
 								}
 								const amount = formatBnBalance(new BN(res.args.value), { numberAfterComma: 2, withUnit: true }, network);
@@ -138,7 +140,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 										<div className="flex items-center justify-between">
 											<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
 											<div className='ml-3'>
-												<h1 className='text-md text-white'>Txn: {shortenAddress(transaction.callHash)}</h1>
+												<h1 className='text-md text-white'>To: {shortenAddress(getEncodedAddress(res.args.dest.id, network) || '')}</h1>
 												<p className='text-white text-xs'>In Process...</p>
 											</div>
 										</div>
@@ -174,7 +176,11 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 										<div className="flex items-center justify-between">
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
-												<h1 className='text-md text-white'>Txn: {shortenAddress(transaction.callHash)}</h1>
+												{sent ?
+													<h1 className='text-md text-white'>To: {shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													:
+													<h1 className='text-md text-white'>From: {shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+												}
 												{/* <p className='text-text_secondary text-xs'>{transaction.created_at.getTime()}</p> */}
 											</div>
 										</div>

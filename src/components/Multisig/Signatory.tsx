@@ -20,15 +20,16 @@ interface ISignature{
 interface ISignatoryProps{
 	setSignatories: React.Dispatch<React.SetStateAction<string[]>>
 	signatories: string[]
+	filterAddress?: string
 
 }
 
-const Signatory = ({ setSignatories, signatories }: ISignatoryProps) => {
+const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryProps) => {
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
-	const addresses: ISignature[] = addressBook.filter((_, i) => i !== 0).map((item: IAddressBookEntry, i: number) => ({
+	const addresses: ISignature[] = addressBook.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookEntry, i: number) => ({
 		address: item.address,
 		key: i+1,
 		name: item.name

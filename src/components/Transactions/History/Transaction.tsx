@@ -21,6 +21,7 @@ const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
 	dayjs.extend(LocalizedFormat);
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [note, setNote] = useState<string>('');
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const type: 'Sent' | 'Received' = activeMultisig === from ? 'Sent' : 'Received';
@@ -37,6 +38,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 				return;
 			}
 			else{
+				setLoading(true);
 				const noteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
 					body: JSON.stringify({
 						callHash
@@ -49,13 +51,16 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 
 				if(noteError) {
 					console.log('error', noteError);
+					setLoading(false);
 					return;
 				}else {
+					setLoading(false);
 					setNote(noteData);
 				}
 
 			}
 		} catch (error){
+			setLoading(false);
 			console.log('ERROR', error);
 		}
 	};
@@ -139,6 +144,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								from={from}
 								callHash={callHash}
 								note={note}
+								loading={loading}
 							/>
 							:
 							<SentInfo
