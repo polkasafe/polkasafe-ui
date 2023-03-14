@@ -5,7 +5,7 @@
 import classNames from 'classnames';
 import React, { useEffect,useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import Filter from 'src/components/Transactions/Filter';
+// import Filter from 'src/components/Transactions/Filter';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 
@@ -57,7 +57,7 @@ const Transactions = () => {
 					>
 						History
 					</button>
-					{tab !== ETab.QUEUE && <Filter />}
+					{/* {tab !== ETab.QUEUE && <Filter />} */}
 				</div>
 				{
 					tab === ETab.HISTORY?
