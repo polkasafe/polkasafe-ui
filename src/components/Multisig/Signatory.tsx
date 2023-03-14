@@ -4,6 +4,7 @@
 
 import { SwapOutlined } from '@ant-design/icons';
 import React from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_USER_ADDRESS_NAME } from 'src/global/default';
 import { IAddressBookEntry } from 'src/types';
@@ -25,6 +26,7 @@ interface ISignatoryProps{
 const Signatory = ({ setSignatories, signatories }: ISignatoryProps) => {
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const addresses: ISignature[] = addressBook.filter((_, i) => i !== 0).map((item: IAddressBookEntry, i: number) => ({
 		address: item.address,
@@ -92,7 +94,7 @@ const Signatory = ({ setSignatories, signatories }: ISignatoryProps) => {
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id="drop1" className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
 						{addresses.map((address) => (
-							<p title={getEncodedAddress(address.address) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
+							<p title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
 						))}
 					</div>
 				</div>
@@ -100,7 +102,7 @@ const Signatory = ({ setSignatories, signatories }: ISignatoryProps) => {
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
 					<div id='drop2' className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto' onDrop={drop} onDragOver={dragOver}>
-						<p title={getEncodedAddress(address) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white'>{DEFAULT_USER_ADDRESS_NAME}</p>
+						<p title={getEncodedAddress(address, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white'>{DEFAULT_USER_ADDRESS_NAME}</p>
 					</div>
 				</div>
 			</div>

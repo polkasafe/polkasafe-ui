@@ -6,6 +6,7 @@ import { Button, Collapse, Divider, Input,Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -13,7 +14,6 @@ import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, Circl
 import copyAddress from 'src/utils/copyAddress';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getNetwork from 'src/utils/getNetwork';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -37,9 +37,9 @@ interface ISentInfoProps {
 	note: string
 }
 
-const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
-	const network = getNetwork();
+const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+	const { network } = useGlobalApiContext();
+
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
@@ -83,13 +83,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{getEncodedAddress(recipientAddress)}
+								{getEncodedAddress(recipientAddress, network)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress))}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress)}`} target='_blank' rel="noreferrer" >
+								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress, network))}><CopyIcon className='hover:text-primary'/></button>
+								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>
@@ -295,13 +295,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 													>
 														<span>
-															{shortenAddress(getEncodedAddress(address) || '')}
+															{shortenAddress(getEncodedAddress(address, network) || '')}
 														</span>
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>
@@ -340,13 +340,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 													>
 														<span>
-															{shortenAddress(getEncodedAddress(address) || '')}
+															{shortenAddress(getEncodedAddress(address, network) || '')}
 														</span>
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>
