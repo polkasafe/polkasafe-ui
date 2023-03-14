@@ -18,9 +18,10 @@ interface IReceivedInfoProps {
 	// time: string;
 	from: string
 	callHash: string
+	note?: string
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, callHash }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, callHash, note }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -113,6 +114,25 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, 
 						className='text-white font-normal text-sm leading-[15px]'
 					>
 						{date}
+					</span>
+				</p>
+			</div>}
+			{note &&
+			<div
+				className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
+			>
+				<span
+					className='text-text_secondary font-normal text-sm leading-[15px]'
+				>
+						Note:
+				</span>
+				<p
+					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+				>
+					<span
+						className='text-white font-normal text-sm leading-[15px]'
+					>
+						{note}
 					</span>
 				</p>
 			</div>}

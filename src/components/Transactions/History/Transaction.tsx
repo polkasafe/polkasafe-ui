@@ -5,9 +5,11 @@
 import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC, useState } from 'react';
+import React, { FC,useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ITransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 
@@ -19,10 +21,44 @@ const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
 	dayjs.extend(LocalizedFormat);
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
+	const [note, setNote] = useState<string>('');
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const type: 'Sent' | 'Received' = activeMultisig === from ? 'Sent' : 'Received';
 	const location = useLocation();
 	const hash = location.hash.slice(1);
+
+	const handleGetHistoryNote = async () => {
+		try{
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				const noteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
+					body: JSON.stringify({
+						callHash
+					}),
+					headers: firebaseFunctionsHeader(),
+					method: 'POST'
+				});
+
+				const { data: noteData, error: noteError } = await noteRes.json() as { data: string, error: string };
+
+				if(noteError) {
+					console.log('error', noteError);
+					return;
+				}else {
+					setNote(noteData);
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
 
 	return (
 		<Collapse
@@ -33,6 +69,9 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 			<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 				<div
 					onClick={() => {
+						if(!transactionInfoVisible){
+							handleGetHistoryNote();
+						}
 						toggleTransactionVisible(!transactionInfoVisible);
 					}}
 					className={classNames(
@@ -99,6 +138,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								date={dayjs(created_at).format('llll')}
 								from={from}
 								callHash={callHash}
+								note={note}
 							/>
 							:
 							<SentInfo
@@ -107,6 +147,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								date={dayjs(created_at).format('llll')}
 								recipient={to}
 								callHash={callHash}
+								note={note}
 							/>
 					}
 				</div>
