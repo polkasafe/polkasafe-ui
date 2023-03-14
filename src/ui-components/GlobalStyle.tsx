@@ -203,4 +203,9 @@ export const GlobalStyle = createGlobalStyle`
 	.ant-timeline .ant-timeline-item-head {
 		background-color: transparent !important;
 	}
+
+	.ant-message-notice-content {
+		background-color: #fff !important;
+		color: #000 !important;
+	}
 `;

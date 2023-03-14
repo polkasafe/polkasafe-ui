@@ -6,14 +6,15 @@ import React, { FC } from 'react';
 import { OutlineCheckIcon } from 'src/ui-components/CustomIcons';
 
 interface IModalBtnProps {
-    title: string;
+	title: string;
 	onClick?: ()=>void;
 	loading?: boolean
+	disabled?: boolean
 }
 
-const ModalBtn: FC<IModalBtnProps> = ({ onClick, title, loading=false }) => {
+const ModalBtn: FC<IModalBtnProps> = ({ onClick, title, loading=false, disabled=false }) => {
 	return (
-		<Button icon={<OutlineCheckIcon />} loading={loading} onClick={onClick} size='large'
+		<Button icon={<OutlineCheckIcon />} loading={loading} disabled={disabled} onClick={onClick} size='large'
 			className='w-[30%] border-none text-white text-sm font-normal bg-primary min-w-[120px]'
 		>
 			{title}

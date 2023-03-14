@@ -152,8 +152,9 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const { name, address: addressToAdd } = req.body;
+			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
@@ -196,8 +197,9 @@ export const removeFromAddressBook = functions.https.onRequest(async (req, res) 
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const { name, address: addressToAdd } = req.body;
+			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
