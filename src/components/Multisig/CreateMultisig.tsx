@@ -144,23 +144,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					}
 				)}>
 					<div className='relative'>
-						{!onCancel?
-							<div className="flex items-center justify-between w-[45vw] gap-x-4">
-								{toggleSwitch?
-									<>
-										<Search setAddAddress={setAddAddress} />
-										<AddAddressModal/>
-									</>:null}
-							</div>:
-							<div className='flex items-center justify-between'>
-								{toggleSwitch?<div className="flex items-left justify-between w-[45vw]">
-									<Search setAddAddress={setAddAddress} />
-									<AddAddressModal/>
-								</div>:null}
-								<div className='flex items-center justify-center absolute top-1 right-1'>
-									<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
-								</div>
-							</div>}
+						<div className='flex items-center justify-between'>
+							{toggleSwitch?<div className="flex items-center justify-between w-[45vw] gap-x-4">
+								<Search setAddAddress={setAddAddress} />
+								<AddAddressModal/>
+							</div>:null}
+							<div className='flex items-center justify-center absolute top-1 right-1'>
+								<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
+							</div>
+						</div>
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
 							{toggleSwitch? <Signatory setSignatories={setSignatories} signatories={signatories}/> : <DragDrop/>}
@@ -195,7 +187,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					</div>
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
+					{!homepage && <CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>}
 					<AddBtn loading={loading} title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
 				</div>
 			</div>:

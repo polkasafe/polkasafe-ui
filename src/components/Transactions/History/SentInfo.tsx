@@ -21,11 +21,10 @@ interface ISentInfoProps {
     className?: string;
 	recipient: string
 	callHash: string
+	note?: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { amount, amountType, className, date, recipient, callHash } = props;
+const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, recipient, callHash, note }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -111,24 +110,6 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Created:
-					</span>
-					<p
-						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-					>
-						<span
-							className='text-white font-normal text-sm leading-[15px]'
-						>
-							{date}
-						</span>
-					</p>
-				</div>
-				<div
-					className='flex items-center justify-between gap-x-5 mt-3'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
 							Executed:
 					</span>
 					<p
@@ -141,6 +122,26 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 						</span>
 					</p>
 				</div>
+				{note &&
+					<div
+						className='flex items-center justify-between gap-x-5 mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+								Note:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{note}
+							</span>
+						</p>
+					</div>
+				}
 				<p
 					className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
 				>
