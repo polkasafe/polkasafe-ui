@@ -135,7 +135,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								});
 
 								// update note for transaction history
-								await updateTransactionNote({ callHash: txHash.toHex(), note });
+								await updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, note });
 								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');

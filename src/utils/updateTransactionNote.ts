@@ -7,16 +7,19 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 
 interface Args {
 	callHash: string;
-	note: string
+	multisigAddress?: string;
+	note: string;
 }
 
 export default async function updateTransactionNote({
 	callHash,
+	multisigAddress,
 	note
 }: Args): Promise<{ data?: any, error?: string }> {
 	const editNoteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionNote `, {
 		body: JSON.stringify({
 			callHash,
+			multisigAddress : multisigAddress || '',
 			note
 		}),
 		headers: firebaseFunctionsHeader(),

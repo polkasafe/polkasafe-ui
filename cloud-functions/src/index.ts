@@ -723,25 +723,28 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { callHash, note } = req.body;
+		const { callHash, multisigAddress, note } = req.body;
 		if (!callHash || !note ) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const txRef = firestoreDB.collection('transactions').doc(callHash);
-			const txDoc = (await txRef.get()).data() as ITransaction;
+			const txDoc = await txRef.get();
+			const txDocData = txDoc.data() as ITransaction;
 
-			if (txDoc.from === substrateAddress) {
+			if (txDoc.exists && txDocData.from === substrateAddress) {
 				txRef.update({ note: String(note) });
 				return res.status(200).json({ data: responseMessages.success });
 			}
 
+			if (!multisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
+
 			// get signatories for multisig
-			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.from).get();
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists ? txDocData.from : multisigAddress).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
-				txRef.update({ note: String(note) });
+				txRef.set({ note: String(note) }, { merge: true });
 				return res.status(200).json({ data: responseMessages.success });
 			}
 
