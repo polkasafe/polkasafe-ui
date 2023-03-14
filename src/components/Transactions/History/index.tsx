@@ -7,10 +7,11 @@ import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+// import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+// import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
+import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
@@ -41,25 +42,23 @@ const History: FC = () => {
 				return;
 			}
 			setLoading(true);
-			const getTransactionsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionsForMultisig`, {
-				body: JSON.stringify({
-					limit: 10,
-					multisigAddress: activeMultisig,
+			try{
+				const { data, error } = await getHistoryTransactions(
+					activeMultisig,
 					network,
-					page: 1
-				}),
-				headers: firebaseFunctionsHeader(),
-				method: 'POST'
-			});
-
-			const { data, error } = await getTransactionsRes.json();
-			if(error){
-				setLoading(false);
-				console.log('Error in Fetching Transactions: ', error);
-			}
-			if(data){
-				setLoading(false);
-				setTransactions(data);
+					10,
+					1
+				);
+				if(error){
+					setLoading(false);
+					console.log('Error in Fetching Transactions: ', error);
+				}
+				if(data){
+					setLoading(false);
+					setTransactions(data);
+				}
+			} catch (error) {
+				console.log(error);
 			}
 		};
 		getTransactions();
