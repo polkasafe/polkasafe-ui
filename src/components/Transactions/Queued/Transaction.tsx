@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
-import { Collapse, Divider } from 'antd';
+import { Collapse, Divider, message } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
@@ -37,13 +37,14 @@ interface ITransactionProps {
 const network = getNetwork();
 
 const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, type, threshold }) => {
-	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
+	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [loading, setLoading] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
+
+	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 
@@ -84,6 +85,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				approvingAddress: address,
 				callDataHex: callData,
 				callHash,
+				messageApi,
 				multisig,
 				network,
 				note: note || '',
@@ -122,6 +124,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				api,
 				approvingAddress: address,
 				callHash,
+				messageApi,
 				multisig,
 				network,
 				recipientAddress: decodedCallData.args.dest.id
@@ -135,106 +138,110 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 	};
 
 	return (
-		<Collapse
-			className='bg-bg-secondary rounded-lg p-3'
-			bordered={false}
-			defaultActiveKey={[`${hash}`]}
-		>
-			<Collapse.Panel showArrow={false} key={`${callHash}`} header={
-				<div
-					onClick={() => {
-						toggleTransactionVisible(!transactionInfoVisible);
-					}}
-					className={classNames(
-						'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
-					)}
-				>
-					<p className='col-span-3 flex items-center gap-x-3'>
-						{
-							type === 'Sent'?
-								<span
-									className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
-								>
-									<ArrowUpRightIcon />
-								</span>
-								:
-								<span
-									className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
-								>
-									<ArrowDownLeftIcon />
-								</span>
-						}
-						<span>
-							{type}
-						</span>
-					</p>
-					<p className='col-span-2 flex items-center gap-x-[6px]'>
-						<PolkadotIcon className='text-base' />
-						<span
-							className={classNames(
-								'font-normal text-xs leading-[13px] text-failure',
-								{
-									'text-success': type === 'Received'
-								}
-							)}
-						>
-							{type === 'Sent'? '-': '+'}{formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network)}
-						</span>
-					</p>
-					{/* <p className='col-span-2'>
-					{time}
-				</p> */}
-					<p className='col-span-2 flex items-center justify-end gap-x-4'>
-						<span className='text-waiting'>
-							{approvals.includes(address) && 'Awaiting your Confirmation'} {approvals.length}/{threshold}
-						</span>
-						<span className='text-white text-sm'>
-							{
-								transactionInfoVisible?
-									<CircleArrowUpIcon />:
-									<CircleArrowDownIcon />
-							}
-						</span>
-					</p>
-				</div>
-			}>
+		<>
+			{ contextHolder }
 
-				<div
-				// className={classNames(
-				// 'h-0 transition-all overflow-hidden',
-				// {
-				// 'h-auto overflow-auto': transactionInfoVisible
-				// }
-				// )}
-				>
-					<Divider className='bg-text_secondary my-5' />
-					{
-						type === 'Received'?
-							<ReceivedInfo
-								amount={decodedCallData?.args?.value || ''}
-								amountType={token}
-								date={date}
-							/>
-							:
-							<SentInfo
-								amount={decodedCallData?.args?.value || ''}
-								callHash={callHash}
-								callDataString={callDataString}
-								callData={callData}
-								date={date}
-								approvals={approvals}
-								threshold={threshold}
-								loading={loading}
-								recipientAddress={decodedCallData?.args?.dest?.id}
-								setCallDataString={setCallDataString}
-								handleApproveTransaction={handleApproveTransaction}
-								handleCancelTransaction={handleCancelTransaction}
-								note={note}
-							/>
-					}
-				</div>
-			</Collapse.Panel>
-		</Collapse>
+			<Collapse
+				className='bg-bg-secondary rounded-lg p-3'
+				bordered={false}
+				defaultActiveKey={[`${hash}`]}
+			>
+				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
+					<div
+						onClick={() => {
+							toggleTransactionVisible(!transactionInfoVisible);
+						}}
+						className={classNames(
+							'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
+						)}
+					>
+						<p className='col-span-3 flex items-center gap-x-3'>
+							{
+								type === 'Sent'?
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+									>
+										<ArrowUpRightIcon />
+									</span>
+									:
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
+									>
+										<ArrowDownLeftIcon />
+									</span>
+							}
+							<span>
+								{type}
+							</span>
+						</p>
+						<p className='col-span-2 flex items-center gap-x-[6px]'>
+							<PolkadotIcon className='text-base' />
+							<span
+								className={classNames(
+									'font-normal text-xs leading-[13px] text-failure',
+									{
+										'text-success': type === 'Received'
+									}
+								)}
+							>
+								{type === 'Sent'? '-': '+'}{formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network)}
+							</span>
+						</p>
+						{/* <p className='col-span-2'>
+						{time}
+					</p> */}
+						<p className='col-span-2 flex items-center justify-end gap-x-4'>
+							<span className='text-waiting'>
+								{approvals.includes(address) && 'Awaiting your Confirmation'} {approvals.length}/{threshold}
+							</span>
+							<span className='text-white text-sm'>
+								{
+									transactionInfoVisible?
+										<CircleArrowUpIcon />:
+										<CircleArrowDownIcon />
+								}
+							</span>
+						</p>
+					</div>
+				}>
+
+					<div
+					// className={classNames(
+					// 'h-0 transition-all overflow-hidden',
+					// {
+					// 'h-auto overflow-auto': transactionInfoVisible
+					// }
+					// )}
+					>
+						<Divider className='bg-text_secondary my-5' />
+						{
+							type === 'Received'?
+								<ReceivedInfo
+									amount={decodedCallData?.args?.value || ''}
+									amountType={token}
+									date={date}
+								/>
+								:
+								<SentInfo
+									amount={decodedCallData?.args?.value || ''}
+									callHash={callHash}
+									callDataString={callDataString}
+									callData={callData}
+									date={date}
+									approvals={approvals}
+									threshold={threshold}
+									loading={loading}
+									recipientAddress={decodedCallData?.args?.dest?.id}
+									setCallDataString={setCallDataString}
+									handleApproveTransaction={handleApproveTransaction}
+									handleCancelTransaction={handleCancelTransaction}
+									note={note}
+								/>
+						}
+					</div>
+				</Collapse.Panel>
+			</Collapse>
+		</>
 	);
 };
 
