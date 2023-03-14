@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import dayjs from 'dayjs';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { responseMessages } from 'src/global/subscan_messages';
 
 import { ITransaction } from '../types';
 
@@ -61,7 +60,7 @@ export default async function getHistoryTransactions(
 		returnValue.data = transactions;
 	} catch (err) {
 		console.log('Error in getTransfersByAddress:', err);
-		returnValue.error = String(err) || responseMessages.transfers_fetch_error;
+		returnValue.error = String(err) || 'Something went wrong while fetching data';
 	}
 
 	return returnValue;
