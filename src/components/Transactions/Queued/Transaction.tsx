@@ -86,6 +86,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				callHash,
 				multisig,
 				network,
+				note: note || '',
 				recipientAddress: decodedCallData.args.dest.id
 			});
 		} catch (error) {

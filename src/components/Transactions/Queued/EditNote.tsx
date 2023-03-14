@@ -6,10 +6,9 @@ import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
+import updateTransactionNote from 'src/utils/updateTransactionNote';
 
 const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 	const { toggleVisibility } = useModalContext();
@@ -28,17 +27,10 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 				return;
 			}
 			else{
-
-				const editNoteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionNote `, {
-					body: JSON.stringify({
-						callHash,
-						note
-					}),
-					headers: firebaseFunctionsHeader(),
-					method: 'POST'
+				const { data: editNoteData, error: editNoteError } = await updateTransactionNote({
+					callHash,
+					note
 				});
-
-				const { data: editNoteData, error: editNoteError } = await editNoteRes.json() as { data: any, error: string };
 
 				if(editNoteError) {
 

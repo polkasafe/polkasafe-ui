@@ -14,6 +14,7 @@ import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
+import updateTransactionNote from './updateTransactionNote';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CallData {
@@ -22,7 +23,7 @@ interface CallData {
   callInfo: CallFunction | null;
 }
 
-interface Props {
+interface Args {
 	api: ApiPromise,
 	network: string,
 	multisig: IMultisigAddress,
@@ -31,9 +32,10 @@ interface Props {
 	amount: BN,
 	approvingAddress: string,
 	recipientAddress: string,
+	note: string
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network }: Props) {
+export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -131,6 +133,9 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
 								});
+
+								// update note for transaction history
+								await updateTransactionNote({ callHash: txHash.toHex(), note });
 								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
