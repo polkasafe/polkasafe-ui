@@ -751,7 +751,30 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
-			functions.logger.error('Error in renameMultisig :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in updateTransactionNote :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getTransactionNote = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { callHash } = req.body;
+		if (!callHash ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const txRef = firestoreDB.collection('transactions').doc(callHash);
+			const txDoc = await txRef.get();
+
+			return res.status(200).json({ data: txDoc.exists ? (txDoc.data() as ITransaction).note || '' : '' });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getTransactionNote :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
