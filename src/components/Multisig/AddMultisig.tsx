@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Button, Switch } from 'antd';
+import { Button } from 'antd';
 import React, { useState } from 'react';
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
 import { useModalContext } from 'src/context/ModalContext';
@@ -20,7 +20,7 @@ interface IMultisigProps {
 
 const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup }) => {
 	const [ isMultisigVisible, setMultisigVisible] = useState(false);
-	const { openModal, toggleOnSwitch } = useModalContext();
+	const { openModal } = useModalContext();
 	return (
 		<>
 			{isMultisigVisible&&!isModalPopup?<div className='p-5'>
@@ -47,8 +47,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup }) => {
 										if(!isModalPopup){
 											setMultisigVisible(true);
 										}else{
-											openModal('Create Multisig', <CreateMultisig/>,<div className='flex items-center justify-center'>
-												<p className='mx-2'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch} /></div>);
+											openModal('Create Multisig', <CreateMultisig/>);
 										}
 									}}
 								>
