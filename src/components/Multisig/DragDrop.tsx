@@ -35,7 +35,7 @@ const DragDrop = () => (
 			<p className="ant-upload-drag-icon">
 				<UploadBoxIcon className='my-2' />
 			</p>
-			<p className="ant-upload-text text-white">Drag and Drop CSV file to upload</p>
+			<p className="ant-upload-text text-white">Drag and Drop JSON file to upload</p>
 			<p className='text-text_secondary'>OR</p>
 			<Button className='mt-3 bg-primary text-primary border-none bg-opacity-10'>Browse</Button>
 		</Dragger></div>

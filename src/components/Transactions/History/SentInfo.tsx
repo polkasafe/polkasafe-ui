@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider } from 'antd';
+import { Divider, Spin } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { ArrowRightIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
@@ -22,9 +22,10 @@ interface ISentInfoProps {
 	recipient: string
 	callHash: string
 	note?: string
+	loading?: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, recipient, callHash, note }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -122,7 +123,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, rec
 						</span>
 					</p>
 				</div>
-				{note &&
+				{loading ? <Spin className='mt-3'/> : note &&
 					<div
 						className='flex items-center justify-between gap-x-5 mt-3'
 					>
@@ -142,14 +143,6 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, rec
 						</p>
 					</div>
 				}
-				<p
-					className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
-				>
-					<span>
-                        Advanced Details
-					</span>
-					<ArrowRightIcon />
-				</p>
 			</article>
 		</div>
 	);

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider } from 'antd';
+import { Divider, Spin } from 'antd';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -19,9 +19,10 @@ interface IReceivedInfoProps {
 	from: string
 	callHash: string
 	note?: string
+	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, callHash, note }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -117,7 +118,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, 
 					</span>
 				</p>
 			</div>}
-			{note &&
+			{loading ? <Spin className='mt-3' /> : note &&
 			<div
 				className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
 			>
