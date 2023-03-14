@@ -199,4 +199,8 @@ export const GlobalStyle = createGlobalStyle`
 		margin-left: 12px;
 		margin-top: 12px;
 	}
+
+	.ant-timeline .ant-timeline-item-head {
+		background-color: transparent !important;
+	}
 `;

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input,Timeline } from 'antd';
+import { Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
@@ -264,7 +264,8 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 									showArrow={false}
 									key={1}
 									className='bg-highlight rounded-md'
-									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}>
+									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}
+								>
 									{approvals.map((address, i) => (
 										<Timeline.Item
 											key={i}
@@ -273,7 +274,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 													<CircleCheckIcon className='text-success text-sm' />
 												</span>
 											}
-											className='success bg-transaparent'
+											className={`${i == 0 && 'mt-4'} success bg-transaparent`}
 										>
 											<div
 												className='mb-3 flex items-center gap-x-4'
@@ -310,6 +311,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 											</div>
 										</Timeline.Item>
 									))}
+
 									{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => (
 										<Timeline.Item
 											key={i}
