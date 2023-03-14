@@ -55,6 +55,7 @@ const Apps = () => {
 						message: 'Your Email has been added successfully!',
 						status: NotificationStatus.SUCCESS
 					});
+					setEmail('');
 					setLoading(false);
 
 				}
