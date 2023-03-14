@@ -91,7 +91,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 	return (
 		<div className="flex w-[45vw]">
 			<div className="flex w-[100%] items-center justify-center">
-				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1" onDrop={dropReturn} onDragOver={dragOver}>
+				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1 cursor-grab" onDrop={dropReturn} onDragOver={dragOver}>
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id="drop1" className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
 						{addresses.map((address) => (
@@ -102,8 +102,8 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 				<SwapOutlined className='text-primary' />
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
-					<div id='drop2' className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto' onDrop={drop} onDragOver={dragOver}>
-						<p title={getEncodedAddress(address, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white'>{DEFAULT_USER_ADDRESS_NAME}</p>
+					<div id='drop2' className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto cursor-grab' onDrop={drop} onDragOver={dragOver}>
+						<p title={getEncodedAddress(address, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white cursor-default'>{DEFAULT_USER_ADDRESS_NAME}</p>
 					</div>
 				</div>
 			</div>
