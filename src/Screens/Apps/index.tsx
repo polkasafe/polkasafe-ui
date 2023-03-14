@@ -75,7 +75,7 @@ const Apps = () => {
 				<p className='text-text_secondary'>We are going to launch Apps on <span className='text-primary'>PolkaSafe</span> very soon.</p>
 				<p className='text-text_secondary m-1'>Stay Tuned.</p>
 				<div className="flex items-center justify-around">
-					<Input onChange={(e) => setEmail(e.target.value)} className= 'placeholder-text_placeholder bg-bg-secondary text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' />
+					<Input value={email} onChange={(e) => setEmail(e.target.value)} className= 'placeholder-text_placeholder bg-bg-secondary text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' />
 					<Button loading={loading} onClick={handleAddEmail} className='flex items-center justify-center bg-primary text-white border-none ml-1 py-4'><NotifyMail/>Notify me</Button>
 				</div>
 			</div>
