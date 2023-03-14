@@ -7,6 +7,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import AddAddrIcon from 'src/assets/icons/add-addr-icon.svg';
 import AddAdress from 'src/components/AddressBook/AddAddress';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
@@ -16,6 +17,8 @@ import getEncodedAddress from 'src/utils/getEncodedAddress';
 const AddressCard = ({ className }: { className?: string }) => {
 	const { openModal } = useModalContext();
 	const { addressBook } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
+
 	return (
 		<div>
 			<div className="flex justify-between flex-row w-full">
@@ -35,7 +38,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 								size={30}
 								theme='polkadot'
 							/>
-							<div className='px-1 text-sm text-white truncate'>{getEncodedAddress(item.address)}</div>
+							<div className='px-1 text-sm text-white truncate'>{getEncodedAddress(item.address, network)}</div>
 						</div>
 					))}
 				</div>

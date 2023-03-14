@@ -103,8 +103,9 @@ export default async function initMultisigTransfer({
 
 							await sendNotificationToAddresses({
 								addresses: otherSignatories,
-								link: `/transactions#${call.method.hash.toHex()}`,
+								link: `/transactions?tab=Queue#${call.method.hash.toHex()}`,
 								message: 'New transaction to sign',
+								network,
 								type: 'sent'
 							});
 

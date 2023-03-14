@@ -41,7 +41,7 @@ export default async function getTransactionsByAddress(
 
 				const newTransaction: ITransaction = {
 					callHash: transfer.hash,
-					created_at: dayjs(transfer.block_timestamp).toDate(),
+					created_at: dayjs(transfer.block_timestamp * 1000).toDate(),
 					from: transfer.from,
 					to: transfer.to,
 					token: transfer.asset_symbol,

@@ -2,10 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input,Timeline } from 'antd';
+import { Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -13,7 +14,6 @@ import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, Circl
 import copyAddress from 'src/utils/copyAddress';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getNetwork from 'src/utils/getNetwork';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -37,9 +37,9 @@ interface ISentInfoProps {
 	note: string
 }
 
-const SentInfo: FC<ISentInfoProps> = (props) => {
-	const { note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction } = props;
-	const network = getNetwork();
+const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+	const { network } = useGlobalApiContext();
+
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
@@ -83,13 +83,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{getEncodedAddress(recipientAddress)}
+								{getEncodedAddress(recipientAddress, network)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress))}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress)}`} target='_blank' rel="noreferrer" >
+								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress, network))}><CopyIcon className='hover:text-primary'/></button>
+								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>
@@ -264,7 +264,8 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 									showArrow={false}
 									key={1}
 									className='bg-highlight rounded-md'
-									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}>
+									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}
+								>
 									{approvals.map((address, i) => (
 										<Timeline.Item
 											key={i}
@@ -273,7 +274,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 													<CircleCheckIcon className='text-success text-sm' />
 												</span>
 											}
-											className='success bg-transaparent'
+											className={`${i == 0 && 'mt-4'} success bg-transaparent`}
 										>
 											<div
 												className='mb-3 flex items-center gap-x-4'
@@ -295,13 +296,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 													>
 														<span>
-															{shortenAddress(getEncodedAddress(address) || '')}
+															{shortenAddress(getEncodedAddress(address, network) || '')}
 														</span>
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>
@@ -310,6 +311,7 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 											</div>
 										</Timeline.Item>
 									))}
+
 									{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => (
 										<Timeline.Item
 											key={i}
@@ -340,13 +342,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 														className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 													>
 														<span>
-															{shortenAddress(getEncodedAddress(address) || '')}
+															{shortenAddress(getEncodedAddress(address, network) || '')}
 														</span>
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address)}`} target='_blank' rel="noreferrer" >
+															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>

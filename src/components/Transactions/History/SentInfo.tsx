@@ -5,6 +5,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Divider } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { ArrowRightIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -26,6 +27,8 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = (props) => {
 	const { amount, amountType, className, date, recipient, callHash } = props;
 	const { addressBook } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
+
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -64,13 +67,13 @@ const SentInfo: FC<ISentInfoProps> = (props) => {
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span>
-								{getEncodedAddress(recipient)}
+								{getEncodedAddress(recipient, network)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(getEncodedAddress(recipient))}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipient)}`} target='_blank' rel="noreferrer" >
+								<button onClick={() => copyAddress(getEncodedAddress(recipient, network))}><CopyIcon className='hover:text-primary'/></button>
+								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>

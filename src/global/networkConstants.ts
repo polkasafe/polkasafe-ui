@@ -4,6 +4,7 @@
 
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
+import westendLogo from 'src/assets/parachains-logos/westend-logo.png';
 import { ChainPropType } from 'src/types';
 
 export const networks = {
@@ -43,7 +44,7 @@ export const chainProperties: ChainPropType = {
 		blockTime: 6000,
 		chainId: 0,
 		existentialDeposit: 0.0100,
-		logo: polkadotLogo,
+		logo: westendLogo,
 		rpcEndpoint: 'wss://westend-rpc.dwellir.com',
 		ss58Format: 42,
 		tokenDecimals: 12,

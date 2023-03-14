@@ -113,5 +113,6 @@ export interface INotification {
 	created_at: Date,
 	message: string,
 	link?: string,
-	type: 'sent' | 'recieved' | 'cancelled' | 'info'
+	type: 'sent' | 'recieved' | 'cancelled' | 'info',
+	network: string
 }

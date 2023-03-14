@@ -6,11 +6,12 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { INotification } from 'src/types';
 
-export default async function sendNotificationToAddresses({ addresses, link = '', message, type }: Omit<INotification, 'created_at' | 'id'>) {
+export default async function sendNotificationToAddresses({ addresses, link = '', message, network, type }: Omit<INotification, 'created_at' | 'id'>) {
 	const newNotificationData: Omit<INotification, 'created_at' | 'id'>  = {
 		addresses,
 		link,
 		message,
+		network,
 		type
 	};
 

@@ -6,11 +6,11 @@ import Identicon from '@polkadot/react-identicon';
 import classNames from 'classnames';
 import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getNetwork from 'src/utils/getNetwork';
 import logout from 'src/utils/logout';
 import shortenAddress from 'src/utils/shortenAddress';
 
@@ -21,8 +21,8 @@ interface IAddress {
 }
 const AddressDropdown = () => {
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	const navigate = useNavigate();
-	const network = getNetwork();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isVisible, toggleVisibility] = useState(false);
@@ -67,7 +67,7 @@ const AddressDropdown = () => {
 						<Identicon size={20} value={address} theme='polkadot' />
 					</span>}
 					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{shortenAddress(getEncodedAddress(address) || '')}
+						{shortenAddress(getEncodedAddress(address, network) || '')}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
@@ -103,8 +103,8 @@ const AddressDropdown = () => {
 							{ addressBook.find(item => item.address === address)?.name }
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
-							<span className='text-text_secondary'>{getEncodedAddress(address)}</span>
-							<button onClick={() => copyAddress(getEncodedAddress(address))}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+							<span className='text-text_secondary'>{getEncodedAddress(address, network)}</span>
+							<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>
 					<div className='w-full'>

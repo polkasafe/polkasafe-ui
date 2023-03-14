@@ -659,8 +659,8 @@ export const sendNotification = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { addresses, link, message, type } = req.body;
-		if (!addresses || !Array.isArray(addresses) || !message ) return res.status(400).json({ error: responseMessages.invalid_params });
+		const { addresses, link, message, type, network } = req.body;
+		if (!addresses || !Array.isArray(addresses) || !message || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const newNotificationRef = firestoreDB.collection('notifications').doc();
@@ -671,7 +671,8 @@ export const sendNotification = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				message,
 				link: link ? String(link) : '',
-				type
+				type,
+				network
 			};
 
 			await newNotificationRef.set(newNotification);

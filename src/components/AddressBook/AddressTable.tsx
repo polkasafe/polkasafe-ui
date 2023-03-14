@@ -5,6 +5,7 @@
 import Identicon from '@polkadot/react-identicon';
 import { Divider } from 'antd';
 import React, { FC } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -27,6 +28,7 @@ interface IAddressProps {
 const AddAddress: FC<IAddressProps> = ({ address }) => {
 	const { openModal, toggleVisibility } = useModalContext();
 	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -55,7 +57,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										size={30}
 										theme={'polkadot'}
 									/>
-									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address)}</span>
+									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address, network)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={() => copyAddress(address)}><CopyIcon /></button>
 										<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >

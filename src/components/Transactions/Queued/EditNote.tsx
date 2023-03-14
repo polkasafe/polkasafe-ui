@@ -29,7 +29,7 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 			else{
 				const { data: editNoteData, error: editNoteError } = await updateTransactionNote({
 					callHash,
-					note
+					note: newNote
 				});
 
 				if(editNoteError) {
