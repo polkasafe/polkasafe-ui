@@ -780,5 +780,36 @@ export const getTransactionNote = functions.https.onRequest(async (req, res) => 
 	});
 });
 
+export const addAppsAlertRecipient = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { email } = req.body;
+		if (!email) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const recipientsRef = firestoreDB.collection('metaData').doc('appsAlertRecipients');
+			const recipients = (await recipientsRef.get()).data();
+
+			if (recipients && recipients.emails?.includes(email)) return res.status(200).json({ data: responseMessages.success });
+
+			const newRecipients = recipients ? [...recipients.emails, email] : [email];
+
+			await recipientsRef.set({
+				emails: newRecipients
+			}, { merge: true });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in addAppsAlertRecipient :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
 // TODO: return BE data first and then save data to BE and return data from BE;
 // store last updated at
