@@ -89,6 +89,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				note: note || '',
 				recipientAddress: decodedCallData.args.dest.id
 			});
+			document.getElementById(callHash)?.remove();
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -128,6 +129,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				network,
 				recipientAddress: decodedCallData.args.dest.id
 			});
+			document.getElementById(callHash)?.remove();
 		} catch (error) {
 			console.log(error);
 		} finally {

@@ -9,7 +9,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IHistoryTransaction } from 'src/types';
+import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
@@ -23,7 +23,7 @@ const History: FC = () => {
 	const { network } = useGlobalApiContext();
 	const location = useLocation();
 
-	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
+	const [transactions, setTransactions] = useState<ITransaction[]>();
 	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {

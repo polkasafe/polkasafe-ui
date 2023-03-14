@@ -10,7 +10,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IHistoryTransaction, IQueueItem } from 'src/types';
+import { IQueueItem,ITransaction } from 'src/types';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
@@ -26,7 +26,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 
-	const [transactions, setTransactions] = useState<IHistoryTransaction[]>();
+	const [transactions, setTransactions] = useState<ITransaction[]>();
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
 
 	const [historyLoading, setHistoryLoading] = useState<boolean>(false);
