@@ -84,8 +84,6 @@ export default async function initMultisigTransfer({
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 
-					messageApi.success('Transaction has been included in block');
-
 					const block = await api.rpc.chain.getBlock(blockHash);
 					const blockNumber = block.block.header.number.toNumber();
 
