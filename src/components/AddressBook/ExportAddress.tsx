@@ -28,7 +28,6 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 		a.remove();
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const exportToJson = () => {
 		// e.preventDefault();
 		downloadFile({
@@ -36,8 +35,10 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 			fileName: 'address-book.json',
 			fileType: 'text/json'
 		});
+		toggleVisibility();
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const exportToCsv = () => {
 		// Headers for each column
 		const headers = ['Name,Address'];
@@ -54,6 +55,7 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 			fileName: 'address-book.csv',
 			fileType: 'text/csv'
 		});
+		toggleVisibility();
 	};
 
 	return (
@@ -64,7 +66,7 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn onClick={toggleVisibility}/>
-				<AddBtn onClick={exportToCsv} title='Export' />
+				<AddBtn onClick={exportToJson} title='Export' />
 			</div>
 		</div>
 	);

@@ -36,7 +36,7 @@ interface ITransactionProps {
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, type, setRefetch, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, type, threshold }) => {
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -94,9 +94,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 			console.log(error);
 		} finally {
 			setLoading(false);
-			if(setRefetch){
-				setRefetch(prev => !prev);
-			}
 		}
 	};
 
@@ -134,9 +131,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 			console.log(error);
 		} finally {
 			setLoading(false);
-			if(setRefetch){
-				setRefetch(prev => !prev);
-			}
 		}
 	};
 

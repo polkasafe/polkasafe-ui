@@ -10,7 +10,6 @@ import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 import DragDrop from '../AddressBook/DragDrop';
-import Search from '../Multisig/Search';
 
 interface IMultisigProps {
 	className?: string
@@ -21,7 +20,6 @@ const MultisigSignatories: React.FC<IMultisigProps> = () => {
 		<div className='flex flex-col'>
 			<div className='w-[80vw] flex justify-between items-end'>
 				<div>
-					<Search/>
 					<div className='flex items-center justify-between'>
 						<DragDrop/>
 						<DashDotIcon className='mt-5'/>

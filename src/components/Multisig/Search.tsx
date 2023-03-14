@@ -5,11 +5,11 @@ import { Input } from 'antd';
 import React from 'react';
 import { SearchIcon } from 'src/ui-components/CustomIcons';
 
-const SearchMultisig = () => {
+const SearchMultisig = ({ setAddAddress }: { setAddAddress: React.Dispatch<React.SetStateAction<string>>}) => {
 	return (
 		<div className='rounded-lg bg-bg-secondary flex items-center text-xs gap-x-2 md:gap-x-4 md:text-sm w-full'>
 			<SearchIcon className='text-primary pl-3 pr-0' />
-			<Input className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none py-2 border-none min-w-[300px]' placeholder='Search by name, address or account index'></Input>
+			<Input onChange={(e) => setAddAddress(e.target.value)} className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none py-2 border-none min-w-[300px]' placeholder='Search by name, address or account index'></Input>
 		</div>
 	);
 };
