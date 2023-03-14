@@ -42,7 +42,7 @@ const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, togg
 							</button>
 							: CloseBtnNode}
 					</article>
-					<article className='mt-8'>
+					<article className='mt-8 max-h-[70vh] overflow-y-auto px-4'>
 						{children}
 					</article>
 				</div>

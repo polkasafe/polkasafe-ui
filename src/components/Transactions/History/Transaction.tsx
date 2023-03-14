@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import React, { FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { IHistoryTransaction } from 'src/types';
+import { ITransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 
 import ReceivedInfo from './ReceivedInfo';
@@ -16,7 +16,7 @@ import SentInfo from './SentInfo';
 
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 
-const Transaction: FC<IHistoryTransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
 	dayjs.extend(LocalizedFormat);
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
