@@ -16,11 +16,13 @@ import { NotificationStatus } from 'src/ui-components/types';
 
 interface IMultisigProps {
 	className?: string
+	addAddress?: string
+	onCancel?: () => void
 }
 
-const AddAddress: React.FC<IMultisigProps> = () => {
+const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
 
-	const [address, setAddress] = useState<string>('');
+	const [address, setAddress] = useState<string>(addAddress || '');
 	const [name, setName] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -84,7 +86,12 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						status: NotificationStatus.SUCCESS
 					});
 					setLoading(false);
-					toggleVisibility();
+					if(onCancel){
+						onCancel();
+					}
+					else{
+						toggleVisibility();
+					}
 
 				}
 
@@ -137,13 +144,14 @@ const AddAddress: React.FC<IMultisigProps> = () => {
 						placeholder="Unique Address"
 						className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="address"
+						defaultValue={addAddress || ''}
 						onChange={(e) => setAddress(e.target.value)}
 						value={address}
 					/>
 				</Form.Item>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
 				<AddBtn loading={loading} title='Add' onClick={handleAddAddress} />
 			</div>
 		</Form>

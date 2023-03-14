@@ -3,10 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Input, InputNumber, Switch } from 'antd';
+// import { PlusCircleOutlined } from '@ant-design/icons';
+import { Input, InputNumber, Modal, Switch } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
@@ -16,14 +16,15 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress } from 'src/types';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
+import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import getNetwork from 'src/utils/getNetwork';
 import styled from 'styled-components';
 
+import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
 import Search from '../Multisig/Search';
-import AddSignatory from '../UserFlow/AddSignatory';
 import MultisigCreated from '../UserFlow/MultisigCreated';
 import Signatory from './Signatory';
 
@@ -39,7 +40,7 @@ interface IMultisigProps {
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
 	const { setUserDetailsContextState, address: userAddress } = useGlobalUserDetailsContext();
 
-	const { openModal, toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
+	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [show, setShow] = useState(true);
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [threshold, setThreshold] = useState<number | null>(null);
@@ -48,6 +49,8 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const { accounts, noAccounts } = useGetAllAccounts();
 	const [address, setAddress] = useState('');
 	const [loading, setLoading] = useState<boolean>(false);
+	const [addAddress, setAddAddress] = useState<string>('');
+	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -117,6 +120,20 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			setLoading(false);
 		}
 	};
+
+	const AddAddressModal: FC = () => {
+		return (
+			<>
+				<PrimaryButton onClick={() => setShowAddressModal(true)} className='bg-primary text-white w-fit'>
+					<p className='font-normal text-sm'>Add</p>
+				</PrimaryButton>
+				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
+					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} />
+				</Modal>
+			</>
+		);
+	};
+
 	return (
 		<div>
 			{show?<div className='flex flex-col relative'>
@@ -128,15 +145,17 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				)}>
 					<div className='relative'>
 						{!onCancel?
-							<div className="flex items-left justify-between w-[45vw]">
-								{toggleSwitch?<Search/>:null}
+							<div className="flex items-center justify-between w-[45vw] gap-x-4">
+								{toggleSwitch?
+									<>
+										<Search setAddAddress={setAddAddress} />
+										<AddAddressModal/>
+									</>:null}
 							</div>:
 							<div className='flex items-center justify-between'>
 								{toggleSwitch?<div className="flex items-left justify-between w-[45vw]">
-									<Search />
-									<Button className='bg-highlight text-primary border-none py-5 flex items-center justify-center ml-2'
-										onClick={() => openModal('Add Signatory', <AddSignatory />)}><PlusCircleOutlined />Add Signatory
-									</Button>
+									<Search setAddAddress={setAddAddress} />
+									<AddAddressModal/>
 								</div>:null}
 								<div className='flex items-center justify-center absolute top-1 right-1'>
 									<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
