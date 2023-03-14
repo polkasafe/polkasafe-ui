@@ -61,7 +61,7 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 	return (
 		<div className='flex flex-col w-[560px]'>
 			<div className="flex items-left justify-left">
-				<p className='mr-2 text-white'>You are about to export a CSV file with</p>
+				<p className='mr-2 text-white'>You are about to export a JSON file with</p>
 				<div className='bg-highlight text-primary px-2 rounded-md'>{addresses.length} address book entries</div>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
