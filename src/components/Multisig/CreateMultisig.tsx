@@ -156,7 +156,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						<div className='flex items-center justify-between'>
 							<div className='w-[45vw]'>
 								<p className='text-primary'>Threshold</p>
-								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='#' />
+								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='0' />
 							</div>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
