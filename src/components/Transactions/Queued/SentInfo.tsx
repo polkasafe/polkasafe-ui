@@ -10,6 +10,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import formatBnBalance from 'src/utils/formatBnBalance';
@@ -44,6 +45,8 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
+
+	const [updatedNote, setUpdatedNote] = useState(note);
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -60,7 +63,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='text-failure'
 					>
-						{formatBnBalance(new BN(amount), { numberAfterComma: 2, withUnit: true }, network)}
+						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 2, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`}
 					</span>
 					<span>
 							To:
@@ -103,7 +106,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Created:
+							Created at:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -126,14 +129,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
-						{note ?
+						{updatedNote ?
 							<span className='text-white font-normal flex items-center flex-wrap gap-x-3'>
-								{note}
-								<button onClick={() => openModal('Edit Note', <EditNote note={note} callHash={callHash} />)}>
+								{updatedNote}
+								<button onClick={() => openModal('Edit Note', <EditNote note={updatedNote} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 									<EditIcon className='text-primary cursor-pointer' />
 								</button>
 							</span> :
-							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} />)}>
+							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 								<EditIcon className='text-primary cursor-pointer' />
 							</button>}
 					</span>
@@ -164,30 +167,15 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 							</span>
 						</p>
 					</div>
-					<div
-						className='flex items-center justify-between gap-x-5 mt-3'
-					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
-						>
-								Call Data:
-						</span>
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-								{callData}
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
-							>
+					{callData && <div className='flex items-center justify-between gap-x-5 mt-3'>
+						<span className='text-text_secondary font-normal text-sm leading-[15px]'>Call Data:</span>
+						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+							<span className='text-white font-normal text-sm leading-[15px]'> {callData}</span>
+							<span className='flex items-center gap-x-2 text-sm'>
 								<button onClick={() => copyAddress(callData)}><CopyIcon className='hover:text-primary'/></button>
-								{/* <ExternalLinkIcon /> */}
 							</span>
 						</p>
-					</div>
+					</div>}
 				</>}
 				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'

@@ -6,16 +6,27 @@ import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import updateTransactionNote from 'src/utils/updateTransactionNote';
 
-const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
+interface Props {
+	note: string;
+	callHash: string;
+	setUpdatedNote: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const EditNote = ({ note, callHash, setUpdatedNote }: Props) => {
 	const { toggleVisibility } = useModalContext();
+
+	const { activeMultisig } = useGlobalUserDetailsContext();
+
 	const [newNote, setNewNote] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const handleEditNote = async () => {
+		if(!newNote) return;
 		try{
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
@@ -29,6 +40,7 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 			else{
 				const { data: editNoteData, error: editNoteError } = await updateTransactionNote({
 					callHash,
+					multisigAddress: activeMultisig,
 					note: newNote
 				});
 
@@ -44,15 +56,16 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 				}
 
 				if(editNoteData){
-
 					queueNotification({
 						header: 'Success!',
 						message: 'Note Updated!',
 						status: NotificationStatus.SUCCESS
 					});
+
+					setUpdatedNote(newNote);
+
 					setLoading(false);
 					toggleVisibility();
-
 				}
 
 			}
@@ -91,7 +104,7 @@ const EditNote = ({ note, callHash }: { note: string, callHash: string }) => {
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn onClick={toggleVisibility}/>
-				<ModalBtn loading={loading} onClick={handleEditNote} title='Update'/>
+				<ModalBtn disabled={!newNote} loading={loading} onClick={handleEditNote} title='Update'/>
 			</div>
 		</Form>
 	);
