@@ -116,7 +116,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 						</span>
 					</p>
 					<p className='col-span-2'>
-						{dayjs(created_at).format('LT')}
+						{dayjs(created_at).format('lll')}
 					</p>
 					<p className='col-span-2 flex items-center justify-end gap-x-4'>
 						<span className='text-success'>

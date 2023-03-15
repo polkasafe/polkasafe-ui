@@ -12,6 +12,7 @@ import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 interface IReceivedInfoProps {
+	className?: string;
 	amount: string;
 	amountType: string;
 	amount_usd: number;
@@ -29,13 +30,13 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 
 	return (
 		<article
-			className='p-4 rounded-lg bg-bg-main'
+			className='p-4 rounded-lg bg-bg-main flex-1'
 		>
 			<p
 				className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 			>
 				<span>
-							Received
+								Received
 				</span>
 				<span
 					className='text-success'
@@ -43,7 +44,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 					{amount} {amountType} ({amount_usd} USD)
 				</span>
 				<span>
-							from:
+								from:
 				</span>
 			</p>
 			<div
@@ -82,7 +83,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 				<span
 					className='text-text_secondary font-normal text-sm leading-[15px]'
 				>
-							Txn Hash:
+								Txn Hash:
 				</span>
 				<p
 					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -101,43 +102,43 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 				</p>
 			</div>
 			{date &&
-			<div
-				className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
-			>
-				<span
-					className='text-text_secondary font-normal text-sm leading-[15px]'
-				>
-						Executed:
-				</span>
-				<p
-					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+				<div
+					className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
-						className='text-white font-normal text-sm leading-[15px]'
+						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-						{date}
+							Executed:
 					</span>
-				</p>
-			</div>}
+					<p
+						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+					>
+						<span
+							className='text-white font-normal text-sm leading-[15px]'
+						>
+							{date}
+						</span>
+					</p>
+				</div>}
 			{loading ? <Spin className='mt-3' /> : note &&
-			<div
-				className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
-			>
-				<span
-					className='text-text_secondary font-normal text-sm leading-[15px]'
-				>
-						Note:
-				</span>
-				<p
-					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+				<div
+					className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
-						className='text-white font-normal text-sm leading-[15px]'
+						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-						{note}
+							Note:
 					</span>
-				</p>
-			</div>}
+					<p
+						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+					>
+						<span
+							className='text-white font-normal text-sm leading-[15px]'
+						>
+							{note}
+						</span>
+					</p>
+				</div>}
 		</article>
 	);
 };

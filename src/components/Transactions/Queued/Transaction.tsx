@@ -214,7 +214,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 							</span>
 						</p>
 						<p className='col-span-2'>
-							{dayjs(date).format('LT')}
+							{dayjs(date).format('lll')}
 						</p>
 						<p className='col-span-2 flex items-center justify-end gap-x-4'>
 							<span className='text-waiting'>
