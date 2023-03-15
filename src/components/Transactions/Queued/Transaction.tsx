@@ -210,7 +210,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 									}
 								)}
 							>
-								{type === 'Sent'? '-': '+'} {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network) : `? ${token}`}
+								{type === 'Sent'? '-': '+'} {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network) : `? ${token}`}
 							</span>
 						</p>
 						<p className='col-span-2'>

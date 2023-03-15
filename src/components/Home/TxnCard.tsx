@@ -158,7 +158,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 											</div>
 										</div>
 										<div>
-											<h1 className='text-md text-white'>- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network): `? ${chainProperties[network].tokenSymbol}`}</h1>
+											<h1 className='text-md text-white'>- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network): `? ${chainProperties[network].tokenSymbol}`}</h1>
 											{/* TODO: <p className='text-white text-right text-xs'>5173.42 USD</p> */}
 										</div>
 									</Link>

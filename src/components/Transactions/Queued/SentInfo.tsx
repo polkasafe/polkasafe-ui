@@ -63,7 +63,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='text-failure'
 					>
-						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 2, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`}
+						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`}
 					</span>
 					<span>
 							To:
