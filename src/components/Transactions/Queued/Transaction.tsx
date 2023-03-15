@@ -10,6 +10,8 @@ import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
@@ -54,10 +56,33 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
+
 		const { data, error } = decodeCallData(callDataString, api);
 		if(error || !data) return;
+
+		if(data?.extrinsicCall?.hash.toHex() !== callHash) {
+			messageApi.error('Invalid call data');
+			return;
+		}
+
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-	}, [api, apiReady, callDataString]);
+
+		// store callData in BE
+		(async () => {
+			if(decodedCallData) return; // already stored
+
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/setTransactionCallData`, {
+				body: JSON.stringify({
+					callData: callDataString,
+					callHash,
+					network
+				}),
+				headers: firebaseFunctionsHeader(),
+				method: 'POST'
+			});
+		})();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [api, apiReady, callDataString, callHash]);
 
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -83,7 +108,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
-				callDataHex: callData,
+				callDataHex: callDataString,
 				callHash,
 				messageApi,
 				multisig,
