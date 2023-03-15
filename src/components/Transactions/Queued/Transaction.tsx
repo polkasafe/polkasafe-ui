@@ -6,6 +6,7 @@ import { Signer } from '@polkadot/api/types';
 import { Collapse, Divider, message } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
+import dayjs from 'dayjs';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -212,12 +213,12 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 								{type === 'Sent'? '-': '+'} {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network) : `? ${token}`}
 							</span>
 						</p>
-						{/* <p className='col-span-2'>
-						{time}
-					</p> */}
+						<p className='col-span-2'>
+							{dayjs(date).format('LT')}
+						</p>
 						<p className='col-span-2 flex items-center justify-end gap-x-4'>
 							<span className='text-waiting'>
-								{approvals.includes(address) && 'Awaiting your Confirmation'} {approvals.length}/{threshold}
+								{approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
 							</span>
 							<span className='text-white text-sm'>
 								{
