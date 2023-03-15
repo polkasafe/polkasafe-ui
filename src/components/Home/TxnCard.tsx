@@ -16,6 +16,7 @@ import { IQueueItem,ITransaction } from 'src/types';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
+import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getHistoryTransactions from 'src/utils/getHistoryTransactions';
@@ -36,6 +37,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 
 	const [historyLoading, setHistoryLoading] = useState<boolean>(false);
 	const [queueLoading, setQueueLoading] = useState<boolean>(false);
+
+	const [amountUSD, setAmountUSD] = useState<string>('');
 
 	useEffect(() => {
 		const getTransactions = async () => {
@@ -114,6 +117,12 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 		getQueue();
 	}, [activeMultisig, network, newTxn]);
 
+	useEffect(() => {
+		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
+		});
+	}, [network]);
+
 	return (
 		<div>
 			<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
@@ -159,7 +168,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 										</div>
 										<div>
 											<h1 className='text-md text-white'>- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network): `? ${chainProperties[network].tokenSymbol}`}</h1>
-											{/* TODO: <p className='text-white text-right text-xs'>5173.42 USD</p> */}
+											<p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(decodedCallData?.args?.value)).toFixed(2)} USD</p>
 										</div>
 									</Link>
 								);})

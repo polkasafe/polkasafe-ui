@@ -34,12 +34,13 @@ interface ITransactionProps {
 	callData: string;
 	callHash: string;
 	note: string;
+	amountUSD: string;
 	setRefetch?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHash, date, type, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, type, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -250,6 +251,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, callData, callHas
 								:
 								<SentInfo
 									amount={decodedCallData?.args?.value || ''}
+									amountUSD={amountUSD}
 									callHash={callHash}
 									callDataString={callDataString}
 									callData={callData}

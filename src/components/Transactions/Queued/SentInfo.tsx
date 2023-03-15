@@ -22,6 +22,7 @@ import EditNote from './EditNote';
 
 interface ISentInfoProps {
 	amount: string;
+	amountUSD: string;
 	date: string;
 	// time: string;
 	loading: boolean
@@ -38,7 +39,7 @@ interface ISentInfoProps {
 	note: string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -47,6 +48,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
+
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -63,7 +65,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='text-failure'
 					>
-						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`}
+						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`} ({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)
 					</span>
 					<span>
 							To:

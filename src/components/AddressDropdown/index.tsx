@@ -8,11 +8,11 @@ import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import logout from 'src/utils/logout';
-import shortenAddress from 'src/utils/shortenAddress';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IAddress {
@@ -66,8 +66,8 @@ const AddressDropdown = () => {
 					{<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
 						<Identicon size={20} value={address} theme='polkadot' />
 					</span>}
-					<span className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{shortenAddress(getEncodedAddress(address, network) || '')}
+					<span title={address} className='hidden md:inline-flex w-24 overflow-hidden truncate'>
+						{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
