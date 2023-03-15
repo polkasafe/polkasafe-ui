@@ -18,7 +18,7 @@ import SentInfo from './SentInfo';
 
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd }) => {
 	dayjs.extend(LocalizedFormat);
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -115,9 +115,9 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 							{type === 'Sent'? '-': '+'}{amount_token} {token}
 						</span>
 					</p>
-					{/* <p className='col-span-2'>
-					{time}
-				</p> */}
+					<p className='col-span-2'>
+						{dayjs(created_at).format('LT')}
+					</p>
 					<p className='col-span-2 flex items-center justify-end gap-x-4'>
 						<span className='text-success'>
 							Success
@@ -145,6 +145,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								callHash={callHash}
 								note={note}
 								loading={loading}
+								amount_usd={amount_usd}
 							/>
 							:
 							<SentInfo
@@ -154,6 +155,8 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								recipient={to}
 								callHash={callHash}
 								note={note}
+								loading={loading}
+								amount_usd={amount_usd}
 							/>
 					}
 				</div>

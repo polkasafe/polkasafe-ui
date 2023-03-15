@@ -14,6 +14,7 @@ import getEncodedAddress from 'src/utils/getEncodedAddress';
 interface IReceivedInfoProps {
 	amount: string;
 	amountType: string;
+	amount_usd: number;
 	date: string;
 	// time: string;
 	from: string
@@ -22,7 +23,7 @@ interface IReceivedInfoProps {
 	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, callHash, note, loading }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, date, from, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -39,7 +40,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amountType, date, from, 
 				<span
 					className='text-success'
 				>
-					{amount} {amountType}
+					{amount} {amountType} ({amount_usd} USD)
 				</span>
 				<span>
 							from:
