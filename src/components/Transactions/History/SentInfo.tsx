@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider, Spin } from 'antd';
+import { Divider, Spin, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
@@ -27,8 +27,9 @@ interface ISentInfoProps {
 }
 
 const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
-	const { addressBook } = useGlobalUserDetailsContext();
+	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const threshold = multisigAddresses.find((item) => item.address === activeMultisig)?.threshold || 0;
 
 	return (
 		<div
@@ -144,6 +145,58 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 						</p>
 					</div>
 				}
+			</article>
+			<article
+				className='p-8 rounded-lg bg-bg-main max-w-[328px] w-full'
+			>
+				<div>
+					<Timeline
+						className=''
+					>
+						<Timeline.Item
+							dot={
+								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CirclePlusIcon className='text-success text-sm' />
+								</span>
+							}
+							className='success'
+						>
+							<div
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+							Created
+							</div>
+						</Timeline.Item>
+						<Timeline.Item
+							dot={
+								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CircleCheckIcon className='text-success text-sm' />
+								</span>
+							}
+							className='success'
+						>
+							<div
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+							Confirmations <span className='text-text_secondary'>{threshold} of {threshold}</span>
+							</div>
+						</Timeline.Item>
+						<Timeline.Item
+							dot={
+								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CircleWatchIcon className='text-success text-sm' />
+								</span>
+							}
+							className='success'
+						>
+							<div
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								<p>Executed</p>
+							</div>
+						</Timeline.Item>
+					</Timeline>
+				</div>
 			</article>
 		</div>
 	);
