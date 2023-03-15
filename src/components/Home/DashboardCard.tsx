@@ -9,8 +9,8 @@ import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
-import psIcon from 'src/assets/icons/ps-icon.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
+import polkadotIcon from 'src/assets/parachains-icons/polkadot.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -129,7 +129,9 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							</div>
 							<div>
 								<div className="flex gap-x-4 my-3 items-center">
-									<img className='w-5 cursor-pointer' src={psIcon} alt="icon" />
+									<a className='w-5' target='_blank' href={'https://polkadot.js.org/apps/#/accounts'} rel="noreferrer">
+										<img className='w-5' src={polkadotIcon} alt="icon" />
+									</a>
 									<a className='w-5' target='_blank' href={`https://explorer.polkascan.io/${network}/account/${activeMultisig}`} rel="noreferrer">
 										<img className='w-5' src={brainIcon} alt="icon" />
 									</a>

@@ -23,9 +23,10 @@ interface ISentInfoProps {
 	callHash: string
 	note?: string
 	loading?: boolean
+	amount_usd: number
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, recipient, callHash, note, loading }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -45,7 +46,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amountType, className, date, rec
 					<span
 						className='text-failure'
 					>
-						{amount} {amountType}
+						{amount} {amountType} ({amount_usd} USD)
 					</span>
 					<span>
 							to:

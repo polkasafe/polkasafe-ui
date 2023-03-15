@@ -348,47 +348,25 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 								</Collapse.Panel>
 							</Collapse>
 						</Timeline.Item>
-						{/* <Timeline.Item
+						<Timeline.Item
 							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<CircleCheckIcon className='text-success text-sm' />
+								<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CircleWatchIcon className='text-waiting text-sm' />
 								</span>
 							}
-							className='success'
+							className='warning'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
 								<p>Executed</p>
 								<div
-									className='mt-3 flex items-center gap-x-4'
+									className='mt-3 text-text_secondary'
 								>
-									<img className='w-10 h-10 block' src={profileImg} alt="profile image" />
-									<div
-										className='flex flex-col gap-y-[6px]'
-									>
-										<p
-											className='font-medium text-sm leading-[15px] text-white'
-										>
-                                            Akshit
-										</p>
-										<p
-											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-										>
-											<span>
-                                                3J98t1W...hWNL2
-											</span>
-											<span
-												className='flex items-center gap-x-2 text-sm'
-											>
-												<CopyIcon />
-												<ExternalLinkIcon />
-											</span>
-										</p>
-									</div>
+									The transaction will be executed once the threshold is reached.
 								</div>
 							</div>
-						</Timeline.Item> */}
+						</Timeline.Item>
 					</Timeline>
 					{(approvals.length === threshold - 1 && !callData) && <Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />}
 					<div className='w-full flex flex-col gap-y-2 items-center'>
