@@ -155,7 +155,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						</div>
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signatory filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop/>}
+							{toggleSwitch? <Signatory filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />
