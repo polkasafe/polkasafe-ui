@@ -5,7 +5,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -13,7 +13,6 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
-import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -23,6 +22,7 @@ import EditNote from './EditNote';
 
 interface ISentInfoProps {
 	amount: string;
+	amountUSD: string;
 	date: string;
 	// time: string;
 	loading: boolean
@@ -39,7 +39,7 @@ interface ISentInfoProps {
 	note: string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -48,13 +48,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
-	const [amountUSD, setAmountUSD] = useState<string>('');
-
-	useEffect(() => {
-		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
-			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
-		});
-	}, [network]);
 
 	return (
 		<div

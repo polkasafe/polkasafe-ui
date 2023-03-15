@@ -5,28 +5,35 @@
 import dayjs from 'dayjs';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IQueueItem } from 'src/types';
 import Loader from 'src/ui-components/Loader';
-import getNetwork from 'src/utils/getNetwork';
+import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 
-const network = getNetwork();
-
 const Queued: FC = () => {
 	dayjs.extend(LocalizedFormat);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
 	const [refetch, setRefetch] = useState<boolean>(false);
 	const location = useLocation();
+	const [amountUSD, setAmountUSD] = useState<string>('');
+
+	useEffect(() => {
+		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
+		});
+	}, [network]);
 
 	useEffect(() => {
 		const hash = location.hash.slice(1);
@@ -77,7 +84,7 @@ const Queued: FC = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	}, [activeMultisig]);
+	}, [activeMultisig, network]);
 
 	useEffect(() => {
 		fetchQueuedTransactions();
@@ -103,6 +110,7 @@ const Queued: FC = () => {
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
 							setRefetch={setRefetch}
+							amountUSD={amountUSD}
 						/>
 					</section>;
 				})}
