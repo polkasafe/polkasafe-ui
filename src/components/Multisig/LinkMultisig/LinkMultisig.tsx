@@ -67,12 +67,7 @@ const LinkMultisig = () => {
 						address,
 						name
 					}),
-					headers: {
-						Accept: 'application/json',
-						'Content-Type': 'application/json',
-						'x-address': userAddress,
-						'x-signature': signature
-					},
+					headers: firebaseFunctionsHeader(),
 					method: 'POST'
 				});
 

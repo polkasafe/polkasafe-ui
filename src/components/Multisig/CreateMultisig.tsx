@@ -11,10 +11,11 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IMultisigAddress } from 'src/types';
+import { IAddressBookEntry, IMultisigAddress } from 'src/types';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -38,7 +39,7 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
-	const { setUserDetailsContextState, address: userAddress } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState, addressBook, address: userAddress } = useGlobalUserDetailsContext();
 
 	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [show, setShow] = useState(true);
@@ -61,6 +62,59 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const handleMultisigCreated = () => {
 		setShow(false);
 	};
+
+	const handleAddAddress = async (address: string, name: string) => {
+		try{
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				if(addressBook.some((item) => item.address === address)){
+					return;
+				}
+
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+					body: JSON.stringify({
+						address,
+						name
+					}),
+					headers: firebaseFunctionsHeader(),
+					method: 'POST'
+				});
+
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookEntry[], error: string };
+
+				if(addAddressError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addAddressError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
+
+				if(addAddressData){
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							addressBook: addAddressData
+						};
+					});
+
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			setLoading(false);
+		}
+	};
+
 	const handleMultisigBadge = async () => {
 		try{
 			setLoading(true);
@@ -103,21 +157,23 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							multisigAddresses: [...prevState.multisigAddresses, multisigData]
 						};
 					});
-
-					queueNotification({
-						header: 'Success!',
-						message: `Your MultiSig ${multisigName} has been created successfully!`,
-						status: NotificationStatus.SUCCESS
+					Promise.all(signatories.map(
+						(signatory) => handleAddAddress(signatory, DEFAULT_ADDRESS_NAME)
+					)).then(() => {
+						queueNotification({
+							header: 'Success!',
+							message: `Your MultiSig ${multisigName} has been created successfully!`,
+							status: NotificationStatus.SUCCESS
+						});
+						setLoading(false);
+						toggleVisibility();
 					});
-					setLoading(false);
-					toggleVisibility();
 
 				}
 
 			}
 		} catch (error){
 			console.log('ERROR', error);
-			setLoading(false);
 		}
 	};
 
