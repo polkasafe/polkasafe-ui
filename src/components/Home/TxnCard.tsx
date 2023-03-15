@@ -19,6 +19,7 @@ import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getHistoryTransactions from 'src/utils/getHistoryTransactions';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
@@ -27,7 +28,7 @@ import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
-	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactions, setTransactions] = useState<ITransaction[]>();
@@ -139,13 +140,19 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 									}
 								}
 
+								const destSubstrateAddress = getSubstrateAddress(decodedCallData?.args?.dest?.id);
+								const destAddressName = addressBook.find((address) => address.address === destSubstrateAddress)?.name;
+
+								const toText = decodedCallData && destSubstrateAddress ? destAddressName :
+									(shortenAddress(getEncodedAddress(decodedCallData?.args?.dest?.id, network) || ''));
+
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
 											<div className='ml-3'>
 												<h1 className='text-md text-white'>
-													{ decodedCallData ? <span>To: {shortenAddress(getEncodedAddress(decodedCallData?.args?.dest?.id, network) || '')}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+													{ decodedCallData ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
 												<p className='text-white text-xs'>In Process...</p>
 											</div>
@@ -178,15 +185,16 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 						{!historyLoading ? (transactions && transactions.length > 0) ?
 							transactions.filter((_, i) => i < 10).map((transaction, i) => {
 								const sent = transaction.from === activeMultisig;
+
 								return (
 									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
 													:
-													<h1 className='text-md text-white'>From: {shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+													<h1 className='text-md text-white'>From: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
 												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
 											</div>
