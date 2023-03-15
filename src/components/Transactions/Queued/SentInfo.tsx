@@ -5,7 +5,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -13,6 +13,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyAddress from 'src/utils/copyAddress';
+import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -47,6 +48,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
+	const [amountUSD, setAmountUSD] = useState<string>('');
+
+	useEffect(() => {
+		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
+		});
+	}, [network]);
+
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
@@ -63,7 +72,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, className, callData, callD
 					<span
 						className='text-failure'
 					>
-						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`}
+						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`} ({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)
 					</span>
 					<span>
 							To:
