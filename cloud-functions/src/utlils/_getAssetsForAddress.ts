@@ -37,8 +37,8 @@ export default async function _getAssetsForAddress(address: string, network: str
 						symbol: asset.symbol,
 						// TODO: cache token usd value
 						balance_usd: usdValue ?
-							`${usdValue * Number(formatBalance(asset.balance, asset.decimals, { numberAfterComma: 2, withThousandDelimitor: false }))}` : '',
-						balance_token: formatBalance(asset.balance, asset.decimals, { numberAfterComma: 2, withThousandDelimitor: false })
+							`${usdValue * Number(formatBalance(asset.balance, asset.decimals, { numberAfterComma: 3, withThousandDelimitor: false }))}` : '',
+						balance_token: formatBalance(asset.balance, asset.decimals, { numberAfterComma: 3, withThousandDelimitor: false })
 					};
 
 					assets.push(newAsset);
