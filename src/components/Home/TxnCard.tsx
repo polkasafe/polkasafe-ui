@@ -120,7 +120,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 				<div className='col-start-1 col-end-13 md:col-end-7'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction Queue</h2>
-						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions?tab=Queue" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
@@ -167,7 +167,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 				<div className='md:col-start-7 col-start-1 col-end-13'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction History</h2>
-						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions?tab=History" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
