@@ -11,11 +11,13 @@ interface IModalBtnProps {
 	className?: string;
 	onClick?: () => void;
 	loading?: boolean;
+	disabled?: boolean;
 }
 
-const ModalBtn: FC<IModalBtnProps> = ({ className, title, loading, onClick }) => {
+const ModalBtn: FC<IModalBtnProps> = ({ className, disabled=false, title, loading=false, onClick }) => {
 	return (
 		<Button
+			disabled={disabled}
 			loading={loading}
 			onClick={onClick}
 			size='large'

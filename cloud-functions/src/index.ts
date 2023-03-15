@@ -13,11 +13,13 @@ import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
-import { chainProperties } from './constants/network_constants';
+import { chainProperties, networks } from './constants/network_constants';
 import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
 import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
+import decodeCallData from './utlils/decodeCallData';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -152,8 +154,9 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const { name, address: addressToAdd } = req.body;
+			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
@@ -196,8 +199,9 @@ export const removeFromAddressBook = functions.https.onRequest(async (req, res) 
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const { name, address: addressToAdd } = req.body;
+			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!name || !substrateAddressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
@@ -742,7 +746,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 			if (!multisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
 
 			// get signatories for multisig
-			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists ? txDocData.from : multisigAddress).get();
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : multisigAddress).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
 				txRef.set({ note: String(note) }, { merge: true });
@@ -806,6 +810,42 @@ export const addAppsAlertRecipient = functions.https.onRequest(async (req, res) 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in addAppsAlertRecipient :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const setTransactionCallData = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		const { isValid, error } = await isValidRequest(address, signature);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { callHash, callData, network } = req.body;
+		if (!callHash || !callData || !network ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			if (!Object.values(networks).includes(network)) return res.status(400).json({ error: responseMessages.invalid_params });
+
+			const provider = new WsProvider(chainProperties[network].rpcEndpoint);
+			const api = new ApiPromise({ provider });
+			await api.isReady;
+
+			if (!api || !api.isReady) return res.status(500).json({ error: responseMessages.internal });
+
+			const { data, error } = decodeCallData(callData, api);
+			if (error || !data) return res.status(400).json({ error: responseMessages.invalid_params });
+			if (data?.extrinsicCall?.hash.toHex() !== callHash) return res.status(400).json({ error: responseMessages.invalid_params });
+
+			// is valid call data
+			const txRef = firestoreDB.collection('transactions').doc(callHash);
+			txRef.set({ callData: String(callData) }, { merge: true });
+
+			return res.status(200).json({ error: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in setTransactionCallData :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

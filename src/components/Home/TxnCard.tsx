@@ -4,12 +4,14 @@
 
 import { ReloadOutlined } from '@ant-design/icons';
 import BN from 'bn.js';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import { IQueueItem,ITransaction } from 'src/types';
 import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
@@ -17,6 +19,7 @@ import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getHistoryTransactions from 'src/utils/getHistoryTransactions';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
@@ -25,7 +28,7 @@ import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
-	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactions, setTransactions] = useState<ITransaction[]>();
@@ -107,6 +110,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 				setQueueLoading(false);
 			}
 		};
+
 		getQueue();
 	}, [activeMultisig, network, newTxn]);
 
@@ -117,35 +121,44 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 				<div className='col-start-1 col-end-13 md:col-end-7'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction Queue</h2>
-						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions?tab=Queue" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
 					</div>
+
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
-						{!queueLoading ? (queuedTransactions && queuedTransactions.length > 0) ?
+						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
-								if(!api || !apiReady) return;
-								const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
-								if(error || !data) return;
-								const res = data.extrinsicCall?.toJSON();
-								if(!res || !res.args || !res.args?.value || res.args?.dest?.id){
-									return;
+								let decodedCallData = null;
+
+								if(transaction.callData) {
+									const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
+									if(!error && data) {
+										decodedCallData = data.extrinsicCall?.toJSON();
+									}
 								}
-								const amount = formatBnBalance(new BN(res.args.value), { numberAfterComma: 2, withUnit: true }, network);
+
+								const destSubstrateAddress = getSubstrateAddress(decodedCallData?.args?.dest?.id);
+								const destAddressName = addressBook.find((address) => address.address === destSubstrateAddress)?.name;
+
+								const toText = decodedCallData && destSubstrateAddress ? destAddressName :
+									(shortenAddress(getEncodedAddress(decodedCallData?.args?.dest?.id, network) || ''));
 
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
 											<div className='ml-3'>
-												<h1 className='text-md text-white'>To: {shortenAddress(getEncodedAddress(res.args.dest.id, network) || '')}</h1>
+												<h1 className='text-md text-white'>
+													{ decodedCallData ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+												</h1>
 												<p className='text-white text-xs'>In Process...</p>
 											</div>
 										</div>
 										<div>
-											<h1 className='text-md text-white'>- {amount}</h1>
+											<h1 className='text-md text-white'>- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 2, withUnit: true }, network): `? ${chainProperties[network].tokenSymbol}`}</h1>
 											{/* TODO: <p className='text-white text-right text-xs'>5173.42 USD</p> */}
 										</div>
 									</Link>
@@ -156,11 +169,12 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 							<Loader />}
 					</div>
 				</div>
+
 				{/* Txn History */}
 				<div className='md:col-start-7 col-start-1 col-end-13'>
 					<div className="flex justify-between flex-row w-full">
 						<h2 className="text-xl font-bold text-white">Transaction History</h2>
-						<Link to="/transactions" className="flex items-center justify-center text-primary cursor-pointer">
+						<Link to="/transactions?tab=History" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
@@ -171,17 +185,18 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 						{!historyLoading ? (transactions && transactions.length > 0) ?
 							transactions.filter((_, i) => i < 10).map((transaction, i) => {
 								const sent = transaction.from === activeMultisig;
+
 								return (
 									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
 													:
-													<h1 className='text-md text-white'>From: {shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+													<h1 className='text-md text-white'>From: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
-												{/* <p className='text-text_secondary text-xs'>{transaction.created_at.getTime()}</p> */}
+												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
 											</div>
 										</div>
 										<div>
@@ -194,12 +209,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 							}) :
 							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No history transactions</p></div>
 							:
-							<Loader />}
-						{/*TODO: Empty state */}
-						{/* <div className="flex flex-col items-center justify-center mt-5">
-							<img className='w-[150px] mt-3' src={emptyTxHistory} alt="tx"/>
-							<p className='text-text_secondary my-2'>No past transactions</p>
-						</div> */}
+							<Loader />
+						}
 					</div>
 				</div>
 			</div>

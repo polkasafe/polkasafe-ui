@@ -6,6 +6,7 @@ import { ApiPromise } from '@polkadot/api';
 import type { Call } from '@polkadot/types/interfaces';
 import type { CallFunction } from '@polkadot/types/types';
 import { formatBalance } from '@polkadot/util/format';
+import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
@@ -33,10 +34,11 @@ interface Args {
 	amount: BN,
 	approvingAddress: string,
 	recipientAddress: string,
-	note: string
+	note: string,
+	messageApi: MessageInstance
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note }: Args) {
+export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, messageApi, multisig, network, note }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -78,12 +80,16 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
+						messageApi.error('Transaction invalid');
 					} else if (status.isReady) {
 						console.log('Transaction is ready');
+						messageApi.loading('Transaction is ready');
 					} else if (status.isBroadcast) {
 						console.log('Transaction has been broadcasted');
+						messageApi.loading('Transaction has been broadcasted');
 					} else if (status.isInBlock) {
 						console.log('Transaction is in block');
+						messageApi.loading('Transaction is in block');
 					} else if (status.isFinalized) {
 						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 						console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
@@ -117,12 +123,16 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
+						messageApi.error('Transaction invalid');
 					} else if (status.isReady) {
 						console.log('Transaction is ready');
+						messageApi.loading('Transaction is ready');
 					} else if (status.isBroadcast) {
 						console.log('Transaction has been broadcasted');
+						messageApi.loading('Transaction has been broadcasted');
 					} else if (status.isInBlock) {
 						console.log('Transaction is in block');
+						messageApi.loading('Transaction is in block');
 					} else if (status.isFinalized) {
 						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 						console.log(`asMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);

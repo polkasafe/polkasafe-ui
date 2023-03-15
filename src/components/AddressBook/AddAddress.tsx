@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Form, Input } from 'antd';
+import { Form, Input, message } from 'antd';
 import React, { useState } from 'react';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -13,6 +13,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookEntry } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 interface IMultisigProps {
 	className?: string
@@ -21,6 +22,7 @@ interface IMultisigProps {
 }
 
 const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
+	const [messageApi, contextHolder] = message.useMessage();
 
 	const [address, setAddress] = useState<string>(addAddress || '');
 	const [name, setName] = useState<string>('');
@@ -29,6 +31,13 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
 	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleAddAddress = async () => {
+		if(!address || !name) return;
+
+		if(!getSubstrateAddress(address)){
+			messageApi.warning('Invalid address');
+			return;
+		}
+
 		try{
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
@@ -104,57 +113,66 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
 
 	const { toggleVisibility } = useModalContext();
 	return (
-		<Form
-			className='my-0 w-[560px]'
-		>
-			<div className="flex flex-col gap-y-3">
-				<label
-					className="text-primary text-xs leading-[13px] font-normal"
-					htmlFor="name"
-				>
-                    Name
-				</label>
-				<Form.Item
-					name="name"
-					rules={[]}
-					className='border-0 outline-0 my-0 p-0'
-				>
-					<Input
-						placeholder="Give the address a name"
-						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-						id="name"
-						onChange={(e) => setName(e.target.value)}
-						value={name}
-					/>
-				</Form.Item>
-			</div>
-			<div className="flex flex-col gap-y-3 mt-5">
-				<label
-					className="text-primary text-xs leading-[13px] font-normal"
-					htmlFor="address"
-				>
-                    Address
-				</label>
-				<Form.Item
-					name="address"
-					rules={[]}
-					className='border-0 outline-0 my-0 p-0'
-				>
-					<Input
-						placeholder="Unique Address"
-						className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-						id="address"
-						defaultValue={addAddress || ''}
-						onChange={(e) => setAddress(e.target.value)}
-						value={address}
-					/>
-				</Form.Item>
-			</div>
-			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
-				<AddBtn loading={loading} title='Add' onClick={handleAddAddress} />
-			</div>
-		</Form>
+		<>
+			{contextHolder}
+
+			<Form
+				className='my-0 w-[560px]'
+			>
+				<div className="flex flex-col gap-y-3">
+					<label
+						className="text-primary text-xs leading-[13px] font-normal"
+						htmlFor="name"
+					>
+											Name
+					</label>
+					<Form.Item
+						name="name"
+						rules={[
+							{
+								message: 'Required',
+								required: true
+							}
+						]}
+						className='border-0 outline-0 my-0 p-0'
+					>
+						<Input
+							placeholder="Give the address a name"
+							className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+							id="name"
+							onChange={(e) => setName(e.target.value)}
+							value={name}
+						/>
+					</Form.Item>
+				</div>
+				<div className="flex flex-col gap-y-3 mt-5">
+					<label
+						className="text-primary text-xs leading-[13px] font-normal"
+						htmlFor="address"
+					>
+											Address
+					</label>
+					<Form.Item
+						name="address"
+						rules={[]}
+						className='border-0 outline-0 my-0 p-0'
+					>
+						<Input
+							placeholder="Unique Address"
+							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+							id="address"
+							defaultValue={addAddress || ''}
+							onChange={(e) => setAddress(e.target.value)}
+							value={address}
+						/>
+					</Form.Item>
+				</div>
+				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+					<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
+					<AddBtn loading={loading} disabled={!name || !address} title='Add' onClick={handleAddAddress} />
+				</div>
+			</Form>
+		</>
 	);
 };
 

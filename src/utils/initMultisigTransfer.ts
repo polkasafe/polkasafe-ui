@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
+import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
@@ -20,7 +21,8 @@ interface Args {
 	amount: BN,
 	network: string,
 	note: string,
-	transferKeepAlive: boolean
+	transferKeepAlive: boolean,
+	messageApi: MessageInstance
 }
 
 export default async function initMultisigTransfer({
@@ -31,7 +33,8 @@ export default async function initMultisigTransfer({
 	amount,
 	network,
 	note,
-	transferKeepAlive
+	transferKeepAlive,
+	messageApi
 }: Args) {
 
 	//promise to be resolved when transaction is finalized
@@ -66,13 +69,17 @@ export default async function initMultisigTransfer({
 			// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
+					messageApi.error('Transaction invalid');
 				} else if (status.isReady) {
 					console.log('Transaction is ready');
+					messageApi.loading('Transaction is ready');
 				} else if (status.isBroadcast) {
 					console.log('Transaction has been broadcasted');
+					messageApi.loading('Transaction has been broadcasted');
 				} else if (status.isInBlock) {
 					blockHash = status.asInBlock.toHex();
 					console.log('Transaction is in block');
+					messageApi.loading('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
@@ -101,15 +108,15 @@ export default async function initMultisigTransfer({
 								to: recipientAddress
 							});
 
-							await sendNotificationToAddresses({
+							resolve();
+
+							sendNotificationToAddresses({
 								addresses: otherSignatories,
 								link: `/transactions?tab=Queue#${call.method.hash.toHex()}`,
 								message: 'New transaction to sign',
 								network,
 								type: 'sent'
 							});
-
-							resolve();
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 							queueNotification({
