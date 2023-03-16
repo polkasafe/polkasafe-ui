@@ -103,7 +103,6 @@ const Queued: FC = () => {
 						<Transaction
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
-							type={ 'Sent' }
 							approvals={transaction.approvals}
 							threshold={transaction.threshold}
 							callData={transaction.callData}

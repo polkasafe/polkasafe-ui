@@ -12,7 +12,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -93,7 +93,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(getEncodedAddress(recipientAddress, network))}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyText(recipientAddress, true, network)}><CopyIcon className='hover:text-primary'/></button>
 								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
@@ -164,7 +164,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(callHash)}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyText(callHash)}><CopyIcon className='hover:text-primary'/></button>
 								{/* <ExternalLinkIcon /> */}
 							</span>
 						</p>
@@ -174,7 +174,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
 							<span className='text-white font-normal text-sm leading-[15px]'> {callData}</span>
 							<span className='flex items-center gap-x-2 text-sm'>
-								<button onClick={() => copyAddress(callData)}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary'/></button>
 							</span>
 						</p>
 					</div>}
@@ -291,7 +291,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
 															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
@@ -337,7 +337,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 														<span
 															className='flex items-center gap-x-2 text-sm'
 														>
-															<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='hover:text-primary'/></button>
+															<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
 															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>

@@ -20,7 +20,7 @@ import { IAsset } from 'src/types';
 import AddressQr from 'src/ui-components/AddressQr';
 import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getNetwork from 'src/utils/getNetwork';
 
@@ -151,7 +151,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig, network)}</div>
-								<button className='ml-2 mr-1' onClick={() => copyAddress((activeMultisig))}><CopyIcon className='text-primary' /></button>
+								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
 								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} />)}>
 									<QRIcon className='text-primary'/>
 								</button>

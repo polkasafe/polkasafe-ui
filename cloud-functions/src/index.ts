@@ -71,7 +71,6 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			// check if address doc already exists
 			const token = `<Bytes>${uuidv4()}</Bytes>`;
 
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -133,7 +132,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				addressBook: [newAddress]
 			};
 
-			await addressRef.set(newUser);
+			await addressRef.set(newUser, { merge: true });
 			return res.status(200).json({ data: newUser });
 		} catch (err:unknown) {
 			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });

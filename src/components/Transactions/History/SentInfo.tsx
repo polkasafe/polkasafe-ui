@@ -9,7 +9,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
@@ -74,7 +74,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyAddress(getEncodedAddress(recipient, network))}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyText(recipient, true, network)}><CopyIcon className='hover:text-primary'/></button>
 								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
@@ -102,7 +102,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => copyAddress(callHash)}><CopyIcon/></button>
+							<button onClick={() => copyText(callHash)}><CopyIcon/></button>
 							{/* <ExternalLinkIcon /> */}
 						</span>
 					</p>

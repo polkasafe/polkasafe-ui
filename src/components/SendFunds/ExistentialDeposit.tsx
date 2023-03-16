@@ -18,7 +18,7 @@ import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getNetwork from 'src/utils/getNetwork';
 import { transferFunds } from 'src/utils/transferFunds';
 
@@ -135,7 +135,7 @@ const ExistentialDeposit = () => {
 										onChange={(value) => setSelectedSender(value)}
 									/>
 									<div className='absolute right-2'>
-										<button onClick={() => copyAddress(selectedSender)}>
+										<button onClick={() => copyText(selectedSender, true, network)}>
 											<CopyIcon className='mr-2 text-primary' />
 										</button>
 										<QrModal />

@@ -10,7 +10,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import logout from 'src/utils/logout';
 
@@ -104,7 +104,7 @@ const AddressDropdown = () => {
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{getEncodedAddress(address, network)}</span>
-							<button onClick={() => copyAddress(getEncodedAddress(address, network))}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+							<button onClick={() => copyText(address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
 					</div>
 					<div className='w-full'>
