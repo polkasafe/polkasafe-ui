@@ -10,8 +10,9 @@ import AddAdress from 'src/components/AddressBook/AddAddress';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
+import { CopyIcon, ExternalLinkIcon, RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 const AddressCard = ({ className }: { className?: string }) => {
@@ -31,14 +32,39 @@ const AddressCard = ({ className }: { className?: string }) => {
 			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-80 mt-3`}>
 				<div className='flex flex-col items-center px-5 h-80 overflow-auto w-[100%] divide-y divide-gray-700'>
 					{addressBook.map((item, i) => (
-						<div key={`${i}-${item.address}`} className='flex justify-items-center items-center pt-5 mb-5'>
+						<div
+							className='mb-3 flex items-center gap-x-4'
+							key={i}
+						>
 							<Identicon
-								className='rounded-full bg-transparent px-1'
 								value={item.address}
 								size={30}
 								theme='polkadot'
 							/>
-							<div className='px-1 text-sm text-white truncate'>{getEncodedAddress(item.address, network)}</div>
+							<div
+								className='flex flex-col gap-y-[6px]'
+							>
+								<p
+									className='font-medium text-sm leading-[15px] text-white'
+								>
+									{item.name}
+								</p>
+								<p
+									className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+								>
+									<span>
+										{getEncodedAddress(item.address, network)}
+									</span>
+									<span
+										className='flex items-center gap-x-2 text-sm'
+									>
+										<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='hover:text-primary'/></button>
+										<a href={`https://www.subscan.io/account/${getEncodedAddress(item.address, network)}`} target='_blank' rel="noreferrer" >
+											<ExternalLinkIcon  />
+										</a>
+									</span>
+								</p>
+							</div>
 						</div>
 					))}
 				</div>

@@ -12,10 +12,12 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import { IAddressBookEntry, IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import _createMultisig from 'src/utils/_createMultisig';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
@@ -251,8 +253,11 @@ const LinkMultisig = () => {
 
 	const checkMultisig = (signatories: ISignatory[]) => {
 		const signatoryAddresses = signatories.map(item => item.address);
-		const address = _createMultisig(signatoryAddresses, 2, 42);
-		if(address && address.multisigAddress === multisigAddress){
+		const response = _createMultisig(signatoryAddresses, threshold, chainProperties[network].ss58Format);
+		console.log('network', network),
+		console.log('ss58', chainProperties[network].ss58Format),
+		console.log(response, multisigAddress);
+		if(response && response.multisigAddress && getEncodedAddress(response.multisigAddress, network) === multisigAddress){
 			setMultisigData(prevState => {
 				return {
 					...prevState,
