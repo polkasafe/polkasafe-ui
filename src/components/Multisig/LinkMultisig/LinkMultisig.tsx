@@ -211,8 +211,6 @@ const LinkMultisig = () => {
 				}
 
 				if(multisigDataRes){
-					console.log('link', multisigDataRes);
-
 					setLoading(false);
 
 					setMultisigData(multisigDataRes);
@@ -243,6 +241,7 @@ const LinkMultisig = () => {
 			setLoading(false);
 		}
 	};
+
 	const handleViewReviews = () => {
 		setNameAddress(false);
 		setViewOwners(false);
@@ -261,8 +260,7 @@ const LinkMultisig = () => {
 					signatories: signatoryAddresses,
 					threshold,
 					network,
-					created_at: new Date(),
-					is_on_chain: false
+					created_at: new Date()
 				};
 			});
 			setSignatoriesWithName(signatories);

@@ -33,6 +33,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const { openModal, toggleVisibility } = useModalContext();
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 
+	// TODO: check why we're not using this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [loading, setLoading] = useState(false);
 	const [transactionLoading, setTransactionLoading] = useState(false);
@@ -71,8 +72,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature) {
-				console.log('ERROR');
+			if(!address || !signature || !activeMultisig) {
 				return;
 			}
 			else{
