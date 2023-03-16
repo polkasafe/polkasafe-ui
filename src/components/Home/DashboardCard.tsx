@@ -150,7 +150,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary'>{getEncodedAddress(activeMultisig, network)}</div>
+								<div className='text-md font-normal text-text_secondary'>{activeMultisig && getEncodedAddress(activeMultisig, network)}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
 								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} />)}>
 									<QRIcon className='text-primary'/>
