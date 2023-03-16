@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -20,15 +21,12 @@ import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
-import getNetwork from 'src/utils/getNetwork';
 import styled from 'styled-components';
 
 import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
 import Search from '../Multisig/Search';
 import Signatory from './Signatory';
-
-const network = getNetwork();
 
 interface IMultisigProps {
 	className?: string
@@ -39,6 +37,7 @@ interface IMultisigProps {
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
 	const { setUserDetailsContextState, addressBook, address: userAddress } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [multisigName, setMultisigName] = useState<string>('');

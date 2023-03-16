@@ -20,7 +20,6 @@ import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
-import getNetwork from 'src/utils/getNetwork';
 
 import SentInfo from './SentInfo';
 
@@ -36,15 +35,13 @@ interface ITransactionProps {
 	setRefetch?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const network = getNetwork();
-
 const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
-	const { api, apiReady } = useGlobalApiContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');

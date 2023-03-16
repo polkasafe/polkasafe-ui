@@ -22,7 +22,6 @@ import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getNetwork from 'src/utils/getNetwork';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -45,7 +44,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 		const isMultisigOnChainRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/isMultisigOnChain`, {
 			body: JSON.stringify({
 				multisigAddress: activeMultisig,
-				network: getNetwork()
+				network
 			}),
 			headers: firebaseFunctionsHeader(),
 			method: 'POST'

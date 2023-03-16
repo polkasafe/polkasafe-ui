@@ -6,8 +6,8 @@ import { Form, Input } from 'antd';
 import BN from 'bn.js';
 import React, { useState } from 'react';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { chainProperties } from 'src/global/networkConstants';
-import getNetwork from 'src/utils/getNetwork';
 import { inputToBn } from 'src/utils/inputToBn';
 
 interface Props{
@@ -17,10 +17,9 @@ interface Props{
 	placeholder?: string
 }
 
-const network = getNetwork();
-
 const BalanceInput = ({ className, label = '', onChange, placeholder = '' }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
+	const { network } = useGlobalApiContext();
 
 	const onBalanceChange = (value: number | string | null): void => {
 		value = Number(value);

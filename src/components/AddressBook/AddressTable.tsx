@@ -46,7 +46,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 				address.map(({ address, name }, index) => {
 					return (
 						<>
-							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white' key={index}>
+							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white my-2' key={index}>
 								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
 									{name}
 								</p>
