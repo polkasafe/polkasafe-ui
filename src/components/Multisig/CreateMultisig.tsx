@@ -26,7 +26,6 @@ import styled from 'styled-components';
 import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
 import Search from '../Multisig/Search';
-import MultisigCreated from '../UserFlow/MultisigCreated';
 import Signatory from './Signatory';
 
 const network = getNetwork();
@@ -42,7 +41,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const { setUserDetailsContextState, addressBook, address: userAddress } = useGlobalUserDetailsContext();
 
 	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
-	const [show, setShow] = useState(true);
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [threshold, setThreshold] = useState<number | null>(null);
 	const [signatories, setSignatories] = useState<string[]>([userAddress]);
@@ -58,10 +56,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			setAddress(accounts[0].address);
 		}
 	}, [accounts, address]);
-
-	const handleMultisigCreated = () => {
-		setShow(false);
-	};
 
 	const handleAddAddress = async (address: string, name: string) => {
 		try{
@@ -166,7 +160,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							status: NotificationStatus.SUCCESS
 						});
 						setLoading(false);
-						toggleVisibility();
+						if(!homepage){
+							toggleVisibility();
+						}
 					});
 
 				}
@@ -184,7 +180,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
 				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
-					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} />
+					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
 				</Modal>
 			</>
 		);
@@ -192,7 +188,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 	return (
 		<div>
-			{show?<div className='flex flex-col relative'>
+			<div className='flex flex-col relative'>
 				<div className={classNames(
 					`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 					{
@@ -202,7 +198,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					<div className='relative'>
 						<div className='flex items-center justify-between'>
 							{toggleSwitch?<div className="flex items-center justify-between w-[45vw] gap-x-4">
-								<Search setAddAddress={setAddAddress} />
+								<Search addAddress={addAddress} setAddAddress={setAddAddress} />
 								<AddAddressModal/>
 							</div>:null}
 							<div className='flex items-center justify-center absolute top-1 right-1'>
@@ -211,7 +207,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						</div>
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signatory filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
+							{toggleSwitch? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />
@@ -243,11 +239,10 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					</div>
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-					{!homepage && <CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>}
-					<AddBtn loading={loading} title='Create Multisig' onClick={onCancel? handleMultisigCreated: handleMultisigBadge} />
+					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
+					<AddBtn loading={loading} title='Create Multisig' onClick={handleMultisigBadge} />
 				</div>
-			</div>:
-				<MultisigCreated/>}
+			</div>
 		</div>
 	);
 };
