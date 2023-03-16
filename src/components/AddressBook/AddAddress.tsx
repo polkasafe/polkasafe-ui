@@ -19,9 +19,10 @@ interface IMultisigProps {
 	className?: string
 	addAddress?: string
 	onCancel?: () => void
+	setAddAddress?: React.Dispatch<React.SetStateAction<string>>
 }
 
-const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
+const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const [address, setAddress] = useState<string>(addAddress || '');
@@ -100,6 +101,9 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel }) => {
 					}
 					else{
 						toggleVisibility();
+					}
+					if(setAddAddress){
+						setAddAddress('');
 					}
 
 				}

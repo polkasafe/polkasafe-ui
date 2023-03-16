@@ -9,6 +9,8 @@ import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalle
 import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
+import AddMultisig from 'src/components/Multisig/AddMultisig';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -40,7 +42,7 @@ const Home = () => {
 						</section>
 						:
 						<section className='bg-black bg-opacity-50 p-5 rounded-lg'>
-							<CreateMultisig homepage />
+							<AddMultisig homepage />
 						</section>
 					:
 					<ConnectWalletWrapper>

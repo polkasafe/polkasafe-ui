@@ -16,28 +16,29 @@ import LinkMultisig from './LinkMultisig/LinkMultisig';
 interface IMultisigProps {
 	className?: string
 	isModalPopup?: boolean
+	homepage?: boolean
 }
 
-const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup }) => {
+const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
 	const [ isMultisigVisible, setMultisigVisible] = useState(false);
 	const { openModal } = useModalContext();
 	return (
 		<>
 			{isMultisigVisible&&!isModalPopup?<div className='p-5'>
-				<CreateMultisig onCancel = {() => {
+				<CreateMultisig homepage={homepage} onCancel = {() => {
 					setMultisigVisible(false);
 				}} />
 			</div>:<div>
-				<div className='p-5 m-auto h-[100%]'>
+				<div className='p-5 h-[100%]'>
 					<div className='text-center mb-5'>
 						<h1 className='text-lg font-bold text-white'>Add Multisig</h1>
 						<p className='text-white'>MultiSig is a secure digital wallet that requires one or multiple owners to authorize the transaction.</p>
 						<br />
 						<p className='text-text_secondary'>To add a MultiSig you can choose from the options below:</p>
 					</div>
-					<div className="flex items-center justify-center mt-5 w-[55vw]">
-						<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-lg p-5 m-5">
-							<div className='mb-5'>
+					<div className="flex justify-center mt-5 w-full h-full">
+						<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-lg p-5 mx-5">
+							<div className='mb-5 flex-1'>
 								<h1 className='font-bold text-md mb-2 text-white'>Create Multisig</h1>
 								<p className='text-text_secondary text-sm'>Create  a new MultiSig that is controlled by one or multiple owners.</p>
 							</div>
@@ -55,7 +56,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup }) => {
 								</Button>
 							</div>
 						</div>
-						<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-lg p-5 m-5">
+						<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-lg p-5 mx-5">
 							<div className='mb-5'>
 								<h1 className='font-bold text-md mb-2 text-white'>Link Multisig</h1>
 								<p className='text-text_secondary text-sm'>Already have a MultiSig? You can link your existing multisig with a few simple steps.</p>

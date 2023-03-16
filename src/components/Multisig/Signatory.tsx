@@ -21,10 +21,11 @@ interface ISignatoryProps{
 	setSignatories: React.Dispatch<React.SetStateAction<string[]>>
 	signatories: string[]
 	filterAddress?: string
+	homepage: boolean
 
 }
 
-const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryProps) => {
+const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISignatoryProps) => {
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
@@ -63,7 +64,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 			}
 		});
 
-		const drop2 = document.getElementById('drop2');
+		const drop2 = document.getElementById(`drop2${homepage && '-home'}`);
 		if(data) {drop2?.appendChild(document.getElementById(data)!);}
 
 	};
@@ -84,7 +85,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 				return copyState;
 			});
 		}
-		const drop1 = document.getElementById('drop1');
+		const drop1 = document.getElementById(`drop1${homepage && '-home'}`);
 		if(data) {drop1?.appendChild(document.getElementById(data)!);}
 	};
 
@@ -93,7 +94,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 			<div className="flex w-[100%] items-center justify-center">
 				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1 cursor-grab" onDrop={dropReturn} onDragOver={dragOver}>
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
-					<div id="drop1" className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
+					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
 						{addresses.map((address) => (
 							<p title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
 						))}
@@ -102,7 +103,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories }: ISignatoryPro
 				<SwapOutlined className='text-primary' />
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
-					<div id='drop2' className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto cursor-grab' onDrop={drop} onDragOver={dragOver}>
+					<div id={`drop2${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto cursor-grab' onDrop={drop} onDragOver={dragOver}>
 						<p title={getEncodedAddress(address, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white cursor-default'>{DEFAULT_USER_ADDRESS_NAME}</p>
 					</div>
 				</div>
