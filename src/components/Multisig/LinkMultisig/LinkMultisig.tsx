@@ -261,7 +261,8 @@ const LinkMultisig = () => {
 					signatories: signatoryAddresses,
 					threshold,
 					network,
-					created_at: new Date()
+					created_at: new Date(),
+					is_on_chain: false
 				};
 			});
 			setSignatoriesWithName(signatories);
