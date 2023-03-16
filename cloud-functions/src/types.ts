@@ -19,7 +19,6 @@ export interface IMultisigAddress {
 	network: string;
 	created_at: Date;
 	threshold: number;
-	is_on_chain: boolean;
 }
 
 export interface IUserResponse extends IUser {

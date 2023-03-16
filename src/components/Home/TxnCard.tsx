@@ -42,10 +42,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 
 	useEffect(() => {
 		const getTransactions = async () => {
-			if(!userAddress || !signature || !activeMultisig) {
-				console.log('ERROR');
-				return;
-			}
+			if(!userAddress || !signature || !activeMultisig) return;
+
 			setHistoryLoading(true);
 			try{
 				const { data, error } = await getHistoryTransactions(
@@ -78,7 +76,6 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 				const signature = localStorage.getItem('signature');
 
 				if(!userAddress || !signature || !activeMultisig) {
-					console.log('ERROR');
 					setQueueLoading(false);
 					return;
 				}
@@ -118,10 +115,12 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	}, [activeMultisig, network, newTxn]);
 
 	useEffect(() => {
+		if(!userAddress || !signature || !activeMultisig) return;
+
 		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
 			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
 		});
-	}, [network]);
+	}, [activeMultisig, network, signature, userAddress]);
 
 	return (
 		<div>

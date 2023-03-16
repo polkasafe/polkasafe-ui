@@ -2,14 +2,13 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
-import { cryptoWaitReady, decodeAddress, signatureVerify } from '@polkadot/util-crypto';
+import { cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
 import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, INotification, ITransaction, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
 import '@polkadot/api-augment';
-import getOnChainMultisigByAddress from './utlils/getOnChainMultisigByAddress';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
@@ -259,16 +258,20 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
 			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
 
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
 			// check if the multisig exists in our db
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
 			const multisigDoc = await multisigRef.get();
 
-			if (multisigDoc.exists) return res.status(400).json({ error: responseMessages.multisig_exists });
+			if (multisigDoc.exists) {
+				const multisigDocData = multisigDoc.data();
 
-			// check if multisig already exists on chain
-			const { data: onChainMultisigData, error: onchainFetchErr } = await getOnChainMultisigByAddress(multisigAddress, network);
-			if (onchainFetchErr) return res.status(400).json({ error: onchainFetchErr || responseMessages.onchain_multisig_fetch_error });
-			if (onChainMultisigData && onChainMultisigData.count > 0) return res.status(400).json({ error: responseMessages.multisig_exists });
+				return res.status(200).json({ data: {
+					...multisigDocData,
+					created_at: multisigDocData?.created_at?.toDate()
+				} });
+			}
 
 			const newMultisig: IMultisigAddress = {
 				address: multisigAddress,
@@ -276,84 +279,12 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				name: multisigName,
 				signatories: substrateSignatories,
 				network: String(network).toLowerCase(),
-				threshold: Number(threshold),
-				is_on_chain: false
+				threshold: Number(threshold)
 			};
 
 			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', multisigAddress);
-			return res.status(200).json({ data: newMultisig });
-		} catch (err:unknown) {
-			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
-			return res.status(500).json({ error: responseMessages.internal });
-		}
-	});
-});
-
-export const linkMultisig = functions.https.onRequest(async (req, res) => {
-	corsHandler(req, res, async () => {
-		const signature = req.get('x-signature');
-		const address = req.get('x-address');
-
-		const { isValid, error } = await isValidRequest(address, signature);
-		if (!isValid) return res.status(400).json({ error });
-
-		const { signatories, threshold, multisigName, network } = req.body;
-		if (!signatories || !threshold || !multisigName || !network) {
-			return res.status(400).json({ error: responseMessages.missing_params });
-		}
-
-		if (!Array.isArray(signatories) || signatories.length < 2) return res.status(400).json({ error: responseMessages.invalid_params });
-
-		if (isNaN(threshold) || Number(threshold) > signatories.length) {
-			return res.status(400).json({ error: responseMessages.invalid_threshold });
-		}
-
-		// check if signatories contain duplicate addresses
-		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
-
-		try {
-			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
-
-			// check if substrateSignatories contains the address of the user
-			const substrateAddress = getSubstrateAddress(String(address));
-			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
-
-			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
-			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
-
-			// check if the multisig exists in our db
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
-			const multisigDoc = await multisigRef.get();
-
-			if (multisigDoc.exists) {
-				return res.status(200).json({
-					data: {
-						...multisigDoc.data(),
-						created_at: multisigDoc?.data()?.created_at?.toDate()
-					}
-				});
-			}
-
-			// check if multisig already exists on chain
-			const { data: onChainMultisigData, error: onchainFetchErr } = await getOnChainMultisigByAddress(multisigAddress, network);
-			if (onchainFetchErr) return res.status(400).json({ error: onchainFetchErr || responseMessages.onchain_multisig_fetch_error });
-			if (!onChainMultisigData || onChainMultisigData.count < 1) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
-
-			const newMultisig: IMultisigAddress = {
-				address: multisigAddress,
-				created_at: new Date(),
-				name: multisigName,
-				signatories: substrateSignatories,
-				network: String(network).toLowerCase(),
-				threshold: Number(threshold),
-				is_on_chain: true
-			};
-
-			await multisigRef.set(newMultisig, { merge: true });
-
-			functions.logger.info('New multisig linked with an address of ', multisigAddress);
 			return res.status(200).json({ data: newMultisig });
 		} catch (err:unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
@@ -396,8 +327,7 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				name: DEFAULT_MULTISIG_NAME,
 				signatories: multisigMetaData.signatories || [],
 				network: String(network).toLowerCase(),
-				threshold: Number(multisigMetaData.threshold) || 0,
-				is_on_chain: true
+				threshold: Number(multisigMetaData.threshold) || 0
 			};
 
 			res.status(200).json({ data: newMultisig });
@@ -498,7 +428,7 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 			functions.logger.info('Deleted multisig with an address of ', multisigAddress);
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
-			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in deleteMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
