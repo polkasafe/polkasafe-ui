@@ -15,19 +15,17 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getNetwork from 'src/utils/getNetwork';
 
-import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
 interface ITransactionProps {
 	status: 'Approval' | 'Cancelled' | 'Executed';
-	type: 'Sent' | 'Received';
 	date: string;
 	approvals: string[];
 	threshold: number;
@@ -40,7 +38,7 @@ interface ITransactionProps {
 
 const network = getNetwork();
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, type, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -183,35 +181,23 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						)}
 					>
 						<p className='col-span-3 flex items-center gap-x-3'>
-							{
-								type === 'Sent'?
-									<span
-										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
-									>
-										<ArrowUpRightIcon />
-									</span>
-									:
-									<span
-										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
-									>
-										<ArrowDownLeftIcon />
-									</span>
-							}
+
+							<span
+								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+							>
+								<ArrowUpRightIcon />
+							</span>
+
 							<span>
-								{type}
+								Sent
 							</span>
 						</p>
 						<p className='col-span-2 flex items-center gap-x-[6px]'>
 							<PolkadotIcon className='text-base' />
 							<span
-								className={classNames(
-									'font-normal text-xs leading-[13px] text-failure',
-									{
-										'text-success': type === 'Received'
-									}
-								)}
+								className={'font-normal text-xs leading-[13px] text-failure'}
 							>
-								{type === 'Sent'? '-': '+'} {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network) : `? ${token}`}
+								- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network) : `? ${token}`}
 							</span>
 						</p>
 						<p className='col-span-2'>
@@ -241,31 +227,24 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					// )}
 					>
 						<Divider className='bg-text_secondary my-5' />
-						{
-							type === 'Received'?
-								<ReceivedInfo
-									amount={decodedCallData?.args?.value || ''}
-									amountType={token}
-									date={date}
-								/>
-								:
-								<SentInfo
-									amount={decodedCallData?.args?.value || ''}
-									amountUSD={amountUSD}
-									callHash={callHash}
-									callDataString={callDataString}
-									callData={callData}
-									date={date}
-									approvals={approvals}
-									threshold={threshold}
-									loading={loading}
-									recipientAddress={decodedCallData?.args?.dest?.id}
-									setCallDataString={setCallDataString}
-									handleApproveTransaction={handleApproveTransaction}
-									handleCancelTransaction={handleCancelTransaction}
-									note={note}
-								/>
-						}
+
+						<SentInfo
+							amount={decodedCallData?.args?.value || ''}
+							amountUSD={amountUSD}
+							callHash={callHash}
+							callDataString={callDataString}
+							callData={callData}
+							date={date}
+							approvals={approvals}
+							threshold={threshold}
+							loading={loading}
+							recipientAddress={decodedCallData?.args?.dest?.id}
+							setCallDataString={setCallDataString}
+							handleApproveTransaction={handleApproveTransaction}
+							handleCancelTransaction={handleCancelTransaction}
+							note={note}
+						/>
+
 					</div>
 				</Collapse.Panel>
 			</Collapse>

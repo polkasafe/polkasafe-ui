@@ -4,14 +4,16 @@
 import { Button,Modal,UploadProps } from 'antd';
 import { message, Upload } from 'antd';
 import React, { FC, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, UploadBoxIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const { Dragger } = Upload;
 
 const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.SetStateAction<string[]>>}) => {
+	const { network } = useGlobalApiContext();
 	const { address } = useGlobalUserDetailsContext();
 	const [showSignatories, setShowSignatories] = useState<boolean>(false);
 	const [uploaded, setUploaded] = useState<string[]>([]);
@@ -94,7 +96,7 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 							className=" flex justify-between text-sm mb-3 font-normal leading-[15px] outline-0 p-3 border-2 border-dashed border-[#505050] rounded-lg text-white"
 						>
 							{item}
-							<button className='text-primary' onClick={() => copyAddress(item)}><CopyIcon className='w-5'/></button>
+							<button className='text-primary' onClick={() => copyText(item, true, network)}><CopyIcon className='w-5'/></button>
 						</div>
 					))}
 				</Modal>

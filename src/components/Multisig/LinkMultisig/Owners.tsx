@@ -5,8 +5,9 @@
 import { Button, Form, Input } from 'antd';
 import React from 'react';
 import profileImg from 'src/assets/icons/profile-img.png';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
@@ -25,6 +26,8 @@ interface Props{
 }
 
 const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatoriesArray, setSignatoriesArray }: Props) => {
+
+	const { network } = useGlobalApiContext();
 
 	const onSignatoryChange = (event: any, i: number) => {
 		setSignatoriesArray((prevState) => {
@@ -113,7 +116,7 @@ const Owners = ({ signatories, setThreshold, setSignatoriesWithName, signatories
 											defaultValue={item.name}
 										/>
 										<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
-											<button onClick={() => copyAddress(item.address)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
+											<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary cursor-pointer'/></button>
 											<ShareIcon className='text-text_secondary'/></div>
 									</div>
 								</div>

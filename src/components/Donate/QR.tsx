@@ -4,7 +4,7 @@
 import React from 'react';
 import AddressQr from 'src/ui-components/AddressQr';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import shortenAddress from 'src/utils/shortenAddress';
 
 const QR = () => {
@@ -24,7 +24,7 @@ const QR = () => {
 					</span>
 				</p>
 				<p className='text-sm md:text-base text-text_secondary flex items-center gap-x-[9px]'>
-					<button onClick={() => copyAddress('165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb')}><CopyIcon className='hover:text-primary'/></button>
+					<button onClick={() => copyText('165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb')}><CopyIcon className='hover:text-primary'/></button>
 					<a href={`https://www.subscan.io/account/${'165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb'}`} target='_blank' rel="noreferrer" >
 						<ExternalLinkIcon  />
 					</a>

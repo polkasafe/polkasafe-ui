@@ -25,7 +25,7 @@ import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import getNetwork from 'src/utils/getNetwork';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
@@ -196,7 +196,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 										defaultValue={address}
 									/>
 									<div className='absolute right-2'>
-										<button onClick={() => copyAddress(recipientAddress)}>
+										<button onClick={() => copyText(recipientAddress, true, network)}>
 											<CopyIcon className='mr-2 text-primary' />
 										</button>
 										<QrModal />
@@ -236,7 +236,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				<div className='flex items-center gap-x-[10px]'>
 					<div
 						className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-						onClick={() => copyAddress(callData)}
+						onClick={() => copyText(callData)}
 					>
 						{callData}
 						<button className='text-primary'><CopyIcon /></button>

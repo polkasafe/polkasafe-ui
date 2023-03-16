@@ -4,9 +4,10 @@
 
 import Identicon from '@polkadot/react-identicon';
 import React from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { IMultisigAddress } from 'src/types';
 import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
@@ -23,6 +24,8 @@ interface Props{
 }
 
 const Review = ({ multisigData, signatories, multisigName }: Props) => {
+	const { network } = useGlobalApiContext();
+
 	return (
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
@@ -69,7 +72,7 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 										theme={'polkadot'}
 									/>
 									<p className='mx-2'>{shortenAddress(multisigData?.address || '')}</p>
-									<button onClick={() => copyAddress(multisigData?.address || '')}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
+									<button onClick={() => copyText(multisigData?.address || '', true, network)}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
 									<ShareIcon/>
 								</div>
 							</div>

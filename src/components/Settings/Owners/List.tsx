@@ -3,9 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Divider } from 'antd';
 import React, { FC } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
-import copyAddress from 'src/utils/copyAddress';
+import copyText from 'src/utils/copyText';
 
 import EditOwner from './Edit';
 import RemoveOwner from './Remove';
@@ -20,7 +21,9 @@ interface IListOwnersProps {
 }
 
 const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
+	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
+
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
@@ -48,7 +51,7 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 									</div>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<button className='hover:text-primary' onClick={() => copyAddress(address)}><CopyIcon /></button>
+										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
 										<ExternalLinkIcon />
 									</div>
 								</div>
