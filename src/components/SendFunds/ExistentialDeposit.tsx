@@ -19,16 +19,13 @@ import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
-import getNetwork from 'src/utils/getNetwork';
 import { transferFunds } from 'src/utils/transferFunds';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
-const network = getNetwork();
-
 const ExistentialDeposit = () => {
 	const { toggleVisibility } = useModalContext();
-	const { api, apiReady } = useGlobalApiContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
@@ -74,6 +71,7 @@ const ExistentialDeposit = () => {
 			await transferFunds({
 				amount: amount,
 				api,
+				network,
 				recepientAddress: activeMultisig,
 				senderAddress: selectedSender
 			});

@@ -5,7 +5,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import formatBnBalance from 'src/utils/formatBnBalance';
-import getNetwork from 'src/utils/getNetwork';
 
 interface Props {
 	className?: string
@@ -14,8 +13,7 @@ interface Props {
 }
 
 const Balance = ({ address, className, onChange }: Props) => {
-	const { api, apiReady } = useGlobalApiContext();
-	const network = getNetwork();
+	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [balance, setBalance] = useState<string>('0');
 

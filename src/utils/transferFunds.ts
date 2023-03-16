@@ -7,18 +7,15 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 
-import getNetwork from './getNetwork';
-
 interface Props {
 	recepientAddress: string;
 	senderAddress: string;
 	amount: BN;
-	api: ApiPromise
+	api: ApiPromise;
+	network: string
 }
 
-const network =  getNetwork();
-
-export async function transferFunds({ api, recepientAddress, senderAddress, amount } : Props) {
+export async function transferFunds({ api, network, recepientAddress, senderAddress, amount } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,

@@ -6,7 +6,6 @@ import React, { FC, useRef, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { chainProperties, networks } from 'src/global/networkConstants';
 import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
-import getNetwork from 'src/utils/getNetwork';
 
 import NetworkCard from './NetworkCard';
 
@@ -22,8 +21,7 @@ interface INetworksDropdownProps {
 }
 
 const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, iconClassName, titleClassName }) => {
-	const network = getNetwork();
-	const { setNetwork } = useGlobalApiContext();
+	const { network, setNetwork } = useGlobalApiContext();
 
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);

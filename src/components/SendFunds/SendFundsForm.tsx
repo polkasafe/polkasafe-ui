@@ -26,7 +26,6 @@ import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } fr
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
-import getNetwork from 'src/utils/getNetwork';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -54,12 +53,11 @@ const addRecipientHeading = () => {
 	}
 };
 
-const network = getNetwork();
-
 const SendFundsForm = (props: ISendFundsFormProps) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	const { toggleVisibility } = useModalContext();
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { className, onCancel, setNewTxn } = props;
