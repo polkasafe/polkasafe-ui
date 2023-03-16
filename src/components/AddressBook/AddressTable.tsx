@@ -60,7 +60,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address, network)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
-										<a href={`https://www.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
+										<a href={`https://${network}.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
 											<ExternalLinkIcon  />
 										</a>
 									</div>

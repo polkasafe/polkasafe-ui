@@ -253,9 +253,6 @@ const LinkMultisig = () => {
 	const checkMultisig = (signatories: ISignatory[]) => {
 		const signatoryAddresses = signatories.map(item => item.address);
 		const response = _createMultisig(signatoryAddresses, threshold, chainProperties[network].ss58Format);
-		console.log('network', network),
-		console.log('ss58', chainProperties[network].ss58Format),
-		console.log(response, multisigAddress);
 		if(response && response.multisigAddress && getEncodedAddress(response.multisigAddress, network) === multisigAddress){
 			setMultisigData(prevState => {
 				return {

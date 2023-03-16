@@ -94,7 +94,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								className='flex items-center gap-x-2 text-sm'
 							>
 								<button onClick={() => copyText(recipientAddress, true, network)}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://www.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
+								<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
 							</span>
@@ -292,7 +292,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 															className='flex items-center gap-x-2 text-sm'
 														>
 															<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
+															<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>
@@ -338,7 +338,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 															className='flex items-center gap-x-2 text-sm'
 														>
 															<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-															<a href={`https://www.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
+															<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
 																<ExternalLinkIcon  />
 															</a>
 														</span>

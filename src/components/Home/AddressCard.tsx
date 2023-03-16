@@ -59,7 +59,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 										className='flex items-center gap-x-2 text-sm'
 									>
 										<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-										<a href={`https://www.subscan.io/account/${getEncodedAddress(item.address, network)}`} target='_blank' rel="noreferrer" >
+										<a href={`https://${network}.subscan.io/account/${getEncodedAddress(item.address, network)}`} target='_blank' rel="noreferrer" >
 											<ExternalLinkIcon  />
 										</a>
 									</span>
