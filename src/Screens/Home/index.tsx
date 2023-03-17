@@ -41,7 +41,7 @@ const Home = () => {
 							</div>
 						</section>
 						:
-						<section className='bg-black bg-opacity-50 p-5 rounded-lg h-full'>
+						<section className='bg-bg-main p-5 rounded-lg h-full'>
 							<AddMultisig homepage />
 						</section>
 					:
