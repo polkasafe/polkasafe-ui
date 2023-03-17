@@ -11,6 +11,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
+import { calcWeight } from './calcWeight';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Args {
@@ -38,35 +39,39 @@ export default async function initMultisigTransfer({
 }: Args) {
 
 	//promise to be resolved when transaction is finalized
+
+	// 1. Use formatBalance to display amounts
+	formatBalance.setDefaults({
+		decimals: chainProperties[network].tokenDecimals,
+		unit: chainProperties[network].tokenSymbol
+	});
+
+	// 2. Define relevant constants
+	// const MAX_WEIGHT = new Uint8Array([640000000]);
+	const AMOUNT_TO_SEND = amount.toNumber();
+	const displayAmount = formatBalance(AMOUNT_TO_SEND);
+
+	// remove initator address from signatories
+	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
+
+	// 3. API calls - info is necessary for the timepoint
+	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
+
+	// 4. Set the timepoint
+	// null for transaction initiation
+	const TIME_POINT = null;
+
+	const callData = api.createType('Call', call.method.toHex());
+	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
+
+	let blockHash = '';
+
 	return new Promise<void>((resolve, reject) => {
 
-		// 1. Use formatBalance to display amounts
-		formatBalance.setDefaults({
-			decimals: chainProperties[network].tokenDecimals,
-			unit: chainProperties[network].tokenSymbol
-		});
-
-		// 2. Define relevant constants
-		const MAX_WEIGHT = new Uint8Array([640000000]);
-		const AMOUNT_TO_SEND = amount.toNumber();
-		const displayAmount = formatBalance(AMOUNT_TO_SEND);
-
-		// remove initator address from signatories
-		const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
-
-		// 3. API calls - info is necessary for the timepoint
-		const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
-
-		// 4. Set the timepoint
-		// null for transaction initiation
-		const TIME_POINT = null;
-
-		let blockHash = '';
 		// 5. first call is approveAsMulti
 		api.tx.multisig
-			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT)
+			.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT as any)
 			.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
-			// TODO: Make callback function reusable (pass onSuccess and onError functions)
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					messageApi.error('Transaction invalid');
