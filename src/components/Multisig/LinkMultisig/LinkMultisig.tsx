@@ -303,7 +303,10 @@ const LinkMultisig = () => {
 					{viewOwners?<div>
 						<NameAddress multisigName={multisigName} setMultisigName={setMultisigName} multisigAddress={multisigAddress} setMultisigAddress={setMultisigAddress} />
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-							<CancelBtn onClick={toggleVisibility} />
+							<CancelBtn onClick={() => {
+								toggleVisibility();
+								setNameAddress(true);
+							}} />
 							<AddBtn title='Continue' loading={loading} onClick={handleViewOwners}/>
 						</div>
 					</div>:<div>

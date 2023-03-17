@@ -159,13 +159,19 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 				</div>
 				<div className="flex flex-wrap">
 					<div className='m-2'>
+						<div className='text-white'>Signatories</div>
+						<div className='font-bold text-xl text-primary'>
+							{multisigAddresses.find((item) => item.address === activeMultisig)?.signatories.length || 0}
+						</div>
+					</div>
+					<div className='m-2'>
 						<div className='text-white'>Tokens</div>
 						<div className='font-bold text-xl text-primary'>{assetsData.length}</div>
 					</div>
 					<div className='m-2'>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-xl text-primary'>
-							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0) || 'N/A'}
+							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
 						</div>
 					</div>
 				</div>

@@ -24,10 +24,10 @@ const ConnectWallet = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (accounts && accounts.length > 0 && !address) {
+		if (accounts && accounts.length > 0) {
 			setAddress(accounts[0].address);
 		}
-	}, [accounts, address]);
+	}, [accounts, network]);
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);

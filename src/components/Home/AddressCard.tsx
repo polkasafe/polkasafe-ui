@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
+import { Divider } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AddAddrIcon from 'src/assets/icons/add-addr-icon.svg';
@@ -29,47 +30,50 @@ const AddressCard = ({ className }: { className?: string }) => {
 					<RightArrowOutlined/>
 				</div>
 			</div>
-			<div className={`${className} bg-bg-main flex flex-col justify-around items-center rounded-lg py-5 shadow-lg text-center h-80 mt-3`}>
-				<div className='flex flex-col items-center px-5 h-80 overflow-auto w-[100%] divide-y divide-gray-700'>
+			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-80 mt-3`}>
+				<div className='flex flex-col px-5 h-80 overflow-auto w-[full]'>
 					{addressBook.map((item, i) => (
-						<div
-							className='mb-3 flex items-center gap-x-4'
-							key={i}
-						>
-							<Identicon
-								value={item.address}
-								size={30}
-								theme='polkadot'
-							/>
+						<>
 							<div
-								className='flex flex-col gap-y-[6px]'
+								className='w-full flex items-center gap-x-4'
+								key={i}
 							>
-								<p
-									className='font-medium text-sm leading-[15px] text-white'
+								<Identicon
+									value={item.address}
+									size={30}
+									theme='polkadot'
+								/>
+								<div
+									className='flex flex-col gap-y-[6px]'
 								>
-									{item.name}
-								</p>
-								<p
-									className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-								>
-									<span>
-										{getEncodedAddress(item.address, network)}
-									</span>
-									<span
-										className='flex items-center gap-x-2 text-sm'
+									<p
+										className='font-medium text-sm leading-[15px] text-white'
 									>
-										<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-										<a href={`https://${network}.subscan.io/account/${getEncodedAddress(item.address, network)}`} target='_blank' rel="noreferrer" >
-											<ExternalLinkIcon  />
-										</a>
-									</span>
-								</p>
+										{item.name}
+									</p>
+									<p
+										className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+									>
+										<span>
+											{getEncodedAddress(item.address, network)}
+										</span>
+										<span
+											className='flex items-center gap-x-2 text-sm'
+										>
+											<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='hover:text-primary'/></button>
+											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(item.address, network)}`} target='_blank' rel="noreferrer" >
+												<ExternalLinkIcon  />
+											</a>
+										</span>
+									</p>
+								</div>
 							</div>
-						</div>
+							{addressBook.length - 1 !== i? <Divider className='bg-text_secondary mt-2 mb-3' />: null}
+						</>
 					))}
 				</div>
-				<div className='w-[90%] mt-5'>
-					<PrimaryButton className='w-[100%] flex items-center justify-center bg-highlight py-5' onClick={() => openModal('Add Address', <AddAdress/>)}>
+				<div className='w-full mt-5 flex justify-center'>
+					<PrimaryButton className='w-[90%] flex items-center justify-center bg-highlight py-5' onClick={() => openModal('Add Address', <AddAdress/>)}>
 						<img className='group-hover:fill-white' src={AddAddrIcon} alt="add"/>
 						<p className='px-2 text-primary'>Add Address</p>
 					</PrimaryButton>
