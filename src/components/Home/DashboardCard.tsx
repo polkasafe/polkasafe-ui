@@ -31,7 +31,6 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
-	console.log('multisigs', multisigAddresses);
 
 	// TODO: check why we're not using this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
