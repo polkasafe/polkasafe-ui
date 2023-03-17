@@ -11,7 +11,7 @@ const MultisigCreated = () => {
 	return (
 		<div className='flex flex-col items-center justify-center'>
 			<img src={MultisigImg} alt="multisig" className='mb-3'/>
-			<p className="text-text_secondary m-5">Your MultiSig has been created successfully!</p>
+			<p className="text-text_secondary m-5">Your Multisig has been created successfully!</p>
 			<Link to="/" ><Button className='flex items-center justify-center bg-highlight text-white border-none ml-1 py-4 mt-3' onClick={refresh}>View Dashboard</Button></Link>
 		</div>
 	);

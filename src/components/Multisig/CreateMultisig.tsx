@@ -163,7 +163,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					)).then(() => {
 						queueNotification({
 							header: 'Success!',
-							message: `Your MultiSig ${multisigName} has been created successfully!`,
+							message: `Your Multisig ${multisigName} has been created successfully!`,
 							status: NotificationStatus.SUCCESS
 						});
 						setLoading(false);

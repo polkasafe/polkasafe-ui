@@ -139,18 +139,14 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 
 		setLoading(true);
 		try {
-			if(!decodedCallData || !decodedCallData?.args || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
-				return;
-			}
 			await cancelMultisigTransfer({
-				amount: new BN(decodedCallData.args.value),
 				api,
 				approvingAddress: address,
 				callHash,
 				messageApi,
 				multisig,
 				network,
-				recipientAddress: decodedCallData.args.dest.id
+				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : ''
 			});
 			document.getElementById(callHash)?.remove();
 		} catch (error) {
