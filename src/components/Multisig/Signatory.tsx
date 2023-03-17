@@ -89,6 +89,30 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		if(data) {drop1?.appendChild(document.getElementById(data)!);}
 	};
 
+	const clickDrop = (event: any) => {
+		event.preventDefault();
+		const data = event.target.id;
+		const address = `${data}`.split('-')[1];
+
+		const substrateAddress = getSubstrateAddress(address);
+		if(!substrateAddress) return; //is invalid
+
+		setSignatories((prevState) => {
+			if(prevState.includes(substrateAddress)){
+				return prevState;
+			}
+			else{
+				return [
+					...prevState,
+					substrateAddress
+				];
+			}
+		});
+
+		const drop2 = document.getElementById(`drop2${homepage && '-home'}`);
+		if(data) {drop2?.appendChild(document.getElementById(data)!);}
+	};
+
 	return (
 		<div className="flex w-[45vw]">
 			<div className="flex w-[100%] items-center justify-center">
@@ -96,7 +120,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
 						{addresses.map((address) => (
-							<p title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
+							<p onClick={clickDrop} title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
 						))}
 					</div>
 				</div>

@@ -87,7 +87,7 @@ const Details = () => {
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
 				Details
 			</h2>
-			<article className='bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
+			<article className='h-full flex flex-col bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
 				<div className='flex items-center justify-between gap-x-5'>
 					<span>
 						Version:
@@ -112,6 +112,7 @@ const Details = () => {
 						</span>
 					</div>
 				}
+				<div className='flex-1'></div>
 				<Button disabled={!activeMultisig} size='large' onClick={handleRemoveSafe} loading={loading} className='border-none outline-none text-failure bg-failure bg-opacity-10 flex items-center gap-x-3 justify-center rounded-lg p-[10px] w-full mt-7'>
 					<DeleteIcon />
 					<span>Remove Safe</span>

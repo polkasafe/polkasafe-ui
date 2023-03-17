@@ -4,18 +4,22 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
+import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
+import queueNotification from 'src/ui-components/QueueNotification';
+import { NotificationStatus } from 'src/ui-components/types';
 
 interface Props {
 	recepientAddress: string;
 	senderAddress: string;
 	amount: BN;
 	api: ApiPromise;
-	network: string
+	network: string;
+	messageApi: MessageInstance
 }
 
-export async function transferFunds({ api, network, recepientAddress, senderAddress, amount } : Props) {
+export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, messageApi } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -25,9 +29,47 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 	const AMOUNT_TO_SEND = amount.toNumber();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
 
-	const txHash = await api.tx.balances
-		.transfer(recepientAddress, AMOUNT_TO_SEND)
-		.signAndSend(senderAddress);
-	console.log(`Sending ${displayAmount} from ${senderAddress} to ${recepientAddress}`);
-	console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+	return new Promise<void>((resolve, reject) => {
+
+		api.tx.balances
+			.transfer(recepientAddress, AMOUNT_TO_SEND)
+			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
+				if (status.isInvalid) {
+					console.log('Transaction invalid');
+					messageApi.error('Transaction invalid');
+				} else if (status.isReady) {
+					console.log('Transaction is ready');
+					messageApi.loading('Transaction is ready');
+				} else if (status.isBroadcast) {
+					console.log('Transaction has been broadcasted');
+					messageApi.loading('Transaction has been broadcasted');
+				} else if (status.isInBlock) {
+					console.log('Transaction is in block');
+					messageApi.loading('Transaction is in block');
+				} else if (status.isFinalized) {
+					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+					for (const { event } of events) {
+						if (event.method === 'ExtrinsicSuccess') {
+							queueNotification({
+								header: 'Success!',
+								message: 'Transaction Successful.',
+								status: NotificationStatus.SUCCESS
+							});
+							resolve();
+						} else if (event.method === 'ExtrinsicFailed') {
+							console.log('Transaction failed');
+							queueNotification({
+								header: 'Error!',
+								message: 'Transaction Failed',
+								status: NotificationStatus.ERROR
+							});
+							reject('ExtrinsicFailed');
+						}
+					}
+				}
+			});
+		console.log(`Sending ${displayAmount} from ${senderAddress} to ${recepientAddress}`);
+	});
 }

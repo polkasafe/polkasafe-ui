@@ -4,6 +4,7 @@
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
@@ -18,14 +19,15 @@ const ConnectWallet = () => {
 
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
+	const { network } = useGlobalApiContext();
 	const [address, setAddress] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (accounts && accounts.length > 0 && !address) {
+		if (accounts && accounts.length > 0) {
 			setAddress(accounts[0].address);
 		}
-	}, [accounts, address]);
+	}, [accounts, network]);
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);

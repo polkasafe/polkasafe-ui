@@ -36,6 +36,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [loading, setLoading] = useState(false);
 	const [transactionLoading, setTransactionLoading] = useState(false);
+	console.log('multisig address', multisigAddresses);
 
 	const handleNewTransaction = async () => {
 		setTransactionLoading(true);
@@ -159,6 +160,12 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					</div>
 				</div>
 				<div className="flex flex-wrap">
+					<div className='m-2'>
+						<div className='text-white'>Signatories</div>
+						<div className='font-bold text-xl text-primary'>
+							{multisigAddresses.find((item) => item.address === activeMultisig)?.signatories.length || 0}
+						</div>
+					</div>
 					<div className='m-2'>
 						<div className='text-white'>Tokens</div>
 						<div className='font-bold text-xl text-primary'>{assetsData.length}</div>

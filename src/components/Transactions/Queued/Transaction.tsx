@@ -20,6 +20,7 @@ import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
 import formatBnBalance from 'src/utils/formatBnBalance';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 import SentInfo from './SentInfo';
 
@@ -86,7 +87,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 			return;
 		}
 
-		const wallet = accountsMap[address];
+		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
 		if(!signersMap[wallet]) return;
 
 		const signer: Signer = signersMap[wallet];
@@ -126,7 +127,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 			return;
 		}
 
-		const wallet = accountsMap[address];
+		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
 		if(!signersMap[wallet]) return;
 
 		const signer: Signer = signersMap[wallet];

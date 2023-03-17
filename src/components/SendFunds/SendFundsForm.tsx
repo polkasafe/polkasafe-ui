@@ -26,6 +26,7 @@ import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } fr
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -85,7 +86,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 			return;
 		}
 
-		const wallet = accountsMap[address];
+		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
 		if(!signersMap[wallet]) return;
 
 		const signer: Signer = signersMap[wallet];

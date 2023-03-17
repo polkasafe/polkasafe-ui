@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Form, Input, Modal } from 'antd';
+import { AutoComplete, Form, Input, message, Modal } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import React, { FC, useState } from 'react';
@@ -19,11 +19,13 @@ import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { transferFunds } from 'src/utils/transferFunds';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
 const ExistentialDeposit = () => {
+	const [messageApi, contextHolder] = message.useMessage();
 	const { toggleVisibility } = useModalContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
@@ -60,8 +62,10 @@ const ExistentialDeposit = () => {
 	const handleSubmit = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap ) return;
 
-		const wallet = accountsMap[selectedSender];
-		if(!signersMap[wallet]) return;
+		const encodedSender = getEncodedAddress(selectedSender, network) || '';
+
+		const wallet = accountsMap[encodedSender];
+		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
 
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
@@ -71,6 +75,7 @@ const ExistentialDeposit = () => {
 			await transferFunds({
 				amount: amount,
 				api,
+				messageApi,
 				network,
 				recepientAddress: activeMultisig,
 				senderAddress: selectedSender
@@ -95,6 +100,7 @@ const ExistentialDeposit = () => {
 
 	return (
 		<div className='w-[35vw] max-w-[900px] min-w-[500px]'>
+			{contextHolder}
 
 			<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
 			{/* TODO: Make into reusable component */}
