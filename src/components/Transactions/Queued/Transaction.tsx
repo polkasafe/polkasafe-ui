@@ -199,7 +199,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						</p>
 						<p className='col-span-2 flex items-center justify-end gap-x-4'>
 							<span className='text-waiting'>
-								{approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
+								{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
 							</span>
 							<span className='text-white text-sm'>
 								{
