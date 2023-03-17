@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Button } from 'antd';
 import React, { useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -14,7 +15,9 @@ import Review from './Review';
 const emojis  = ['😍', '🙂', '😐', '🙁', '😢'];
 
 const Feedback = () => {
+	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
+
 	const [loading, setLoading] = useState<boolean>(false);
 	const [review, setReview] = useState<string>('');
 	const [rating, setRating] = useState<number | null>(null);
@@ -45,7 +48,7 @@ const Feedback = () => {
 						rating,
 						review
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

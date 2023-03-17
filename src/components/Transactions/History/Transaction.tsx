@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC,useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -17,9 +18,11 @@ import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
 
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
+dayjs.extend(LocalizedFormat);
 
 const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd }) => {
-	dayjs.extend(LocalizedFormat);
+	const { network } = useGlobalApiContext();
+
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [note, setNote] = useState<string>('');
@@ -43,7 +46,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					body: JSON.stringify({
 						callHash
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

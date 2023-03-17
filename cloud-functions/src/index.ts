@@ -26,9 +26,10 @@ const firestoreDB = admin.firestore();
 // TODO: Remove cors before production
 const corsHandler = cors({ origin: true });
 
-const isValidRequest = async (address?:string, signature?:string): Promise<{ isValid: boolean, error: string }> => {
-	if (!address || !signature) return { isValid: false, error: responseMessages.missing_headers };
+const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
+	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
 	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_headers };
+	if (!Object.values(networks).includes(network)) return { isValid: false, error: responseMessages.invalid_network };
 
 	const isValid = await isValidSignature(signature, address);
 	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };
@@ -87,8 +88,9 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		try {
@@ -144,8 +146,9 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		try {
@@ -189,8 +192,9 @@ export const removeFromAddressBook = functions.https.onRequest(async (req, res) 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		try {
@@ -230,12 +234,13 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { signatories, threshold, multisigName, network } = req.body;
-		if (!signatories || !threshold || !multisigName || !network) {
+		const { signatories, threshold, multisigName } = req.body;
+		if (!signatories || !threshold || !multisigName) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
@@ -274,7 +279,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			}
 
 			const newMultisig: IMultisigAddress = {
-				address: multisigAddress,
+				address: encodedMultisigAddress,
 				created_at: new Date(),
 				name: multisigName,
 				signatories: substrateSignatories,
@@ -284,7 +289,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			await multisigRef.set(newMultisig, { merge: true });
 
-			functions.logger.info('New multisig created with an address of ', multisigAddress);
+			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
 			return res.status(200).json({ data: newMultisig });
 		} catch (err:unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
@@ -297,18 +302,21 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { multisigAddress, network } = req.body;
+		const { multisigAddress } = req.body;
 		if (!multisigAddress || !network) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
 		try {
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
 			// check if the multisig already exists in our db
-			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(multisigAddress)).get();
+			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
 			if (multisigRef.exists) {
 				const data = multisigRef.data();
 				return res.status(200).json({ data: {
@@ -317,12 +325,12 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				} });
 			}
 
-			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
 			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
 			if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
 
 			const newMultisig: IMultisigAddress = {
-				address: multisigAddress,
+				address: encodedMultisigAddress,
 				created_at: new Date(),
 				name: DEFAULT_MULTISIG_NAME,
 				signatories: multisigMetaData.signatories || [],
@@ -334,7 +342,7 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 
 			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
 				// make a copy to db
-				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
 				await newMultisigRef.set(newMultisig);
 			}
 			return;
@@ -349,17 +357,19 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { multisigAddress, network, limit, page } = req.body;
+		const { multisigAddress, limit, page } = req.body;
 		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
 		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
 		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
 
 		try {
-			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(multisigAddress, network, Number(limit), Number(page), firestoreDB);
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(encodedMultisigAddress, network, Number(limit), Number(page), firestoreDB);
 			if (transactionsError || !transactionsArr) return res.status(400).json({ error: transactionsError || responseMessages.transfers_fetch_error });
 
 			res.status(200).json({ data: transactionsArr });
@@ -386,11 +396,12 @@ export const getAssetsForAddress = functions.https.onRequest(async (req, res) =>
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { address: addressToFetch, network } = req.body;
+		const { address: addressToFetch } = req.body;
 		if (!addressToFetch || !network) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -414,18 +425,20 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { multisigAddress } = req.body;
 		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(multisigAddress);
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
 			await multisigRef.delete();
 
-			functions.logger.info('Deleted multisig with an address of ', multisigAddress);
+			functions.logger.info('Deleted multisig with an address of ', encodedMultisigAddress);
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in deleteMultisig :', { err, stack: (err as any).stack });
@@ -438,8 +451,9 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { review, rating } = req.body;
@@ -491,8 +505,9 @@ export const updateEmail = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { email } = req.body;
@@ -516,17 +531,19 @@ export const isMultisigOnChain = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { multisigAddress, network } = req.body;
+		const { multisigAddress } = req.body;
 		if (!multisigAddress || !network) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
 		try {
-			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(multisigAddress, network);
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
 			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
 			if (multisigMetaData && multisigMetaData.balance === '0') {
 				return res.status(200).json({ data: { isOnChain: false } });
@@ -544,18 +561,20 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { multisigAddress, network, limit, page } = req.body;
+		const { multisigAddress, limit, page } = req.body;
 		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
 		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
 		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
 
 		try {
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
 			const { data: queueItemsArr, error: queueItemsError } = await getMultisigQueueByAddress(
-				multisigAddress,
+				encodedMultisigAddress,
 				network,
 				Number(limit),
 				Number(page),
@@ -588,11 +607,12 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { amount_token, block_number, callData, callHash, from, network, to, note } = req.body;
+		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
 		if (!amount_token || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
@@ -626,8 +646,9 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { address: mutisigAddress, name } = req.body;
@@ -635,8 +656,9 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
+			const encodedMultisigAddress = encodeAddress(mutisigAddress, chainProperties[network].ss58Format);
 
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(mutisigAddress);
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
 			const multisigAddressDoc = (await multisigRef.get()).data() as IMultisigAddress;
 
 			if (multisigAddressDoc.signatories.includes(substrateAddress)) {
@@ -657,11 +679,12 @@ export const sendNotification = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { addresses, link, message, type, network } = req.body;
+		const { addresses, link, message, type } = req.body;
 		if (!addresses || !Array.isArray(addresses) || !message || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
@@ -691,8 +714,9 @@ export const getNotifications = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		try {
@@ -722,8 +746,9 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { callHash, multisigAddress, note } = req.body;
@@ -741,10 +766,12 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 				return res.status(200).json({ data: responseMessages.success });
 			}
 
-			if (!multisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
+			if (!encodedMultisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
 
 			// get signatories for multisig
-			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : multisigAddress).get();
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : encodedMultisigAddress).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
 				txRef.set({ note: String(note) }, { merge: true });
@@ -763,8 +790,9 @@ export const getTransactionNote = functions.https.onRequest(async (req, res) => 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { callHash } = req.body;
@@ -786,8 +814,9 @@ export const addAppsAlertRecipient = functions.https.onRequest(async (req, res) 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
 		const { email } = req.body;
@@ -817,11 +846,12 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature);
+		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { callHash, callData, network } = req.body;
+		const { callHash, callData } = req.body;
 		if (!callHash || !callData || !network ) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {

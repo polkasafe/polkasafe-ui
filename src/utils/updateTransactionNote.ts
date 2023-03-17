@@ -9,12 +9,14 @@ interface Args {
 	callHash: string;
 	multisigAddress?: string;
 	note: string;
+	network: string
 }
 
 export default async function updateTransactionNote({
 	callHash,
 	multisigAddress,
-	note
+	note,
+	network
 }: Args): Promise<{ data?: any, error?: string }> {
 	const editNoteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionNote `, {
 		body: JSON.stringify({
@@ -22,7 +24,7 @@ export default async function updateTransactionNote({
 			multisigAddress : multisigAddress || '',
 			note
 		}),
-		headers: firebaseFunctionsHeader(),
+		headers: firebaseFunctionsHeader(network),
 		method: 'POST'
 	});
 

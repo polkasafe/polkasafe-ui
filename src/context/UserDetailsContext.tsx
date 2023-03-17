@@ -11,6 +11,8 @@ import { UserDetailsContextType } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
+import { useGlobalApiContext } from './ApiContext';
+
 const initialUserDetailsContext : UserDetailsContextType = {
 	activeMultisig: localStorage.getItem('active_multisig') || '',
 	address: localStorage.getItem('address') || '',
@@ -30,6 +32,7 @@ export function useGlobalUserDetailsContext() {
 
 export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) => {
 	const navigate = useNavigate();
+	const { network } = useGlobalApiContext();
 
 	const [userDetailsContextState, setUserDetailsContextState] = useState(initialUserDetailsContext);
 	const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 		setLoading(true);
 		const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-			headers: firebaseFunctionsHeader(),
+			headers: firebaseFunctionsHeader(network),
 			method: 'POST'
 		});
 

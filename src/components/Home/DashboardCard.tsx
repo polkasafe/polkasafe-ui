@@ -47,13 +47,12 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 				multisigAddress: activeMultisig,
 				network
 			}),
-			headers: firebaseFunctionsHeader(),
+			headers: firebaseFunctionsHeader(network),
 			method: 'POST'
 		});
 
 		const { data: isMultisigOnChainData, error: isMultisigOnChainErr } = await isMultisigOnChainRes.json();
 		if(isMultisigOnChainErr || !isMultisigOnChainData) {
-			console.log('show error state');
 			setTransactionLoading(false);
 			return;
 		}
@@ -83,7 +82,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						address: activeMultisig,
 						network
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

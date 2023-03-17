@@ -146,7 +146,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								});
 
 								// update note for transaction history
-								await updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, note });
+								await updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,

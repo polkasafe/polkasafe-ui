@@ -5,6 +5,7 @@ import { Form, Input } from 'antd';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -19,6 +20,7 @@ interface Props {
 
 const EditNote = ({ note, callHash, setUpdatedNote }: Props) => {
 	const { toggleVisibility } = useModalContext();
+	const { network } = useGlobalApiContext();
 
 	const { activeMultisig } = useGlobalUserDetailsContext();
 
@@ -41,6 +43,7 @@ const EditNote = ({ note, callHash, setUpdatedNote }: Props) => {
 				const { data: editNoteData, error: editNoteError } = await updateTransactionNote({
 					callHash,
 					multisigAddress: activeMultisig,
+					network,
 					note: newNote
 				});
 

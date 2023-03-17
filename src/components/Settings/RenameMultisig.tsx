@@ -5,6 +5,7 @@ import { Form, Input } from 'antd';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -13,6 +14,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 const RenameMultisig = ({ name }: { name: string }) => {
+	const { network } = useGlobalApiContext();
 	const { toggleVisibility } = useModalContext();
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
@@ -36,7 +38,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 						address: activeMultisig,
 						name: multisigName
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

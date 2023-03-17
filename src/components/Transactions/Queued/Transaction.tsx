@@ -75,7 +75,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					callHash,
 					network
 				}),
-				headers: firebaseFunctionsHeader(),
+				headers: firebaseFunctionsHeader(network),
 				method: 'POST'
 			});
 		})();

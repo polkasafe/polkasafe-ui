@@ -5,6 +5,7 @@
 import { Button, Input } from 'antd';
 import React, { useState } from 'react';
 import appsBG from 'src/assets/icons/apps-bg.svg';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { NotifyMail } from 'src/ui-components/CustomIcons';
@@ -12,6 +13,8 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 const Apps = () => {
+	const { network } = useGlobalApiContext();
+
 	const [loading, setLoading] = useState<boolean>(false);
 	const [email, setEmail] = useState<string>('');
 
@@ -32,7 +35,7 @@ const Apps = () => {
 					body: JSON.stringify({
 						email
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

@@ -69,7 +69,7 @@ const LinkMultisig = () => {
 						address,
 						name
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
@@ -126,15 +126,9 @@ const LinkMultisig = () => {
 					body: JSON.stringify({
 						signatories,
 						threshold,
-						multisigName,
-						network
+						multisigName
 					}),
-					headers: {
-						'x-address': address,
-						'x-signature': signature,
-						Accept: 'application/json',
-						'Content-Type': 'application/json'
-					},
+					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
 				});
 
@@ -195,7 +189,7 @@ const LinkMultisig = () => {
 						multisigAddress,
 						network
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

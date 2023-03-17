@@ -4,6 +4,7 @@
 
 import { Button, Input } from 'antd';
 import React, { useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CheckOutlined, Disc, NotifyMail } from 'src/ui-components/CustomIcons';
@@ -12,6 +13,8 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 const EmailBadge = () => {
+	const { network } = useGlobalApiContext();
+
 	const [showBadge, setShowBadge] = useState<boolean>(true);
 	const [showDiv, setShowDiv] = useState<boolean>(true);
 	const [inputValue, setInputValue] = useState<string>('');
@@ -38,7 +41,7 @@ const EmailBadge = () => {
 					body: JSON.stringify({
 						email: inputValue
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

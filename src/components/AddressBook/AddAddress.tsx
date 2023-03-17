@@ -6,6 +6,7 @@ import { Form, Input, message } from 'antd';
 import React, { useState } from 'react';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -24,6 +25,7 @@ interface IMultisigProps {
 
 const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
 	const [messageApi, contextHolder] = message.useMessage();
+	const { network } = useGlobalApiContext();
 
 	const [address, setAddress] = useState<string>(addAddress || '');
 	const [name, setName] = useState<string>('');
@@ -65,7 +67,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						address,
 						name
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
