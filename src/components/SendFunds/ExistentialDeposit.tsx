@@ -84,6 +84,7 @@ const ExistentialDeposit = () => {
 			console.log(error);
 		} finally {
 			setLoading(false);
+			toggleVisibility();
 		}
 	};
 
