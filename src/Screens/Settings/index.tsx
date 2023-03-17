@@ -54,10 +54,10 @@ const Settings = () => {
 			</div>
 			{userAddress &&
 			<div className='mt-[30px] grid md:grid-cols-2 gap-[30px]'>
-				<section className='col-span-1 h-full'>
+				<section className='col-span-1'>
 					<Details />
 				</section>
-				<section className='col-span-1 h-full'>
+				<section className='col-span-1'>
 					<Feedback />
 				</section>
 			</div>}

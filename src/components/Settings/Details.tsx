@@ -83,11 +83,11 @@ const Details = () => {
 	};
 
 	return (
-		<>
+		<div className='h-full flex flex-col'>
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
 				Details
 			</h2>
-			<article className='h-full flex flex-col bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
+			<article className=' flex flex-col flex-1 bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
 				<div className='flex items-center justify-between gap-x-5'>
 					<span>
 						Version:
@@ -118,7 +118,7 @@ const Details = () => {
 					<span>Remove Safe</span>
 				</Button>
 			</article>
-		</>
+		</div>
 	);
 };
 

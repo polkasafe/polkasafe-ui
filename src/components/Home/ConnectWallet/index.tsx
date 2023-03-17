@@ -20,7 +20,6 @@ const ConnectWallet = () => {
 	const { network } = useGlobalApiContext();
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
-	const { network } = useGlobalApiContext();
 	const [address, setAddress] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 

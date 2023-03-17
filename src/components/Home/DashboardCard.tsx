@@ -31,12 +31,12 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
+	console.log('multisigs', multisigAddresses);
 
 	// TODO: check why we're not using this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [loading, setLoading] = useState(false);
 	const [transactionLoading, setTransactionLoading] = useState(false);
-	console.log('multisig address', multisigAddresses);
 
 	const handleNewTransaction = async () => {
 		setTransactionLoading(true);
@@ -172,7 +172,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='m-2'>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-xl text-primary'>
-							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0) || 'N/A'}
+							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
 						</div>
 					</div>
 				</div>

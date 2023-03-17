@@ -36,7 +36,7 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
-	const { setUserDetailsContextState, addressBook, address: userAddress } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState, addressBook, address: userAddress, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
 	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
@@ -143,6 +143,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				}
 
 				if(multisigData){
+					if(multisigAddresses.some((item) => item.address === multisigData.address)){
+						queueNotification({
+							header: 'Multisig Exist!',
+							message: 'Please add other signatories.',
+							status: NotificationStatus.WARNING
+						});
+						setLoading(false);
+						return;
+					}
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
