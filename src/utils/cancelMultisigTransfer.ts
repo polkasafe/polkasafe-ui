@@ -5,7 +5,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import { MessageInstance } from 'antd/es/message/interface';
-import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -17,23 +16,18 @@ interface Props {
 	api: ApiPromise,
 	network: string,
 	multisig: IMultisigAddress,
-	amount: BN,
 	approvingAddress: string,
-	recipientAddress: string,
+	recipientAddress?: string,
 	callHash: string,
 	messageApi: MessageInstance
 }
 
-export async function cancelMultisigTransfer ({ amount, api, approvingAddress, callHash, recipientAddress, messageApi, multisig, network }: Props) {
+export async function cancelMultisigTransfer ({ api, approvingAddress, callHash, recipientAddress, messageApi, multisig, network }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
 	});
-
-	// 2. Set relevant constants
-	const AMOUNT_TO_SEND = amount.toNumber();
-	const displayAmount = formatBalance(AMOUNT_TO_SEND);
 
 	// remove approving address address from signatories
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
@@ -108,7 +102,7 @@ export async function cancelMultisigTransfer ({ amount, api, approvingAddress, c
 				});
 		}
 
-		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
+		console.log(`Cancel tx from ${multisig.address} ${recipientAddress ? `to ${recipientAddress}` : ''}`);
 		console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
 	});
 }
