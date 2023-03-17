@@ -29,11 +29,11 @@ interface Args {
 	api: ApiPromise,
 	network: string,
 	multisig: IMultisigAddress,
-	callDataHex: string,
+	callDataHex?: string,
 	callHash: string,
-	amount: BN,
+	amount?: BN,
 	approvingAddress: string,
-	recipientAddress: string,
+	recipientAddress?: string,
 	note: string,
 	messageApi: MessageInstance
 }
@@ -45,27 +45,38 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const callData = api.createType('Call', callDataHex);
-	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
-
-	// invalid call data for this call hash
-	if (!callData.hash.eq(callHash)) return;
-
-	// 2. Set relevant constants
-	const ZERO_MAX_WEIGHT = new Uint8Array(0);
-	const AMOUNT_TO_SEND = amount.toNumber();
-	const displayAmount = formatBalance(AMOUNT_TO_SEND);
+	// 2. Set relevant vars
+	const ZERO_WEIGHT = new Uint8Array(0);
+	let WEIGHT: any = ZERO_WEIGHT;
+	let call: any;
+	let AMOUNT_TO_SEND: number;
+	let displayAmount: string;
 
 	// remove approving address address from signatories
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
 
-	// 3. tx call
-	const call = api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND);
+	if(callDataHex && amount && recipientAddress) {
+		AMOUNT_TO_SEND = amount.toNumber();
+		displayAmount = formatBalance(AMOUNT_TO_SEND);
+
+		const callData = api.createType('Call', callDataHex);
+		const { weight } = await calcWeight(callData, api);
+		WEIGHT = weight;
+
+		// invalid call data for this call hash
+		if (!callData.hash.eq(callHash)) return;
+
+		// 3. tx call
+		call = api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND);
+	}
 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 
-	if(!multisigInfo) return;
+	if(!multisigInfo) {
+		console.log('No multisig info found');
+		return;
+	}
 
 	console.log(`Time point is: ${multisigInfo?.when}`);
 
@@ -76,7 +87,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		// 5. Send asMulti if last approval call
 		if (numApprovals < multisig.threshold - 1) {
 			api.tx.multisig
-				.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), ZERO_MAX_WEIGHT)
+				.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, callHash, ZERO_WEIGHT)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
@@ -119,7 +130,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				});
 		} else {
 			api.tx.multisig
-				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), MAX_WEIGHT as any)
+				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
@@ -180,6 +191,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		}
 
 		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${MAX_WEIGHT})\n`);
+		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${WEIGHT})\n`);
 	});
 }
