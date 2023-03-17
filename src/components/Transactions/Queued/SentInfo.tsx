@@ -49,14 +49,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
-	const [depositor, setDepositor] = useState<any>();
+	const [depositor, setDepositor] = useState<string>('');
 
 	useEffect(() => {
 		const getDepositor = async () => {
 			if(!api || !apiReady) return;
 			const multisigInfos = await getMultisigInfo(activeMultisig, api);
 			const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
-			setDepositor(multisigInfo?.depositor);
+			setDepositor(multisigInfo?.depositor?.toString() || '');
 		};
 		getDepositor();
 	}, [activeMultisig, api, apiReady, callHash]);

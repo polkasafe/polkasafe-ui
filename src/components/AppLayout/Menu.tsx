@@ -88,34 +88,36 @@ const Menu: FC<Props> = ({ className }) => {
 	}, [selectedMultisigAddress]);
 
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full gap-y-11 py-[30px] px-5 overflow-auto [&::-webkit-scrollbar]:hidden')}>
-			<section>
-				<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
-					<img src={polkasafeLogo} alt="polkasafe logo" />
-				</Link>
-			</section>
-			<section>
-				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary'>
-					Menu
-				</h2>
-				<ul className='flex flex-col py-2 text-white list-none'>
-					{
-						menuItems.map((item) => {
-							return <li className='w-full' key={item.key}>
-								<Link
-									className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
-										'bg-highlight text-primary': item.key === location.pathname
-									})}
-									to={item.key} >
-									{item.icon}
-									{item.title}
-								</Link>
-							</li>;
-						})
-					}
-				</ul>
-			</section>
-			<section>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
+			<div className='flex flex-col gap-y-11 mb-3'>
+				<section>
+					<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
+						<img src={polkasafeLogo} alt="polkasafe logo" />
+					</Link>
+				</section>
+				<section>
+					<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary'>
+						Menu
+					</h2>
+					<ul className='flex flex-col py-2 text-white list-none'>
+						{
+							menuItems.map((item) => {
+								return <li className='w-full' key={item.key}>
+									<Link
+										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+											'bg-highlight text-primary': item.key === location.pathname
+										})}
+										to={item.key} >
+										{item.icon}
+										{item.title}
+									</Link>
+								</li>;
+							})
+						}
+					</ul>
+				</section>
+			</div>
+			<section className='overflow-auto [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
 					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => multisig.network === network).length : '0'}</span>
