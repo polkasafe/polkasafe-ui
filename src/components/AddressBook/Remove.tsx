@@ -9,7 +9,6 @@ import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -93,7 +92,7 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
-					{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+					{name}
 				</span>
                 from your Address Book?
 			</p>

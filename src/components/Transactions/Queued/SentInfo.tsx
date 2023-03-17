@@ -5,7 +5,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -15,6 +15,7 @@ import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, Circl
 import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import { getMultisigInfo } from 'src/utils/getMultisigInfo';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -40,7 +41,7 @@ interface ISentInfoProps {
 }
 
 const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
-	const { network } = useGlobalApiContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -48,6 +49,17 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
+	const [depositor, setDepositor] = useState<string>('');
+
+	useEffect(() => {
+		const getDepositor = async () => {
+			if(!api || !apiReady) return;
+			const multisigInfos = await getMultisigInfo(activeMultisig, api);
+			const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
+			setDepositor(multisigInfo?.depositor?.toString() || '');
+		};
+		getDepositor();
+	}, [activeMultisig, api, apiReady, callHash]);
 
 	return (
 		<div
@@ -375,9 +387,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						<Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
 						</Button>
-						<Button disabled={approvals[0] !== address} loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+						{depositor === address &&
+							<Button loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
-						</Button>
+							</Button>
+						}
 					</div>
 				</div>
 			</article>

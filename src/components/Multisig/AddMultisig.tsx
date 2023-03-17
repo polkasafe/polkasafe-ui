@@ -28,17 +28,17 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
 				<CreateMultisig homepage={homepage} onCancel = {() => {
 					setMultisigVisible(false);
 				}} />
-			</div>:<div className='h-full'>
-				<div className='p-5 flex flex-col h-full'>
-					<div className='text-center mb-5 flex-1'>
+			</div>:<div className='h-full flex flex-col justify-center'>
+				<div className='p-5 '>
+					<div className='text-center mb-10'>
 						<h1 className='text-lg font-bold text-white'>Add Multisig</h1>
 						<p className='text-white'>MultiSig is a secure digital wallet that requires one or multiple owners to authorize the transaction.</p>
 						<br />
 						<p className='text-text_secondary'>To add a MultiSig you can choose from the options below:</p>
 					</div>
-					<div className="flex justify-center mt-5 w-full">
+					<div className="flex justify-center mt-5 w-full px-10">
 						<div className="flex flex-col w-[50%] items-left justify-between bg-bg-secondary rounded-lg p-5 mx-5">
-							<div className='mb-5 flex-1'>
+							<div className='mb-5'>
 								<h1 className='font-bold text-md mb-2 text-white'>Create Multisig</h1>
 								<p className='text-text_secondary text-sm'>Create  a new MultiSig that is controlled by one or multiple owners.</p>
 							</div>
