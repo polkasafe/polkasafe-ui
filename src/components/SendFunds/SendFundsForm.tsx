@@ -92,7 +92,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
 
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({
@@ -157,7 +157,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 								theme='polkadot'
 							/>
 							<div className='flex flex-col gap-y-[6px] truncate'>
-								<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
+								<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
 								<p className='text-text_secondary font-normal text-xs leading-[13px]'>{(activeMultisig)}</p>
 							</div>
 							<Balance address={activeMultisig} />

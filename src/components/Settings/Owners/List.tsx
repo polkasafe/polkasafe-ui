@@ -40,8 +40,8 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 			{
 				owners.map(({ address, imgSrc, name }, index) => {
 					return (
-						<>
-							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white' key={index}>
+						<article key={index}>
+							<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
 								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
 									{name}
 								</p>
@@ -67,9 +67,9 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 										<DeleteIcon />
 									</button>
 								</div>
-							</article>
+							</div>
 							{owners.length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
-						</>
+						</article>
 					);
 				})
 			}

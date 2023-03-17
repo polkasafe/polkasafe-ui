@@ -24,7 +24,7 @@ const Assets = () => {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature) {
+			if(!address || !signature || !activeMultisig) {
 				console.log('ERROR');
 				return;
 			}
