@@ -4,6 +4,7 @@
 import { Button, Form, Input } from 'antd';
 import React, { useState } from 'react';
 import contactImg from 'src/assets/icons/contact-us.svg';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { NotifyMail } from 'src/ui-components/CustomIcons';
@@ -11,6 +12,8 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 const ContactUs = () => {
+	const { network } = useGlobalApiContext();
+
 	const [name, setName] = useState<string>('');
 	const [email, setEmail] = useState<string>('');
 	const [message, setMessage] = useState<string>('');
@@ -26,7 +29,7 @@ const ContactUs = () => {
 					message,
 					name
 				}),
-				headers: firebaseFunctionsHeader(),
+				headers: firebaseFunctionsHeader(network),
 				method: 'POST'
 			});
 

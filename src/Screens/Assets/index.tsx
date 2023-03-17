@@ -36,7 +36,7 @@ const Assets = () => {
 						address: activeMultisig,
 						network
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

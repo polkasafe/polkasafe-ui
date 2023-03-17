@@ -88,7 +88,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 							network,
 							page: 1
 						}),
-						headers: firebaseFunctionsHeader(),
+						headers: firebaseFunctionsHeader(network),
 						method: 'POST'
 					});
 
@@ -148,11 +148,11 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 									}
 								}
 
-								const destSubstrateAddress = getSubstrateAddress(decodedCallData?.args?.dest?.id);
+								const destSubstrateAddress = decodedCallData ? getSubstrateAddress(decodedCallData?.args?.dest?.id) : '';
 								const destAddressName = addressBook.find((address) => address.address === destSubstrateAddress)?.name;
 
 								const toText = decodedCallData && destSubstrateAddress ? destAddressName :
-									(shortenAddress(getEncodedAddress(decodedCallData?.args?.dest?.id, network) || ''));
+									(shortenAddress( decodedCallData ? String(getEncodedAddress(decodedCallData?.args?.dest?.id, network)) : ''));
 
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">

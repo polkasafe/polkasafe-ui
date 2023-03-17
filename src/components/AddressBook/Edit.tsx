@@ -5,6 +5,7 @@ import { Form, Input } from 'antd';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -19,6 +20,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 	const [loading, setLoading] = useState<boolean>(false);
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [newName, setNewName] = useState<string>(nameToEdit);
+	const { network } = useGlobalApiContext();
 
 	const handleAddAddress = async () => {
 		try{
@@ -40,7 +42,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 						address: addressToEdit,
 						name: newName
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

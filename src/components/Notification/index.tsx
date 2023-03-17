@@ -5,6 +5,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import noNotification from 'src/assets/icons/no-notification.svg';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -20,6 +21,7 @@ export enum ENotificationStatus {
 }
 
 const Notification= () => {
+	const { network } = useGlobalApiContext();
 	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ const Notification= () => {
 
 		setLoading(true);
 		const getNotificationsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getNotifications`, {
-			headers: firebaseFunctionsHeader(),
+			headers: firebaseFunctionsHeader(network),
 			method: 'POST'
 		});
 
@@ -44,7 +46,7 @@ const Notification= () => {
 			setNotifications(data as INotification[]);
 		}
 		setLoading(false);
-	}, [address]);
+	}, [address, network]);
 
 	const markAllRead = useCallback(async () => {
 		const newNotifiedTill = new Date();

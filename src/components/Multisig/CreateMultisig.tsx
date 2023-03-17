@@ -75,7 +75,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						address,
 						name
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
@@ -124,10 +124,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					body: JSON.stringify({
 						signatories,
 						threshold,
-						multisigName,
-						network
+						multisigName
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
 				});
 

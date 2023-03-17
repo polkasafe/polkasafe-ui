@@ -2,6 +2,7 @@ import axios from 'axios';
 import { DEFAULT_MULTISIG_NAME } from '../constants/defaults';
 import { responseMessages } from '../constants/response_messages';
 import { SUBSCAN_API_HEADERS } from '../constants/subscan_consts';
+import getSubstrateAddress from './getSubstrateAddress';
 
 interface IResponse {
 	error?: string | null;
@@ -34,7 +35,7 @@ export default async function getOnChainMultisigMetaData(multisigAddress: string
 
 		returnValue.data = {
 			name: response?.data?.account?.account_display.display || DEFAULT_MULTISIG_NAME,
-			signatories: response?.data?.account?.multisig?.multi_account_member?.map((obj: any) => obj.address) || [],
+			signatories: response?.data?.account?.multisig?.multi_account_member?.map((obj: any) => getSubstrateAddress(obj.address)) || [],
 			threshold: response?.data?.account?.multisig?.threshold || null,
 			balance: response?.data?.account?.balance || '0'
 		};

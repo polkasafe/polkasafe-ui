@@ -4,7 +4,9 @@
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
@@ -15,7 +17,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-
+	const { network } = useGlobalApiContext();
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState<string>('');
@@ -55,7 +57,7 @@ const ConnectWallet = () => {
 
 			if(tokenError) {
 				// TODO extension
-				console.log('ERROR TODO', tokenError);
+				console.log('ERROR', tokenError);
 				setLoading(false);
 				return;
 			} else {
@@ -74,10 +76,7 @@ const ConnectWallet = () => {
 				});
 
 				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-					headers: {
-						'x-address': substrateAddress,
-						'x-signature': signature
-					},
+					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
 					method: 'POST'
 				});
 

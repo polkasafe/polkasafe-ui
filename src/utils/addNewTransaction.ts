@@ -26,7 +26,7 @@ export async function addNewTransaction ({ amount, network, block_number, callDa
 
 	const setTransactionResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
 		body: JSON.stringify(newTransactionData),
-		headers: firebaseFunctionsHeader(),
+		headers: firebaseFunctionsHeader(network),
 		method: 'POST'
 	});
 

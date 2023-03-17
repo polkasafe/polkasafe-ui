@@ -17,9 +17,9 @@ import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
 
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
+dayjs.extend(LocalizedFormat);
 
 const Queued: FC = () => {
-	dayjs.extend(LocalizedFormat);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
@@ -63,7 +63,7 @@ const Queued: FC = () => {
 						network,
 						page: 1
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

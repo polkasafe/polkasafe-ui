@@ -6,6 +6,7 @@ import { Form } from 'antd';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -18,6 +19,7 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { toggleVisibility } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
+	const { network } = useGlobalApiContext();
 
 	const handleRemoveAddress = async () => {
 		try{
@@ -41,7 +43,7 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 						address: addressToRemove,
 						name
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 

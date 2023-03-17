@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import DragDrop from 'src/components/AddressBook/DragDrop';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -21,6 +22,7 @@ const ImportAdress = () => {
 	const [addresses, setAddresses] = useState<IAddress[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 
 	const handleAddAddress = async (address: string, name: string) => {
 		try{
@@ -41,7 +43,7 @@ const ImportAdress = () => {
 						address,
 						name
 					}),
-					headers: firebaseFunctionsHeader(),
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
