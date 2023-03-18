@@ -138,7 +138,7 @@ const ConnectWallet = () => {
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
 
-					if((dayjs(userData.created_at) > dayjs().add(-3, 'minutes'))){
+					if((dayjs(userData.created_at) > dayjs().subtract(3, 'minutes'))){
 						setUserDetailsContextState((prevState) => {
 							return {
 								...prevState,

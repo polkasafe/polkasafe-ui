@@ -108,7 +108,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 		}
 	};
 
-	const handleMultisigBadge = async () => {
+	const handleMultisigCreate = async () => {
 		try{
 			setLoading(true);
 			const address = localStorage.getItem('address');
@@ -143,7 +143,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				}
 
 				if(multisigData){
-					if(multisigAddresses.some((item) => item.address === multisigData.address)){
+					if(multisigAddresses?.some((item) => item.address === multisigData.address)){
 						queueNotification({
 							header: 'Multisig Exist!',
 							message: 'Please try adding a different multisig.',
@@ -155,7 +155,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
-							multisigAddresses: [...prevState.multisigAddresses, multisigData]
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData]
 						};
 					});
 					Promise.all(signatories.map(
@@ -247,7 +247,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
-					<AddBtn loading={loading} title='Create Multisig' onClick={handleMultisigBadge} />
+					<AddBtn loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 				</div>
 			</div>
 		</div>

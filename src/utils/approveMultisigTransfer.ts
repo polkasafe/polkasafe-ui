@@ -3,8 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ApiPromise } from '@polkadot/api';
-import type { Call } from '@polkadot/types/interfaces';
-import type { CallFunction } from '@polkadot/types/types';
 import { formatBalance } from '@polkadot/util/format';
 import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
@@ -17,13 +15,6 @@ import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface CallData {
-  callData: Call | null;
-  callError: string | null;
-  callInfo: CallFunction | null;
-}
 
 interface Args {
 	api: ApiPromise,
@@ -156,8 +147,10 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									status: NotificationStatus.SUCCESS
 								});
 
+								resolve();
+
 								// update note for transaction history
-								await updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
+								updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,
@@ -166,8 +159,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									network,
 									type: 'sent'
 								});
-
-								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
 								queueNotification({

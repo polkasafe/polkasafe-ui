@@ -14,6 +14,12 @@ import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
+interface IMultiTransferResponse {
+	callData: string;
+	callHash: string;
+	created_at: Date;
+}
+
 interface Args {
 	api: ApiPromise,
 	recipientAddress: string,
@@ -66,7 +72,7 @@ export default async function initMultisigTransfer({
 
 	let blockHash = '';
 
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<IMultiTransferResponse>((resolve, reject) => {
 
 		// 5. first call is approveAsMulti
 		api.tx.multisig
@@ -99,10 +105,16 @@ export default async function initMultisigTransfer({
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
+
+							resolve({
+								callData: call.method.toHex(),
+								callHash: call.method.hash.toHex(),
+								created_at: new Date()
+							});
+
 							// 6. store data to BE
 							// created_at should be set by BE for server time, amount_usd should be fetched by BE
-
-							await addNewTransaction({
+							addNewTransaction({
 								amount,
 								block_number: blockNumber,
 								callData: call.method.toHex(),
@@ -112,8 +124,6 @@ export default async function initMultisigTransfer({
 								note,
 								to: recipientAddress
 							});
-
-							resolve();
 
 							sendNotificationToAddresses({
 								addresses: otherSignatories,
