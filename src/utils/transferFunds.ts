@@ -32,7 +32,7 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 	return new Promise<void>((resolve, reject) => {
 
 		api.tx.balances
-			.transfer(recepientAddress, AMOUNT_TO_SEND)
+			.transferKeepAlive(recepientAddress, AMOUNT_TO_SEND)
 			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');

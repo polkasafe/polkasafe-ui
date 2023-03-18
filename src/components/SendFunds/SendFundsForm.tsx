@@ -54,14 +54,13 @@ const addRecipientHeading = () => {
 	}
 };
 
-const SendFundsForm = (props: ISendFundsFormProps) => {
+const SendFundsForm = ({ className, onCancel, setNewTxn }: ISendFundsFormProps) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { toggleVisibility } = useModalContext();
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
-	const { className, onCancel, setNewTxn } = props;
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -104,7 +103,7 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 		}
 		setLoading(true);
 		try {
-			await initMultisigTransfer({
+			const queueItemData = await initMultisigTransfer({
 				amount,
 				api,
 				initiatorAddress: address,
@@ -115,6 +114,8 @@ const SendFundsForm = (props: ISendFundsFormProps) => {
 				recipientAddress,
 				transferKeepAlive: true
 			});
+			console.log('queueItemData', queueItemData);
+			// todo: add IQueueItem to state
 			toggleVisibility();
 		} catch (error) {
 			console.log(error);
