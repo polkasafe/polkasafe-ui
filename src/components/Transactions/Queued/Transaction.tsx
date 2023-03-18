@@ -80,7 +80,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 			});
 		})();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [api, apiReady, callDataString, callHash]);
+	}, [api, apiReady, callDataString, callHash, network]);
 
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){

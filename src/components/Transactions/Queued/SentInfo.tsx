@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input, Timeline } from 'antd';
+import { Alert, Button, Collapse, Divider, Input, Timeline } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
@@ -10,7 +10,6 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
@@ -68,34 +67,36 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				<p
-					className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-				>
-					<span>
-							Sent
-					</span>
-					<span
-						className='text-failure'
-					>
-						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)</span>}
-					</span>
-					<span>
-							To:
-					</span>
-				</p>
-				<div
-					className='mt-3 flex items-center gap-x-4'
-				>
-					{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
-					<div
-						className='flex flex-col gap-y-[6px]'
-					>
+				{callData ?
+					<>
 						<p
-							className='font-medium text-sm leading-[15px] text-white'
+							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 						>
-							{recipientAddress ? (addressBook.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+							<span>
+							Sent
+							</span>
+							<span
+								className='text-failure'
+							>
+								{formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network)}` {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)</span>}
+							</span>
+							<span>
+							To:
+							</span>
 						</p>
-						{recipientAddress &&
+						<div
+							className='mt-3 flex items-center gap-x-4'
+						>
+							{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
+							<div
+								className='flex flex-col gap-y-[6px]'
+							>
+								<p
+									className='font-medium text-sm leading-[15px] text-white'
+								>
+									{recipientAddress ? (addressBook.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+								</p>
+								{recipientAddress &&
 						<p
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
@@ -111,8 +112,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								</a>
 							</span>
 						</p>}
-					</div>
-				</div>
+							</div>
+						</div>
+					</> :
+					<>
+						<Alert type='warning' showIcon message='Transaction was not created on Polkasafe, enter call data to fetch this data.' />
+						<Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
+					</>
+				}
 				<Divider className='bg-text_secondary my-5' />
 				<div
 					className='flex items-center justify-between gap-x-5 mt-3'
@@ -265,8 +272,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								<Collapse.Panel
 									showArrow={false}
 									key={1}
-									className='bg-highlight rounded-md'
-									header={<span className='text-primary font-normal text-sm leading-[15px]'>Show All Confirmations</span>}
+									header={<span className='text-primary font-normal text-sm leading-[15px] p-3 rounded-md bg-highlight'>Show All Confirmations</span>}
 								>
 									{approvals.map((address, i) => (
 										<Timeline.Item
