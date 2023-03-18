@@ -67,7 +67,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 
 		// store callData in BE
 		(async () => {
-			if(decodedCallData || callData) return; // already stored
+			if(callData) return; // already stored
 
 			await fetch(`${FIREBASE_FUNCTIONS_URL}/setTransactionCallData`, {
 				body: JSON.stringify({
