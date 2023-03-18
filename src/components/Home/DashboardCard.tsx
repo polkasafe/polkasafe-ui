@@ -22,14 +22,17 @@ import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
 const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
+	const { api, apiReady } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
+
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 
 	// TODO: check why we're not using this
@@ -38,25 +41,13 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const [transactionLoading, setTransactionLoading] = useState(false);
 
 	const handleNewTransaction = async () => {
+		if(!api || !apiReady || !activeMultisig) return;
+
 		setTransactionLoading(true);
+		// check if wallet has existential deposit
+		const hasExistentialDepositRes = await hasExistentialDeposit(api, activeMultisig, network);
 
-		// check if wallet exists onchain (has existential deposit)
-		const isMultisigOnChainRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/isMultisigOnChain`, {
-			body: JSON.stringify({
-				multisigAddress: activeMultisig,
-				network
-			}),
-			headers: firebaseFunctionsHeader(network),
-			method: 'POST'
-		});
-
-		const { data: isMultisigOnChainData, error: isMultisigOnChainErr } = await isMultisigOnChainRes.json();
-		if(isMultisigOnChainErr || !isMultisigOnChainData) {
-			setTransactionLoading(false);
-			return;
-		}
-
-		if(!isMultisigOnChainData.isOnChain) {
+		if(!hasExistentialDepositRes) {
 			openModal('Existential Deposit', <ExistentialDeposit />);
 		} else {
 			openModal('Send Funds', <SendFundsForm setNewTxn={setNewTxn} onCancel={() => toggleVisibility()} />);
@@ -70,35 +61,31 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !activeMultisig) {
+			if(!address || !signature || !activeMultisig) return;
+
+			setLoading(true);
+			const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
+				body: JSON.stringify({
+					address: activeMultisig,
+					network
+				}),
+				headers: firebaseFunctionsHeader(network),
+				method: 'POST'
+			});
+
+			const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
+
+			if(error) {
+				setLoading(false);
 				return;
 			}
-			else{
 
-				setLoading(true);
-				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
-					body: JSON.stringify({
-						address: activeMultisig,
-						network
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
-
-				if(error) {
-					setLoading(false);
-					return;
-				}
-
-				if(data){
-					setAssetsData(data);
-					setLoading(false);
-
-				}
+			if(data){
+				setAssetsData(data);
+				setLoading(false);
 
 			}
+
 		} catch (error){
 			console.log('ERROR', error);
 			setLoading(false);
