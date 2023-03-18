@@ -384,9 +384,9 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 					</Timeline>
 					{(approvals.length === threshold - 1 && !callData) && <Input size='large' placeholder='Enter Call Data.' className='w-full my-3 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />}
 					<div className='w-full flex flex-col gap-y-2 items-center'>
-						<Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
-						</Button>
+						</Button>}
 						{depositor === address &&
 							<Button loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
