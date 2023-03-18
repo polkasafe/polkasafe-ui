@@ -77,7 +77,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 					<span
 						className='text-failure'
 					>
-						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`} ({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)
+						{amount ? formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)</span>}
 					</span>
 					<span>
 							To:
