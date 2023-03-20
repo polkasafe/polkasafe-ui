@@ -77,7 +77,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>}
-									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm onCancel={() => toggleVisibility()} />)}>
+									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm defaultSelectedAddress={address} onCancel={() => toggleVisibility()} />)}>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</div>
