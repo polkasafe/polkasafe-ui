@@ -133,7 +133,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							</div>
 						</div>
 						<div>
-							<div className='text-lg font-bold text-white'>{multisigAddresses.find(a => a.address == activeMultisig)?.name}</div>
+							<div className='text-lg font-bold text-white'>{multisigAddresses?.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
 								<div className='text-md font-normal text-text_secondary'>{activeMultisig && getEncodedAddress(activeMultisig, network)}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
@@ -148,7 +148,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='m-2'>
 						<div className='text-white'>Signatories</div>
 						<div className='font-bold text-xl text-primary'>
-							{multisigAddresses.find((item) => item.address === activeMultisig)?.signatories.length || 0}
+							{multisigAddresses?.find((item) => item.address === activeMultisig)?.signatories.length || 0}
 						</div>
 					</div>
 					<div className='m-2'>

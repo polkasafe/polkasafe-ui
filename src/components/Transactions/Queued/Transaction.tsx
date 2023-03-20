@@ -67,7 +67,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 
 		// store callData in BE
 		(async () => {
-			if(callData) return; // already stored
+			if(decodedCallData || callData) return; // already stored
 
 			await fetch(`${FIREBASE_FUNCTIONS_URL}/setTransactionCallData`, {
 				body: JSON.stringify({
@@ -93,7 +93,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
 
 		if(!multisig) return;
 
@@ -133,7 +133,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses.find((multisig) => multisig.address === activeMultisig);
+		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
 
 		if(!multisig) return;
 

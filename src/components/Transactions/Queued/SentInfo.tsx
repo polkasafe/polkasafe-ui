@@ -46,7 +46,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
-	const activeMultisigObject = multisigAddresses.find((item) => item.address === activeMultisig);
+	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
 	const [depositor, setDepositor] = useState<string>('');
@@ -103,7 +103,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								<p
 									className='font-medium text-sm leading-[15px] text-white'
 								>
-									{recipientAddress ? (addressBook.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+									{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
 								</p>
 								{recipientAddress &&
 						<p
@@ -319,7 +319,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 														<p
 															className='font-medium text-sm leading-[15px] text-white'
 														>
-															{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+															{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 														</p>
 														<p
 															className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -365,7 +365,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 														<p
 															className='font-medium text-sm leading-[15px] text-white'
 														>
-															{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+															{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 														</p>
 														<p
 															className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'

@@ -148,7 +148,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 								}
 
 								const destSubstrateAddress = decodedCallData ? getSubstrateAddress(decodedCallData?.args?.dest?.id) : '';
-								const destAddressName = addressBook.find((address) => address.address === destSubstrateAddress)?.name;
+								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;
 
 								const toText = decodedCallData && destSubstrateAddress ? destAddressName :
 									(shortenAddress( decodedCallData ? String(getEncodedAddress(decodedCallData?.args?.dest?.id, network)) : ''));
@@ -199,9 +199,9 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
 													:
-													<h1 className='text-md text-white'>From: {addressBook.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
 												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
 											</div>

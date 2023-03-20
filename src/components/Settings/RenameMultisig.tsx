@@ -58,7 +58,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 				if(changeNameData){
 
 					const copyMultisigAddresses = [...multisigAddresses];
-					const copyObject = copyMultisigAddresses.find((item) => item.address === activeMultisig);
+					const copyObject = copyMultisigAddresses?.find((item) => item.address === activeMultisig);
 					if(copyObject){
 						copyObject.name = multisigName;
 						setUserDetailsContextState((prev) => {
