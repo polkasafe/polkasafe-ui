@@ -53,12 +53,18 @@ export interface IAddressBookItem {
 	address: string;
 }
 
+interface IMultisigSettings {
+	deleted: boolean;
+	name: string;
+}
+
 export interface IUser {
 	address: string;
 	email: string | null;
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
 	multisigAddresses: IMultisigAddress[];
+	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
 }
 
 export interface IMultisigAddress {

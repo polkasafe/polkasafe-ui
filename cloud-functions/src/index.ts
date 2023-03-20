@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, INotification, ITransaction, IUser } from './types';
+import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, IMultisigSettings, INotification, ITransaction, IUser, IUserResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -109,12 +109,13 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						created_at: data?.created_at.toDate()
 					} as IUser;
 
-					const resUser: IUser = {
+					const resUser: IUserResponse = {
 						address: addressDoc.address,
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
 						addressBook: addressDoc.addressBook,
-						multisigAddresses
+						multisigAddresses,
+						multisigSettings: addressDoc.multisigSettings
 					};
 
 					return res.status(200).json({ data: resUser });
@@ -132,11 +133,16 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				email: null,
 				addressBook: [newAddress],
+				multisigSettings: {}
+			};
+
+			const newUserResponse: IUserResponse = {
+				...newUser,
 				multisigAddresses
 			};
 
 			await addressRef.set(newUser, { merge: true });
-			return res.status(200).json({ data: newUser });
+			return res.status(200).json({ data: newUserResponse });
 		} catch (err:unknown) {
 			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
@@ -267,6 +273,12 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
 
+			// change user's multisig settings to deleted: false and set the name
+			const newMultisigSettings: IMultisigSettings = {
+				deleted: false,
+				name: multisigName
+			};
+
 			// check if the multisig exists in our db
 			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
 			const multisigDoc = await multisigRef.get();
@@ -274,10 +286,19 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			if (multisigDoc.exists) {
 				const multisigDocData = multisigDoc.data();
 
-				return res.status(200).json({ data: {
+				res.status(200).json({ data: {
 					...multisigDocData,
+					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate()
 				} });
+
+				await firestoreDB.collection('addresses').doc(substrateAddress).set({
+					'multisigSettings': {
+						[encodedMultisigAddress]: newMultisigSettings
+					}
+				}, { merge: true });
+
+				return;
 			}
 
 			const newMultisig: IMultisigAddress = {
@@ -292,7 +313,15 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
-			return res.status(200).json({ data: newMultisig });
+			res.status(200).json({ data: newMultisig });
+
+			await firestoreDB.collection('addresses').doc(substrateAddress).set({
+				'multisigSettings': {
+					[encodedMultisigAddress]: newMultisigSettings
+				}
+			}, { merge: true });
+
+			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
@@ -436,11 +465,22 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
 			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
-			await multisigRef.delete();
 
-			functions.logger.info('Deleted multisig with an address of ', encodedMultisigAddress);
+			const newMultisigSettings: IMultisigSettings = {
+				name: DEFAULT_MULTISIG_NAME,
+				deleted: true
+			};
+
+			// delete multisig for user
+			firestoreDB.collection('addresses').doc(substrateAddress).set({
+				'multisigSettings': {
+					[encodedMultisigAddress]: newMultisigSettings
+				}
+			}, { merge: true });
+
+			functions.logger.info('Deleted multisig ', encodedMultisigAddress, ' for user ', substrateAddress);
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in deleteMultisig :', { err, stack: (err as any).stack });
@@ -630,13 +670,22 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 			const substrateAddress = getSubstrateAddress(String(address));
 			const encodedMultisigAddress = encodeAddress(mutisigAddress, chainProperties[network].ss58Format);
 
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
-			const multisigAddressDoc = (await multisigRef.get()).data() as IMultisigAddress;
+			const multisigDocData = (await firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress).get()).data() as IMultisigAddress;
 
-			if (multisigAddressDoc.signatories.includes(substrateAddress)) {
-				multisigRef.update({ name: String(name) });
+			if (multisigDocData.signatories.includes(substrateAddress)) {
+				const newMultisigSettings: IMultisigSettings = {
+					name,
+					deleted: false
+				};
+
+				// delete multisig for user
+				firestoreDB.collection('addresses').doc(substrateAddress).set({
+					'multisigSettings': {
+						[encodedMultisigAddress]: newMultisigSettings
+					}
+				}, { merge: true });
 			} else {
-				return res.status(400).json({ error: responseMessages.invalid_params });
+				return res.status(403).json({ error: responseMessages.invalid_params });
 			}
 
 			return res.status(200).json({ data: responseMessages.success });
