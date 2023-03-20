@@ -57,7 +57,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 					<p
 						className='font-medium text-sm leading-[15px] text-white'
 					>
-						{addressBook.find((item) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
 					</p>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'

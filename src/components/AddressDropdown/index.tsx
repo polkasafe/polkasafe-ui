@@ -67,7 +67,7 @@ const AddressDropdown = () => {
 						<Identicon size={20} value={address} theme='polkadot' />
 					</span>}
 					<span title={address} className='hidden md:inline-flex w-24 overflow-hidden truncate'>
-						{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
@@ -100,7 +100,7 @@ const AddressDropdown = () => {
 							theme='polkadot'
 						/>
 						<p className='text-white font-normal text-sm'>
-							{ addressBook.find(item => item.address === address)?.name }
+							{ addressBook?.find(item => item.address === address)?.name }
 						</p>
 						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
 							<span className='text-text_secondary'>{getEncodedAddress(address, network)}</span>

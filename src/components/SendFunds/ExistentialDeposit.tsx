@@ -38,7 +38,7 @@ const ExistentialDeposit = () => {
 	const [showQrModal, setShowQrModal] = useState(false);
 
 	const autocompleteAddresses: DefaultOptionType[] = [{
-		label: addressBook.find(a => a.address === address)?.name || 'My Address',
+		label: addressBook?.find(a => a.address === address)?.name || 'My Address',
 		value: address
 	}];
 
@@ -115,7 +115,7 @@ const ExistentialDeposit = () => {
 					/>
 				</div>
 				<div className='flex flex-col gap-y-[6px]'>
-					<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses.find(a => a.address === activeMultisig)?.name }</h4>
+					<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find(a => a.address === activeMultisig)?.name }</h4>
 					<p className='text-text_secondary font-normal text-xs leading-[13px]'>{activeMultisig}</p>
 				</div>
 				<Balance address={activeMultisig} />

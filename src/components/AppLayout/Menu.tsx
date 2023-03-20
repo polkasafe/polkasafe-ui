@@ -65,7 +65,7 @@ const Menu: FC<Props> = ({ className }) => {
 	useEffect(() => {
 		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network) || [];
 
-		if(filteredMutisigs.find((multisig) => multisig.address === activeMultisig)){
+		if(filteredMutisigs?.find((multisig) => multisig.address === activeMultisig)){
 			setSelectedMultisigAddress(activeMultisig);
 		}
 		else{

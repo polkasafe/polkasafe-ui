@@ -46,7 +46,7 @@ const LinkMultisig = () => {
 
 	const [signatoriesWithName, setSignatoriesWithName] = useState<ISignatory[]>([]);
 
-	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
+	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook?.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
 	const [threshold, setThreshold] = useState<number>(0);
 
 	const viewNameAddress = () => {
