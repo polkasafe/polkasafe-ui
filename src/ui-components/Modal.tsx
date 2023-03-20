@@ -29,7 +29,7 @@ const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, togg
 		<section className={classNames('fixed top-0 left-0 inset-0 h-screen w-screen bg-black bg-opacity-50 text-white flex items-center justify-center z-50', {
 			'hidden opacity-0 h-0 w-0': !isVisible
 		})}>
-			<div className='overflow-auto h-screen py-10 px-5 scroll-transparent flex items-center'>
+			<div className='overflow-y-auto h-screen py-10 px-5 scroll-transparent flex items-center'>
 				<div className='bg-bg-main rounded-xl p-5 md:p-[30px] md:min-w-[500px] my-auto'>
 					<article className='flex items-center justify-between gap-x-5'>
 						<h3 className='text-white text-lg font-semibold md:font-bold md:text-xl'>{title}</h3>

@@ -23,6 +23,7 @@ import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
+import shortenAddress from 'src/utils/shortenAddress';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -135,7 +136,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						<div>
 							<div className='text-lg font-bold text-white'>{multisigAddresses?.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
-								<div className='text-md font-normal text-text_secondary'>{activeMultisig && getEncodedAddress(activeMultisig, network)}</div>
+								<div title={getEncodedAddress(activeMultisig, network) || ''} className='text-md font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
 								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} />)}>
 									<QRIcon className='text-primary'/>
