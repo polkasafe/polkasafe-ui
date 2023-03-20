@@ -7,7 +7,7 @@ import React from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_USER_ADDRESS_NAME } from 'src/global/default';
-import { IAddressBookEntry } from 'src/types';
+import { IAddressBookItem } from 'src/types';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
@@ -30,7 +30,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
-	const addresses: ISignature[] = addressBook.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookEntry, i: number) => ({
+	const addresses: ISignature[] = addressBook.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
 		address: item.address,
 		key: i+1,
 		name: item.name

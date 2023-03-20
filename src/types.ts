@@ -10,7 +10,7 @@ export interface UserDetailsContextType {
     activeMultisig: string;
     address: string;
     multisigAddresses: IMultisigAddress[];
-    addressBook: IAddressBookEntry[];
+    addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
@@ -48,7 +48,7 @@ export type ChainPropType = {
     [index: string]: ChainProps;
 };
 
-export interface IAddressBookEntry {
+export interface IAddressBookItem {
 	name: string;
 	address: string;
 }
@@ -56,8 +56,9 @@ export interface IAddressBookEntry {
 export interface IUser {
 	address: string;
 	email: string | null;
-	addressBook?: IAddressBookEntry[];
+	addressBook?: IAddressBookItem[];
 	created_at: Date;
+	multisigAddresses: IMultisigAddress[];
 }
 
 export interface IMultisigAddress {
