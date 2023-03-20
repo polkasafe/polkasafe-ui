@@ -10,6 +10,7 @@ export interface IUser {
 	email: string | null;
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
+	multisigAddresses: IMultisigAddress[];
 }
 
 export interface IMultisigAddress {
@@ -19,10 +20,6 @@ export interface IMultisigAddress {
 	network: string;
 	created_at: Date;
 	threshold: number;
-}
-
-export interface IUserResponse extends IUser {
-	multisigAddresses: IMultisigAddress[];
 }
 
 export interface ChainProperties {

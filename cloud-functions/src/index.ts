@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, INotification, ITransaction, IUser, IUserResponse } from './types';
+import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, INotification, ITransaction, IUser } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -96,6 +96,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
+			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
+
 			// check if address doc already exists
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
@@ -107,15 +109,14 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						created_at: data?.created_at.toDate()
 					} as IUser;
 
-					const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
-
-					const resUser: IUserResponse = {
+					const resUser: IUser = {
 						address: addressDoc.address,
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
 						addressBook: addressDoc.addressBook,
 						multisigAddresses
 					};
+
 					return res.status(200).json({ data: resUser });
 				}
 			}
@@ -130,7 +131,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				address: String(substrateAddress),
 				created_at: new Date(),
 				email: null,
-				addressBook: [newAddress]
+				addressBook: [newAddress],
+				multisigAddresses
 			};
 
 			await addressRef.set(newUser, { merge: true });
