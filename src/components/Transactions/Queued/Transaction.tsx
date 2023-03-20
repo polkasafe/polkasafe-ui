@@ -19,8 +19,8 @@ import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import parseDecodedValue from 'src/utils/parseDecodedValue';
 
 import SentInfo from './SentInfo';
 
@@ -191,7 +191,11 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 							<span
 								className={'font-normal text-xs leading-[13px] text-failure'}
 							>
-								- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network) : `? ${token}`}
+								- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({
+									network,
+									value: String(decodedCallData.args.value),
+									withUnit: true
+								}) : `? ${token}`}
 							</span>
 						</p>
 						<p className='col-span-2'>

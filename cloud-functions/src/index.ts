@@ -744,7 +744,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : encodedMultisigAddress).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
-				txRef.set({ note: String(note) }, { merge: true });
+				txRef.set({ callHash, note: String(note) }, { merge: true });
 				return res.status(200).json({ data: responseMessages.success });
 			}
 

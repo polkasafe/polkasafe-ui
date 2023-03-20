@@ -3,19 +3,19 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Timeline } from 'antd';
-import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { chainProperties } from 'src/global/networkConstants';
 import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
+import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -79,7 +79,15 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							<span
 								className='text-failure'
 							>
-								{formatBnBalance(new BN(amount), { numberAfterComma: 3, withUnit: true }, network)} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(amount)).toFixed(2)} USD)</span>}
+								{amount ? parseDecodedValue({
+									network,
+									value: String(amount),
+									withUnit: true
+								}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+									network,
+									value: String(amount),
+									withUnit: false
+								}))).toFixed(2)} USD)</span>}
 							</span>
 							<span>
 							To:

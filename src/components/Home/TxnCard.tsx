@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ReloadOutlined } from '@ant-design/icons';
-import BN from 'bn.js';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -17,10 +16,10 @@ import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
 import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
@@ -166,7 +165,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 											</div>
 										</div>
 										<div>
-											<h1 className='text-md text-white'>- {decodedCallData ? formatBnBalance(new BN(decodedCallData?.args?.value), { numberAfterComma: 3, withUnit: true }, network): `? ${chainProperties[network].tokenSymbol}`}</h1>
+											<h1 className='text-md text-white'>- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
 											{!isNaN(Number(amountUSD)) && decodedCallData?.args?.value && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(decodedCallData?.args?.value)).toFixed(2) || '0'} USD</p>}
 										</div>
 									</Link>
