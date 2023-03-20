@@ -125,7 +125,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 						</span>
 					</p>
 				</div>
-				{loading ? <Spin className='mt-3'/> : !note &&
+				{loading ? <Spin className='mt-3'/> : note &&
 					<div
 						className='flex items-center justify-between gap-x-5 mt-3'
 					>

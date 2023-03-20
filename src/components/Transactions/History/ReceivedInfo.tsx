@@ -120,7 +120,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 						</span>
 					</p>
 				</div>}
-			{loading ? <Spin className='mt-3' /> : !note &&
+			{loading ? <Spin className='mt-3' /> : note &&
 				<div
 					className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
 				>
