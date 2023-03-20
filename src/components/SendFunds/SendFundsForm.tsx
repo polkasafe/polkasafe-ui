@@ -17,6 +17,7 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressQr from 'src/ui-components/AddressQr';
@@ -27,6 +28,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 // import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -35,6 +37,7 @@ interface ISendFundsFormProps {
 	onCancel?: () => void;
 	className?: string;
 	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>
+	defaultSelectedAddress?: string
 }
 
 const addRecipientHeading = () => {
@@ -54,23 +57,23 @@ const addRecipientHeading = () => {
 	}
 };
 
-const SendFundsForm = ({ className, onCancel, setNewTxn }: ISendFundsFormProps) => {
+const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress }: ISendFundsFormProps) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { toggleVisibility } = useModalContext();
-	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState(addressBook[0]?.address);
+	const [recipientAddress, setRecipientAddress] = useState('');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
-	const autocompleteAddresses: DefaultOptionType[] = addressBook.map(a => ({
-		label: a.name,
-		value: a.address
+	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
+		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		value: account.address
 	}));
 
 	useEffect(() => {
@@ -111,7 +114,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn }: ISendFundsFormProps) 
 				multisig,
 				network,
 				note,
-				recipientAddress,
+				recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
 				transferKeepAlive: true
 			});
 			console.log('queueItemData', queueItemData);
@@ -193,7 +196,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn }: ISendFundsFormProps) 
 										id='recipient'
 										placeholder="Send to Address.."
 										onChange={(value) => setRecipientAddress(value)}
-										defaultValue={address}
+										defaultValue={getEncodedAddress(defaultSelectedAddress || addressBook[0]?.address, network) || ''}
 									/>
 									<div className='absolute right-2'>
 										<button onClick={() => copyText(recipientAddress, true, network)}>

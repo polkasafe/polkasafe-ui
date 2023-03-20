@@ -12,6 +12,7 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressQr from 'src/ui-components/AddressQr';
@@ -20,6 +21,7 @@ import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { transferFunds } from 'src/utils/transferFunds';
 
 import { ParachainIcon } from '../NetworksDropdown';
@@ -28,19 +30,19 @@ const ExistentialDeposit = () => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { toggleVisibility } = useModalContext();
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
 
-	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 
-	const [selectedSender, setSelectedSender] = useState(addressBook[0].address);
+	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
 	const [loading, setLoading] = useState(false);
 	const [showQrModal, setShowQrModal] = useState(false);
 
-	const autocompleteAddresses: DefaultOptionType[] = [{
-		label: addressBook?.find(a => a.address === address)?.name || 'My Address',
-		value: address
-	}];
+	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
+		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		value: account.address
+	}));
 
 	const addSenderHeading = () => {
 		const elm = document.getElementById('recipient_list');
@@ -78,7 +80,7 @@ const ExistentialDeposit = () => {
 				messageApi,
 				network,
 				recepientAddress: activeMultisig,
-				senderAddress: selectedSender
+				senderAddress: getSubstrateAddress(selectedSender) || selectedSender
 			});
 		} catch (error) {
 			console.log(error);
@@ -136,6 +138,7 @@ const ExistentialDeposit = () => {
 										onClick={addSenderHeading}
 										options={autocompleteAddresses}
 										id='sender'
+										value={getEncodedAddress(selectedSender, network)}
 										placeholder="Send from Address.."
 										onChange={(value) => setSelectedSender(value)}
 									/>

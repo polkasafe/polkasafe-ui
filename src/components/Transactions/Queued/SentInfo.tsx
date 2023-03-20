@@ -171,7 +171,9 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 					>
 						{updatedNote ?
 							<span className='text-white font-normal flex items-center flex-wrap gap-x-3'>
-								{updatedNote}
+								<p className='whitespace-pre'>
+									{updatedNote}
+								</p>
 								<button onClick={() => openModal('Edit Note', <EditNote note={updatedNote} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 									<EditIcon className='text-primary cursor-pointer' />
 								</button>

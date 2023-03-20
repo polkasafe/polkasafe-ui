@@ -138,7 +138,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 						>
 							<span
-								className='text-white font-normal text-sm leading-[15px]'
+								className='text-white font-normal text-sm leading-[15px] whitespace-pre'
 							>
 								{note}
 							</span>
