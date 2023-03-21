@@ -15,12 +15,13 @@ const DonateInfo = () => {
 			<div className='flex flex-col gap-y-10 md:flex-row md:gap-x-20 items-center'>
 				<article className='flex flex-col justify-between h-full'>
 					<p className='text-sm font-normal'>
-						Please feel free to donate us any amount you want.
+						If you like the product, feel free to Donate us!
 					</p>
 					<div className='flex items-center justify-center my-10'>
 						<img src={polkasafeLogo} alt="polkadot logo" />
 					</div>
 					<div className='text-normal text-sm max-w-[367px] leading-4'>
+						Polkasafe is built for the ecosystem using grants from treasury & community.
 					</div>
 				</article>
 				<article>

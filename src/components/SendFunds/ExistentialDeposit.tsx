@@ -91,13 +91,12 @@ const ExistentialDeposit = () => {
 			setSuccess(true);
 			setTimeout(() => {
 				setSuccess(false);
-				toggleVisibility();
-			}, 10000);
+			}, 7000);
 		} catch (error) {
 			console.log(error);
 			setLoading(false);
 			setFailure(true);
-			setTimeout(() => setFailure(false), 10000);
+			setTimeout(() => setFailure(false), 5000);
 		}
 	};
 

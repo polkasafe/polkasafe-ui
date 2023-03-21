@@ -10,6 +10,7 @@ import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -283,7 +284,7 @@ const LinkMultisig = () => {
 	const handleLinkMultisig = () => {
 		setLoading(true);
 		if(multisigData){
-			const name = multisigData.name ? multisigData.name : multisigName;
+			const name = multisigName ? multisigName : multisigData?.name || DEFAULT_MULTISIG_NAME;
 			handleMultisigBadge(multisigData.signatories, multisigData.threshold, name, network);
 		}
 		else{
