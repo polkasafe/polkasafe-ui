@@ -6,8 +6,8 @@ import noTransactionsQueued from 'src/assets/icons/no-transactions-queued.svg';
 
 const NoTransactionsQueued = () => {
 	return (
-		<div className='flex flex-col gap-y-10 items-center justify-center mt-[82.5px] mb-[110px]'>
-			<img className='block w-[380px] h-[280px]' src={noTransactionsQueued} alt="Zero transaction icon" />
+		<div className='flex flex-col gap-y-10 items-center justify-center'>
+			<img className='block w-[350px] h-[250px]' src={noTransactionsQueued} alt="Zero transaction icon" />
 			<p className='font-normal text-sm leading-[15px] text-text_secondary'>No queued transactions</p>
 		</div>
 	);

@@ -30,7 +30,7 @@ const Transactions = () => {
 	return (
 		<>
 			<div
-				className='bg-bg-main rounded-xl p-[20.5px]'
+				className='bg-bg-main rounded-xl p-[20.5px] h-full'
 			>
 				<div
 					className='flex items-center mb-4'

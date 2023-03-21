@@ -96,7 +96,7 @@ const EmailBadge = () => {
 				<div>
 					{showDiv?<div className='flex items-center justify-between w-[100%] mb-5 h-[87px] bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
 						<div className='flex items-center justify-center'>
-							<CheckOutlined className='mx-5'/>
+							<CheckOutlined className='mx-5 text-success'/>
 							<div>
 								<h1 className='text-white text-xl font-bold'>Email has been updated successfully!</h1>
 								<p className='text-white text-sm'>You’re all set to receive regular notifications on your mail 👍</p>

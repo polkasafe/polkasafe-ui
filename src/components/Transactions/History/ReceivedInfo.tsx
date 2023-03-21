@@ -10,6 +10,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import shortenAddress from 'src/utils/shortenAddress';
 
 interface IReceivedInfoProps {
 	className?: string;
@@ -78,7 +79,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 			</div>
 			<Divider className='bg-text_secondary my-5' />
 			<div
-				className='w-full max-w-[418px] flex items-center justify-between gap-x-5'
+				className='w-full max-w-[418px] flex items-center gap-x-5'
 			>
 				<span
 					className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -91,7 +92,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 					<span
 						className='text-white font-normal text-sm leading-[15px]'
 					>
-						{callHash}
+						{shortenAddress(callHash, 10)}
 					</span>
 					<span
 						className='flex items-center gap-x-2 text-sm'
@@ -103,7 +104,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 			</div>
 			{date &&
 				<div
-					className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
+					className='w-full max-w-[418px] flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -122,7 +123,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 				</div>}
 			{loading ? <Spin className='mt-3' /> : note &&
 				<div
-					className='w-full max-w-[418px] flex items-center justify-between gap-x-5 mt-3'
+					className='w-full max-w-[418px] flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'

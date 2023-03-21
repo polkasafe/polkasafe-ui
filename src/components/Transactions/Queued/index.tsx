@@ -28,6 +28,7 @@ const Queued: FC = () => {
 	const [refetch, setRefetch] = useState<boolean>(false);
 	const location = useLocation();
 	const [amountUSD, setAmountUSD] = useState<string>('');
+	const [removedLastItem, setRemovedLastItem] = useState(false);
 
 	useEffect(() => {
 		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
@@ -94,13 +95,14 @@ const Queued: FC = () => {
 
 	return (
 		<>
-			{(queuedTransactions && queuedTransactions.length > 0)? <div className='flex flex-col gap-y-[10px]'>
+			{(queuedTransactions && queuedTransactions.length > 0) || removedLastItem ? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
 					return <section id={transaction.callHash} key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
 						</h4> */}
 						<Transaction
+							setRemovedLastItem={setRemovedLastItem}
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							approvals={transaction.approvals}
@@ -110,6 +112,7 @@ const Queued: FC = () => {
 							note={transaction.note || ''}
 							setRefetch={setRefetch}
 							amountUSD={amountUSD}
+							numberOfTransactions={queuedTransactions.length || 0}
 						/>
 					</section>;
 				})}

@@ -6,11 +6,14 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, message, Modal, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, message, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
+import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
+import LoadingLottie from 'src/assets/lottie-graphics/Loading';
+import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
@@ -30,6 +33,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
+import shortenAddress from 'src/utils/shortenAddress';
 // import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -68,13 +72,15 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState('');
+	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || addressBook[0]?.address, network) || '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
 		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
 		value: account.address
 	}));
+	const [success, setSuccess] = useState(false);
+	const [failure, setFailure] = useState(false);
 
 	useEffect(() => {
 		if(api && apiReady && recipientAddress && amount){
@@ -119,14 +125,20 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 			});
 			console.log('queueItemData', queueItemData);
 			// todo: add IQueueItem to state
-			toggleVisibility();
-		} catch (error) {
-			console.log(error);
-		} finally {
 			setLoading(false);
 			if(setNewTxn){
 				setNewTxn(prev => !prev);
 			}
+			setSuccess(true);
+			setTimeout(() => {
+				setSuccess(false);
+				toggleVisibility();
+			}, 10000);
+		} catch (error) {
+			console.log(error);
+			setLoading(false);
+			setFailure(true);
+			setTimeout(() => setFailure(false), 10000);
 		}
 	};
 
@@ -146,10 +158,10 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	};
 
 	return (
-		<>
+		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
 			{ contextHolder }
 			<Form
-				className={classNames(className)}
+				className={classNames(className, 'max-h-[68vh] overflow-y-auto px-2')}
 			>
 				<section>
 					<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
@@ -227,25 +239,28 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 								<LineIcon className='text-5xl' />
 							</span>
 							<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
-						If the recipient account is new, the balance needs to be more than the existential deposit. Likewise if the sending account balance drops below the same value, the account will be removed from the state.
+							If the recipient account is new, the balance needs to be more than the existential deposit. Likewise if the sending account balance drops below the same value, the account will be removed from the state.
 							</p>
 						</article>
 					</div>
 				</section>
 
 				{callData && !!Number(amount) && recipientAddress &&
-			<section className='mt-[15px]'>
-				<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Call Data</label>
-				<div className='flex items-center gap-x-[10px]'>
-					<div
-						className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-						onClick={() => copyText(callData)}
-					>
-						{callData}
-						<button className='text-primary'><CopyIcon /></button>
+				<section className='mt-[15px]'>
+					<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Call Data</label>
+					<div className='flex items-center gap-x-[10px]'>
+						<article className='w-[500px]'>
+							<div
+								className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
+								onClick={() => copyText(callData)}
+							>
+								{shortenAddress(callData, 10)}
+								<button className='text-primary'><CopyIcon /></button>
+							</div>
+
+						</article>
 					</div>
-				</div>
-			</section>
+				</section>
 				}
 
 				<section className='mt-[15px]'>
@@ -303,7 +318,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 					<div className='flex items-center gap-x-[10px]'>
 						<article className='w-[500px] flex items-center gap-x-3'>
 							<p className='text-white text-sm font-normal leading-[15px]'>
-							Transfer with account keep-alive checks
+								Transfer with account keep-alive checks
 							</p>
 							<Switch disabled size='small' className='text-primary' defaultChecked />
 						</article>
@@ -322,7 +337,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 						<WarningCircleIcon className='text-base' />
 					</span>
 					<p className=''>
-					The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.
+						The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.
 					</p>
 				</section>
 
@@ -331,7 +346,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 					<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 				</section>
 			</Form>
-		</>
+		</Spin>
 	);
 };
 

@@ -114,7 +114,7 @@ const AddressDropdown = () => {
 						</p>
 						<p className='border-t border-b border-text_secondary flex items-center text-normal text-sm justify-between w-full p-3'>
 							<span className='text-text_secondary'>Network</span>
-							<span className='text-white'>{ network }</span>
+							<span className='text-white capitalize'>{ network }</span>
 						</p>
 					</div>
 					<button onClick={handleDisconnect} className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>

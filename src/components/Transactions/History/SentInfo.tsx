@@ -11,6 +11,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
@@ -84,7 +85,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 				</div>
 				<Divider className='bg-text_secondary my-5' />
 				<div
-					className='flex items-center justify-between gap-x-5'
+					className='flex items-center gap-x-5'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -97,7 +98,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 						<span
 							className='text-white font-normal text-sm leading-[15px]'
 						>
-							{callHash}
+							{shortenAddress(callHash, 10)}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'
@@ -108,7 +109,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 					</p>
 				</div>
 				<div
-					className='flex items-center justify-between gap-x-5 mt-3'
+					className='flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -127,7 +128,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 				</div>
 				{loading ? <Spin className='mt-3'/> : note &&
 					<div
-						className='flex items-center justify-between gap-x-5 mt-3'
+						className='flex items-center gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -149,9 +150,9 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 			<article
 				className='p-8 rounded-lg bg-bg-main max-w-[328px] w-full'
 			>
-				<div>
+				<div className='h-full'>
 					<Timeline
-						className=''
+						className='h-full flex flex-col'
 					>
 						<Timeline.Item
 							dot={
@@ -159,7 +160,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 									<CirclePlusIcon className='text-success text-sm' />
 								</span>
 							}
-							className='success'
+							className='success flex-1'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
@@ -173,7 +174,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 									<CircleCheckIcon className='text-success text-sm' />
 								</span>
 							}
-							className='success'
+							className='success flex-1'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
@@ -187,7 +188,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 									<CircleWatchIcon className='text-success text-sm' />
 								</span>
 							}
-							className='success'
+							className='success flex-1'
 						>
 							<div
 								className='text-white font-normal text-sm leading-[15px]'

@@ -7,7 +7,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { UserDetailsContextType } from 'src/types';
+import { IUser, UserDetailsContextType } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
@@ -18,6 +18,7 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	multisigAddresses: [],
+	multisigSettings: {},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
@@ -46,15 +47,16 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			method: 'POST'
 		});
 
-		const { data: userData, error: connectAddressErr } = await connectAddressRes.json();
+		const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
 		if(!connectAddressErr && userData){
 			setUserDetailsContextState((prevState) => {
 				return {
 					...prevState,
 					address: userData?.address,
-					addressBook: userData?.addressBook,
-					multisigAddresses: userData?.multisigAddresses
+					addressBook: userData?.addressBook || [],
+					multisigAddresses: userData?.multisigAddresses,
+					multisigSettings: userData?.multisigSettings || {}
 				};
 			});
 		}else {
@@ -65,7 +67,8 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					activeMultisig: localStorage.getItem('active_multisig') || '',
 					address: '',
 					addressBook: [],
-					multisigAddresses: []
+					multisigAddresses: [],
+					multisigSettings: {}
 				};
 			});
 			navigate('/');
