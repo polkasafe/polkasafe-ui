@@ -13,7 +13,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IAddressBookEntry, IMultisigAddress } from 'src/types';
+import { IAddressBookItem, IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import _createMultisig from 'src/utils/_createMultisig';
@@ -73,7 +73,7 @@ const LinkMultisig = () => {
 					method: 'POST'
 				});
 
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookEntry[], error: string };
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
 				if(addAddressError) {
 

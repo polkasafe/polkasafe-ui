@@ -5,11 +5,21 @@ export interface IAddressBookItem {
 	address: string;
 }
 
+export interface IMultisigSettings {
+	name: string;
+	deleted: boolean;
+}
+
 export interface IUser {
 	address: string;
 	email: string | null;
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
+	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+}
+
+export interface IUserResponse extends IUser {
+	multisigAddresses?: IMultisigAddress[];
 }
 
 export interface IMultisigAddress {
@@ -19,10 +29,6 @@ export interface IMultisigAddress {
 	network: string;
 	created_at: Date;
 	threshold: number;
-}
-
-export interface IUserResponse extends IUser {
-	multisigAddresses: IMultisigAddress[];
 }
 
 export interface ChainProperties {

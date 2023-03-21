@@ -11,7 +11,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IAddressBookEntry } from 'src/types';
+import { IAddressBookItem } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
@@ -56,7 +56,7 @@ const ConnectWallet = () => {
 					method: 'POST'
 				});
 
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookEntry[], error: string };
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
 				if(addAddressError) {
 					return;
