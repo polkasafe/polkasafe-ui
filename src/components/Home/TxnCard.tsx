@@ -6,6 +6,8 @@ import { ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import noTransactionsHistory from 'src/assets/icons/no-transaction.svg';
+import noTransactionsQueued from 'src/assets/icons/no-transactions-queued.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -171,7 +173,10 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 									</Link>
 								);})
 							:
-							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No queued transactions</p></div>
+							<div className={'flex flex-col gap-y-5 items-center justify-center'}>
+								<img className={'block w-[250px] h-[140px]'} src={noTransactionsQueued} alt="Zero transaction icon" />
+								<p className='font-normal text-sm leading-[15px] text-text_secondary'>No past transactions</p>
+							</div>
 							:
 							<Loader />}
 					</div>
@@ -214,7 +219,10 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 									</Link>
 								);
 							}) :
-							<div className='flex justify-center items-center h-full'><p className='font-normal text-sm leading-[15px] text-text_secondary'>No history transactions</p></div>
+							<div className={'flex flex-col gap-y-5 items-center justify-center'}>
+								<img className={'block w-[250px] h-[140px]'} src={noTransactionsHistory} alt="Zero transaction icon" />
+								<p className='font-normal text-sm leading-[15px] text-text_secondary'>No past transactions</p>
+							</div>
 							:
 							<Loader />
 						}

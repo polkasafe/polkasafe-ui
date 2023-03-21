@@ -9,13 +9,14 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
@@ -187,7 +188,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 							</span>
 						</p>
 						<p className='col-span-2 flex items-center gap-x-[6px]'>
-							<PolkadotIcon className='text-base' />
+							<ParachainIcon src={chainProperties[network].logo} />
 							<span
 								className={'font-normal text-xs leading-[13px] text-failure'}
 							>

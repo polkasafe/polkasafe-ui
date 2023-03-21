@@ -2,85 +2,22 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Button } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { DeleteIcon, EditIcon } from 'src/ui-components/CustomIcons';
-import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
+import RemoveMultisigAddress from './RemoveMultisig';
 import RenameMultisig from './RenameMultisig';
 
 const Details = () => {
 
-	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
-	const [loading, setLoading] = useState<boolean>(false);
 	const { openModal } = useModalContext();
-
-	const handleRemoveSafe = async () => {
-		try{
-			setLoading(true);
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				setLoading(false);
-				return;
-			}
-
-			const removeSafeRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/deleteMultisig`, {
-				body: JSON.stringify({
-					multisigAddress: activeMultisig
-				}),
-				headers: firebaseFunctionsHeader(network),
-				method: 'POST'
-			});
-
-			const { data: removeSafeData, error: removeSafeError } = await removeSafeRes.json() as { data: string, error: string };
-
-			if(removeSafeError) {
-
-				queueNotification({
-					header: 'Error!',
-					message: removeSafeError,
-					status: NotificationStatus.ERROR
-				});
-				setLoading(false);
-				return;
-			}
-
-			if(removeSafeData){
-				if(removeSafeData === 'Success'){
-					setLoading(false);
-					const copy = [...multisigAddresses];
-					setUserDetailsContextState((prevState) => {
-						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig);
-						if(newMutlisigArray && newMutlisigArray[0]?.address){
-							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
-						}
-						else{
-							localStorage.removeItem('active_multisig');
-						}
-						return {
-							...prevState,
-							activeMultisig: localStorage.getItem('active_multisig') || '',
-							multisigAddresses: newMutlisigArray
-						};
-					});
-				}
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-	};
 
 	return (
 		<div className='h-full flex flex-col'>
@@ -113,7 +50,7 @@ const Details = () => {
 					</div>
 				}
 				<div className='flex-1'></div>
-				<Button disabled={!activeMultisig} size='large' onClick={handleRemoveSafe} loading={loading} className='border-none outline-none text-failure bg-failure bg-opacity-10 flex items-center gap-x-3 justify-center rounded-lg p-[10px] w-full mt-7'>
+				<Button disabled={!activeMultisig} size='large' onClick={() => openModal('Remove Multisig', <RemoveMultisigAddress/>)} className='border-none outline-none text-failure bg-failure bg-opacity-10 flex items-center gap-x-3 justify-center rounded-lg p-[10px] w-full mt-7'>
 					<DeleteIcon />
 					<span>Remove Safe</span>
 				</Button>

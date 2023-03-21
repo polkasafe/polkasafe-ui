@@ -6,7 +6,7 @@ import Identicon from '@polkadot/react-identicon';
 import React from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { IMultisigAddress } from 'src/types';
-import { CheckOutlined, CopyIcon, ShareIcon } from 'src/ui-components/CustomIcons';
+import { CheckOutlined, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import shortenAddress from 'src/utils/shortenAddress';
 
@@ -56,11 +56,11 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 						<div>
 							<div className="flex items-center justify-between m-5">
 								<p className='text-text_secondary'>Network:</p>
-								<p className='text-primary'>{multisigData?.network}</p>
+								<p className='text-primary capitalize'>{multisigData?.network}</p>
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Name:</p>
-								<p>{multisigData?.name ? multisigData.name : multisigName}</p>
+								<p>{multisigName ? multisigName : multisigData?.name}</p>
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Address:</p>
@@ -73,7 +73,9 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 									/>
 									<p className='mx-2'>{shortenAddress(multisigData?.address || '')}</p>
 									<button onClick={() => copyText(multisigData?.address || '', true, network)}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
-									<ShareIcon/>
+									<a href={`https://${network}.subscan.io/account/${multisigData?.address}`} target='_blank' rel="noreferrer" >
+										<ExternalLinkIcon  />
+									</a>
 								</div>
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
@@ -99,7 +101,10 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 											<div className='flex'><p className='text-sm text-text_secondary'>{shortenAddress(item.address)}</p>
 												<button className='mx-1' onClick={() => navigator.clipboard.writeText(item.address)}>
 													<CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/>
-												</button><ShareIcon />
+												</button>
+												<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
+													<ExternalLinkIcon  />
+												</a>
 											</div>
 										</div>
 									</div>

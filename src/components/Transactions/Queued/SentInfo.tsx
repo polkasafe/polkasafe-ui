@@ -10,8 +10,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import { ArrowRightIcon, Circle3DotsIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
-import PrimaryButton from 'src/ui-components/PrimaryButton';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
@@ -132,16 +131,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						</p>
 					</section>}
 				{!callData &&
-					<div className='flex items-center gap-x-2 my-2'>
-						<Input size='large' placeholder='Enter Call Data.' className='w-full text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
-						<PrimaryButton className='bg-primary text-white w-fit'>
-							<p className='font-normal text-sm'>Submit</p>
-						</PrimaryButton>
-					</div>
+					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
 				}
 				<Divider className='bg-text_secondary my-5' />
 				<div
-					className='flex items-center justify-between gap-x-5 mt-3'
+					className='flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -159,7 +153,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 					</p>
 				</div>
 				<div
-					className='flex items-center justify-between gap-x-5 mt-3'
+					className='flex items-center gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -174,10 +168,12 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								<p className='whitespace-pre'>
 									{updatedNote}
 								</p>
+								{depositor === address &&
 								<button onClick={() => openModal('Edit Note', <EditNote note={updatedNote} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 									<EditIcon className='text-primary cursor-pointer' />
-								</button>
+								</button>}
 							</span> :
+							depositor === address &&
 							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 								<EditIcon className='text-primary cursor-pointer' />
 							</button>}
@@ -186,7 +182,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 				{showDetails &&
 				<>
 					<div
-						className='flex items-center justify-between gap-x-5 mt-3'
+						className='flex items-center gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -199,7 +195,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							<span
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-								{callHash}
+								{shortenAddress(callHash, 10)}
 							</span>
 							<span
 								className='flex items-center gap-x-2 text-sm'
@@ -209,10 +205,10 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							</span>
 						</p>
 					</div>
-					{callData && <div className='flex items-center justify-between gap-x-5 mt-3'>
+					{callData && <div className='flex items-center gap-x-5 mt-3'>
 						<span className='text-text_secondary font-normal text-sm leading-[15px]'>Call Data:</span>
 						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-							<span className='text-white font-normal text-sm leading-[15px]'> {callData}</span>
+							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
 							<span className='flex items-center gap-x-2 text-sm'>
 								<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary'/></button>
 							</span>
@@ -284,11 +280,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						</Timeline.Item>
 						<Timeline.Item
 							dot={
-								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-									<Circle3DotsIcon className='text-success text-sm' />
+								<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CircleWatchIcon className='text-waiting text-sm' />
 								</span>
 							}
-							className='success'
+							className='warning'
 						>
 							<Collapse bordered={false}>
 								<Collapse.Panel
@@ -406,14 +402,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							>
 								<p>Executed</p>
 								<div
-									className='mt-3 text-text_secondary'
+									className='mt-2 text-text_secondary text-sm'
 								>
 									The transaction will be executed once the threshold is reached.
 								</div>
 							</div>
 						</Timeline.Item>
 					</Timeline>
-					<div className='w-full flex flex-col gap-y-2 items-center'>
+					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
 						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
 								Approve Transaction
 						</Button>}

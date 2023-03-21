@@ -27,6 +27,12 @@ const Footer = () => {
 					<Link to='/contact-us'>
 						Contact Us
 					</Link>
+					<a href='https://polkasafe.hellonext.co/b/bugs-feedback' target='_blank' rel="noreferrer">
+						Report Bug
+					</a>
+					<a href='https://polkasafe.hellonext.co/b/bugs-feedback' target='_blank' rel="noreferrer">
+						Feature Request
+					</a>
 				</div>
 				<p className='flex items-center gap-x-2'>
 					<PolkadotIcon className='text-sm'/>

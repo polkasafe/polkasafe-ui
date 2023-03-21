@@ -4,9 +4,10 @@
 import { QrDisplayAddress } from '@polkadot/react-qr';
 import React, { useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 const AddressQr = ({ address }: { address: string }) => {
-	const { api, apiReady } = useGlobalApiContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 	const [genesisHash, setGenesisHash] = useState('');
 	useEffect(() => {
 		const getGenesisHash = async () => {
@@ -20,7 +21,7 @@ const AddressQr = ({ address }: { address: string }) => {
 	}, [api, apiReady]);
 	return (
 		<div className='flex flex-col items-center'>
-			<QrDisplayAddress className='h-80 w-60' address={address} genesisHash={genesisHash} />
+			<QrDisplayAddress className='h-80 w-60' address={getEncodedAddress(address, network) || address} genesisHash={genesisHash} />
 		</div>
 	);
 };
