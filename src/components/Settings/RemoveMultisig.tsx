@@ -69,9 +69,17 @@ const RemoveMultisigAddress = () => {
 						return {
 							...prevState,
 							activeMultisig: localStorage.getItem('active_multisig') || '',
-							multisigAddresses: newMutlisigArray
+							multisigAddresses: newMutlisigArray,
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[activeMultisig]: {
+									...prevState.multisigSettings[activeMultisig],
+									deleted: true
+								}
+							}
 						};
 					});
+					toggleVisibility();
 				}
 			}
 		} catch (error){

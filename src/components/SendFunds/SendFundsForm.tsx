@@ -33,6 +33,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
+import shortenAddress from 'src/utils/shortenAddress';
 // import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -248,13 +249,16 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 				<section className='mt-[15px]'>
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Call Data</label>
 					<div className='flex items-center gap-x-[10px]'>
-						<div
-							className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-							onClick={() => copyText(callData)}
-						>
-							{callData}
-							<button className='text-primary'><CopyIcon /></button>
-						</div>
+						<article className='w-[500px]'>
+							<div
+								className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
+								onClick={() => copyText(callData)}
+							>
+								{shortenAddress(callData, 10)}
+								<button className='text-primary'><CopyIcon /></button>
+							</div>
+
+						</article>
 					</div>
 				</section>
 				}

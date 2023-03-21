@@ -64,7 +64,14 @@ const RenameMultisig = ({ name }: { name: string }) => {
 						setUserDetailsContextState((prev) => {
 							return {
 								...prev,
-								multisigAddresses: copyMultisigAddresses
+								multisigAddresses: copyMultisigAddresses,
+								multisigSettings: {
+									...prev.multisigSettings,
+									[activeMultisig]: {
+										...prev.multisigSettings[activeMultisig],
+										name: multisigName
+									}
+								}
 							};
 						});
 					}
