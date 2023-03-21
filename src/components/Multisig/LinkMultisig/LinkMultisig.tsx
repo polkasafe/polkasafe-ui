@@ -149,7 +149,14 @@ const LinkMultisig = () => {
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
-							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData]
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							multisigSettings: {
+								...prevState?.multisigSettings,
+								[multisigData.address]: {
+									name: multisigName,
+									deleted: false
+								}
+							}
 						};
 					});
 					Promise.all(signatoriesWithName.map(
