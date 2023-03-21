@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const { openModal } = useModalContext();
@@ -125,7 +125,7 @@ const Menu: FC<Props> = ({ className }) => {
 				<div>
 					{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
-						{multisigAddresses.filter((multisig) => multisig.network === network).map((multisig) => {
+						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
