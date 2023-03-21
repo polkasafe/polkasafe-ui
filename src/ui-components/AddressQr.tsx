@@ -21,7 +21,7 @@ const AddressQr = ({ address }: { address: string }) => {
 	}, [api, apiReady]);
 	return (
 		<div className='flex flex-col items-center'>
-			<QrDisplayAddress className='h-80 w-60' address={getEncodedAddress(address, network) || address} genesisHash={genesisHash} />
+			<QrDisplayAddress size={150} address={getEncodedAddress(address, network) || address} genesisHash={genesisHash} />
 		</div>
 	);
 };

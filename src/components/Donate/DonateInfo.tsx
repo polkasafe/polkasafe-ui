@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Divider } from 'antd';
 import React from 'react';
-import polkadotLogoText from 'src/assets/icons/polkadot-logo-text.svg';
+import polkasafeLogo from 'src/assets/polkasafe-logo-white.svg';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ExternalLinkIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 
@@ -17,16 +17,10 @@ const DonateInfo = () => {
 					<p className='text-sm font-normal'>
 						Please feel free to donate us any amount you want.
 					</p>
-					<div className='flex items-center ml-[59.1px] my-20'>
-						<img src={polkadotLogoText} alt="polkadot logo" />
+					<div className='flex items-center justify-center my-10'>
+						<img src={polkasafeLogo} alt="polkadot logo" />
 					</div>
 					<div className='text-normal text-sm max-w-[367px] leading-4'>
-						<p>
-							Polkadot is a consensus network that enables a new payment system and a completely digital money.
-						</p>
-						<p>
-							From a user perspective, Polkadot is pretty much like cash for the Internet.
-						</p>
 					</div>
 				</article>
 				<article>
