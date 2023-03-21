@@ -18,7 +18,6 @@ import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
@@ -26,7 +25,7 @@ import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
@@ -66,7 +65,6 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { toggleVisibility } = useModalContext();
 	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
@@ -132,13 +130,12 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 			setSuccess(true);
 			setTimeout(() => {
 				setSuccess(false);
-				toggleVisibility();
-			}, 10000);
+			}, 7000);
 		} catch (error) {
 			console.log(error);
 			setLoading(false);
 			setFailure(true);
-			setTimeout(() => setFailure(false), 10000);
+			setTimeout(() => setFailure(false), 5000);
 		}
 	};
 
@@ -332,14 +329,14 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 					</div>
 				</section>
 
-				<section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
+				{/* <section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
 					<span>
 						<WarningCircleIcon className='text-base' />
 					</span>
 					<p className=''>
 						The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.
 					</p>
-				</section>
+				</section> */}
 
 				<section className='flex items-center gap-x-5 justify-center mt-10'>
 					<CancelBtn className='w-[300px]' onClick={onCancel} />

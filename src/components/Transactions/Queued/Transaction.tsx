@@ -16,6 +16,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import { IQueueItem } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
@@ -35,11 +36,11 @@ interface ITransactionProps {
 	note: string;
 	amountUSD: string;
 	setRefetch?: React.Dispatch<React.SetStateAction<boolean>>
-	setRemovedLastItem?: React.Dispatch<React.SetStateAction<boolean>>
+	setQueuedTransactions?: React.Dispatch<React.SetStateAction<IQueueItem[]>>
 	numberOfTransactions: number
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, setRemovedLastItem, numberOfTransactions, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
@@ -118,8 +119,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				recipientAddress: decodedCallData.args.dest.id
 			});
 			document.getElementById(callHash)?.remove();
-			if(numberOfTransactions < 2 && setRemovedLastItem){
-				setRemovedLastItem(true);
+			if(numberOfTransactions < 2 && setQueuedTransactions){
+				setQueuedTransactions([]);
 			}
 		} catch (error) {
 			console.log(error);
@@ -155,8 +156,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : ''
 			});
 			document.getElementById(callHash)?.remove();
-			if(numberOfTransactions < 2 && setRemovedLastItem){
-				setRemovedLastItem(true);
+			if(numberOfTransactions < 2 && setQueuedTransactions){
+				setQueuedTransactions([]);
 			}
 		} catch (error) {
 			console.log(error);
