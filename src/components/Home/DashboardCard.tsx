@@ -30,7 +30,7 @@ import SendFundsForm from '../SendFunds/SendFundsForm';
 
 const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const { api, apiReady } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal, toggleVisibility } = useModalContext();
 
@@ -134,7 +134,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 							</div>
 						</div>
 						<div>
-							<div className='text-lg font-bold text-white'>{multisigAddresses?.find(a => a.address == activeMultisig)?.name}</div>
+							<div className='text-lg font-bold text-white'>{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find(a => a.address == activeMultisig)?.name}</div>
 							<div className="flex">
 								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className='text-md font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>

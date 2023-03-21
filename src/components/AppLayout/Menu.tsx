@@ -52,6 +52,7 @@ const Menu: FC<Props> = ({ className }) => {
 			title: 'Apps'
 		}
 	];
+
 	if(userAddress){
 		menuItems.push(
 			{
@@ -144,7 +145,7 @@ const Menu: FC<Props> = ({ className }) => {
 										size={30}
 										theme={'polkadot'}
 									/>
-									<span className='truncate'>{multisig.name}</span>
+									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
 								</button>
 							</li>;
 						})}

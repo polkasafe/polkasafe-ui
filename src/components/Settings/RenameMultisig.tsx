@@ -16,7 +16,8 @@ import { NotificationStatus } from 'src/ui-components/types';
 const RenameMultisig = ({ name }: { name: string }) => {
 	const { network } = useGlobalApiContext();
 	const { toggleVisibility } = useModalContext();
-	const [multisigName, setMultisigName] = useState<string>('');
+
+	const [multisigName, setMultisigName] = useState<string>(name);
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig, setUserDetailsContextState, multisigAddresses } = useGlobalUserDetailsContext();
 
@@ -108,13 +109,14 @@ const RenameMultisig = ({ name }: { name: string }) => {
 					name="multisig_name"
 					rules={[]}
 					className='border-0 outline-0 my-0 p-0'
+					initialValue={multisigName}
 				>
 					<Input
 						placeholder="Mutlisig Name"
 						className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						id="multisig_name"
 						value={multisigName}
-						defaultValue={name}
+						defaultValue={multisigName}
 						onChange={(e) => setMultisigName(e.target.value)}
 					/>
 				</Form.Item>

@@ -144,7 +144,8 @@ const ConnectWallet = () => {
 							return {
 								...prevState,
 								address: userData?.address,
-								multisigAddresses: userData?.multisigAddresses
+								multisigAddresses: userData?.multisigAddresses,
+								multisigSettings: userData?.multisigSettings || {}
 							};
 						});
 						setLoading(false);
@@ -156,7 +157,8 @@ const ConnectWallet = () => {
 								...prevState,
 								address: userData?.address,
 								addressBook: userData?.addressBook,
-								multisigAddresses: userData?.multisigAddresses
+								multisigAddresses: userData?.multisigAddresses,
+								multisigSettings: userData?.multisigSettings || {}
 							};
 						});
 						setLoading(false);
