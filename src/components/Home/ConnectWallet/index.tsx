@@ -5,6 +5,7 @@ import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import ConnectWalletImg from 'src/assets/connect-wallet.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -20,7 +21,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
+	const { network, api, apiReady } = useGlobalApiContext();
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState<string>('');
@@ -173,35 +174,37 @@ const ConnectWallet = () => {
 	return (
 		<>
 			<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
+				<img src={ConnectWalletImg} alt='Wallet' height={150} width={150} className='mb-4' />
 				{
-					!noAccounts?
-						<>
-							<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
-							<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
-							<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
-							{
-								showAccountsDropdown?
-									<div className='mt-[30px]'>
-										<AccountSelectionForm
-											accounts={accounts}
-											address={address}
-											onAccountChange={onAccountChange}
-											title='Choose linked account'
-										/>
-									</div>
-									: null
-							}
-							<Button
-								icon={<WalletIcon/>}
-								size='large'
-								loading={loading}
-								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
-								className='mt-[60px] border-none outline-none flex items-center justify-center bg-primary text-white max-w-[350px] w-full'
-							>
+					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :
+						noExtension ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>No Extensions Found.</p> :
+							noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>No Accounts Found.</p> :
+								<>
+									<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
+									<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
+									<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
+									{
+										showAccountsDropdown?
+											<div className='mt-[30px]'>
+												<AccountSelectionForm
+													accounts={accounts}
+													address={address}
+													onAccountChange={onAccountChange}
+													title='Choose linked account'
+												/>
+											</div>
+											: null
+									}
+									<Button
+										icon={<WalletIcon/>}
+										size='large'
+										loading={loading}
+										onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
+										className='mt-[60px] border-none outline-none flex items-center justify-center bg-primary text-white max-w-[350px] w-full'
+									>
 								Connect Wallet
-							</Button>
-						</>
-						: <Loader size='large' />
+									</Button>
+								</>
 
 				}
 			</div>

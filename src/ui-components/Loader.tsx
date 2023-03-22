@@ -4,10 +4,10 @@
 import { Spin } from 'antd';
 import React from 'react';
 
-const Loader = ({ size='default' }: { size?: 'small' | 'default' | 'large' }) => {
+const Loader = ({ size='default', text }: { size?: 'small' | 'default' | 'large', text?: string }) => {
 	return (
 		<div className='flex justify-center items-center h-full'>
-			<Spin size={size} tip='Loading...' />
+			<Spin size={size} tip={text ? text : 'Loading...'} />
 		</div>
 	);
 };
