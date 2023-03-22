@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
+import { Badge } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect,useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -92,8 +93,10 @@ const Menu: FC<Props> = ({ className }) => {
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
 			<div className='flex flex-col gap-y-11 mb-3'>
 				<section>
-					<Link className='text-white flex items-center gap-x-2 overflow-hidden ml-3' to='/'>
-						<img src={polkasafeLogo} alt="polkasafe logo" />
+					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
+						<Badge offset={[10, 0]} count='Beta' color='#1573FE'>
+							<img src={polkasafeLogo} alt="polkasafe logo" />
+						</Badge>
 					</Link>
 				</section>
 				<section>

@@ -119,6 +119,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 		}
 		setLoading(true);
 		try {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const queueItemData = await initMultisigTransfer({
 				amount,
 				api,
@@ -130,7 +131,6 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 				recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
 				transferKeepAlive: true
 			});
-			console.log('queueItemData', queueItemData);
 			// todo: add IQueueItem to state
 			setLoading(false);
 			if(setNewTxn){
@@ -204,7 +204,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 
 				<section className=''>
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient</label>
-					<div className='flex items-center gap-x-[10px]'>
+					<div className='flex items-start gap-x-[10px]'>
 						<article className='w-[500px]'>
 							<Form.Item
 								name="recipient"
@@ -242,7 +242,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 
 				<section className='mt-[15px]'>
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Amount</label>
-					<div className='flex items-center gap-x-[10px]'>
+					<div className='flex items-start gap-x-[10px]'>
 						<article className='w-[500px]'>
 							<BalanceInput onChange={(balance) => setAmount(balance)} />
 						</article>
@@ -355,7 +355,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 
 				<section className='flex items-center gap-x-5 justify-center mt-10'>
 					<CancelBtn className='w-[300px]' onClick={onCancel} />
-					<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+					<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 				</section>
 			</Form>
 		</Spin>
