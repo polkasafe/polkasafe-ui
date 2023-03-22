@@ -6,7 +6,7 @@ import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Form, Input, message, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
@@ -25,10 +25,11 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { transferFunds } from 'src/utils/transferFunds';
+import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
-const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
+const ExistentialDeposit = ({ className, onCancel }: { className?: string, onCancel: () => void }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
@@ -41,6 +42,16 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
+	const [isValidSender, setIsValidSender] = useState(true);
+
+	useEffect(() => {
+		if(!getSubstrateAddress(selectedSender)){
+			setIsValidSender(false);
+		}
+		else{
+			setIsValidSender(true);
+		}
+	}, [selectedSender]);
 
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
 		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
@@ -89,6 +100,7 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 			setSuccess(true);
 			setTimeout(() => {
 				setSuccess(false);
+				onCancel();
 			}, 7000);
 		} catch (error) {
 			console.log(error);
@@ -111,7 +123,7 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 
 	return (
 		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
-			<div >
+			<div className={className}>
 				{contextHolder}
 				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
 					<span>
@@ -148,17 +160,19 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 							<div className='w-full'>
 								<Form.Item
 									name="sender"
+									rules={[{ required: true }]}
+									help={!isValidSender && 'Please add a valid Address.'}
 									className='border-0 outline-0 my-0 p-0'
-									initialValue={addressBook[0].address}
+									validateStatus={selectedSender && isValidSender ? 'success' : 'error'}
 								>
 									<div className="flex items-center">
 										<AutoComplete
 											onClick={addSenderHeading}
 											options={autocompleteAddresses}
 											id='sender'
-											value={getEncodedAddress(selectedSender, network)}
 											placeholder="Send from Address.."
 											onChange={(value) => setSelectedSender(value)}
+											defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
 										/>
 										<div className='absolute right-2'>
 											<button onClick={() => copyText(selectedSender, true, network)}>
@@ -202,7 +216,7 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 
 					<section className='flex items-center gap-x-5 justify-center mt-10'>
 						<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
-						<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+						<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 					</section>
 				</Form>
 			</div>
@@ -210,4 +224,36 @@ const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 	);
 };
 
-export default ExistentialDeposit;
+export default styled(ExistentialDeposit)`
+	.ant-select input {
+		font-size: 14px !important;
+		font-style: normal !important;
+		line-height: 15px !important;
+		border: 0 !important;
+		outline: 0 !important;
+		background-color: #24272E !important;
+		border-radius: 8px !important;
+		color: white !important;
+		padding: 12px !important;
+		display: block !important;
+		height: auto !important;
+	}
+	.ant-select-selector {
+		border: none !important;
+		height: 40px !important; 
+		box-shadow: none !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+`;

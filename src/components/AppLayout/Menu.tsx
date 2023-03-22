@@ -94,7 +94,7 @@ const Menu: FC<Props> = ({ className }) => {
 			<div className='flex flex-col gap-y-11 mb-3'>
 				<section>
 					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
-						<Badge offset={[10, 0]} count='Beta' color='#1573FE'>
+						<Badge offset={[-15, 45]} count='Beta' color='#1573FE'>
 							<img src={polkasafeLogo} alt="polkasafe logo" />
 						</Badge>
 					</Link>
