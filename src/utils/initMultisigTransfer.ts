@@ -134,12 +134,28 @@ export default async function initMultisigTransfer({
 							});
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
+
+							const errorCode = (event.data as any)?.dispatchError?.asModule?.toJSON()?.error;
+							if(!errorCode) {
+								queueNotification({
+									header: 'Error!',
+									message: 'Transaction Failed',
+									status: NotificationStatus.ERROR
+								});
+								reject('Transaction Failed');
+								return;
+							}
+
+							const { method, section, docs } = api.registry.findMetaError(new Uint8Array(errorCode));
+							console.log(`Error: ${section}.${method}\n${docs.join(' ')}`);
+
 							queueNotification({
-								header: 'Error!',
-								message: 'Transaction Failed',
+								header: `Error! ${section}.${method}`,
+								message: `${docs.join(' ')}`,
 								status: NotificationStatus.ERROR
 							});
-							reject();
+
+							reject(`Error: ${section}.${method}\n${docs.join(' ')}`);
 						}
 					}
 				}
