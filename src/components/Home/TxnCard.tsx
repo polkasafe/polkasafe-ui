@@ -168,7 +168,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 										</div>
 										<div>
 											<h1 className='text-md text-white'>- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
-											{!isNaN(Number(amountUSD)) && decodedCallData?.args?.value && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(decodedCallData?.args?.value)).toFixed(2) || '0'} USD</p>}
+											{!isNaN(Number(amountUSD)) && decodedCallData?.args?.value && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
 										</div>
 									</Link>
 								);})
