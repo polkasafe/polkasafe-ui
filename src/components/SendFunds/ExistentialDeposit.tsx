@@ -113,7 +113,7 @@ const ExistentialDeposit = () => {
 
 	return (
 		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
-			<div className='w-[42vw]  min-w-[500px]'>
+			<div >
 				{contextHolder}
 				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
 					<span>
