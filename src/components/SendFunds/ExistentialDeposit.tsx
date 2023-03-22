@@ -13,7 +13,6 @@ import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransact
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
@@ -29,9 +28,8 @@ import { transferFunds } from 'src/utils/transferFunds';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
-const ExistentialDeposit = () => {
+const ExistentialDeposit = ({ onCancel }: { onCancel: () => void }) => {
 	const [messageApi, contextHolder] = message.useMessage();
-	const { toggleVisibility } = useModalContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
 
@@ -203,7 +201,7 @@ const ExistentialDeposit = () => {
 					</section>
 
 					<section className='flex items-center gap-x-5 justify-center mt-10'>
-						<CancelBtn loading={loading} className='w-[300px]' onClick={toggleVisibility} />
+						<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
 						<ModalBtn loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 					</section>
 				</Form>

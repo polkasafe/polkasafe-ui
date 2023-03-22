@@ -4,7 +4,8 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import React, { useCallback, useEffect,useState } from 'react';
+import { Modal } from 'antd';
+import React, { FC, useCallback, useEffect,useState } from 'react';
 import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -18,7 +19,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
 import AddressQr from 'src/ui-components/AddressQr';
-import { CopyIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, OutlineCloseIcon, QRIcon, WalletIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -32,30 +33,33 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const { api, apiReady } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { openModal, toggleVisibility } = useModalContext();
+	const { openModal } = useModalContext();
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 
-	// TODO: check why we're not using this
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [loading, setLoading] = useState(false);
-	const [transactionLoading, setTransactionLoading] = useState(false);
+	const [transactionLoading, setTransactionLoading] = useState(true);
+	const [isOnchain, setIsOnchain] = useState(false);
+	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
-	const handleNewTransaction = async () => {
-		if(!api || !apiReady || !activeMultisig) return;
+	useEffect(() => {
+		const handleNewTransaction = async () => {
+			if(!api || !apiReady || !activeMultisig) return;
 
-		setTransactionLoading(true);
-		// check if wallet has existential deposit
-		const hasExistentialDepositRes = await hasExistentialDeposit(api, activeMultisig, network);
+			setTransactionLoading(true);
+			// check if wallet has existential deposit
+			const hasExistentialDepositRes = await hasExistentialDeposit(api, activeMultisig, network);
 
-		if(!hasExistentialDepositRes) {
-			openModal('Existential Deposit', <ExistentialDeposit />);
-		} else {
-			openModal('Send Funds', <SendFundsForm setNewTxn={setNewTxn} onCancel={() => toggleVisibility()} />);
-		}
+			if(!hasExistentialDepositRes) {
+				setIsOnchain(false);
+			} else {
+				setIsOnchain(true);
+			}
 
-		setTransactionLoading(false);
-	};
+			setTransactionLoading(false);
+		};
+		handleNewTransaction();
+
+	}, [activeMultisig, api, apiReady, network]);
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -64,7 +68,6 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 
 			if(!address || !signature || !activeMultisig) return;
 
-			setLoading(true);
 			const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
 				body: JSON.stringify({
 					address: activeMultisig,
@@ -77,25 +80,49 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 			const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
 
 			if(error) {
-				setLoading(false);
 				return;
 			}
 
 			if(data){
 				setAssetsData(data);
-				setLoading(false);
-
 			}
 
 		} catch (error){
 			console.log('ERROR', error);
-			setLoading(false);
 		}
 	}, [activeMultisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
 	}, [handleGetAssets]);
+
+	const TransactionModal: FC = () => {
+		return (
+			<>
+				<PrimaryButton onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
+					<PlusCircleOutlined /> New Transaction
+				</PrimaryButton>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenTransactionModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
+					open={openTransactionModal}
+					className='w-auto md:min-w-[500px]'
+				>
+					{isOnchain ?
+						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
+						: <ExistentialDeposit onCancel={() => setOpenTransactionModal(false)} />}
+				</Modal>
+			</>
+		);
+	};
 
 	return (
 		<div>
@@ -164,9 +191,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					</div>
 				</div>
 				<div className="flex justify-around w-full mt-5">
-					<PrimaryButton onClick={handleNewTransaction} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
-						<PlusCircleOutlined /> New Transaction
-					</PrimaryButton>
+					<TransactionModal/>
 					<Link to='/assets' className='w-[45%] group'>
 						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'><WalletIcon />View Assets</PrimaryButton>
 					</Link>
