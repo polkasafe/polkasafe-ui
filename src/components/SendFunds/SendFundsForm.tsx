@@ -139,12 +139,15 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 			setSuccess(true);
 			setTimeout(() => {
 				setSuccess(false);
+				onCancel?.();
 			}, 7000);
 		} catch (error) {
 			console.log(error);
 			setLoading(false);
 			setFailure(true);
-			setTimeout(() => setFailure(false), 5000);
+			setTimeout(() => {
+				setFailure(false);
+			}, 5000);
 		}
 	};
 

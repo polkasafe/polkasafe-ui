@@ -73,7 +73,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 						>
 							<span>
-							Sent
+							Send
 							</span>
 							<span
 								className='text-failure'
