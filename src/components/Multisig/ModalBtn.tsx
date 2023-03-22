@@ -7,17 +7,29 @@ import { OutlineCheckIcon } from 'src/ui-components/CustomIcons';
 
 interface IModalBtnProps {
 	title: string;
-	onClick?: ()=>void;
-	loading?: boolean
-	disabled?: boolean
+	className?: string;
+	onClick?: () => void;
+	loading?: boolean;
+	disabled?: boolean;
 }
 
-const ModalBtn: FC<IModalBtnProps> = ({ onClick, title, loading=false, disabled=false }) => {
+const ModalBtn: FC<IModalBtnProps> = ({ className, disabled=false, title, loading=false, onClick }) => {
 	return (
-		<Button icon={<OutlineCheckIcon />} loading={loading} disabled={disabled} onClick={onClick} size='large'
-			className='w-[30%] border-none text-white text-sm font-normal bg-primary min-w-[120px]'
+		<Button
+			disabled={disabled}
+			loading={loading}
+			onClick={onClick}
+			size='large'
+			className={`${className} w-[30%] flex items-center justify-center gap-x-[10.83px] border-none outline-none text-sm ${disabled ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} rounded-lg min-w-[120px]`}
 		>
-			{title}
+			<span
+				className={`flex items-center justify-center p-2 border ${disabled ? 'border-text_secondary' : 'border-white'} rounded-full w-[14.33px] h-[14.33px]`}
+			>
+				<OutlineCheckIcon className='w-[8px] h-[8px]' />
+			</span>
+			<span>
+				{title}
+			</span>
 		</Button>
 	);
 };

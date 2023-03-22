@@ -4,7 +4,7 @@
 /* eslint-disable sort-keys */
 
 // import { PlusCircleOutlined } from '@ant-design/icons';
-import { Input, InputNumber, Modal, Switch } from 'antd';
+import { Form, Input, InputNumber, Modal, Switch } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -41,7 +41,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 	const { toggleVisibility, toggleSwitch, toggleOnSwitch } = useModalContext();
 	const [multisigName, setMultisigName] = useState<string>('');
-	const [threshold, setThreshold] = useState<number | null>(null);
+	const [threshold, setThreshold] = useState<number | null>(2);
 	const [signatories, setSignatories] = useState<string[]>([userAddress]);
 
 	const { accounts, noAccounts } = useGetAllAccounts();
@@ -49,6 +49,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [addAddress, setAddAddress] = useState<string>('');
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
+	const [form] = Form.useForm();
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0 && !address) {
@@ -194,7 +195,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	};
 
 	return (
-		<div>
+		<Form
+			form={form}
+			validateMessages={
+				{ required: "Please add the '${name}'" }
+			}
+		>
 			<div className='flex flex-col relative'>
 				<div className={classNames(
 					`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
@@ -214,7 +220,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						</div>
 						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
-							{toggleSwitch? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
+							<Form.Item
+								name="signatories"
+								rules={[{ required: true }]}
+								help={signatories.length < 2 && 'Multisig Must Have Atleast 2 Signatories.'}
+								className='border-0 outline-0 my-0 p-0'
+								validateStatus={signatories.length < 2 ? 'error' : 'success'}
+							>
+								{toggleSwitch? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
+							</Form.Item>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<br />
@@ -223,11 +237,19 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 								</p> : <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>Supply a JSON file with the list of signatories.</p>}
 							</div>
 						</div>
-						<div className='flex items-center justify-between'>
-							<div className='w-[45vw]'>
-								<p className='text-primary'>Threshold</p>
-								<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='0' />
-							</div>
+						<div className='flex items-start justify-between'>
+							<Form.Item
+								name="threshold"
+								rules={[{ required: true }]}
+								help={(!threshold || threshold < 2) ? 'Threshold Must Be More Than 1.' : (threshold > signatories.length && signatories.length > 1) ? 'Threshold Must Be Less Than Or Equal To Selected Signatories.' : ''}
+								className='border-0 outline-0 my-0 p-0'
+								validateStatus={(!threshold || threshold < 2 || (threshold > signatories.length && signatories.length > 1) ) ? 'error' : 'success'}
+							>
+								<div className='w-[45vw]'>
+									<p className='text-primary'>Threshold</p>
+									<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='0' />
+								</div>
+							</Form.Item>
 							<DashDotIcon className='mt-5'/>
 							<div className='w-[40%] overflow-auto'>
 								<p className='bg-bg-secondary py-2 px-5 rounded-md mx-2 mt-5 text-text_secondary'>The threshold for approval should be less or equal to the number of signatories for this multisig.</p>
@@ -247,10 +269,10 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
-					<AddBtn loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
+					<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 				</div>
 			</div>
-		</div>
+		</Form>
 	);
 };
 
