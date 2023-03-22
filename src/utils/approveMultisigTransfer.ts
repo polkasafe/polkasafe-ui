@@ -106,12 +106,17 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								resolve();
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
+
+								const errorCode = (event.data as any).dispatchError.asModule.toJSON()?.error;
+								const { method, section, docs } = api.registry.findMetaError(new Uint8Array(errorCode));
+								console.log(`Error: ${section}.${method}\n${docs.join(' ')}`);
+
 								queueNotification({
-									header: 'Error!',
-									message: 'Transaction Failed',
+									header: `Error! ${section}.${method}`,
+									message: `${docs.join(' ')}`,
 									status: NotificationStatus.ERROR
 								});
-								reject('ExtrinsicFailed');
+								reject(`Error: ${section}.${method}\n${docs.join(' ')}`);
 							}
 						}
 					}
@@ -161,12 +166,27 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								});
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
+
+								const errorCode = (event.data as any)?.dispatchError?.asModule?.toJSON()?.error;
+								if(!errorCode) {
+									queueNotification({
+										header: 'Error!',
+										message: 'Transaction Failed',
+										status: NotificationStatus.ERROR
+									});
+									reject('Transaction Failed');
+									return;
+								}
+
+								const { method, section, docs } = api.registry.findMetaError(new Uint8Array(errorCode));
+								console.log(`Error: ${section}.${method}\n${docs?.join(' ')}`);
+
 								queueNotification({
-									header: 'Error!',
-									message: 'Transaction Failed',
+									header: `Error! ${section}.${method}`,
+									message: `${docs.join(' ')}`,
 									status: NotificationStatus.ERROR
 								});
-								reject('ExtrinsicFailed');
+								reject(`Error: ${section}.${method}\n${docs.join(' ')}`);
 							}
 						}
 					}
