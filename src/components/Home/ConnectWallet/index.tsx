@@ -177,8 +177,8 @@ const ConnectWallet = () => {
 				<img src={ConnectWalletImg} alt='Wallet' height={150} width={150} className='mb-4' />
 				{
 					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :
-						noExtension ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>Extension Not Found.</p><p>Please Install Polkadot-Js Wallet Extention.</p></p> :
-							noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>No Accounts Found.</p><p>Please Install Polkadot-Js Wallet Extention And Add Accounts.</p></p> :
+						noExtension ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>Extension Not Found.</p><p>Please Install Polkadot-Js Wallet Extension.</p></p> :
+							noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>No Accounts Found.</p><p>Please Install Polkadot-Js Wallet Extension And Add Accounts.</p></p> :
 								<>
 									<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
 									<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
