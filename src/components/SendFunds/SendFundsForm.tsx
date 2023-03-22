@@ -80,7 +80,16 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
 
+	const [validRecipient, setValidRecipient] = useState(true);
+	const [form] = Form.useForm();
+
 	useEffect(() => {
+		if(!getSubstrateAddress(recipientAddress)){
+			setValidRecipient(false);
+			return;
+		} else {
+			setValidRecipient(true);
+		}
 		if(api && apiReady && recipientAddress && amount){
 			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
 			setCallData(call.method.toHex());
@@ -159,6 +168,10 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 			{ contextHolder }
 			<Form
 				className={classNames(className, 'max-h-[68vh] overflow-y-auto px-2')}
+				form={form}
+				validateMessages={
+					{ required: "Please add the '${name}'" }
+				}
 			>
 				<section>
 					<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
@@ -195,8 +208,10 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 						<article className='w-[500px]'>
 							<Form.Item
 								name="recipient"
-								rules={[]}
+								rules={[{ required: true }]}
+								help={!validRecipient && 'Please add a valid Address.'}
 								className='border-0 outline-0 my-0 p-0'
+								validateStatus={recipientAddress && validRecipient ? 'success' : 'error'}
 							>
 								<div className="flex items-center">
 									<AutoComplete

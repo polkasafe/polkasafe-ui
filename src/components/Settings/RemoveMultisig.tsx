@@ -16,7 +16,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 
 const RemoveMultisigAddress = () => {
-	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { toggleVisibility } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
@@ -60,7 +60,7 @@ const RemoveMultisigAddress = () => {
 					const copy = [...multisigAddresses];
 					setUserDetailsContextState((prevState) => {
 						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig);
-						if(newMutlisigArray && newMutlisigArray[0]?.address){
+						if(newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted){
 							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
 						}
 						else{

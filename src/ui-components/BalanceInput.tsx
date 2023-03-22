@@ -52,7 +52,7 @@ const BalanceInput = ({ className, label = '', onChange, placeholder = '' }: Pro
 				>
 					<div className='flex items-center h-[40px]'>
 						<Input
-							id="amount"
+							id="balance"
 							onChange={(a) => onBalanceChange(a.target.value)}
 							placeholder={`${placeholder} ${chainProperties[network]?.tokenSymbol}`}
 							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
