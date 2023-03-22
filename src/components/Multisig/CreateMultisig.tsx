@@ -241,9 +241,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							<Form.Item
 								name="threshold"
 								rules={[{ required: true }]}
-								help={(!threshold || threshold < 2) && 'Threshold Must Be More Than 1.'}
+								help={(!threshold || threshold < 2) ? 'Threshold Must Be More Than 1.' : (threshold > signatories.length && signatories.length > 1) ? 'Threshold Must Be Less Than Or Equal To Selected Signatories.' : ''}
 								className='border-0 outline-0 my-0 p-0'
-								validateStatus={(!threshold || threshold < 2) ? 'error' : 'success'}
+								validateStatus={(!threshold || threshold < 2 || (threshold > signatories.length && signatories.length > 1) ) ? 'error' : 'success'}
 							>
 								<div className='w-[45vw]'>
 									<p className='text-primary'>Threshold</p>
@@ -269,7 +269,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel? onCancel:toggleVisibility}/>
-					<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
+					<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 				</div>
 			</div>
 		</Form>
