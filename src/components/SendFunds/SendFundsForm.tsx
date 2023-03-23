@@ -83,6 +83,8 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	const [validRecipient, setValidRecipient] = useState(true);
 	const [form] = Form.useForm();
 
+	const [multisigBalance, setMultisigBalance] = useState<string>('');
+
 	useEffect(() => {
 		if(!getSubstrateAddress(recipientAddress)){
 			setValidRecipient(false);
@@ -189,7 +191,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 								<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
 								<p className='text-text_secondary font-normal text-xs leading-[13px]'>{(activeMultisig)}</p>
 							</div>
-							<Balance address={activeMultisig} />
+							<Balance address={activeMultisig} onChange={setMultisigBalance} />
 						</article>
 						<article className='w-[412px] flex items-center'>
 							<span className='-mr-1.5 z-0'>
@@ -247,7 +249,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Amount</label>
 					<div className='flex items-start gap-x-[10px]'>
 						<article className='w-[500px]'>
-							<BalanceInput onChange={(balance) => setAmount(balance)} />
+							<BalanceInput multisigBalance={multisigBalance} onChange={(balance) => setAmount(balance)} />
 						</article>
 						<article className='w-[412px] flex items-center'>
 							<span className='-mr-1.5 z-0'>
@@ -358,7 +360,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 
 				<section className='flex items-center gap-x-5 justify-center mt-10'>
 					<CancelBtn className='w-[300px]' onClick={onCancel} />
-					<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+					<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance))} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
 				</section>
 			</Form>
 		</Spin>

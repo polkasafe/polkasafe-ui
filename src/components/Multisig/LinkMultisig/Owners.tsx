@@ -127,39 +127,41 @@ const Owners = ({ signatories, threshold, setThreshold, setSignatoriesWithName, 
 							)) :
 							<>
 								{signatoriesArray.map((signatory, i) => (
-									<div className="flex flex-col gap-y-3 mb-5" key={i}>
+									<div className="flex flex-col gap-y-3" key={i}>
 										<div className="flex items-center gap-x-4">
-											<Form.Item>
-												<label
-													className="text-primary text-xs leading-[13px] font-normal"
-												>Name {i+1}</label>
-												<Input
-													placeholder=""
-													disabled={i === 0}
-													className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-													value={signatory.name}
-													onChange={(e) => onNameChange(e, i)}
-												/>
-											</Form.Item>
-											<Form.Item
-												className='w-full'
-												name={`Address ${i+1}`}
-												rules={[{ required: true }]}
-												help={signatory.address === '' && 'This Is Required.'}
-												status={signatory.address === '' ? 'error' : 'success'}
-											>
-												<label
-													className="text-primary text-xs leading-[13px] font-normal"
-												>Address {i+1}</label>
-												<Input
-													id={`Address ${i+1}`}
-													placeholder=""
-													disabled={i === 0}
-													className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-													value={signatory.address}
-													onChange={(e) => onSignatoryChange(e, i)}
-												/>
-											</Form.Item>
+											<div className='flex-1 flex items-start gap-x-4'>
+												<Form.Item>
+													<label
+														className="text-primary text-xs leading-[13px] font-normal"
+													>Name {i+1}</label>
+													<Input
+														placeholder={`Name ${i+1}`}
+														disabled={i === 0}
+														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+														value={signatory.name}
+														onChange={(e) => onNameChange(e, i)}
+													/>
+												</Form.Item>
+												<Form.Item
+													className='w-full'
+													name={`Address ${i+1}`}
+													rules={[{ required: true }]}
+													help={signatory.address === '' && 'This Is Required.'}
+													validateStatus={!signatory.address ? 'error' : 'success'}
+												>
+													<label
+														className="text-primary text-xs leading-[13px] font-normal"
+													>Address {i+1}</label>
+													<Input
+														id={`Address ${i+1}`}
+														placeholder={`Address ${i+1}`}
+														disabled={i === 0}
+														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+														value={signatory.address}
+														onChange={(e) => onSignatoryChange(e, i)}
+													/>
+												</Form.Item>
+											</div>
 											{i > 1 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}
 										</div>
 									</div>
@@ -174,7 +176,7 @@ const Owners = ({ signatories, threshold, setThreshold, setSignatoriesWithName, 
 									name='threshold-1'
 									rules={[{ required: true }]}
 									help={((threshold < 2 || threshold > signatoriesArray.length) && 'Threshold Must Be Atleast 2 And Less Than Signatories.')}
-									status={(threshold < 2 || threshold > signatoriesArray.length) ? 'error' : 'success'}
+									validateStatus={(threshold < 2 || threshold > signatoriesArray.length) ? 'error' : 'success'}
 								>
 									<label
 										className="text-primary text-xs leading-[13px] font-normal"
