@@ -4,10 +4,12 @@
 
 import classNames from 'classnames';
 import React, { useEffect,useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 // import Filter from 'src/components/Transactions/Filter';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
 	QUEUE,
@@ -17,6 +19,7 @@ enum ETab {
 const Transactions = () => {
 	const [tab, setTab] = useState(ETab.QUEUE);
 	const location = useLocation();
+	const { address } = useGlobalUserDetailsContext();
 	useEffect(() => {
 		const search = location.search.split('=')[1];
 		if(search === 'History'){
@@ -32,38 +35,45 @@ const Transactions = () => {
 			<div
 				className='bg-bg-main rounded-xl p-[20.5px] h-full'
 			>
-				<div
-					className='flex items-center mb-4'
-				>
-					<button
-						onClick={() => setTab(ETab.QUEUE)}
-						className={classNames(
-							'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
-							{
-								'text-primary bg-highlight': tab === ETab.QUEUE
-							}
-						)}
-					>
-						Queue
-					</button>
-					<button
-						onClick={() => setTab(ETab.HISTORY)}
-						className={classNames(
-							'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
-							{
-								'text-primary bg-highlight': tab === ETab.HISTORY
-							}
-						)}
-					>
-						History
-					</button>
-					{/* {tab !== ETab.QUEUE && <Filter />} */}
-				</div>
-				{
-					tab === ETab.HISTORY?
-						<History />
-						:<Queued />
-				}
+				{address ?
+					<>
+						<div
+							className='flex items-center mb-4'
+						>
+							<button
+								onClick={() => setTab(ETab.QUEUE)}
+								className={classNames(
+									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									{
+										'text-primary bg-highlight': tab === ETab.QUEUE
+									}
+								)}
+							>
+							Queue
+							</button>
+							<button
+								onClick={() => setTab(ETab.HISTORY)}
+								className={classNames(
+									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									{
+										'text-primary bg-highlight': tab === ETab.HISTORY
+									}
+								)}
+							>
+							History
+							</button>
+							{/* {tab !== ETab.QUEUE && <Filter />} */}
+						</div>
+						{
+							tab === ETab.HISTORY?
+								<History />
+								:<Queued />
+						}
+					</>
+					:
+					<div className='h-full w-full flex items-center justify-center text-primary font-bold text-lg'>
+						<Link to='/'><span>Please Login</span> <ExternalLinkIcon /></Link>
+					</div>}
 			</div>
 		</>
 	);

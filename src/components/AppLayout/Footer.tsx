@@ -36,7 +36,7 @@ const Footer = () => {
 				</div>
 				<p className='flex items-center gap-x-2'>
 					<PolkadotIcon className='text-sm'/>
-					<span className='text-sm'>Built by grants from Polkadot Treasury</span>
+					<span className='text-sm'>Built By Grants From Polkadot Treasury</span>
 				</p>
 				<p className='md:hidden'>
 					<sup>&#169;</sup>

@@ -14,6 +14,7 @@ import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
+import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
@@ -53,6 +54,10 @@ const Home = () => {
 							</section>
 							:
 							<section className='bg-bg-main p-5 rounded-lg h-full'>
+								<section className='grid grid-cols-2 gap-x-5'>
+									<Loader className='bg-primary col-span-1' />
+									<Loader className='bg-primary col-span-1' />
+								</section>
 								<AddMultisig homepage />
 							</section>}
 					</>

@@ -5,13 +5,14 @@
 import { Button } from 'antd';
 import { Input } from 'antd';
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import AddAdress from 'src/components/AddressBook/AddAddress';
 import AddressTable from 'src/components/AddressBook/AddressTable';
 import ExportAdress from 'src/components/AddressBook/ExportAddress';
 import ImportAdress from 'src/components/AddressBook/ImportAddress';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { SearchIcon } from 'src/ui-components/CustomIcons';
+import { ExternalLinkIcon, SearchIcon } from 'src/ui-components/CustomIcons';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
 const AddressBook = () => {
 	const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +42,9 @@ const AddressBook = () => {
 						<AddressTable address={ filteredData } />
 					</div>
 				</div>
-				: <div className='h-full w-full flex items-center justify-center text-primary font-bold text-lg'>Please Login.</div>
+				: <div className='h-full w-full flex items-center justify-center text-primary font-bold text-lg'>
+					<Link to='/'><span>Please Login</span> <ExternalLinkIcon /></Link>
+				</div>
 			}
 		</div>
 	);

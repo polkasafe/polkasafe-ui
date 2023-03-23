@@ -204,7 +204,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			}
 		>
 			<NewUserModal open={addWalletAddress} onCancel={() => setAddWalletAddress(false)} />
-			<div className='flex flex-col relative max-h-[68vh] overflow-y-auto pr-3'>
+			<div className={`flex flex-col relative ${!homepage && 'max-h-[68vh] overflow-y-auto pr-3'}`}>
 				<div className={classNames(
 					`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 					{
