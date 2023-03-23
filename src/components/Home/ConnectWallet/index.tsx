@@ -3,16 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
-import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import ConnectWalletImg from 'src/assets/connect-wallet.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IAddressBookItem } from 'src/types';
+import { IUser } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
@@ -35,55 +33,6 @@ const ConnectWallet = () => {
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);
-	};
-
-	const handleAddAddress = async (address: string, name: string) => {
-		try{
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
-					body: JSON.stringify({
-						address,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
-
-				if(addAddressError) {
-					return;
-				}
-
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							addressBook: addAddressData
-						};
-					});
-
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-	};
-
-	const addToAddressBook = async () => {
-		for(const account of accounts){
-			await handleAddAddress(account.address, account.name || DEFAULT_ADDRESS_NAME);
-		}
 	};
 
 	const handleConnectWallet = async () => {
@@ -133,36 +82,23 @@ const ConnectWallet = () => {
 					method: 'POST'
 				});
 
-				const { data: userData, error: connectAddressErr } = await connectAddressRes.json();
+				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
 				if(!connectAddressErr && userData){
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
 
-					if((dayjs(userData.created_at) > dayjs().subtract(3, 'minutes'))){
-						setUserDetailsContextState((prevState) => {
-							return {
-								...prevState,
-								address: userData?.address,
-								multisigAddresses: userData?.multisigAddresses,
-								multisigSettings: userData?.multisigSettings || {}
-							};
-						});
-						setLoading(false);
-						addToAddressBook();
-					}
-					else{
-						setUserDetailsContextState((prevState) => {
-							return {
-								...prevState,
-								address: userData?.address,
-								addressBook: userData?.addressBook,
-								multisigAddresses: userData?.multisigAddresses,
-								multisigSettings: userData?.multisigSettings || {}
-							};
-						});
-						setLoading(false);
-					}
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							address: userData?.address,
+							addressBook: userData?.addressBook || [],
+							createdAt: userData?.created_at,
+							multisigAddresses: userData?.multisigAddresses,
+							multisigSettings: userData?.multisigSettings || {}
+						};
+					});
+					setLoading(false);
 				}
 			}
 		} catch (error){

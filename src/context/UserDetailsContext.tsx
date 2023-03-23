@@ -17,6 +17,7 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	activeMultisig: localStorage.getItem('active_multisig') || '',
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
+	createdAt: new Date(),
 	multisigAddresses: [],
 	multisigSettings: {},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
@@ -55,6 +56,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					...prevState,
 					address: userData?.address,
 					addressBook: userData?.addressBook || [],
+					createdAt: userData?.created_at,
 					multisigAddresses: userData?.multisigAddresses,
 					multisigSettings: userData?.multisigSettings || {}
 				};
