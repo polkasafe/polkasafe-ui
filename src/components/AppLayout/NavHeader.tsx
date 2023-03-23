@@ -10,6 +10,7 @@ import AddressDropdown from 'src/components/AddressDropdown';
 import DonateBtn from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const { Header } = Layout;
 
@@ -21,6 +22,7 @@ interface Props {
 
 const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 	const location = useLocation();
+	const { address } = useGlobalUserDetailsContext();
 	return (
 		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
 			<section className='hidden lg:block w-[240px]'></section>
@@ -39,7 +41,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 					</p>
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>
-					<Notification />
+					{address && <Notification />}
 					<NetworksDropdown />
 					<AddressDropdown/>
 					<DonateBtn />
