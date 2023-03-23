@@ -4,7 +4,7 @@
 /* eslint-disable sort-keys */
 
 // import { PlusCircleOutlined } from '@ant-design/icons';
-import { Form, Input, InputNumber, Modal, Switch } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Switch } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -17,13 +17,14 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IAddressBookItem, IMultisigAddress } from 'src/types';
-import { DashDotIcon } from 'src/ui-components/CustomIcons';
+import { AddIcon, DashDotIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import styled from 'styled-components';
 
 import AddAddress from '../AddressBook/AddAddress';
+import NewUserModal from '../Home/ConnectWallet/NewUserModal';
 import DragDrop from '../Multisig/DragDrop';
 import Search from '../Multisig/Search';
 import Signatory from './Signatory';
@@ -49,6 +50,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [addAddress, setAddAddress] = useState<string>('');
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
+	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 	const [form] = Form.useForm();
 
 	useEffect(() => {
@@ -201,7 +203,8 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				{ required: "Please add the '${name}'" }
 			}
 		>
-			<div className='flex flex-col relative'>
+			<NewUserModal open={addWalletAddress} onCancel={() => setAddWalletAddress(false)} />
+			<div className='flex flex-col relative max-h-[68vh] overflow-y-auto pr-3'>
 				<div className={classNames(
 					`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 					{
@@ -214,11 +217,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 								<Search addAddress={addAddress} setAddAddress={setAddAddress} />
 								<AddAddressModal/>
 							</div>:null}
-							<div className='flex items-center justify-center absolute top-1 right-1'>
-								<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
+							<div className='flex flex-col items-end justify-center absolute top-1 right-1'>
+								<div className='flex items-center justify-center mb-2'>
+									<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
+								</div>
+								<Button onClick={() => setAddWalletAddress(true)} className='bg-primary flex items-center border-none outline-none text-white' icon={<AddIcon/>}>
+									Add Wallet Addresses
+								</Button>
 							</div>
 						</div>
-						<div className="poition-absolute top-0 right-0"></div>
 						<div className='flex items-center justify-between'>
 							<Form.Item
 								name="signatories"

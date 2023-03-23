@@ -9,6 +9,7 @@ import { networks, tokenSymbol } from './global/networkConstants';
 export interface UserDetailsContextType {
     activeMultisig: string;
     address: string;
+	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
     addressBook: IAddressBookItem[];
