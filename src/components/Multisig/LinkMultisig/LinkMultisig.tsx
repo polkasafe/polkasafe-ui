@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -30,8 +29,7 @@ interface ISignatory{
 	address: string
 }
 
-const LinkMultisig = () => {
-	const { toggleVisibility } = useModalContext();
+const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const [multisigName, setMultisigName] = useState('');
 	const [nameAddress, setNameAddress] = useState(true);
 	const [viewOwners, setViewOwners] = useState(true);
@@ -48,7 +46,7 @@ const LinkMultisig = () => {
 	const [signatoriesWithName, setSignatoriesWithName] = useState<ISignatory[]>([]);
 
 	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook?.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
-	const [threshold, setThreshold] = useState<number>(0);
+	const [threshold, setThreshold] = useState<number>(2);
 
 	const viewNameAddress = () => {
 		setNameAddress(false);
@@ -77,12 +75,6 @@ const LinkMultisig = () => {
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
 				if(addAddressError) {
-
-					queueNotification({
-						header: 'Error!',
-						message: addAddressError,
-						status: NotificationStatus.ERROR
-					});
 					return;
 				}
 
@@ -168,7 +160,7 @@ const LinkMultisig = () => {
 							status: NotificationStatus.SUCCESS
 						});
 						setLoading(false);
-						toggleVisibility();
+						onCancel();
 					});
 				}
 
@@ -303,7 +295,7 @@ const LinkMultisig = () => {
 				<div>
 					<SelectNetwork />
 					<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-						<CancelBtn onClick={toggleVisibility} />
+						<CancelBtn onClick={onCancel} />
 						<AddBtn title='Continue' onClick={viewNameAddress}/>
 					</div>
 				</div>:
@@ -311,27 +303,24 @@ const LinkMultisig = () => {
 					{viewOwners?<div>
 						<NameAddress multisigName={multisigName} setMultisigName={setMultisigName} multisigAddress={multisigAddress} setMultisigAddress={setMultisigAddress} />
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-							<CancelBtn onClick={() => {
-								toggleVisibility();
-								setNameAddress(true);
-							}} />
-							<AddBtn title='Continue' loading={loading} onClick={handleViewOwners}/>
+							<CancelBtn onClick={onCancel} />
+							<AddBtn disabled={!multisigAddress} title='Continue' loading={loading} onClick={handleViewOwners}/>
 						</div>
 					</div>:<div>
 						{viewReviews?<div>
-							<Owners setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
+							<Owners threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-								<CancelBtn onClick={toggleVisibility} />
+								<CancelBtn onClick={onCancel} />
 								{signatoriesWithName.length ?
 									<AddBtn title='Continue' onClick={handleViewReviews}/>
 									:
-									<AddBtn title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>
+									<AddBtn disabled={signatoriesArray.length < 2 || threshold < 2 || threshold > signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>
 								}
 							</div>
 						</div>: <div>
 							<Review multisigName={multisigName} multisigData={multisigData} signatories={signatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-								<CancelBtn onClick={toggleVisibility} />
+								<CancelBtn onClick={onCancel} />
 								<AddBtn loading={loading} title='Link Multisig' onClick={handleLinkMultisig}/>
 							</div>
 						</div>}

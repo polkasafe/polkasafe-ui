@@ -5,9 +5,11 @@
 import Identicon from '@polkadot/react-identicon';
 import React from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { IMultisigAddress } from 'src/types';
 import { CheckOutlined, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
@@ -28,25 +30,25 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 
 	return (
 		<div>
-			<div className='flex flex-col items-center w-[800px] h-[400px]'>
+			<div className='flex flex-col items-center text-white w-[800px] h-[400px]'>
 				<div className="flex justify-around items-center mb-10 w-full">
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
 						<p>Select Network</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
 						<p>Name & Address</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
 						<p>Owners</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'>4</div>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>4</div>
 						<p>Review</p>
 					</div>
 				</div>
@@ -64,7 +66,7 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Safe Address:</p>
-								<div className='flex'>
+								<div className='flex items-center'>
 									<Identicon
 										className='image identicon'
 										value={multisigData?.address}
@@ -72,9 +74,9 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 										theme={'polkadot'}
 									/>
 									<p className='mx-2'>{shortenAddress(multisigData?.address || '')}</p>
-									<button onClick={() => copyText(multisigData?.address || '', true, network)}><CopyIcon className='mr-2 text-text_secondary hover:text-primary cursor-pointer'/></button>
+									<button onClick={() => copyText(multisigData?.address || '', true, network)}><CopyIcon className='mr-2 text-text_secondary hover:text-primary'/></button>
 									<a href={`https://${network}.subscan.io/account/${multisigData?.address}`} target='_blank' rel="noreferrer" >
-										<ExternalLinkIcon  />
+										<ExternalLinkIcon className='text-text_secondary' />
 									</a>
 								</div>
 							</div>
@@ -97,13 +99,13 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 											theme={'polkadot'}
 										/>
 										<div className='flex flex-col'>
-											{item.name && <p className='text-sm'>{item.name}</p>}
-											<div className='flex'><p className='text-sm text-text_secondary'>{shortenAddress(item.address)}</p>
+											<p className='text-sm'>{item.name || DEFAULT_ADDRESS_NAME}</p>
+											<div className='flex'><p className='text-sm text-text_secondary'>{shortenAddress(getEncodedAddress(item.address, network) || item.address)}</p>
 												<button className='mx-1' onClick={() => navigator.clipboard.writeText(item.address)}>
 													<CopyIcon className='text-text_secondary cursor-pointer hover:text-primary'/>
 												</button>
 												<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
-													<ExternalLinkIcon  />
+													<ExternalLinkIcon className='text-text_secondary' />
 												</a>
 											</div>
 										</div>

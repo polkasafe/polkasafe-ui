@@ -157,7 +157,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 								theme='polkadot'
 							/>
 							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
-								1/{multisigAddresses?.filter(multisig => multisig.network === network)?.length}
+								1/{multisigAddresses?.filter(multisig => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)?.length}
 							</div>
 						</div>
 						<div>

@@ -19,22 +19,22 @@ const NameAddress = ({ multisigAddress, setMultisigAddress, multisigName, setMul
 		<div>
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
 				<div className="flex justify-around items-center mb-10 w-full">
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+					<div className='flex flex-col items-center text-white justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
 						<p>Select Network</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
-						<div className='rounded-lg bg-primary text-white w-9 h-9 mb-2 flex items-center justify-center'>2</div>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
 						<p>Name & Address</p>
 					</div>
 					<Loader className='bg-bg-secondary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
+					<div className='flex flex-col text-white items-center justify-center'>
 						<div className='rounded-lg bg-highlight text-primary w-9 h-9 mb-2 flex items-center justify-center'>3</div>
 						<p>Owners</p>
 					</div>
 					<Loader className='bg-bg-secondary h-[2px] w-[80px]'/>
-					<div className='flex flex-col items-center justify-center'>
+					<div className='flex flex-col text-white items-center justify-center'>
 						<div className='rounded-lg bg-highlight text-primary w-9 h-9 mb-2 flex items-center justify-center'>4</div>
 						<p>Review</p>
 					</div>
@@ -72,16 +72,17 @@ const NameAddress = ({ multisigAddress, setMultisigAddress, multisigName, setMul
                     Safe Address*
 							</label>
 							<Form.Item
-								name="address"
-								rules={[]}
+								name="Address"
+								rules={[{ required: true }]}
 								className='border-0 outline-0 my-0 p-0'
+								status={!multisigAddress ? 'error' : 'success'}
 							>
 								<Input
 									onChange={(e) => setMultisigAddress(e.target.value)}
 									value={multisigAddress}
 									placeholder="Unique Safe Address"
 									className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-									id="address"
+									id="Address"
 								/>
 							</Form.Item>
 						</div>

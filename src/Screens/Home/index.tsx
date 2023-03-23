@@ -16,14 +16,14 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
-	const { address, multisigAddresses } = useGlobalUserDetailsContext();
+	const { address, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	return (
 		<>
 			{
 				address ?
-					multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network).length > 0 ?
+					multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted).length > 0 ?
 						<section>
 							<EmailBadge/>
 							<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
