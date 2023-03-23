@@ -13,13 +13,15 @@ import { inputToBn } from 'src/utils/inputToBn';
 interface Props{
 	className?: string
 	label?: string
+	multisigBalance?: string
 	onChange: (balance: BN) => void
 	placeholder?: string
 }
 
-const BalanceInput = ({ className, label = '', onChange, placeholder = '' }: Props) => {
+const BalanceInput = ({ multisigBalance, className, label = '', onChange, placeholder = '' }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
 	const { network } = useGlobalApiContext();
+	const [bnBalance, setBnBalance] = useState(new BN(0));
 
 	const onBalanceChange = (value: number | string | null): void => {
 		value = Number(value);
@@ -34,6 +36,7 @@ const BalanceInput = ({ className, label = '', onChange, placeholder = '' }: Pro
 		setIsValidInput(isValid);
 
 		if(isValid){
+			setBnBalance(balance);
 			onChange(balance);
 		}
 	};
@@ -46,8 +49,8 @@ const BalanceInput = ({ className, label = '', onChange, placeholder = '' }: Pro
 					className='border-0 outline-0 my-0 p-0'
 					name="balance"
 					rules={[{ required: true }]}
-					validateStatus={isValidInput ? 'success' : 'error'}
-					help={!isValidInput && 'Please input a valid value'}
+					validateStatus={!isValidInput || bnBalance?.gte(new BN(multisigBalance || 0)) ? 'error' : 'success'}
+					help={!isValidInput ? 'Please input a valid value' : (!bnBalance?.isZero() && bnBalance?.gte(new BN(multisigBalance || 0)) && 'Insufficient Balance in Multisig.')}
 					initialValue={chainProperties[network].existentialDeposit}
 				>
 					<div className='flex items-center h-[40px]'>

@@ -75,7 +75,7 @@ const NameAddress = ({ multisigAddress, setMultisigAddress, multisigName, setMul
 								name="Address"
 								rules={[{ required: true }]}
 								className='border-0 outline-0 my-0 p-0'
-								status={!multisigAddress ? 'error' : 'success'}
+								validateStatus={!multisigAddress ? 'error' : 'success'}
 							>
 								<Input
 									onChange={(e) => setMultisigAddress(e.target.value)}
