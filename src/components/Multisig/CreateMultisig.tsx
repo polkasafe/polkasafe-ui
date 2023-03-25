@@ -158,7 +158,14 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
-							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData]
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[multisigData.address]: {
+									name: multisigData.name,
+									deleted: false
+								}
+							}
 						};
 					});
 					Promise.all(signatories.map(
