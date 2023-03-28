@@ -18,6 +18,7 @@ import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IQueueItem } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
+import LoadingModal from 'src/ui-components/LoadingModal';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import decodeCallData from 'src/utils/decodeCallData';
@@ -45,6 +46,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 
 	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
+	const [success, setSuccess] = useState(false);
+	const [failure, setFailure] = useState(false);
+	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady, network } = useGlobalApiContext();
 
@@ -118,14 +122,26 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				note: note || '',
 				recipientAddress: decodedCallData.args.dest.id
 			});
-			document.getElementById(callHash)?.remove();
-			if(numberOfTransactions < 2 && setQueuedTransactions){
-				setQueuedTransactions([]);
+			setLoading(false);
+			setSuccess(true);
+			setTimeout(() => {
+				setSuccess(false);
+				setOpenLoadingModal(false);
+			}, 5000);
+			if(!openLoadingModal){
+				document.getElementById(callHash)?.remove();
+				if(numberOfTransactions < 2 && setQueuedTransactions){
+					setQueuedTransactions([]);
+				}
 			}
 		} catch (error) {
 			console.log(error);
-		} finally {
 			setLoading(false);
+			setFailure(true);
+			setTimeout(() => {
+				setFailure(false);
+				setOpenLoadingModal(false);
+			}, 5000);
 		}
 	};
 
@@ -145,6 +161,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		if(!multisig) return;
 
 		setLoading(true);
+		setOpenLoadingModal(true);
 		try {
 			await cancelMultisigTransfer({
 				api,
@@ -155,14 +172,26 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				network,
 				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : ''
 			});
-			document.getElementById(callHash)?.remove();
-			if(numberOfTransactions < 2 && setQueuedTransactions){
-				setQueuedTransactions([]);
+			setLoading(false);
+			setSuccess(true);
+			setTimeout(() => {
+				setSuccess(false);
+				setOpenLoadingModal(false);
+			}, 5000);
+			if(!openLoadingModal){
+				document.getElementById(callHash)?.remove();
+				if(numberOfTransactions < 2 && setQueuedTransactions){
+					setQueuedTransactions([]);
+				}
 			}
 		} catch (error) {
 			console.log(error);
-		} finally {
 			setLoading(false);
+			setFailure(true);
+			setTimeout(() => {
+				setFailure(false);
+				setOpenLoadingModal(false);
+			}, 5000);
 		}
 	};
 
@@ -225,6 +254,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						</p>
 					</div>
 				}>
+					<LoadingModal loading={loading} success={success} failed={failure} open={openLoadingModal} onCancel={() => setOpenLoadingModal(false)} />
 
 					<div
 					// className={classNames(
