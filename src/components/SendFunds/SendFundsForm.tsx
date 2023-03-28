@@ -135,13 +135,13 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 			});
 			// todo: add IQueueItem to state
 			setLoading(false);
-			if(setNewTxn){
-				setNewTxn(prev => !prev);
-			}
 			setSuccess(true);
 			setTimeout(() => {
 				setSuccess(false);
 				onCancel?.();
+				if(setNewTxn){
+					setNewTxn(prev => !prev);
+				}
 			}, 7000);
 		} catch (error) {
 			console.log(error);

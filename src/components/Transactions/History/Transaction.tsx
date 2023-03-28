@@ -7,12 +7,14 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC,useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import { ITransaction } from 'src/types';
-import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon,  PolkadotIcon } from 'src/ui-components/CustomIcons';
+import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
@@ -106,7 +108,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 						</span>
 					</p>
 					<p className='col-span-2 flex items-center gap-x-[6px]'>
-						<PolkadotIcon className='text-base' />
+						<ParachainIcon src={chainProperties[network].logo} />
 						<span
 							className={classNames(
 								'font-normal text-xs leading-[13px] text-failure',

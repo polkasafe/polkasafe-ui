@@ -49,8 +49,8 @@ const BalanceInput = ({ multisigBalance, className, label = '', onChange, placeh
 					className='border-0 outline-0 my-0 p-0'
 					name="balance"
 					rules={[{ required: true }]}
-					validateStatus={!isValidInput || bnBalance?.gte(new BN(multisigBalance || 0)) ? 'error' : 'success'}
-					help={!isValidInput ? 'Please input a valid value' : (!bnBalance?.isZero() && bnBalance?.gte(new BN(multisigBalance || 0)) && 'Insufficient Balance in Multisig.')}
+					validateStatus={!isValidInput || (multisigBalance && bnBalance?.gte(new BN(multisigBalance))) ? 'error' : 'success'}
+					help={!isValidInput ? 'Please input a valid value' : (multisigBalance && !bnBalance?.isZero() && bnBalance?.gte(new BN(multisigBalance)) && 'Insufficient Balance in Multisig.')}
 					initialValue={chainProperties[network].existentialDeposit}
 				>
 					<div className='flex items-center h-[40px]'>
