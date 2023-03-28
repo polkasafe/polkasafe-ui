@@ -105,7 +105,7 @@ const Queued: FC = () => {
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							approvals={transaction.approvals}
-							threshold={multisigAddresses.find((item) => item.address === activeMultisig)?.threshold || 0}
+							threshold={multisigAddresses?.find((item) => item.address === activeMultisig)?.threshold || 0}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
