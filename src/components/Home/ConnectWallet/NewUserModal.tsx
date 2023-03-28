@@ -102,7 +102,7 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 					<Button
 						size='large'
 						disabled={loading}
-						className={'flex border-none outline-none items-center text-primary text-sm font-normal leading-[15px] bg-highlight p-3 rounded-lg min-w-[130px] justify-center'}
+						className={'flex border-none outline-none items-center text-primary text-sm font-normal'}
 						onClick={onCancel}
 					>
 						Add Manually Later
@@ -112,9 +112,9 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 						icon={<AddIcon className='text-sm' />}
 						onClick={addToAddressBook}
 						size='large'
-						className='flex items-center border-none outline-none text-white text-sm font-normal leading-[15px] bg-primary p-3 rounded-lg min-w-[130px] justify-center'
+						className='flex items-center border-none outline-none text-white text-sm font-normal leading-[15px] bg-primary rounded-lg min-w-[130px] justify-center'
 					>
-                        Add Addresses
+                        Import
 					</Button>
 				</div>
 			</Form>

@@ -159,7 +159,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 								theme='polkadot'
 							/>
 							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
-								{currentMultisig?.signatories.length}/{currentMultisig?.threshold}
+								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>

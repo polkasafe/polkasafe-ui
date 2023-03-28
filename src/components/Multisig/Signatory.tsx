@@ -3,12 +3,16 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SwapOutlined } from '@ant-design/icons';
-import React from 'react';
+import { Button, Tooltip } from 'antd';
+import React, { useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { IAddressBookItem } from 'src/types';
+import { AddIcon } from 'src/ui-components/CustomIcons';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+
+import NewUserModal from '../Home/ConnectWallet/NewUserModal';
 
 interface ISignature{
 	name: string
@@ -28,6 +32,8 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+
+	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
 	const addresses: ISignature[] = addressBook.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
 		address: item.address,
@@ -134,13 +140,21 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	return (
 		<div className="flex w-[45vw]">
+			<NewUserModal open={addWalletAddress} onCancel={() => setAddWalletAddress(false)} />
 			<div className="flex w-[100%] items-center justify-center">
 				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1 cursor-grab" onDrop={dropReturn} onDragOver={dragOver}>
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
-					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-auto'>
-						{addresses.map((address) => (
+					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-y-auto'>
+						{addresses.length > 0 ? addresses.map((address) => (
 							<p onClick={signatories.includes(address.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{address.name}</p>
-						))}
+						))
+							:
+							<Tooltip title='Import Addresses From Your Wallet.'>
+								<Button onClick={() => setAddWalletAddress(true)} className='bg-primary flex items-center justify-center border-none outline-none text-white w-full' icon={<AddIcon/>}>
+									Import
+								</Button>
+							</Tooltip>
+						}
 					</div>
 				</div>
 				<SwapOutlined className='text-primary' />
