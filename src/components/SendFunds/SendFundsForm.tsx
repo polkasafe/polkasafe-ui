@@ -6,7 +6,7 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, message, Modal, Spin, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -61,7 +61,6 @@ const addRecipientHeading = () => {
 };
 
 const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress }: ISendFundsFormProps) => {
-	const [messageApi, contextHolder] = message.useMessage();
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
@@ -84,6 +83,8 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	const [form] = Form.useForm();
 
 	const [multisigBalance, setMultisigBalance] = useState<string>('');
+
+	const [loadingMessages, setLoadingMessages] = useState<string>('');
 
 	useEffect(() => {
 		if(!getSubstrateAddress(recipientAddress)){
@@ -126,11 +127,11 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 				amount,
 				api,
 				initiatorAddress: address,
-				messageApi,
 				multisig,
 				network,
 				note,
 				recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
+				setLoadingMessages,
 				transferKeepAlive: true
 			});
 			// todo: add IQueueItem to state
@@ -169,8 +170,7 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	};
 
 	return (
-		<Spin wrapperClassName={className} spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
-			{ contextHolder }
+		<Spin wrapperClassName={className} spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
 			<Form
 				className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 				form={form}

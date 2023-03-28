@@ -15,9 +15,10 @@ interface ILoadingModal{
     failed?: boolean
     open: boolean
     onCancel: () => void
+    message?: string
 }
 
-const LoadingModal = ({ loading, success, open, onCancel }: ILoadingModal) => {
+const LoadingModal = ({ loading, success, open, onCancel, message }: ILoadingModal) => {
 	return (
 		<Modal
 			centered
@@ -32,7 +33,7 @@ const LoadingModal = ({ loading, success, open, onCancel }: ILoadingModal) => {
 			open={open}
 			className={'w-auto text-primary md:min-w-[500px]'}
 		>
-			{loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}
+			{loading ? <LoadingLottie message={message} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}
 		</Modal>
 	);
 };

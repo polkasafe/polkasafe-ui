@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
@@ -29,7 +28,7 @@ interface Args {
 	network: string,
 	note: string,
 	transferKeepAlive: boolean,
-	messageApi: MessageInstance
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
 export default async function initMultisigTransfer({
@@ -41,7 +40,7 @@ export default async function initMultisigTransfer({
 	network,
 	note,
 	transferKeepAlive,
-	messageApi
+	setLoadingMessages
 }: Args) {
 
 	//promise to be resolved when transaction is finalized
@@ -80,17 +79,21 @@ export default async function initMultisigTransfer({
 			.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
-					messageApi.error('Transaction invalid');
+					// messageApi.error('Transaction invalid');
+					setLoadingMessages('Transaction invalid');
 				} else if (status.isReady) {
 					console.log('Transaction is ready');
-					messageApi.loading('Transaction is ready');
+					// messageApi.loading('Transaction is ready');
+					setLoadingMessages('Transaction is ready');
 				} else if (status.isBroadcast) {
 					console.log('Transaction has been broadcasted');
-					messageApi.loading('Transaction has been broadcasted');
+					// messageApi.loading('Transaction has been broadcasted');
+					setLoadingMessages('Transaction has been broadcasted');
 				} else if (status.isInBlock) {
 					blockHash = status.asInBlock.toHex();
 					console.log('Transaction is in block');
-					messageApi.loading('Transaction is in block');
+					// messageApi.loading('Transaction is in block');
+					setLoadingMessages('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`approveAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
