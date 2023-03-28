@@ -123,6 +123,7 @@ const ConnectWallet = () => {
 										showAccountsDropdown?
 											<div className='mt-[30px]'>
 												<AccountSelectionForm
+													disabled={loading}
 													accounts={accounts}
 													address={address}
 													onAccountChange={onAccountChange}

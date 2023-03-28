@@ -32,7 +32,7 @@ const NotificationCard: FC<INotification> = ({ message, created_at, link, networ
 					at
 						<span> {dayjs(created_at).format('HH:mm')}</span>
 					</p>
-					<p className='text-xs font-normal text-text_secondary'><img className='rounded-full' height={14} width={14} src={chainProperties[network].logo} /></p>
+					<p className='text-xs font-normal text-text_secondary'><img className='rounded-full' height={14} width={14} src={chainProperties[network]?.logo} /></p>
 
 				</span>
 			</div>

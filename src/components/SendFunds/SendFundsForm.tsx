@@ -169,10 +169,10 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	};
 
 	return (
-		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
+		<Spin wrapperClassName={className} spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
 			{ contextHolder }
 			<Form
-				className={classNames(className, 'max-h-[68vh] overflow-y-auto px-2')}
+				className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 				form={form}
 				validateMessages={
 					{ required: "Please add the '${name}'" }
