@@ -41,6 +41,8 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const [isOnchain, setIsOnchain] = useState(false);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
+	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig);
+
 	useEffect(() => {
 		const handleNewTransaction = async () => {
 			if(!api || !apiReady || !activeMultisig) return;
@@ -118,7 +120,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 				>
 					{isOnchain ?
 						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
-						: <ExistentialDeposit onCancel={() => setOpenTransactionModal(false)} />}
+						: <ExistentialDeposit setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />}
 				</Modal>
 			</>
 		);
@@ -157,11 +159,11 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 								theme='polkadot'
 							/>
 							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
-								1/{multisigAddresses?.filter(multisig => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)?.length}
+								{currentMultisig?.signatories.length}/{currentMultisig?.threshold}
 							</div>
 						</div>
 						<div>
-							<div className='text-lg font-bold text-white'>{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find(a => a.address == activeMultisig)?.name}</div>
+							<div className='text-lg font-bold text-white'>{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}</div>
 							<div className="flex">
 								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className='text-md font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
@@ -176,7 +178,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='m-2'>
 						<div className='text-white'>Signatories</div>
 						<div className='font-bold text-xl text-primary'>
-							{multisigAddresses?.find((item) => item.address === activeMultisig)?.signatories.length || 0}
+							{currentMultisig?.signatories.length || 0}
 						</div>
 					</div>
 					<div className='m-2'>

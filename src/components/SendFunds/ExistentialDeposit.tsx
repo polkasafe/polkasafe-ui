@@ -29,7 +29,7 @@ import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
 
-const ExistentialDeposit = ({ className, onCancel }: { className?: string, onCancel: () => void }) => {
+const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
@@ -101,6 +101,9 @@ const ExistentialDeposit = ({ className, onCancel }: { className?: string, onCan
 			setTimeout(() => {
 				setSuccess(false);
 				onCancel();
+				if(setNewTxn){
+					setNewTxn(prev => !prev);
+				}
 			}, 7000);
 		} catch (error) {
 			console.log(error);

@@ -21,7 +21,7 @@ dayjs.extend(LocalizedFormat);
 
 const Queued: FC = () => {
 	const [loading, setLoading] = useState<boolean>(false);
-	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
@@ -105,7 +105,7 @@ const Queued: FC = () => {
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							approvals={transaction.approvals}
-							threshold={transaction.threshold}
+							threshold={multisigAddresses.find((item) => item.address === activeMultisig)?.threshold || 0}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
