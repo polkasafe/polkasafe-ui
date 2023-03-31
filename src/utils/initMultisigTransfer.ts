@@ -138,8 +138,8 @@ export default async function initMultisigTransfer({
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 
-							const errorCode = (event.data as any)?.dispatchError?.asModule?.toJSON()?.error;
-							if(!errorCode) {
+							const errorModule = (event.data as any)?.dispatchError?.asModule;
+							if(!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',
@@ -149,7 +149,7 @@ export default async function initMultisigTransfer({
 								return;
 							}
 
-							const { method, section, docs } = api.registry.findMetaError(new Uint8Array(errorCode));
+							const { method, section, docs } = api.registry.findMetaError(errorModule);
 							console.log(`Error: ${section}.${method}\n${docs.join(' ')}`);
 
 							queueNotification({
