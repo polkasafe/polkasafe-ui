@@ -4,7 +4,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { MessageInstance } from 'antd/es/message/interface';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -16,10 +15,10 @@ interface Props {
 	amount: BN;
 	api: ApiPromise;
 	network: string;
-	messageApi: MessageInstance
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, messageApi } : Props) {
+export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -36,16 +35,16 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
-					messageApi.error('Transaction invalid');
+					setLoadingMessages('Transaction invalid');
 				} else if (status.isReady) {
 					console.log('Transaction is ready');
-					messageApi.loading('Transaction is ready');
+					setLoadingMessages('Transaction is ready');
 				} else if (status.isBroadcast) {
 					console.log('Transaction has been broadcasted');
-					messageApi.loading('Transaction has been broadcasted');
+					setLoadingMessages('Transaction has been broadcasted');
 				} else if (status.isInBlock) {
 					console.log('Transaction is in block');
-					messageApi.loading('Transaction is in block');
+					setLoadingMessages('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
@@ -85,6 +84,15 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 						}
 					}
 				}
+			}).catch((error) => {
+				console.log(':( transaction failed');
+				console.error('ERROR:', error);
+				reject();
+				queueNotification({
+					header: 'Failed!',
+					message: error.message,
+					status: NotificationStatus.ERROR
+				});
 			});
 		console.log(`Sending ${displayAmount} from ${senderAddress} to ${recepientAddress}`);
 	});

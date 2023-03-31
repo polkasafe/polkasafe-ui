@@ -20,12 +20,11 @@ function FailedTransactionLottie({ message, width = 350 }: Props): ReactElement 
 			<Lottie
 				animationData={FailedScreen}
 				style={{
-					height: width,
 					width: width
 				}}
 				play={true}
 			/>
-			<div className='text-sidebarBlue font-medium' >{message}</div>
+			<div className='font-medium text-lg text-failure' >{message}</div>
 		</div>
 	);
 }
