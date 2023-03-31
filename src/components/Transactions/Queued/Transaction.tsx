@@ -48,6 +48,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
+	const [loadingMessages, setLoadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady, network } = useGlobalApiContext();
@@ -116,11 +117,11 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				approvingAddress: address,
 				callDataHex: callDataString,
 				callHash,
-				messageApi,
 				multisig,
 				network,
 				note: note || '',
-				recipientAddress: decodedCallData.args.dest.id
+				recipientAddress: decodedCallData.args.dest.id,
+				setLoadingMessages
 			});
 			setLoading(false);
 			setSuccess(true);
@@ -167,10 +168,10 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				api,
 				approvingAddress: address,
 				callHash,
-				messageApi,
 				multisig,
 				network,
-				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : ''
+				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : '',
+				setLoadingMessages
 			});
 			setLoading(false);
 			setSuccess(true);
@@ -254,7 +255,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						</p>
 					</div>
 				}>
-					<LoadingModal loading={loading} success={success} failed={failure} open={openLoadingModal} onCancel={() => setOpenLoadingModal(false)} />
+					<LoadingModal message={loadingMessages} loading={loading} success={success} failed={failure} open={openLoadingModal} onCancel={() => setOpenLoadingModal(false)} />
 
 					<div
 					// className={classNames(

@@ -6,10 +6,11 @@
 
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, message, Modal, Spin, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
+import dayjs from 'dayjs';
 import React, { FC, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
@@ -22,6 +23,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -29,11 +31,11 @@ import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-componen
 import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
 import shortenAddress from 'src/utils/shortenAddress';
-// import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISendFundsFormProps {
@@ -60,8 +62,7 @@ const addRecipientHeading = () => {
 	}
 };
 
-const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress }: ISendFundsFormProps) => {
-	const [messageApi, contextHolder] = message.useMessage();
+const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFundsFormProps) => {
 
 	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
@@ -84,6 +85,12 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 	const [form] = Form.useForm();
 
 	const [multisigBalance, setMultisigBalance] = useState<string>('');
+
+	const [loadingMessages, setLoadingMessages] = useState<string>('');
+
+	const [transactionData, setTransactionData] = useState<any>({});
+
+	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
 
 	useEffect(() => {
 		if(!getSubstrateAddress(recipientAddress)){
@@ -109,8 +116,6 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
-
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({
 				header: 'Error!',
@@ -121,28 +126,20 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 		}
 		setLoading(true);
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const queueItemData = await initMultisigTransfer({
 				amount,
 				api,
 				initiatorAddress: address,
-				messageApi,
 				multisig,
 				network,
 				note,
 				recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
+				setLoadingMessages,
 				transferKeepAlive: true
 			});
-			// todo: add IQueueItem to state
+			setTransactionData(queueItemData);
 			setLoading(false);
 			setSuccess(true);
-			setTimeout(() => {
-				setSuccess(false);
-				onCancel?.();
-				if(setNewTxn){
-					setNewTxn(prev => !prev);
-				}
-			}, 7000);
 		} catch (error) {
 			console.log(error);
 			setLoading(false);
@@ -168,9 +165,43 @@ const SendFundsForm = ({ className, onCancel, setNewTxn, defaultSelectedAddress 
 		);
 	};
 
+	const TransactionSuccessScreen: FC = () => {
+		return (
+			<div className='flex flex-col items-center'>
+				<SuccessTransactionLottie />
+				<div className='flex flex-col w-[50%] gap-y-4 bg-bg-secondary p-4 rounded-lg my-1 text-text_secondary'>
+					<div className='flex justify-between items-center'>
+						<span>Amount:</span>
+						<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 3, withUnit: true }, network)}</span>
+					</div>
+					<div className='flex justify-between items-center'>
+						<span>Txn Hash:</span>
+						<div className='flex items-center gap-x-1'>
+							<span className='text-white'>{shortenAddress(transactionData?.callHash)}</span>
+							<button onClick={() => copyText(transactionData?.callHash, false, network)}>
+								<CopyIcon className='mr-2 text-primary' />
+							</button>
+						</div>
+					</div>
+					<div className='flex justify-between items-center'>
+						<span>Created:</span>
+						<span className='text-white'>{dayjs(transactionData?.created_at).format('llll')}</span>
+					</div>
+					<div className='flex justify-between items-center'>
+						<span>Created By:</span>
+						<span><AddressComponent address={address} /></span>
+					</div>
+					<div className='flex justify-between items-center'>
+						<span>Recipient:</span>
+						<span><AddressComponent address={recipientAddress} /></span>
+					</div>
+				</div>
+			</div>
+		);
+	};
+
 	return (
-		<Spin wrapperClassName={className} spinning={loading || success || failure} indicator={loading ? <LoadingLottie message='Loading...' /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
-			{ contextHolder }
+		<Spin wrapperClassName={className} spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <TransactionSuccessScreen /> : <FailedTransactionLottie message='Failed!' />}>
 			<Form
 				className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 				form={form}

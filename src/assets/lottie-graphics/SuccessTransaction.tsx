@@ -20,12 +20,11 @@ function SuccessTransactionLottie({ message, width = 350 }: Props): ReactElement
 			<Lottie
 				animationData={SuccessScreen}
 				style={{
-					height: width,
 					width: width
 				}}
 				play={true}
 			/>
-			<div className='font-medium' >{message}</div>
+			<div className='font-medium text-lg text-success' >{message}</div>
 		</div>
 	);
 }
