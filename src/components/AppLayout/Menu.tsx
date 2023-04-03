@@ -3,16 +3,15 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Badge } from 'antd';
+import { Badge, Modal } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect,useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
+import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, OutlineCloseIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 
 interface Props {
 	className?: string;
@@ -22,9 +21,10 @@ const Menu: FC<Props> = ({ className }) => {
 	const { multisigAddresses, activeMultisig, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
-	const { openModal } = useModalContext();
 	const location = useLocation();
 	const userAddress = localStorage.getItem('address');
+
+	const [openAddMultisig, setOpenAddMultisig] = useState(false);
 
 	const menuItems = [
 		{
@@ -89,8 +89,29 @@ const Menu: FC<Props> = ({ className }) => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedMultisigAddress]);
 
+	const AddMultisigModal: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenAddMultisig(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				open={openAddMultisig}
+				className={`${className} w-auto md:min-w-[500px]`}
+			>
+				<AddMultisig onCancel={() => setOpenAddMultisig(false)} isModalPopup = {true}  />
+			</Modal>
+		);
+	};
+
 	return (
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
+			<AddMultisigModal/>
 			<div className='flex flex-col gap-y-11 mb-3'>
 				<section>
 					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
@@ -158,7 +179,7 @@ const Menu: FC<Props> = ({ className }) => {
 			{userAddress &&
 				<section className='mt-auto'>
 					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
-						onClick={() => openModal('', <AddMultisig isModalPopup = {true} />) }>
+						onClick={() => setOpenAddMultisig(true)}>
 						<UserPlusIcon className='text-xl' />
 						<span className='font-normal text-sm'>Add Multisig</span>
 					</button>

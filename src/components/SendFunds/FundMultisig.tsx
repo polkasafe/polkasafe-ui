@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Form, Input, Modal, Spin } from 'antd';
+import { AutoComplete, Form, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import React, { FC, useEffect, useState } from 'react';
@@ -20,16 +20,14 @@ import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, QRIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { transferFunds } from 'src/utils/transferFunds';
 import styled from 'styled-components';
 
-import { ParachainIcon } from '../NetworksDropdown';
-
-const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
+const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
 
@@ -125,14 +123,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	};
 
 	return (
-		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
+		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie width={300} message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
 			<div className={className}>
-				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
-					<span>
-						<WarningCircleIcon className='text-base' />
-					</span>
-					<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
-				</section>
 
 				<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
 				{/* TODO: Make into reusable component */}
@@ -190,7 +182,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 
 					<BalanceInput className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
 
-					<section className='mt-6'>
+					{/* <section className='mt-6'>
 						<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
 						<div className='flex items-center gap-x-[10px]'>
 							<article className='w-full'>
@@ -214,7 +206,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 								</Form.Item>
 							</article>
 						</div>
-					</section>
+					</section> */}
 
 					<section className='flex items-center gap-x-5 justify-center mt-10'>
 						<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
@@ -226,7 +218,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	);
 };
 
-export default styled(ExistentialDeposit)`
+export default styled(FundMultisig)`
 	.ant-select input {
 		font-size: 14px !important;
 		font-style: normal !important;

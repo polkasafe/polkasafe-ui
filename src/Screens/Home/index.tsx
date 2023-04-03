@@ -19,12 +19,12 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Home = () => {
-	const { address, multisigAddresses, multisigSettings, createdAt } = useGlobalUserDetailsContext();
+	const { address, multisigAddresses, multisigSettings, createdAt, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	useEffect(() => {
-		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds'))){
+		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1){
 			setOpenNewUserModal(true);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps

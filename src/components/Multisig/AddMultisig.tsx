@@ -5,24 +5,22 @@
 import { Button, Modal } from 'antd';
 import React, { FC, useState } from 'react';
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
-import { useModalContext } from 'src/context/ModalContext';
 import { CreateMultisigIcon, LinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 import LinkMultisig from './LinkMultisig/LinkMultisig';
 
-// import Signotary from './Signotary';
-
 interface IMultisigProps {
 	className?: string
 	isModalPopup?: boolean
 	homepage?: boolean
+	onCancel?: () => void
 }
 
-const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
+const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, className, onCancel }) => {
 	const [ isMultisigVisible, setMultisigVisible] = useState(false);
-	const { openModal } = useModalContext();
 	const [openLinkMultisig, setOpenLinkMultisig] = useState(false);
+	const [openCreateMultisig, setOpenCreateMultisig] = useState(false);
 
 	const LinkMultisigModal: FC = () => {
 		return (
@@ -52,9 +50,34 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
 			</>
 		);
 	};
+	const CreateMultisigModal: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenCreateMultisig(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Multisig</h3>}
+				open={openCreateMultisig}
+				className={`${className} w-auto md:min-w-[500px]`}
+			>
+				<CreateMultisig onCancel={() => {
+					setOpenCreateMultisig(false);
+					onCancel?.();
+				}}
+				/>
+			</Modal>
+		);
+	};
 
 	return (
-		<>
+		<div className={className}>
+			<CreateMultisigModal/>
 			{isMultisigVisible&&!isModalPopup?<div className='p-5'>
 				<CreateMultisig homepage={homepage} onCancel = {() => {
 					setMultisigVisible(false);
@@ -79,7 +102,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
 										if(!isModalPopup){
 											setMultisigVisible(true);
 										}else{
-											openModal('Create Multisig', <CreateMultisig/>);
+											setOpenCreateMultisig(true);
 										}
 									}}
 								>
@@ -99,13 +122,20 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage }) => {
 					</div>
 				</div>
 			</div>}
-		</>
+		</div>
 	);
 };
 
 export default styled(AddMultisig)`
 	.ant-switch-inner-checked {
 		background-color: #645ADF !important;
+	}
+
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
 	}
 `;
 
