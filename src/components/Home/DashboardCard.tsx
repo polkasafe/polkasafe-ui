@@ -6,7 +6,6 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
 import { Modal } from 'antd';
 import React, { FC, useCallback, useEffect,useState } from 'react';
-import { Link } from 'react-router-dom';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
 import dotIcon from 'src/assets/icons/image 39.svg';
@@ -28,6 +27,7 @@ import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
+import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
 const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
@@ -41,6 +41,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const [transactionLoading, setTransactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(false);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
+	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
 
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig);
 
@@ -127,6 +128,32 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 		);
 	};
 
+	const FundMultisigModal: FC = () => {
+		return (
+			<>
+				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'>
+					<WalletIcon /> Fund Multisig
+				</PrimaryButton>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenFundMultisigModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Fund Multisig</h3>}
+					open={openFundMultisigModal}
+					className={`${className} w-auto md:min-w-[500px]`}
+				>
+					<FundMultisig setNewTxn={setNewTxn} onCancel={() => setOpenFundMultisigModal(false)} />
+				</Modal>
+			</>
+		);
+	};
+
 	return (
 		<div>
 			<h2 className="text-lg font-bold text-white">Overview</h2>
@@ -195,9 +222,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<TransactionModal/>
-					<Link to='/assets' className='w-[45%] group'>
-						<PrimaryButton className='w-[100%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'><WalletIcon />View Assets</PrimaryButton>
-					</Link>
+					<FundMultisigModal/>
 				</div>
 			</div>
 		</div>
