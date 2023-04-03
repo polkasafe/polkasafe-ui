@@ -24,7 +24,7 @@ const Home = () => {
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	useEffect(() => {
-		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook.length === 1){
+		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1){
 			setOpenNewUserModal(true);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
