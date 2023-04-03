@@ -4,7 +4,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { MessageInstance } from 'antd/es/message/interface';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -19,10 +18,10 @@ interface Props {
 	approvingAddress: string,
 	recipientAddress?: string,
 	callHash: string,
-	messageApi: MessageInstance
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function cancelMultisigTransfer ({ api, approvingAddress, callHash, recipientAddress, messageApi, multisig, network }: Props) {
+export async function cancelMultisigTransfer ({ api, approvingAddress, callHash, recipientAddress, multisig, network, setLoadingMessages }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -50,16 +49,16 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
-						messageApi.error('Transaction invalid');
+						setLoadingMessages('Transaction invalid');
 					} else if (status.isReady) {
 						console.log('Transaction is ready');
-						messageApi.loading('Transaction is ready');
+						setLoadingMessages('Transaction is ready');
 					} else if (status.isBroadcast) {
 						console.log('Transaction has been broadcasted');
-						messageApi.loading('Transaction has been broadcasted');
+						setLoadingMessages('Transaction has been broadcasted');
 					} else if (status.isInBlock) {
 						console.log('Transaction is in block');
-						messageApi.loading('Transaction is in block');
+						setLoadingMessages('Transaction is in block');
 					} else if (status.isFinalized) {
 						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 						console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
@@ -83,8 +82,8 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 							} else if (event.method === 'ExtrinsicFailed') {
 								console.log('Transaction failed');
 
-								const errorCode = (event.data as any)?.dispatchError?.asModule?.toJSON()?.error;
-								if(!errorCode) {
+								const errorModule = (event.data as any)?.dispatchError?.asModule;
+								if(!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',
@@ -94,7 +93,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 									return;
 								}
 
-								const { method, section, docs } = api.registry.findMetaError(new Uint8Array(errorCode));
+								const { method, section, docs } = api.registry.findMetaError(errorModule);
 								console.log(`Error: ${section}.${method}\n${docs.join(' ')}`);
 
 								queueNotification({

@@ -12,14 +12,15 @@ interface IAccountSelectionFormProps {
 	address: string
 	onAccountChange: (address: string) => void
 	title: string
+	disabled?: boolean
 }
 
-const AccountSelectionForm: FC<IAccountSelectionFormProps> = (props) => {
-	const { accounts, address, onAccountChange, title } = props;
+const AccountSelectionForm: FC<IAccountSelectionFormProps> = ({ accounts, address, onAccountChange, title, disabled }) => {
 	return (
 		<article className='flex flex-col gap-y-3 w-[350px]'>
 			<h3 className='text-primary font-normal text-sm leading-[13px]'>{title}</h3>
 			<AddressDropdown
+				disabled={disabled}
 				accounts={accounts}
 				defaultAddress={address}
 				onAccountChange={onAccountChange}

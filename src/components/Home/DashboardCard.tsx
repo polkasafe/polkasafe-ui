@@ -25,6 +25,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import shortenAddress from 'src/utils/shortenAddress';
+import styled from 'styled-components';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -37,7 +38,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 
-	const [transactionLoading, setTransactionLoading] = useState(true);
+	const [transactionLoading, setTransactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(false);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
@@ -116,7 +117,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
 					open={openTransactionModal}
-					className='w-auto md:min-w-[500px]'
+					className={`${className} w-auto md:min-w-[500px]`}
 				>
 					{isOnchain ?
 						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
@@ -159,7 +160,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 								theme='polkadot'
 							/>
 							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
-								{currentMultisig?.signatories.length}/{currentMultisig?.threshold}
+								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>
@@ -203,5 +204,12 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	);
 };
 
-export default DashboardCard;
+export default styled(DashboardCard)`
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
+	}
+`;
 

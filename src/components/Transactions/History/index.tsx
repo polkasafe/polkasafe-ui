@@ -16,7 +16,13 @@ import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
 
-const History: FC = () => {
+interface IHistory{
+	loading: boolean
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>
+	refetch: boolean
+}
+
+const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
@@ -25,7 +31,6 @@ const History: FC = () => {
 	const location = useLocation();
 
 	const [transactions, setTransactions] = useState<ITransaction[]>();
-	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		const hash = location.hash.slice(1);
@@ -62,7 +67,8 @@ const History: FC = () => {
 			}
 		};
 		getTransactions();
-	}, [activeMultisig, network, signature, userAddress]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeMultisig, network, signature, userAddress, refetch]);
 
 	if(loading) return <Loader size='large'/>;
 

@@ -19,13 +19,18 @@ import Transaction from './Transaction';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Queued: FC = () => {
-	const [loading, setLoading] = useState<boolean>(false);
+interface IQueued{
+	loading: boolean
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>
+	refetch: boolean
+	setRefetch: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
-	const [refetch, setRefetch] = useState<boolean>(false);
 	const location = useLocation();
 	const [amountUSD, setAmountUSD] = useState<string>('');
 
@@ -84,6 +89,7 @@ const Queued: FC = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeMultisig, network]);
 
 	useEffect(() => {
@@ -105,7 +111,7 @@ const Queued: FC = () => {
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							approvals={transaction.approvals}
-							threshold={multisigAddresses.find((item) => item.address === activeMultisig)?.threshold || 0}
+							threshold={multisigAddresses?.find((item) => item.address === activeMultisig)?.threshold || 0}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}

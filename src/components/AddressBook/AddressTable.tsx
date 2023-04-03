@@ -3,15 +3,16 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Divider } from 'antd';
-import React, { FC } from 'react';
+import { Divider, Modal } from 'antd';
+import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import styled from 'styled-components';
 
 import SendFundsForm from '../SendFunds/SendFundsForm';
 import EditAddress from './Edit';
@@ -23,14 +24,40 @@ export interface IAddress {
 }
 interface IAddressProps {
     address: IAddress[];
+	className?: string
 }
 
-const AddAddress: FC<IAddressProps> = ({ address }) => {
-	const { openModal, toggleVisibility } = useModalContext();
+const AddAddress: FC<IAddressProps> = ({ address, className }) => {
+	const { openModal } = useModalContext();
 	const { activeMultisig } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+
+	const [openTransactionModal, setOpenTransactionModal] = useState(false);
+
+	const TransactionModal: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenTransactionModal(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
+				open={openTransactionModal}
+				className={`${className} w-auto md:min-w-[500px]`}
+			>
+				<SendFundsForm onCancel={() => setOpenTransactionModal(false)} />
+			</Modal>
+		);
+	};
+
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
+			<TransactionModal/>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
 					Name
@@ -77,7 +104,7 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>}
-									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => openModal('Send Funds', <SendFundsForm defaultSelectedAddress={address} onCancel={() => toggleVisibility()} />)}>
+									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => setOpenTransactionModal(true)}>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</div>
@@ -91,4 +118,11 @@ const AddAddress: FC<IAddressProps> = ({ address }) => {
 	);
 };
 
-export default AddAddress;
+export default styled(AddAddress)`
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
+	}
+`;

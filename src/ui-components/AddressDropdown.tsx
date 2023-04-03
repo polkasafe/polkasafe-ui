@@ -16,11 +16,11 @@ interface IAddressDropdownProps {
 	defaultAddress?: string;
 	accounts: InjectedAccount[];
 	className?: string;
+	disabled?: boolean
 	onAccountChange: (address: string) => void;
 }
 
-const AddressDropdown: FC<IAddressDropdownProps> = (props) => {
-	const { defaultAddress, className, accounts, onAccountChange } = props;
+const AddressDropdown: FC<IAddressDropdownProps> = ({ defaultAddress, className, accounts, disabled, onAccountChange }) => {
 
 	const [selectedAddress, setSelectedAddress] = useState('');
 	useEffect(() => {
@@ -58,6 +58,7 @@ const AddressDropdown: FC<IAddressDropdownProps> = (props) => {
 	});
 	return (
 		<Dropdown
+			disabled={disabled}
 			trigger={['click']}
 			className={classNames(
 				'border border-primary rounded-xl px-3 py-[13px] bg-bg-secondary cursor-pointer',
