@@ -40,7 +40,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
-	const [addresses, setAddresses] = useState<ISignature[]>(addressBook.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
+	const [addresses, setAddresses] = useState<ISignature[]>(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
 		address: item.address,
 		key: i+1,
 		name: item.name
@@ -51,15 +51,18 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			return;
 		}
 		const fetchBalances = async () => {
-			for(const item of addresses){
-				const balance = await api.query.system.account(item.address);
-				setAddresses((prev) => {
-					const copyPrev = [...prev];
-					const copyObj = copyPrev.find((e) => e.address === item.address);
-					copyObj!.balance = balance?.data?.free?.toString();
-					return copyPrev;
-				});
-			}
+			const results = await Promise.allSettled(addresses.map((item) => api.query.system.account(item.address)));
+			results.forEach((result, i) => {
+				if(result.status === 'fulfilled'){
+					const balance = result.value;
+					setAddresses((prev) => {
+						const copyPrev = [...prev];
+						const copyObj = copyPrev[i];
+						copyObj!.balance = balance?.data?.free?.toString();
+						return copyPrev;
+					});
+				}
+			});
 		};
 		fetchBalances();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
