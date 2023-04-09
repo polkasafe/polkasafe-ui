@@ -24,6 +24,7 @@ const ConnectWallet = () => {
 	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
+	const [signing, setSigning] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (accounts && accounts.length > 0) {
@@ -70,12 +71,15 @@ const ConnectWallet = () => {
 					setLoading(false);
 					return;
 				}
+				setSigning(true);
 				// @ts-ignore
 				const { signature } = await signersMap[wallet].signRaw({
 					address: substrateAddress,
 					data: stringToHex(token),
 					type: 'bytes'
 				});
+
+				setSigning(false);
 
 				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
 					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
@@ -99,11 +103,13 @@ const ConnectWallet = () => {
 						};
 					});
 					setLoading(false);
+					setSigning(false);
 				}
 			}
 		} catch (error){
 			console.log('ERROR OCCURED', error);
 			setLoading(false);
+			setSigning(false);
 		}
 	};
 
@@ -141,6 +147,7 @@ const ConnectWallet = () => {
 									>
 								Connect Wallet
 									</Button>
+									{signing && <div className='text-white mt-1'>Please Sign This Randomly Generated Text To Login.</div>}
 								</>
 
 				}

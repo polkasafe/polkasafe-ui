@@ -14,9 +14,10 @@ interface IMultisigProps {
 	className?: string
 	isModalPopup?: boolean
 	homepage?: boolean
+	onCancel?: () => void
 }
 
-const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, className }) => {
+const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, className, onCancel }) => {
 	const [ isMultisigVisible, setMultisigVisible] = useState(false);
 	const [openLinkMultisig, setOpenLinkMultisig] = useState(false);
 	const [openCreateMultisig, setOpenCreateMultisig] = useState(false);
@@ -65,7 +66,11 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 				open={openCreateMultisig}
 				className={`${className} w-auto md:min-w-[500px]`}
 			>
-				<CreateMultisig onCancel={() => setOpenCreateMultisig(false)} />
+				<CreateMultisig onCancel={() => {
+					setOpenCreateMultisig(false);
+					onCancel?.();
+				}}
+				/>
 			</Modal>
 		);
 	};

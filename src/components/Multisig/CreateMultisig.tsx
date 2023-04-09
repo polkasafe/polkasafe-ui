@@ -145,7 +145,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						message: `Your Multisig ${multisigName} has been created successfully!`,
 						status: NotificationStatus.SUCCESS
 					});
-					Promise.all([addExistentialDeposit(multisigData.address)])
+					addExistentialDeposit(multisigData.address)
 						.then(() => {
 							setUserDetailsContextState((prevState) => {
 								return {
