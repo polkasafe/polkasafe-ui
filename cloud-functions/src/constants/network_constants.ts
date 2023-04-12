@@ -3,7 +3,6 @@ import { ChainProperties } from '../types';
 export const networks = {
 	POLKADOT: 'polkadot',
 	KUSAMA: 'kusama',
-	ROCOCO: 'rococo',
 	WESTEND: 'westend'
 };
 
@@ -31,13 +30,5 @@ export const chainProperties: ChainProperties = {
 		ss58Format: 42,
 		tokenDecimals: 12,
 		tokenSymbol: 'WND'
-	},
-	[networks.ROCOCO]: {
-		blockTime: 6000,
-		keyringType: 'sr25519',
-		rpcEndpoint: 'wss://rococo-rpc.polkadot.io',
-		ss58Format: 42,
-		tokenDecimals: 12,
-		tokenSymbol: 'ROC'
 	}
 };
