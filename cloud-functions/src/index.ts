@@ -900,5 +900,35 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 	});
 });
 
+export const updateMultisigProxyAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, proxyAddress } = req.body;
+		if (!multisigAddress || !proxyAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(String(multisigAddress));
+			const multisigDoc = await multisigRef.get();
+			if (!multisigDoc.exists) return res.status(400).json({ error: responseMessages.multisig_not_found });
+
+			const multisigData = multisigDoc.data() as IMultisigAddress;
+			if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
+
+			multisigRef.update({ proxy: String(proxyAddress) });
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateMultisigProxyAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
 // TODO: return BE data first and then save data to BE and return data from BE;
 // store last updated at

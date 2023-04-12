@@ -29,6 +29,7 @@ export interface IMultisigAddress {
 	network: string;
 	created_at: Date;
 	threshold: number;
+	proxy?: string
 }
 
 export interface ChainProperties {
