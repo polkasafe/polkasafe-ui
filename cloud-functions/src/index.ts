@@ -263,12 +263,15 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
+			let oldProxyMultisigRef = null;
 
 			if (proxyAddress) {
 				const proxyMultisigQuery = await firestoreDB.collection('multisigAddresses').where('proxy', '==', proxyAddress).limit(1).get();
 				if (!proxyMultisigQuery.empty) {
 					// check if the multisig linked to this proxy has this user as a signatory.
-					const multisigData = proxyMultisigQuery.docs[0].data();
+					const multisigDoc = proxyMultisigQuery.docs[0];
+					const multisigData = multisigDoc.data();
+					oldProxyMultisigRef = multisigDoc.ref;
 					if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
 				}
 			}
@@ -303,9 +306,19 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				};
 
 				if (proxyAddress) {
-					await multisigRef.update({
+					const batch = firestoreDB.batch();
+
+					batch.update(multisigRef, {
 						proxy: proxyAddress
 					});
+
+					if (oldProxyMultisigRef) {
+						batch.update(oldProxyMultisigRef, {
+							proxy: ''
+						});
+					}
+
+					await batch.commit();
 
 					resData.proxy = proxyAddress;
 				}
@@ -338,6 +351,12 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
 			res.status(200).json({ data: newMultisig });
+
+			if (oldProxyMultisigRef) {
+				await oldProxyMultisigRef.update({
+					proxy: ''
+				});
+			}
 
 			await firestoreDB.collection('addresses').doc(substrateAddress).set({
 				'multisigSettings': {
