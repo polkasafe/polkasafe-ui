@@ -18,6 +18,7 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	createdAt: new Date(),
+	isProxy: false,
 	multisigAddresses: [],
 	multisigSettings: {},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,

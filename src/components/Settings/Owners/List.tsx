@@ -1,10 +1,13 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import Identicon from '@polkadot/react-identicon';
 import { Divider } from 'antd';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 
@@ -23,6 +26,8 @@ interface IListOwnersProps {
 const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
+	const { multisigAddresses, activeMultisig, addressBook } = useGlobalUserDetailsContext();
+	const signatories = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.signatories;
 
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
@@ -38,17 +43,20 @@ const ListOwners: FC<IListOwnersProps> = ({ owners }) => {
 				</span>
 			</article>
 			{
-				owners.map(({ address, imgSrc, name }, index) => {
+				signatories?.map((address, index) => {
 					return (
 						<article key={index}>
 							<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
-								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
-									{name}
+								<p className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
+									{addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 								</p>
 								<div className='col-span-2 flex items-center'>
-									<div className='flex items-center justify-center overflow-hidden rounded-full w-4 h-4'>
-										<img src={imgSrc} alt="profile img" />
-									</div>
+									<Identicon
+										className='image identicon mx-2'
+										value={address}
+										size={30}
+										theme={'polkadot'}
+									/>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>

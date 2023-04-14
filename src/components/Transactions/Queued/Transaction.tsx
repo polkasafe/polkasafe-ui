@@ -19,8 +19,11 @@ import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IQueueItem } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
+import { approveAddProxy } from 'src/utils/approveAddProxy';
 import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
+import { approveProxy } from 'src/utils/approveProxy';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
+import { cancelProxy } from 'src/utils/cancelProxy';
 import decodeCallData from 'src/utils/decodeCallData';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
@@ -44,7 +47,7 @@ interface ITransactionProps {
 const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 
-	const { activeMultisig, multisigAddresses, address } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
@@ -73,6 +76,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
+		console.log('decoded call data', data.extrinsicCall?.toJSON());
 
 		// store callData in BE
 		(async () => {
@@ -102,27 +106,55 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
+		const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 		if(!multisig) return;
 
 		setLoading(true);
 		try {
-			if(!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id){
+			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
 				return;
 			}
-			await approveMultisigTransfer({
-				amount: new BN(decodedCallData.args.value),
-				api,
-				approvingAddress: address,
-				callDataHex: callDataString,
-				callHash,
-				multisig,
-				network,
-				note: note || '',
-				recipientAddress: decodedCallData.args.dest.id,
-				setLoadingMessages
-			});
+			if(decodedCallData?.args?.proxy_type){
+				await approveProxy({
+					api,
+					approvingAddress: address,
+					callDataHex: callDataString,
+					callHash,
+					multisig,
+					network,
+					note: note || '',
+					setLoadingMessages,
+					setUserDetailsContextState
+				});
+			}
+			else if(decodedCallData?.args?.call?.args?.delegate){
+				await approveAddProxy({
+					api,
+					approvingAddress: address,
+					callDataHex: callDataString,
+					callHash,
+					multisig,
+					network,
+					note: note || '',
+					setLoadingMessages,
+					setUserDetailsContextState
+				});
+			}
+			else{
+				await approveMultisigTransfer({
+					amount: new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
+					api,
+					approvingAddress: address,
+					callDataHex: callDataString,
+					callHash,
+					multisig,
+					network,
+					note: note || '',
+					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
+					setLoadingMessages
+				});
+			}
 			setLoading(false);
 			setSuccess(true);
 			setTimeout(() => {
@@ -157,22 +189,37 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
+		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 		if(!multisig) return;
 
 		setLoading(true);
 		setOpenLoadingModal(true);
 		try {
-			await cancelMultisigTransfer({
-				api,
-				approvingAddress: address,
-				callHash,
-				multisig,
-				network,
-				recipientAddress: decodedCallData ? decodedCallData.args.dest.id : '',
-				setLoadingMessages
-			});
+			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) ){
+				return;
+			}
+			if(decodedCallData?.args?.proxy_type){
+				await cancelProxy({
+					api,
+					approvingAddress: address,
+					callHash,
+					multisig,
+					network,
+					setLoadingMessages
+				});
+			}
+			else{
+				await cancelMultisigTransfer({
+					api,
+					approvingAddress: address,
+					callHash,
+					multisig,
+					network,
+					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
+					setLoadingMessages
+				});
+			}
 			setLoading(false);
 			setSuccess(true);
 			setTimeout(() => {
@@ -231,9 +278,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 							<span
 								className={'font-normal text-xs leading-[13px] text-failure'}
 							>
-								- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({
+								- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({
 									network,
-									value: String(decodedCallData.args.value),
+									value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
 									withUnit: true
 								}) : `? ${token}`}
 							</span>
@@ -268,7 +315,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						<Divider className='bg-text_secondary my-5' />
 
 						<SentInfo
-							amount={decodedCallData?.args?.value || ''}
+							amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || ''}
 							amountUSD={amountUSD}
 							callHash={callHash}
 							callDataString={callDataString}
@@ -277,7 +324,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 							approvals={approvals}
 							threshold={threshold}
 							loading={loading}
-							recipientAddress={decodedCallData?.args?.dest?.id}
+							recipientAddress={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id}
 							setCallDataString={setCallDataString}
 							handleApproveTransaction={handleApproveTransaction}
 							handleCancelTransaction={handleCancelTransaction}

@@ -64,7 +64,7 @@ const addRecipientHeading = () => {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
@@ -90,7 +90,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFun
 
 	const [transactionData, setTransactionData] = useState<any>({});
 
-	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
+	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(!getSubstrateAddress(recipientAddress)){
@@ -130,6 +130,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFun
 				amount,
 				api,
 				initiatorAddress: address,
+				isProxy,
 				multisig,
 				network,
 				note,

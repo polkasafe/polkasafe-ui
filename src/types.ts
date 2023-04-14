@@ -8,6 +8,7 @@ import { networks, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
     activeMultisig: string;
+	isProxy: boolean;
     address: string;
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
@@ -76,6 +77,7 @@ export interface IMultisigAddress {
 	network: string;
 	created_at: Date;
 	threshold: number;
+	proxy?: string;
 }
 
 export interface IUserResponse extends IUser {

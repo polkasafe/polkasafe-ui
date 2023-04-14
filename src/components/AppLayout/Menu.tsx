@@ -19,7 +19,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const { openModal } = useModalContext();
@@ -66,9 +66,9 @@ const Menu: FC<Props> = ({ className }) => {
 
 	useEffect(() => {
 		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) || [];
-
-		if(filteredMutisigs?.find((multisig) => multisig.address === activeMultisig)){
-			setSelectedMultisigAddress(activeMultisig);
+		const multi = filteredMutisigs?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
+		if(multi){
+			setSelectedMultisigAddress(multi.address);
 		}
 		else{
 			if(filteredMutisigs.length) setSelectedMultisigAddress(filteredMutisigs[0].address );
@@ -79,15 +79,16 @@ const Menu: FC<Props> = ({ className }) => {
 	}, [multisigAddresses, network]);
 
 	useEffect(() => {
-		localStorage.setItem('active_multisig', selectedMultisigAddress);
+		const active = multisigAddresses.find(item => item.address === selectedMultisigAddress || item.proxy === selectedMultisigAddress);
+		localStorage.setItem('active_multisig', active?.proxy && isProxy ? active.proxy : selectedMultisigAddress);
 		setUserDetailsContextState((prevState) => {
 			return {
 				...prevState,
-				activeMultisig: selectedMultisigAddress
+				activeMultisig: active?.proxy && isProxy ? active.proxy : selectedMultisigAddress
 			};
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedMultisigAddress]);
+	}, [multisigAddresses, selectedMultisigAddress, isProxy]);
 
 	return (
 		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
@@ -137,14 +138,14 @@ const Menu: FC<Props> = ({ className }) => {
 									setUserDetailsContextState((prevState) => {
 										return {
 											...prevState,
-											activeMultisig: multisig.address
+											activeMultisig: multisig.proxy && isProxy ? multisig.proxy : multisig.address
 										};
 									});
 									setSelectedMultisigAddress(multisig.address);
 								}}>
 									<Identicon
 										className='image identicon mx-2'
-										value={multisig.address}
+										value={(isProxy ? multisig?.proxy : multisig.address) || multisig.address}
 										size={30}
 										theme={'polkadot'}
 									/>

@@ -15,6 +15,7 @@ import { CopyIcon, ExternalLinkIcon, RightArrowOutlined } from 'src/ui-component
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import shortenAddress from 'src/utils/shortenAddress';
 
 const AddressCard = ({ className }: { className?: string }) => {
 	const { openModal } = useModalContext();
@@ -55,7 +56,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 										className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 									>
 										<span>
-											{getEncodedAddress(item.address, network)}
+											{shortenAddress(getEncodedAddress(item.address, network) || item.address)}
 										</span>
 										<span
 											className='flex items-center gap-x-2 text-sm'

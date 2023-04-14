@@ -45,7 +45,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
-	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig);
+	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
 	const [depositor, setDepositor] = useState<string>('');
@@ -53,12 +53,12 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	useEffect(() => {
 		const getDepositor = async () => {
 			if(!api || !apiReady) return;
-			const multisigInfos = await getMultisigInfo(activeMultisig, api);
+			const multisigInfos = await getMultisigInfo(activeMultisigObject?.address || activeMultisig, api);
 			const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 			setDepositor(multisigInfo?.depositor?.toString() || '');
 		};
 		getDepositor();
-	}, [activeMultisig, api, apiReady, callHash]);
+	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
 
 	return (
 		<div
@@ -67,7 +67,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{amount && recipientAddress ?
+				{ recipientAddress ?
 					<>
 						<p
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
