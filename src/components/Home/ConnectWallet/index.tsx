@@ -1,16 +1,19 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
 import ConnectWalletImg from 'src/assets/connect-wallet.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { APP_NAME } from 'src/global/appName';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IUser } from 'src/types';
+import { Wallet } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
@@ -20,23 +23,23 @@ const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
+	const { accounts, noAccounts, noExtension } = useGetWalletAccounts();
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
-	const { accounts, accountsMap, noAccounts, noExtension, signersMap } = useGetAllAccounts();
 	const [address, setAddress] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
-
-	useEffect(() => {
-		if (accounts && accounts.length > 0) {
-			setAddress(accounts[0].address);
-		}
-	}, [accounts, network]);
+	const [signing, setSigning] = useState<boolean>(false);
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);
 	};
 
+	useEffect(() => {
+		if (accounts && accounts.length > 0) {
+			setAddress(accounts[0].address);
+		}
+	}, [accounts]);
+
 	const handleConnectWallet = async () => {
-		if(noExtension || noAccounts) return;
 		try {
 			const substrateAddress = getSubstrateAddress(address);
 
@@ -63,19 +66,27 @@ const ConnectWallet = () => {
 				setLoading(false);
 				return;
 			} else {
-				const wallet = accountsMap[address];
+				const injectedWindow = window as Window & InjectedWindow;
 
-				if(!signersMap[wallet]){
-					// error state - please add ...
+				const wallet = injectedWindow.injectedWeb3[Wallet.POLKADOT];
+
+				if (!wallet) {
 					setLoading(false);
 					return;
 				}
+				const injected = wallet && wallet.enable && await wallet.enable(APP_NAME);
+
+				const signRaw = injected && injected.signer && injected.signer.signRaw;
+				if (!signRaw) console.error('Signer not available');
+				setSigning(true);
 				// @ts-ignore
-				const { signature } = await signersMap[wallet].signRaw({
+				const { signature } = await signRaw({
 					address: substrateAddress,
 					data: stringToHex(token),
 					type: 'bytes'
 				});
+
+				setSigning(false);
 
 				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
 					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
@@ -99,11 +110,13 @@ const ConnectWallet = () => {
 						};
 					});
 					setLoading(false);
+					setSigning(false);
 				}
 			}
 		} catch (error){
 			console.log('ERROR OCCURED', error);
 			setLoading(false);
+			setSigning(false);
 		}
 	};
 
@@ -141,6 +154,7 @@ const ConnectWallet = () => {
 									>
 								Connect Wallet
 									</Button>
+									{signing && <div className='text-white mt-1'>Please Sign This Randomly Generated Text To Login.</div>}
 								</>
 
 				}

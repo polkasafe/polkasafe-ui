@@ -32,7 +32,7 @@ const Home = ({ className }: { className?: string }) => {
 	const [openProxyModal, setOpenProxyModal] = useState(false);
 	const [hasProxy, setHasProxy] = useState<boolean>(true);
 	useEffect(() => {
-		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook.length === 1){
+		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1){
 			setOpenNewUserModal(true);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -6,6 +6,7 @@ export const responseMessages = {
 	invalid_params: 'Invalid parameters passed to the function call.',
 	invalid_signature: 'Invalid signature.',
 	invalid_network: 'Invalid network.',
+	unauthorised: 'Unauthorised.',
 	internal: 'Internal error occured.',
 	min_singatories: 'Minimum number of signatories is 2.',
 	invalid_threshold: 'Threshold should be a number less than or equal to the number of signatories.',

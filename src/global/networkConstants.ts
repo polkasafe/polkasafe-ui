@@ -10,14 +10,12 @@ import { ChainPropType } from 'src/types';
 export const networks = {
 	KUSAMA: 'kusama',
 	POLKADOT: 'polkadot',
-	ROCOCO: 'rococo',
 	WESTEND: 'westend'
 };
 
 export const tokenSymbol = {
 	DOT: 'DOT',
 	KSM: 'KSM',
-	ROC: 'ROC',
 	WND: 'WND'
 };
 
@@ -51,15 +49,5 @@ export const chainProperties: ChainPropType = {
 		ss58Format: 42,
 		tokenDecimals: 12,
 		tokenSymbol: tokenSymbol.WND
-	},
-	[networks.ROCOCO]: {
-		blockTime: 6000,
-		chainId: 0,
-		existentialDeposit: 0.000033333333,
-		logo: westendLogo,
-		rpcEndpoint: 'wss://rococo-rpc.polkadot.io',
-		ss58Format: 42,
-		tokenDecimals: 12,
-		tokenSymbol: tokenSymbol.ROC
 	}
 };

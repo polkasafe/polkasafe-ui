@@ -3,8 +3,8 @@ import { ChainProperties } from '../types';
 export const networks = {
 	POLKADOT: 'polkadot',
 	KUSAMA: 'kusama',
-	ROCOCO: 'rococo',
-	WESTEND: 'westend'
+	WESTEND: 'westend',
+	ROCOCO: 'rococo'
 };
 
 export const chainProperties: ChainProperties = {

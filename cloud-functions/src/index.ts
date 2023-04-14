@@ -247,7 +247,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { signatories, threshold, multisigName } = req.body;
+		const { signatories, threshold, multisigName, proxyAddress } = req.body;
 		if (!signatories || !threshold || !multisigName) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
@@ -262,10 +262,23 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
 
 		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+			let oldProxyMultisigRef = null;
+
+			if (proxyAddress) {
+				const proxyMultisigQuery = await firestoreDB.collection('multisigAddresses').where('proxy', '==', proxyAddress).limit(1).get();
+				if (!proxyMultisigQuery.empty) {
+					// check if the multisig linked to this proxy has this user as a signatory.
+					const multisigDoc = proxyMultisigQuery.docs[0];
+					const multisigData = multisigDoc.data();
+					oldProxyMultisigRef = multisigDoc.ref;
+					if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
+				}
+			}
+
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
 			// check if substrateSignatories contains the address of the user
-			const substrateAddress = getSubstrateAddress(String(address));
 			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
 
 			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
@@ -286,11 +299,31 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			if (multisigDoc.exists) {
 				const multisigDocData = multisigDoc.data();
 
-				res.status(200).json({ data: {
+				const resData: {[key:string]: any} = {
 					...multisigDocData,
 					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate()
-				} });
+				};
+
+				if (proxyAddress) {
+					const batch = firestoreDB.batch();
+
+					batch.update(multisigRef, {
+						proxy: proxyAddress
+					});
+
+					if (oldProxyMultisigRef) {
+						batch.update(oldProxyMultisigRef, {
+							proxy: ''
+						});
+					}
+
+					await batch.commit();
+
+					resData.proxy = proxyAddress;
+				}
+
+				res.status(200).json({ data: resData });
 
 				await firestoreDB.collection('addresses').doc(substrateAddress).set({
 					'multisigSettings': {
@@ -310,10 +343,20 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				threshold: Number(threshold)
 			};
 
+			if (proxyAddress) {
+				newMultisig.proxy = proxyAddress;
+			}
+
 			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
 			res.status(200).json({ data: newMultisig });
+
+			if (oldProxyMultisigRef) {
+				await oldProxyMultisigRef.update({
+					proxy: ''
+				});
+			}
 
 			await firestoreDB.collection('addresses').doc(substrateAddress).set({
 				'multisigSettings': {
@@ -900,5 +943,37 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 	});
 });
 
+export const updateMultisigProxyAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, proxyAddress } = req.body;
+		if (!multisigAddress || !proxyAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(String(multisigAddress));
+			const multisigDoc = await multisigRef.get();
+			if (!multisigDoc.exists) return res.status(400).json({ error: responseMessages.multisig_not_found });
+
+			const multisigData = multisigDoc.data() as IMultisigAddress;
+			if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
+
+			multisigRef.update({ proxy: String(proxyAddress) });
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateMultisigProxyAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// set
 // TODO: return BE data first and then save data to BE and return data from BE;
 // store last updated at
