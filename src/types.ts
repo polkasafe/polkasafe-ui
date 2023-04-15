@@ -75,8 +75,10 @@ export interface IMultisigAddress {
 	signatories: string[];
 	network: string;
 	created_at: Date;
+	updated_at?: Date;
 	threshold: number;
-	proxy?: string;
+	proxy?: string
+	disabled?: boolean
 }
 
 export interface IUserResponse extends IUser {

@@ -60,7 +60,8 @@ const getMultisigAddressesByAddress = async (address:string) => {
 
 	return multisigAddresses.docs.map((doc) => ({
 		...doc.data(),
-		created_at: doc.data().created_at.toDate()
+		created_at: doc.data().created_at.toDate(),
+		updated_at: doc.data().updated_at?.toDate() || doc.data().created_at.toDate()
 	})) as IMultisigAddress[];
 };
 
@@ -247,7 +248,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { signatories, threshold, multisigName, proxyAddress } = req.body;
+		const { signatories, threshold, multisigName, proxyAddress, disabled } = req.body;
 		if (!signatories || !threshold || !multisigName) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
@@ -257,6 +258,9 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		if (isNaN(threshold) || Number(threshold) > signatories.length) {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
+
+		// cannot send proxy address if disabled is true
+		if (proxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		// check if signatories contain duplicate addresses
 		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
@@ -302,25 +306,31 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				const resData: {[key:string]: any} = {
 					...multisigDocData,
 					name: multisigName,
-					created_at: multisigDocData?.created_at?.toDate()
+					created_at: multisigDocData?.created_at?.toDate(),
+					updated_at: multisigDocData?.data().updated_at?.toDate() || multisigDocData?.data().created_at.toDate()
 				};
 
 				if (proxyAddress) {
 					const batch = firestoreDB.batch();
 
 					batch.update(multisigRef, {
-						proxy: proxyAddress
+						proxy: proxyAddress,
+						disabled: false,
+						updated_at: new Date()
 					});
 
 					if (oldProxyMultisigRef) {
 						batch.update(oldProxyMultisigRef, {
-							proxy: ''
+							proxy: '',
+							disabled: true,
+							updated_at: new Date()
 						});
 					}
 
 					await batch.commit();
 
 					resData.proxy = proxyAddress;
+					resData.disabled = false;
 				}
 
 				res.status(200).json({ data: resData });
@@ -334,9 +344,13 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				return;
 			}
 
+			const newDate = new Date();
+
 			const newMultisig: IMultisigAddress = {
 				address: encodedMultisigAddress,
-				created_at: new Date(),
+				created_at: newDate,
+				updated_at: newDate,
+				disabled: disabled || false,
 				name: multisigName,
 				signatories: substrateSignatories,
 				network: String(network).toLowerCase(),
@@ -354,7 +368,9 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			if (oldProxyMultisigRef) {
 				await oldProxyMultisigRef.update({
-					proxy: ''
+					proxy: '',
+					disabled: true,
+					updated_at: newDate
 				});
 			}
 
@@ -395,7 +411,8 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				const data = multisigRef.data();
 				return res.status(200).json({ data: {
 					...data,
-					created_at: data?.created_at.toDate()
+					created_at: data?.created_at.toDate(),
+					updated_at: data?.data().updated_at?.toDate() || data?.data().created_at.toDate()
 				} });
 			}
 
@@ -406,6 +423,7 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 			const newMultisig: IMultisigAddress = {
 				address: encodedMultisigAddress,
 				created_at: new Date(),
+				updated_at: new Date(),
 				name: DEFAULT_MULTISIG_NAME,
 				signatories: multisigMetaData.signatories || [],
 				network: String(network).toLowerCase(),
@@ -938,37 +956,6 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 			return res.status(200).json({ error: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in setTransactionCallData :', { err, stack: (err as any).stack });
-			return res.status(500).json({ error: responseMessages.internal });
-		}
-	});
-});
-
-export const updateMultisigProxyAddress = functions.https.onRequest(async (req, res) => {
-	corsHandler(req, res, async () => {
-		const signature = req.get('x-signature');
-		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
-
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
-
-		const { multisigAddress, proxyAddress } = req.body;
-		if (!multisigAddress || !proxyAddress ) return res.status(400).json({ error: responseMessages.missing_params });
-
-		try {
-			const substrateAddress = getSubstrateAddress(String(address));
-
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(String(multisigAddress));
-			const multisigDoc = await multisigRef.get();
-			if (!multisigDoc.exists) return res.status(400).json({ error: responseMessages.multisig_not_found });
-
-			const multisigData = multisigDoc.data() as IMultisigAddress;
-			if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
-
-			multisigRef.update({ proxy: String(proxyAddress) });
-			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
-			functions.logger.error('Error in updateMultisigProxyAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
