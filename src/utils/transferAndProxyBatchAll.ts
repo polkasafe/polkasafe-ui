@@ -7,8 +7,8 @@ import { formatBalance } from '@polkadot/util/format';
 import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
@@ -23,10 +23,11 @@ interface Props {
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
     signatories: string[];
-    threshold: number
+    threshold: number;
+	setTxnHash: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function transferAndProxyBatchAll({ api, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
+export async function transferAndProxyBatchAll({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -75,26 +76,21 @@ export async function transferAndProxyBatchAll({ api, network, recepientAddress,
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {
+							setTxnHash(proxyTx.method.hash.toHex());
 							queueNotification({
 								header: 'Success!',
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-							console.log('callData', multiSigProxyCall.method.toHex());
-							console.log('callHash1', api.tx.utility.batchAll([transferTx, multiSigProxyCall]).method.hash.toHex());
-							console.log('multiSigProxyCall', multiSigProxyCall.method.hash.toHex());
-							console.log('transferTx', transferTx.method.hash.toHex());
-							console.log('proxyTx', proxyTx.method.hash.toHex());
 							resolve({
-								callData: multiSigProxyCall.method.toHex(),
-								callHash: multiSigProxyCall.method.hash.toHex(),
+								callData: proxyTx.method.toHex(),
+								callHash: proxyTx.method.hash.toHex(),
 								created_at: new Date()
 							});
 
 							const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
 								.muln(1)
 								.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
-							console.log(reservedProxyDeposit.toString());
 
 							// store data to BE
 							// created_at should be set by BE for server time, amount_usd should be fetched by BE
@@ -110,7 +106,7 @@ export async function transferAndProxyBatchAll({ api, network, recepientAddress,
 
 							sendNotificationToAddresses({
 								addresses: otherSignatories,
-								link: `/transactions?tab=Queue#${multiSigProxyCall.method.hash.toHex()}`,
+								link: `/transactions?tab=Queue#${proxyTx.method.hash.toHex()}`,
 								message: 'New transaction to sign',
 								network,
 								type: 'sent'

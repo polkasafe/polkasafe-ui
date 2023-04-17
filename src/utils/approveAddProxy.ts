@@ -5,12 +5,12 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { encodeAddress } from '@polkadot/util-crypto';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { IMultisigAddress, UserDetailsContextType } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
@@ -20,16 +20,20 @@ import updateTransactionNote from './updateTransactionNote';
 interface Args {
 	api: ApiPromise,
 	network: string,
+	newSignatories: string[],
+	newThreshold: number,
 	multisig: IMultisigAddress,
 	callDataHex?: string,
 	callHash: string,
 	approvingAddress: string,
 	note: string,
+	proxyAddress: string,
+	newMultisigAddress: string,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, newSignatories, newThreshold, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -67,47 +71,60 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 
 	const numApprovals = multisigInfo.approvals.length;
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const fetchProxyData = async () => {
-		const response = await fetch(
-			`https://${network}.api.subscan.io/api/scan/events`,
-			{
-				body: JSON.stringify({
-					row: 1,
-					page: 0,
-					module: 'proxy',
-					call: 'ProxyAdded',
-					address: multisig.address
-				}),
-				headers: SUBSCAN_API_HEADERS,
-				method: 'POST'
-			}
-		);
+	const handleMultisigCreate = async () => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
 
-		const responseJSON = await response.json();
-		if(responseJSON.data.count === 0){
-			setUserDetailsContextState((prev) => ({
-				...prev,
-				isProxy: false
-			}));
-		}
-		else{
-			const params = JSON.parse(responseJSON.data?.events[0]?.params);
-			const proxyAddress = encodeAddress(params[0].value, 42);
-			const multisigAddress = encodeAddress(params[1].value, 42);
-			console.log('proxy', proxyAddress);
-			setUserDetailsContextState((prev) => {
-				const copyMultisigs = [...prev.multisigAddresses];
-				const copyMultisigObject = copyMultisigs?.find((item) => item.address === multisigAddress);
-				if(copyMultisigObject){
-					copyMultisigObject.proxy = proxyAddress;
+			if(!address || !signature || !newSignatories || !newThreshold) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				setLoadingMessages('Creating Your Proxy.');
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					body: JSON.stringify({
+						proxyAddress,
+						multisigName: multisig?.name,
+						signatories: newSignatories,
+						threshold: newThreshold
+					}),
+					headers: firebaseFunctionsHeader(network, address, signature),
+					method: 'POST'
+				});
+
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+
+				if(multisigError) {
+					return;
 				}
-				return {
-					...prev,
-					isProxy: true,
-					multisigAddresses: copyMultisigs
-				};
-			});
+
+				if(multisigData){
+					setUserDetailsContextState((prevState) => {
+						const copyMultisigAddresses = [...prevState.multisigAddresses];
+						const indexOfNew = copyMultisigAddresses.findIndex((item) => item.address === newMultisigAddress);
+						const indexOfOld = copyMultisigAddresses.findIndex((item) => item.address === multisig.address);
+						copyMultisigAddresses[indexOfNew] = multisigData;
+						copyMultisigAddresses[indexOfOld].proxy = undefined;
+						copyMultisigAddresses[indexOfOld].disabled = true;
+						return {
+							...prevState,
+							activeMultisig: multisigData.address,
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[multisigData.address]: {
+									deleted: false,
+									name: multisigData.name
+								}
+							}
+						};
+					});
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
 		}
 	};
 
@@ -190,6 +207,8 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
 								});
+
+								await handleMultisigCreate();
 
 								resolve();
 

@@ -11,8 +11,8 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, name: string }) => {
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();

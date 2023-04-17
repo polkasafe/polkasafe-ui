@@ -4,7 +4,6 @@
 /* eslint-disable sort-keys */
 
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { encodeAddress } from '@polkadot/util-crypto';
 import { Button, Modal } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect,useState } from 'react';
@@ -20,17 +19,17 @@ import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
 const Home = ({ className }: { className?: string }) => {
-	const { address, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	const [openProxyModal, setOpenProxyModal] = useState(false);
 	const [hasProxy, setHasProxy] = useState<boolean>(true);
+	const [proxyInProcess, setProxyInProcess] = useState<boolean>(false);
 	useEffect(() => {
 		if((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1){
 			setOpenNewUserModal(true);
@@ -39,55 +38,14 @@ const Home = ({ className }: { className?: string }) => {
 	}, [createdAt]);
 
 	useEffect(() => {
-
-		const fetchProxyData = async () => {
-			const response = await fetch(
-				`https://${network}.api.subscan.io/api/scan/events`,
-				{
-					body: JSON.stringify({
-						row: 1,
-						page: 0,
-						module: 'proxy',
-						call: 'PureCreated',
-						address: activeMultisig
-					}),
-					headers: SUBSCAN_API_HEADERS,
-					method: 'POST'
-				}
-			);
-
-			const responseJSON = await response.json();
-			if(responseJSON.data.count === 0){
-				setHasProxy(false);
-				setUserDetailsContextState((prev) => ({
-					...prev,
-					isProxy: false
-				}));
-			}
-			else{
-				const params = JSON.parse(responseJSON.data?.events[0]?.params);
-				const proxyAddress = encodeAddress(params[0].value, 42);
-				const multisigAddress = encodeAddress(params[1].value, 42);
-				if(!multisigAddresses.some((item) => item.proxy === proxyAddress)){
-					setUserDetailsContextState((prev) => {
-						const copyMultisigs = [...prev.multisigAddresses];
-						const copyMultisigObject = copyMultisigs?.find((item) => item.address === multisigAddress);
-						if(copyMultisigObject){
-							copyMultisigObject.proxy = proxyAddress;
-						}
-						return {
-							...prev,
-							isProxy: true,
-							multisigAddresses: copyMultisigs
-						};
-					});
-				}
-			}
-		};
-		fetchProxyData();
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, network]);
+		const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+		if(multisig?.proxy){
+			setHasProxy(true);
+		}
+		else{
+			setHasProxy(false);
+		}
+	}, [activeMultisig, multisigAddresses]);
 
 	const AddProxyModal: React.FC = () => {
 		return (
@@ -107,7 +65,7 @@ const Home = ({ className }: { className?: string }) => {
 					open={openProxyModal}
 					className={`w-auto md:min-w-[500px] ${className}`}
 				>
-					<AddProxy onCancel={() => setOpenProxyModal(false)} />
+					<AddProxy homepage onCancel={() => setOpenProxyModal(false)} />
 				</Modal>
 			</>
 		);
@@ -121,7 +79,7 @@ const Home = ({ className }: { className?: string }) => {
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted).length > 0 ?
 							<section>
-								{!hasProxy &&
+								{!hasProxy && !proxyInProcess &&
 									<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
@@ -138,7 +96,7 @@ const Home = ({ className }: { className?: string }) => {
 								</div>
 								<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
 									<div className='col-start-1 col-end-13 lg:col-end-13'>
-										<TxnCard newTxn={newTxn} />
+										<TxnCard setProxyInProcess={setProxyInProcess} newTxn={newTxn} />
 									</div>
 								</div>
 							</section>

@@ -14,8 +14,8 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { IAddressBookItem, IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import _createMultisig from 'src/utils/_createMultisig';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 

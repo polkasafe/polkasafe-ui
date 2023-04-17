@@ -5,12 +5,10 @@
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import { sortAddresses } from '@polkadot/util-crypto';
-import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
-import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import { IMultiTransferResponse } from './initMultisigTransfer';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
@@ -27,7 +25,7 @@ interface Props {
     multisigAddress: string;
 }
 
-export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, api, network, recepientAddress, senderAddress, setLoadingMessages, newSignatories, newThreshold } : Props) {
+export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, api, network, senderAddress, setLoadingMessages, newSignatories, newThreshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -40,8 +38,6 @@ export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, a
 
 	const callData = api.createType('Call', proxyTx.method.toHex());
 	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
-
-	let blockHash = '';
 
 	return new Promise<IMultiTransferResponse>((resolve, reject) => {
 
@@ -58,15 +54,11 @@ export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, a
 					console.log('Transaction has been broadcasted');
 					setLoadingMessages('Transaction has been broadcasted');
 				} else if (status.isInBlock) {
-					blockHash = status.asInBlock.toHex();
 					console.log('Transaction is in block');
 					setLoadingMessages('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
-
-					const block = await api.rpc.chain.getBlock(blockHash);
-					const blockNumber = block.block.header.number.toNumber();
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {
@@ -80,18 +72,6 @@ export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, a
 								callData: proxyTx.method.toHex(),
 								callHash: proxyTx.method.hash.toHex(),
 								created_at: new Date()
-							});
-
-							// store data to BE
-							// created_at should be set by BE for server time, amount_usd should be fetched by BE
-							addNewTransaction({
-								amount: new BN(1),
-								block_number: blockNumber,
-								callData: proxyTx.method.toHex(),
-								callHash: proxyTx.method.hash.toHex(),
-								from: senderAddress,
-								network,
-								to: recepientAddress
 							});
 
 							sendNotificationToAddresses({

@@ -59,6 +59,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
+	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
 
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
@@ -95,6 +96,12 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [api, apiReady, callDataString, callHash, network]);
 
+	useEffect(() => {
+		if(decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id)){
+			setIsProxyApproval(true);
+		}
+	}, [decodedCallData]);
+
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
 			return;
@@ -111,6 +118,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		if(!multisig) return;
 
 		setLoading(true);
+		setOpenLoadingModal(true);
 		try {
 			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
 				return;
@@ -129,6 +137,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				});
 			}
 			else if(decodedCallData?.args?.call?.args?.delegate){
+				const newMultisig = multisigAddresses.find((item) => item.address === decodedCallData?.args?.call?.args?.delegate?.id);
 				await approveAddProxy({
 					api,
 					approvingAddress: address,
@@ -136,7 +145,11 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					callHash,
 					multisig,
 					network,
+					newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
+					newSignatories: newMultisig?.signatories || [],
+					newThreshold: newMultisig?.threshold || 2,
 					note: note || '',
+					proxyAddress: multisig.proxy || '',
 					setLoadingMessages,
 					setUserDetailsContextState
 				});
@@ -264,27 +277,29 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						<p className='col-span-3 flex items-center gap-x-3'>
 
 							<span
-								className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+								className={`flex items-center justify-center w-9 h-9 ${isProxyApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
 							>
 								<ArrowUpRightIcon />
 							</span>
 
 							<span>
-								Sent
+								{isProxyApproval ? 'Proxy' : 'Sent'}
 							</span>
 						</p>
-						<p className='col-span-2 flex items-center gap-x-[6px]'>
-							<ParachainIcon src={chainProperties[network].logo} />
-							<span
-								className={'font-normal text-xs leading-[13px] text-failure'}
-							>
-								- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({
-									network,
-									value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
-									withUnit: true
-								}) : `? ${token}`}
-							</span>
-						</p>
+						{!isProxyApproval &&
+							<p className='col-span-2 flex items-center gap-x-[6px]'>
+								<ParachainIcon src={chainProperties[network].logo} />
+								<span
+									className={'font-normal text-xs leading-[13px] text-failure'}
+								>
+									- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({
+										network,
+										value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
+										withUnit: true
+									}) : `? ${token}`}
+								</span>
+							</p>
+						}
 						<p className='col-span-2'>
 							{dayjs(date).format('lll')}
 						</p>
@@ -329,6 +344,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 							handleApproveTransaction={handleApproveTransaction}
 							handleCancelTransaction={handleCancelTransaction}
 							note={note}
+							isProxyApproval={isProxyApproval}
 						/>
 
 					</div>

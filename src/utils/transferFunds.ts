@@ -7,7 +7,7 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
+import { NotificationStatus } from 'src/types';
 
 interface Props {
 	recepientAddress: string;

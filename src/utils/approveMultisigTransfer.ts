@@ -7,8 +7,8 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
@@ -125,7 +125,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				});
 		} else {
 			api.tx.multisig
-				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), WEIGHT as any)
+				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex || call.method.toHex(), WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');

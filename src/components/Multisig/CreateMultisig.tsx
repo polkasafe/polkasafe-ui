@@ -20,10 +20,11 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import { DashDotIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
+import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
@@ -86,6 +87,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				setLoadingMessages
 			});
 			setSuccess(true);
+			setTimeout(() => setSuccess(false), 60000);
 			setLoading(false);
 		} catch (error) {
 			console.log(error);
@@ -161,6 +163,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 									}
 								};
 							});
+							onCancel?.();
 						});
 				}
 
@@ -187,7 +190,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 		return (
 			<div className='flex flex-col h-full'>
 				<SuccessTransactionLottie message='MultiSig created successfully!'/>
-				<div className='flex-1'></div>
+				<div className='w-full flex justify-center my-3 flex-1'>
+					<ProxyImpPoints />
+				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 					<CancelBtn onClick={onCancel}/>
 					<AddBtn title='Create Proxy' onClick={() => setCreateProxyScreen(true)} />

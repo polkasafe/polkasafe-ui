@@ -7,8 +7,8 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
@@ -84,7 +84,7 @@ export default async function initMultisigTransfer({
 		// 5. for transaction from proxy address
 		if(isProxy && multisig.proxy){
 			api.tx.multisig
-				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, MAX_WEIGHT as any)
+				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, 0 as any)
 				.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');

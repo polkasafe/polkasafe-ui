@@ -112,7 +112,10 @@ const DashboardCard = ({ className, setNewTxn, hasProxy }: { className?: string,
 					closeIcon={
 						<button
 							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-							onClick={() => setOpenTransactionModal(false)}
+							onClick={() => {
+								setOpenTransactionModal(false);
+								setNewTxn(prev => !prev);
+							}}
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
@@ -181,19 +184,19 @@ const DashboardCard = ({ className, setNewTxn, hasProxy }: { className?: string,
 					<div className='flex gap-x-3 items-center'>
 						<div className='relative'>
 							<Identicon
-								className={`border-2 rounded-full bg-transparent ${isProxy ? 'border-[#FF79F2]' : 'border-primary'} p-1.5`}
+								className={`border-2 rounded-full bg-transparent ${hasProxy && isProxy ? 'border-[#FF79F2]' : 'border-primary'} p-1.5`}
 								value={activeMultisig}
 								size={70}
 								theme='polkadot'
 							/>
-							<div className={`${isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'} rounded-lg absolute -bottom-0 mt-3 left-[27px] px-2`}>
+							<div className={`${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'} rounded-lg absolute -bottom-0 mt-3 left-[27px] px-2`}>
 								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>
 							<div className='text-lg font-bold text-white flex items-center gap-x-2'>
 								{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}
-								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{isProxy ? 'Proxy' : 'Multisig'}</div>
+								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
 								{hasProxy &&
 								<Tooltip title='Switch Account'>
 									<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-lg' /></Button>

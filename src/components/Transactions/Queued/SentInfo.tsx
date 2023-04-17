@@ -37,9 +37,10 @@ interface ISentInfoProps {
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
 	note: string
+	isProxyApproval: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -67,7 +68,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{ recipientAddress ?
+				{ recipientAddress && amount ?
 					<>
 						<p
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
@@ -122,7 +123,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						</p>}
 							</div>
 						</div>
-					</> : <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
+					</> : isProxyApproval ? <></> : <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
 						<span>
 							<WarningCircleIcon className='text-base' />
 						</span>
@@ -133,7 +134,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 				{!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
 				}
-				<Divider className='bg-text_secondary my-5' />
+				{!isProxyApproval && <Divider className='bg-text_secondary my-5' />}
 				<div
 					className='flex items-center gap-x-5 mt-3'
 				>

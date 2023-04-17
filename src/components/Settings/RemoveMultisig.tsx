@@ -12,8 +12,8 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 const RemoveMultisigAddress = () => {
 	const { activeMultisig, multisigAddresses, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();

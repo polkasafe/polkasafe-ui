@@ -8,8 +8,8 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import _createMultisig from './_createMultisig';
 import { addNewTransaction } from './addNewTransaction';
@@ -90,7 +90,7 @@ export async function addNewMultiToProxy({ proxyAddress, api, network, recepient
 							// store data to BE
 							// created_at should be set by BE for server time, amount_usd should be fetched by BE
 							addNewTransaction({
-								amount: new BN(1),
+								amount: new BN(0),
 								block_number: blockNumber,
 								callData: proxyTx.method.toHex(),
 								callHash: proxyTx.method.hash.toHex(),

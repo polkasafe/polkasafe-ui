@@ -129,3 +129,10 @@ export interface INotification {
 	type: 'sent' | 'recieved' | 'cancelled' | 'info',
 	network: string
 }
+
+export enum NotificationStatus {
+	SUCCESS= 'success',
+	ERROR = 'error',
+	WARNING = 'warning',
+	INFO = 'info'
+  }

@@ -6,11 +6,13 @@
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import { encodeAddress } from '@polkadot/util-crypto';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
+import { NotificationStatus } from 'src/types';
 import { IMultisigAddress, UserDetailsContextType } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
@@ -67,6 +69,70 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 
 	const numApprovals = multisigInfo.approvals.length;
 
+	const handleMultisigCreate = async (proxyAddress: string) => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!address || !signature || !proxyAddress) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				setLoadingMessages('Creating Your Proxy.');
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					body: JSON.stringify({
+						signatories: multisig.signatories,
+						threshold: multisig.threshold,
+						multisigName: multisig.name,
+						proxyAddress
+					}),
+					headers: firebaseFunctionsHeader(network, address, signature),
+					method: 'POST'
+				});
+
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+
+				if(multisigError) {
+					queueNotification({
+						header: 'Error!',
+						message: multisigError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
+
+				if(multisigData){
+					queueNotification({
+						header: 'Success!',
+						message: 'Your Proxy has been created Successfully!',
+						status: NotificationStatus.SUCCESS
+					});
+					setUserDetailsContextState((prevState) => {
+						const copyMultisigAddresses = [...prevState.multisigAddresses];
+						const index = copyMultisigAddresses.findIndex((item) => item.address === multisig.address);
+						copyMultisigAddresses[index] = multisigData;
+						return {
+							...prevState,
+							activeMultisig: multisigData.proxy || multisigData.address,
+							isProxy: true,
+							multisigAddresses: copyMultisigAddresses,
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[multisigData.address]: {
+									name: multisigData.name,
+									deleted: false
+								}
+							}
+						};
+					});
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
 	const fetchProxyData = async () => {
 		const response = await fetch(
 			`https://${network}.api.subscan.io/api/scan/events`,
@@ -85,28 +151,12 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 
 		const responseJSON = await response.json();
 		if(responseJSON.data.count === 0){
-			setUserDetailsContextState((prev) => ({
-				...prev,
-				isProxy: false
-			}));
+			return;
 		}
 		else{
 			const params = JSON.parse(responseJSON.data?.events[0]?.params);
-			const proxyAddress = encodeAddress(params[0].value, 42);
-			const multisigAddress = encodeAddress(params[1].value, 42);
-			console.log('proxy', proxyAddress);
-			setUserDetailsContextState((prev) => {
-				const copyMultisigs = [...prev.multisigAddresses];
-				const copyMultisigObject = copyMultisigs?.find((item) => item.address === multisigAddress);
-				if(copyMultisigObject){
-					copyMultisigObject.proxy = proxyAddress;
-				}
-				return {
-					...prev,
-					isProxy: true,
-					multisigAddresses: copyMultisigs
-				};
-			});
+			const proxyAddress = encodeAddress(params[0].value, chainProperties[network].ss58Format);
+			await handleMultisigCreate(proxyAddress);
 		}
 	};
 
@@ -184,12 +234,7 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
-								queueNotification({
-									header: 'Success!',
-									message: 'Transaction Successful.',
-									status: NotificationStatus.SUCCESS
-								});
-								fetchProxyData();
+								await fetchProxyData();
 
 								resolve();
 

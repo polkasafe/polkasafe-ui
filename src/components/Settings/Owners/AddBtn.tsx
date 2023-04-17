@@ -4,10 +4,11 @@
 import { Modal } from 'antd';
 import React, { FC,useState } from 'react';
 import { AddIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
+import styled from 'styled-components';
 
 import AddOwner from './Add';
 
-const AddNewOwnerBtn = () => {
+const AddNewOwnerBtn = ({ className }: { className?: string }) => {
 
 	const [openAddOwnerModal, setOpenAddOwnerModal] = useState(false);
 
@@ -25,9 +26,9 @@ const AddNewOwnerBtn = () => {
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Multisig</h3>}
 				open={openAddOwnerModal}
-				className={' w-auto md:min-w-[500px]'}
+				className={`${className} w-auto md:min-w-[500px]`}
 			>
-				<AddOwner />
+				<AddOwner onCancel={() => setOpenAddOwnerModal(false)} />
 			</Modal>
 		);
 	};
@@ -43,4 +44,11 @@ const AddNewOwnerBtn = () => {
 	);
 };
 
-export default AddNewOwnerBtn;
+export default styled(AddNewOwnerBtn)`
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
+	}
+`;

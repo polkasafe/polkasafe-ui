@@ -34,10 +34,9 @@ const AddressCard = ({ className }: { className?: string }) => {
 			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-80 mt-3`}>
 				<div className='flex flex-col px-5 h-80 overflow-auto w-[full]'>
 					{addressBook.map((item, i) => (
-						<>
+						<div key={i}>
 							<div
 								className='w-full flex items-center gap-x-4'
-								key={i}
 							>
 								<Identicon
 									value={item.address}
@@ -70,7 +69,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 								</div>
 							</div>
 							{addressBook.length - 1 !== i? <Divider className='bg-text_secondary mt-2 mb-3' />: null}
-						</>
+						</div>
 					))}
 				</div>
 				<div className='w-full mt-5 flex justify-center'>

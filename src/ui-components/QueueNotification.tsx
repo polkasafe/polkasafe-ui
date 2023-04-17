@@ -4,7 +4,7 @@
 
 /* eslint-disable sort-keys */
 import { notification } from 'antd';
-import { NotificationStatus } from 'src/ui-components/types';
+import { NotificationStatus } from 'src/types';
 
 interface Props {
 	header: string
