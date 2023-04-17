@@ -154,11 +154,11 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								const isProxyApproval = decodedCallData && decodedCallData?.args?.proxy_type;
 								setProxyInProcess(!!isProxyApproval);
 
-								const destSubstrateAddress = decodedCallData && decodedCallData?.args?.dest?.id ? getSubstrateAddress(decodedCallData?.args?.dest?.id) : '';
+								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
 								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;
 
 								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
-									(shortenAddress( decodedCallData && decodedCallData?.args?.dest?.id ? String(getEncodedAddress(decodedCallData?.args?.dest?.id, network)) : ''));
+									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
 
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
@@ -180,8 +180,8 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 										</div>
 										{!isProxyApproval &&
 											<div>
-												<h1 className='text-md text-white'>- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
-												{!isNaN(Number(amountUSD)) && decodedCallData?.args?.value && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
+												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
+												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
 											</div>
 										}
 									</Link>

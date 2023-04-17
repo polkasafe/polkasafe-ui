@@ -77,7 +77,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-		console.log('decoded call data', data.extrinsicCall?.toJSON());
 
 		// store callData in BE
 		(async () => {

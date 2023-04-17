@@ -212,7 +212,6 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 					reject(error);
 				});
 		} else {
-			console.log('multisig info', multisigInfo);
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex || '', WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {

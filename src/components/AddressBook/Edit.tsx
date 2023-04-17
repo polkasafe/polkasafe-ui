@@ -35,8 +35,6 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 			}
 			else{
 
-				console.log(addressToEdit, newName);
-
 				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
 					body: JSON.stringify({
 						address: addressToEdit,

@@ -80,7 +80,6 @@ export async function addNewMultiToProxy({ proxyAddress, api, network, recepient
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-							console.log('proxyTx', proxyTx.method.hash.toHex());
 							resolve({
 								callData: proxyTx.method.toHex(),
 								callHash: proxyTx.method.hash.toHex(),

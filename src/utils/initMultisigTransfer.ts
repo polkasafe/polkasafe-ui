@@ -126,7 +126,6 @@ export default async function initMultisigTransfer({
 
 								// 6. store data to BE
 								// created_at should be set by BE for server time, amount_usd should be fetched by BE
-								console.log('callhash: ', tx.method.hash.toHex());
 								addNewTransaction({
 									amount,
 									block_number: blockNumber,

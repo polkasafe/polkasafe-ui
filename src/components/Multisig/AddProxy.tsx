@@ -8,7 +8,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Spin } from 'antd';
 import BN from 'bn.js';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
@@ -22,7 +22,6 @@ import Balance from 'src/ui-components/Balance';
 import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -52,17 +51,6 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig);
 
 	const [txnHash, setTxnHash] = useState<string>('');
-
-	useEffect(() => {
-		if(!api || !apiReady){
-			return;
-		}
-		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
-			.muln(1)
-			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
-		console.log(reservedProxyDeposit.toString());
-		console.log('format', formatBnBalance(reservedProxyDeposit, {}, network));
-	}, [api, apiReady, network]);
 
 	const createProxy = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap ) return;

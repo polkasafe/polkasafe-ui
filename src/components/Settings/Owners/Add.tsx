@@ -136,7 +136,6 @@ const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 
 		setLoading(true);
-		console.log('signatories', newSignatories, newThreshold);
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
 			await addNewMultiToProxy({

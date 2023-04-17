@@ -100,7 +100,6 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== address) || [];
 
 		setLoading(true);
-		console.log('signatories', newSignatories, newThreshold);
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
 			await addNewMultiToProxy({
