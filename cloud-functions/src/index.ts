@@ -686,7 +686,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
-		if (!amount_token || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
