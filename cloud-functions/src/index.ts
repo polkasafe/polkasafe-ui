@@ -307,7 +307,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 					...multisigDocData,
 					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate(),
-					updated_at: multisigDocData?.data().updated_at?.toDate() || multisigDocData?.data().created_at.toDate()
+					updated_at: multisigDocData?.updated_at?.toDate() || multisigDocData?.created_at.toDate()
 				};
 
 				if (proxyAddress) {
@@ -412,7 +412,7 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				return res.status(200).json({ data: {
 					...data,
 					created_at: data?.created_at.toDate(),
-					updated_at: data?.data().updated_at?.toDate() || data?.data().created_at.toDate()
+					updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
 				} });
 			}
 
