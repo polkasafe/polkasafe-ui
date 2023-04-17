@@ -6,8 +6,8 @@ import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
-import queueNotification from 'src/ui-components/QueueNotification';
 import { NotificationStatus } from 'src/types';
+import queueNotification from 'src/ui-components/QueueNotification';
 
 interface Props {
 	recepientAddress: string;
