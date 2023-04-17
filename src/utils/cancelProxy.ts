@@ -16,12 +16,11 @@ interface Props {
 	network: string,
 	multisig: IMultisigAddress,
 	approvingAddress: string,
-	recipientAddress?: string,
 	callHash: string,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function cancelMultisigTransfer ({ api, approvingAddress, callHash, recipientAddress, multisig, network, setLoadingMessages }: Props) {
+export async function cancelProxy ({ api, approvingAddress, callHash, multisig, network, setLoadingMessages }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -38,6 +37,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 
 	return new Promise<void>((resolve, reject) => {
 		// 4. Send cancelAsMulti if last approval call
+
 		api.tx.multisig
 			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
 			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
@@ -109,8 +109,6 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 					status: NotificationStatus.ERROR
 				});
 			});
-
-		console.log(`Cancel tx from ${multisig.address} ${recipientAddress ? `to ${recipientAddress}` : ''}`);
 		console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
 	});
 }

@@ -14,7 +14,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { IQueueItem,ITransaction } from 'src/types';
-import { RightArrowOutlined } from 'src/ui-components/CustomIcons';
+import { ArrowUpRightIcon, RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
 import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
@@ -27,10 +27,10 @@ import shortenAddress from 'src/utils/shortenAddress';
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
 import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 
-const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
+const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
-	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, multisigAddresses } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactions, setTransactions] = useState<ITransaction[]>();
@@ -40,6 +40,8 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 	const [queueLoading, setQueueLoading] = useState<boolean>(false);
 
 	const [amountUSD, setAmountUSD] = useState<string>('');
+
+	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		const getTransactions = async () => {
@@ -85,7 +87,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 					const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
 						body: JSON.stringify({
 							limit: 10,
-							multisigAddress: activeMultisig,
+							multisigAddress: multisig?.address,
 							network,
 							page: 1
 						}),
@@ -113,7 +115,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 		};
 
 		getQueue();
-	}, [activeMultisig, network, newTxn]);
+	}, [activeMultisig, multisig?.address, network, newTxn]);
 
 	useEffect(() => {
 		if(!userAddress || !signature || !activeMultisig) return;
@@ -149,27 +151,39 @@ const TxnCard = ({ newTxn }: { newTxn: boolean }) => {
 									}
 								}
 
-								const destSubstrateAddress = decodedCallData ? getSubstrateAddress(decodedCallData?.args?.dest?.id) : '';
+								const isProxyApproval = decodedCallData && decodedCallData?.args?.proxy_type;
+								setProxyInProcess(!!isProxyApproval);
+
+								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
 								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;
 
-								const toText = decodedCallData && destSubstrateAddress ? destAddressName :
-									(shortenAddress( decodedCallData ? String(getEncodedAddress(decodedCallData?.args?.dest?.id, network)) : ''));
+								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
+									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
 
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
-											<div className='bg-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'><ReloadOutlined className='text-waiting' /></div>
+											{isProxyApproval ?
+												<div className='bg-[#FF79F2] text-[#FF79F2] bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
+													<ArrowUpRightIcon />
+												</div>
+												:
+												<div className='bg-waiting text-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
+													<ReloadOutlined />
+												</div>}
 											<div className='ml-3'>
 												<h1 className='text-md text-white'>
-													{ decodedCallData ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+													{ decodedCallData && !isProxyApproval ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
-												<p className='text-white text-xs'>In Process...</p>
+												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
 											</div>
 										</div>
-										<div>
-											<h1 className='text-md text-white'>- {decodedCallData && decodedCallData?.args?.value ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
-											{!isNaN(Number(amountUSD)) && decodedCallData?.args?.value && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
-										</div>
+										{!isProxyApproval &&
+											<div>
+												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
+												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
+											</div>
+										}
 									</Link>
 								);})
 							:

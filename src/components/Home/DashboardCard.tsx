@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Modal } from 'antd';
+import { Button, Modal, Tooltip } from 'antd';
 import React, { FC, useCallback, useEffect,useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -30,9 +30,9 @@ import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
-const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
+const DashboardCard = ({ className, setNewTxn, hasProxy }: { className?: string, hasProxy: boolean, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const { api, apiReady } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 
@@ -43,7 +43,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
 
-	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig);
+	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		const handleNewTransaction = async () => {
@@ -112,7 +112,10 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					closeIcon={
 						<button
 							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-							onClick={() => setOpenTransactionModal(false)}
+							onClick={() => {
+								setOpenTransactionModal(false);
+								setNewTxn(prev => !prev);
+							}}
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
@@ -181,17 +184,25 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='flex gap-x-3 items-center'>
 						<div className='relative'>
 							<Identicon
-								className='border-2 rounded-full bg-transparent border-primary p-1.5'
+								className={`border-2 rounded-full bg-transparent ${hasProxy && isProxy ? 'border-[#FF79F2]' : 'border-primary'} p-1.5`}
 								value={activeMultisig}
 								size={70}
 								theme='polkadot'
 							/>
-							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
+							<div className={`${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'} rounded-lg absolute -bottom-0 mt-3 left-[27px] px-2`}>
 								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>
-							<div className='text-lg font-bold text-white'>{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}</div>
+							<div className='text-lg font-bold text-white flex items-center gap-x-2'>
+								{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}
+								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
+								{hasProxy &&
+								<Tooltip title='Switch Account'>
+									<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-lg' /></Button>
+								</Tooltip>
+								}
+							</div>
 							<div className="flex">
 								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className='text-md font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>

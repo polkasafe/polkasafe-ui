@@ -40,11 +40,16 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
-	const [addresses, setAddresses] = useState<ISignature[]>(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
-		address: item.address,
-		key: i+1,
-		name: item.name
-	})));
+	const [addresses, setAddresses] = useState<ISignature[]>([]);
+
+	useEffect(() => {
+		setAddresses(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
+			address: item.address,
+			key: i+1,
+			name: item.name
+		})));
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [addressBook]);
 
 	useEffect(() => {
 		if(!api || !apiReady){
@@ -66,7 +71,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		};
 		fetchBalances();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ api, apiReady]);
+	}, [ api, apiReady, addressBook]);
 
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);

@@ -23,13 +23,13 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -64,7 +64,7 @@ const addRecipientHeading = () => {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
@@ -90,7 +90,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFun
 
 	const [transactionData, setTransactionData] = useState<any>({});
 
-	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig);
+	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(!getSubstrateAddress(recipientAddress)){
@@ -130,6 +130,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress }: ISendFun
 				amount,
 				api,
 				initiatorAddress: address,
+				isProxy,
 				multisig,
 				network,
 				note,

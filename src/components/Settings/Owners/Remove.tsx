@@ -2,28 +2,215 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Form } from 'antd';
-import React from 'react';
+import { Signer } from '@polkadot/api/types';
+import Identicon from '@polkadot/react-identicon';
+import { Form, Spin } from 'antd';
+import React, { useState } from 'react';
+import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
+import LoadingLottie from 'src/assets/lottie-graphics/Loading';
+import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
+import Loader from 'src/components/UserFlow/Loader';
+import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import { IMultisigAddress } from 'src/types';
+import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
 
-const RemoveOwner = () => {
+const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: { address: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
+	const [newThreshold, setNewThreshold] = useState(oldThreshold === oldSignatoriesLength ? oldThreshold - 1 : oldThreshold);
+	const [loading, setLoading] = useState(false);
+	const [success, setSuccess] = useState<boolean>(false);
+	const [failure, setFailure] = useState<boolean>(false);
+	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { api, apiReady, network } = useGlobalApiContext();
+	const { signersMap, accountsMap } = useGetAllAccounts();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+
+	const handleMultisigCreate = async (newSignatories: string[], newThreshold: number) => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!address || !signature || !newSignatories || !newThreshold) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				setLoadingMessages('Creating Your Proxy.');
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					body: JSON.stringify({
+						disabled: true,
+						multisigName: multisig?.name,
+						signatories: newSignatories,
+						threshold: newThreshold
+					}),
+					headers: firebaseFunctionsHeader(network, address, signature),
+					method: 'POST'
+				});
+
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+
+				if(multisigError) {
+					return;
+				}
+
+				if(multisigData){
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[multisigData.address]: {
+									deleted: false,
+									name: multisigData.name
+								}
+							}
+						};
+					});
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
+
+	const changeMultisig = async () => {
+		if(!api || !apiReady ) return;
+
+		const encodedSender = getEncodedAddress(userAddress, network) || '';
+
+		const wallet = accountsMap[encodedSender];
+		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
+
+		const signer: Signer = signersMap[wallet];
+		api.setSigner(signer);
+
+		const newSignatories = multisig && multisig.signatories.filter((item) => item !== address) || [];
+
+		setLoading(true);
+		try {
+			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
+			await addNewMultiToProxy({
+				api,
+				network,
+				newSignatories,
+				newThreshold,
+				oldSignatories: multisig?.signatories || [],
+				oldThreshold: multisig?.threshold || 2,
+				proxyAddress: multisig?.proxy || '',
+				recepientAddress: activeMultisig,
+				senderAddress: getSubstrateAddress(userAddress) || userAddress,
+				setLoadingMessages
+			});
+			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
+			await removeOldMultiFromProxy({
+				api,
+				multisigAddress: multisig?.address || '',
+				network,
+				newSignatories,
+				newThreshold,
+				proxyAddress: multisig?.proxy || '',
+				recepientAddress: activeMultisig,
+				senderAddress: getSubstrateAddress(userAddress) || userAddress,
+				setLoadingMessages
+			});
+			setSuccess(true);
+			setLoading(false);
+			setTimeout(() => {
+				setSuccess(false);
+				onCancel?.();
+			}, 7000);
+			await handleMultisigCreate(newSignatories, newThreshold);
+		} catch (error) {
+			console.log(error);
+			setFailure(true);
+			setLoading(false);
+			setTimeout(() => setFailure(false), 5000);
+		}
+	};
+
 	return (
-		<Form
-			className='my-0'
-		>
-			<p className='text-white font-medium text-sm leading-[15px]'>
-                Are you sure you want to permanently remove
-				<span className='text-primary mx-1.5'>
-                    Jaski - 1
-				</span>
-                as a owner?
-			</p>
-			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn />
-				<RemoveBtn/>
-			</div>
-		</Form>
+		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful'/> : <FailedTransactionLottie message='Failed!' />}>
+			<Form
+				className='my-0'
+			>
+				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>1</div>
+						<p className='text-text_secondary'>Add New Multisig</p>
+					</div>
+					<Loader className='bg-primary h-[2px] w-[80px]'/>
+					<div className='flex flex-col text-white items-center justify-center'>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
+						<p className='text-text_secondary'>Remove Old Multisig</p>
+					</div>
+				</div>
+				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
+					<span>
+						<WarningCircleIcon className='text-base' />
+					</span>
+					<p>Removing a signatory would require you to sign two transactions and approval from other signatories.</p>
+				</section>
+				<div className='text-primary text-sm mb-2'>Remove Signatory*</div>
+				<div className='flex items-center p-3 mb-4 text-text_secondary border-dashed border-2 border-bg-secondary rounded-lg gap-x-5'>
+					<Identicon size={20} theme='polkadot' value={address} />
+					{address}
+				</div>
+				<div className='text-primary text-sm mb-2'>New Threshold</div>
+				<div
+					className='flex items-center gap-x-3'
+				>
+					<p
+						className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
+					>
+						<button
+							onClick={() => {
+								if (newThreshold !== 2) {
+									setNewThreshold(prev => prev - 1);
+								}
+							}}
+							className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+									-
+						</button>
+						<span
+							className='text-white text-sm'
+						>
+							{newThreshold}
+						</span>
+						<button
+							onClick={() => {
+								if (newThreshold < (oldSignatoriesLength - 1)) {
+									setNewThreshold(prev => prev + 1);
+								}
+							}}
+							className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+									+
+						</button>
+					</p>
+					<p
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+								out of <span className='text-white font-medium'>{oldSignatoriesLength - 1}</span> owners
+					</p>
+				</div>
+				<div className='flex items-center justify-between gap-x-4 mt-[30px]'>
+					<CancelBtn onClick={onCancel} />
+					<RemoveBtn loading={loading} onClick={changeMultisig} />
+				</div>
+			</Form>
+		</Spin>
 	);
 };
 

@@ -1,12 +1,14 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+/* eslint-disable sort-keys */
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import BN from 'bn.js';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress } from 'src/types';
+import { IMultisigAddress, UserDetailsContextType } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -18,17 +20,20 @@ import updateTransactionNote from './updateTransactionNote';
 interface Args {
 	api: ApiPromise,
 	network: string,
+	newSignatories: string[],
+	newThreshold: number,
 	multisig: IMultisigAddress,
-	callDataHex: string,
+	callDataHex?: string,
 	callHash: string,
-	amount?: BN,
 	approvingAddress: string,
-	recipientAddress?: string,
 	note: string,
+	proxyAddress: string,
+	newMultisigAddress: string,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
+export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, newSignatories, newThreshold, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -38,24 +43,20 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 2. Set relevant vars
 	const ZERO_WEIGHT = new Uint8Array(0);
 	let WEIGHT: any = ZERO_WEIGHT;
-	let AMOUNT_TO_SEND: number;
-	let displayAmount: string;
 
 	// remove approving address address from signatories
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
-	if(!callDataHex) return;
 
-	if(callDataHex && amount && recipientAddress) {
-		AMOUNT_TO_SEND = amount.toNumber();
-		displayAmount = formatBalance(AMOUNT_TO_SEND);
+	if(callDataHex) {
 
 		const callData = api.createType('Call', callDataHex);
 		const { weight } = await calcWeight(callData, api);
 		WEIGHT = weight;
 
 		// invalid call data for this call hash
-		if (!callData.hash.eq(callHash)) return;
-
+		if (!callData.hash.eq(callHash)) {
+			return;
+		}
 	}
 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
@@ -69,6 +70,63 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	console.log(`Time point is: ${multisigInfo?.when}`);
 
 	const numApprovals = multisigInfo.approvals.length;
+
+	const handleMultisigCreate = async () => {
+		try{
+			const address = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!address || !signature || !newSignatories || !newThreshold) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+				setLoadingMessages('Creating Your Proxy.');
+				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					body: JSON.stringify({
+						proxyAddress,
+						multisigName: multisig?.name,
+						signatories: newSignatories,
+						threshold: newThreshold
+					}),
+					headers: firebaseFunctionsHeader(network, address, signature),
+					method: 'POST'
+				});
+
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+
+				if(multisigError) {
+					return;
+				}
+
+				if(multisigData){
+					setUserDetailsContextState((prevState) => {
+						const copyMultisigAddresses = [...prevState.multisigAddresses];
+						const indexOfNew = copyMultisigAddresses.findIndex((item) => item.address === newMultisigAddress);
+						const indexOfOld = copyMultisigAddresses.findIndex((item) => item.address === multisig.address);
+						copyMultisigAddresses[indexOfNew] = multisigData;
+						copyMultisigAddresses[indexOfOld].proxy = undefined;
+						copyMultisigAddresses[indexOfOld].disabled = true;
+						return {
+							...prevState,
+							activeMultisig: multisigData.address,
+							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							multisigSettings: {
+								...prevState.multisigSettings,
+								[multisigData.address]: {
+									deleted: false,
+									name: multisigData.name
+								}
+							}
+						};
+					});
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
 
 	return new Promise<void>((resolve, reject) => {
 
@@ -122,6 +180,10 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 					reject(error);
 				});
 		} else {
+			if(!callDataHex){
+				reject('Invalid Call Data');
+				return;
+			}
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex, WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
@@ -148,6 +210,8 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
 								});
+
+								await handleMultisigCreate();
 
 								resolve();
 
@@ -198,7 +262,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				});
 		}
 
-		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${callHash}, ${WEIGHT})\n`);
+		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${callDataHex}, ${WEIGHT})\n`);
 	});
 }

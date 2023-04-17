@@ -4,43 +4,46 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
+import { sortAddresses } from '@polkadot/util-crypto';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import { calcWeight } from './calcWeight';
+import { IMultiTransferResponse } from './initMultisigTransfer';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Props {
-	api: ApiPromise,
-	network: string,
-	multisig: IMultisigAddress,
-	approvingAddress: string,
-	recipientAddress?: string,
-	callHash: string,
-	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	recepientAddress: string;
+	senderAddress: string;
+	api: ApiPromise;
+	network: string;
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
+    newSignatories: string[];
+    newThreshold: number;
+    proxyAddress: string;
+    multisigAddress: string;
 }
 
-export async function cancelMultisigTransfer ({ api, approvingAddress, callHash, recipientAddress, multisig, network, setLoadingMessages }: Props) {
-	// 1. Use formatBalance to display amounts
+export async function removeOldMultiFromProxy({ multisigAddress, proxyAddress, api, network, senderAddress, setLoadingMessages, newSignatories, newThreshold } : Props) {
+
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	// remove approving address address from signatories
-	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
+	const otherSignatories = sortAddresses(newSignatories.filter((sig) => sig !== senderAddress));
+	const removeProxyTx = api.tx.proxy.removeProxy(multisigAddress, 'Any', 0);
+	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, removeProxyTx);
 
-	// 3. Retrieve and unwrap the timepoint
-	const info = await api.query.multisig.multisigs(multisig.address, callHash);
-	const TIME_POINT= info.unwrap().when;
-	console.log(`Time point is: ${TIME_POINT}`);
+	const callData = api.createType('Call', proxyTx.method.toHex());
+	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
 
-	return new Promise<void>((resolve, reject) => {
-		// 4. Send cancelAsMulti if last approval call
+	return new Promise<IMultiTransferResponse>((resolve, reject) => {
+
 		api.tx.multisig
-			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
-			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+			.asMulti(newThreshold, otherSignatories, null, proxyTx, MAX_WEIGHT as any)
+			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					setLoadingMessages('Transaction invalid');
@@ -55,7 +58,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 					setLoadingMessages('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
-					console.log(`cancelAsMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {
@@ -64,15 +67,20 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-
-							await sendNotificationToAddresses({
-								addresses: otherSignatories,
-								link: '',
-								message: 'Transaction cancelled.',
-								network,
-								type: 'cancelled'
+							console.log('proxyTx', proxyTx.method.hash.toHex());
+							resolve({
+								callData: proxyTx.method.toHex(),
+								callHash: proxyTx.method.hash.toHex(),
+								created_at: new Date()
 							});
-							resolve();
+
+							sendNotificationToAddresses({
+								addresses: otherSignatories,
+								link: `/transactions?tab=Queue#${proxyTx.method.hash.toHex()}`,
+								message: 'New transaction to sign',
+								network,
+								type: 'sent'
+							});
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 
@@ -101,16 +109,14 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 					}
 				}
 			}).catch((error) => {
-				console.log(error);
-				reject(error);
+				console.log(':( transaction failed');
+				console.error('ERROR:', error);
+				reject();
 				queueNotification({
 					header: 'Failed!',
 					message: error.message,
 					status: NotificationStatus.ERROR
 				});
 			});
-
-		console.log(`Cancel tx from ${multisig.address} ${recipientAddress ? `to ${recipientAddress}` : ''}`);
-		console.log(`Submitted values: cancelAsMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${TIME_POINT}, ${callHash})\n`);
 	});
 }

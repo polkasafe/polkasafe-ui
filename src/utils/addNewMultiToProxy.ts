@@ -4,34 +4,54 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
+import { encodeAddress } from '@polkadot/util-crypto';
+import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import _createMultisig from './_createMultisig';
+import { addNewTransaction } from './addNewTransaction';
+import { calcWeight } from './calcWeight';
+import { IMultiTransferResponse } from './initMultisigTransfer';
+import sendNotificationToAddresses from './sendNotificationToAddresses';
+
 interface Props {
 	recepientAddress: string;
 	senderAddress: string;
-	amount: BN;
 	api: ApiPromise;
 	network: string;
-	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
+    oldSignatories: string[];
+    oldThreshold: number;
+    newSignatories: string[];
+    newThreshold: number;
+    proxyAddress: string;
 }
 
-export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
+export async function addNewMultiToProxy({ proxyAddress, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const AMOUNT_TO_SEND = amount.toNumber();
-	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
+	const otherSignatories = sortAddresses(oldSignatories.filter((sig) => sig !== senderAddress));
+	const multisigResponse = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
+	const newMultisigAddress = encodeAddress(multisigResponse?.multisigAddress || '');
+	const addProxyTx = api.tx.proxy.addProxy(newMultisigAddress, 'Any', 0);
+	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, addProxyTx);
 
-	return new Promise<void>((resolve, reject) => {
+	const callData = api.createType('Call', proxyTx.method.toHex());
+	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
 
-		api.tx.balances
-			.transferKeepAlive(recepientAddress, AMOUNT_TO_SEND)
+	let blockHash = '';
+
+	return new Promise<IMultiTransferResponse>((resolve, reject) => {
+
+		api.tx.multisig
+			.asMulti(oldThreshold, otherSignatories, null, proxyTx, MAX_WEIGHT as any)
 			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
@@ -43,11 +63,15 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 					console.log('Transaction has been broadcasted');
 					setLoadingMessages('Transaction has been broadcasted');
 				} else if (status.isInBlock) {
+					blockHash = status.asInBlock.toHex();
 					console.log('Transaction is in block');
 					setLoadingMessages('Transaction is in block');
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+					const block = await api.rpc.chain.getBlock(blockHash);
+					const blockNumber = block.block.header.number.toNumber();
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {
@@ -56,7 +80,31 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
-							resolve();
+							resolve({
+								callData: proxyTx.method.toHex(),
+								callHash: proxyTx.method.hash.toHex(),
+								created_at: new Date()
+							});
+
+							// store data to BE
+							// created_at should be set by BE for server time, amount_usd should be fetched by BE
+							addNewTransaction({
+								amount: new BN(0),
+								block_number: blockNumber,
+								callData: proxyTx.method.toHex(),
+								callHash: proxyTx.method.hash.toHex(),
+								from: senderAddress,
+								network,
+								to: recepientAddress
+							});
+
+							sendNotificationToAddresses({
+								addresses: otherSignatories,
+								link: `/transactions?tab=Queue#${proxyTx.method.hash.toHex()}`,
+								message: 'New transaction to sign',
+								network,
+								type: 'sent'
+							});
 						} else if (event.method === 'ExtrinsicFailed') {
 							console.log('Transaction failed');
 
@@ -94,6 +142,5 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 					status: NotificationStatus.ERROR
 				});
 			});
-		console.log(`Sending ${displayAmount} from ${senderAddress} to ${recepientAddress}`);
 	});
 }

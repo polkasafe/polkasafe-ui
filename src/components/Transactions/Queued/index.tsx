@@ -33,6 +33,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
 	const location = useLocation();
 	const [amountUSD, setAmountUSD] = useState<string>('');
+	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
@@ -64,7 +65,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 				const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
 					body: JSON.stringify({
 						limit: 10,
-						multisigAddress: activeMultisig,
+						multisigAddress: multisig?.address,
 						network,
 						page: 1
 					}),
@@ -111,7 +112,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
 							approvals={transaction.approvals}
-							threshold={multisigAddresses?.find((item) => item.address === activeMultisig)?.threshold || 0}
+							threshold={multisig?.threshold || 0}
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
