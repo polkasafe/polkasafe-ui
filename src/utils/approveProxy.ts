@@ -212,8 +212,12 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 					reject(error);
 				});
 		} else {
+			if(!callDataHex){
+				reject('Invalid Call Data');
+				return;
+			}
 			api.tx.multisig
-				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex || '', WEIGHT as any)
+				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex, WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');

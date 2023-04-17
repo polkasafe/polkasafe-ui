@@ -87,7 +87,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				setLoadingMessages
 			});
 			setSuccess(true);
-			setTimeout(() => setSuccess(false), 60000);
 			setLoading(false);
 		} catch (error) {
 			console.log(error);
