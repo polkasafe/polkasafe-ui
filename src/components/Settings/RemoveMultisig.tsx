@@ -21,13 +21,15 @@ const RemoveMultisigAddress = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
 
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+
 	const handleRemoveSafe = async () => {
 		try{
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if(!userAddress || !signature || !multisig?.address) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
@@ -35,7 +37,7 @@ const RemoveMultisigAddress = () => {
 
 			const removeSafeRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/deleteMultisig`, {
 				body: JSON.stringify({
-					multisigAddress: activeMultisig
+					multisigAddress: multisig.address
 				}),
 				headers: firebaseFunctionsHeader(network),
 				method: 'POST'
@@ -59,7 +61,7 @@ const RemoveMultisigAddress = () => {
 					setLoading(false);
 					const copy = [...multisigAddresses];
 					setUserDetailsContextState((prevState) => {
-						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig);
+						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig || item.proxy === activeMultisig);
 						if(newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted){
 							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
 						}

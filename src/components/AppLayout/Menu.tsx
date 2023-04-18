@@ -152,7 +152,7 @@ const Menu: FC<Props> = ({ className }) => {
 			<section className='overflow-auto [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).length : '0'}</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
 				</h2>
 				<div>
 					{multisigAddresses &&

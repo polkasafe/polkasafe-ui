@@ -109,7 +109,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 						copyMultisigAddresses[indexOfOld].disabled = true;
 						return {
 							...prevState,
-							activeMultisig: multisigData.address,
+							activeMultisig: multisigData.proxy || multisigData.address,
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 							multisigSettings: {
 								...prevState.multisigSettings,

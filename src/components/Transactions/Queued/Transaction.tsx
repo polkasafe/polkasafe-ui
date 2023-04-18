@@ -302,7 +302,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 						<p className='col-span-2'>
 							{dayjs(date).format('lll')}
 						</p>
-						<p className='col-span-2 flex items-center justify-end gap-x-4'>
+						<p className={`${isProxyApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
 							<span className='text-waiting'>
 								{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
 							</span>

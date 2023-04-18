@@ -77,7 +77,7 @@ const Home = ({ className }: { className?: string }) => {
 				address ?
 					<>
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
-						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted).length > 0 ?
+						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
 								{!hasProxy && !proxyInProcess &&
 									<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
