@@ -20,8 +20,6 @@ import updateTransactionNote from './updateTransactionNote';
 interface Args {
 	api: ApiPromise,
 	network: string,
-	newSignatories: string[],
-	newThreshold: number,
 	multisig: IMultisigAddress,
 	callDataHex?: string,
 	callHash: string,
@@ -33,7 +31,7 @@ interface Args {
 	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, newSignatories, newThreshold, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -76,18 +74,38 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !newSignatories || !newThreshold) {
+			if(!address || !signature || !newMultisigAddress) {
 				console.log('ERROR');
 				return;
 			}
 			else{
 				setLoadingMessages('Creating Your Proxy.');
+				const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
+					body: JSON.stringify({
+						multisigAddress: newMultisigAddress,
+						network
+					}),
+					headers: firebaseFunctionsHeader(network),
+					method: 'POST'
+				});
+
+				const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
+
+				if(multisigFetchError || !newMultisigData) {
+
+					queueNotification({
+						header: 'Error!',
+						message: 'No Multisig Found',
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						proxyAddress,
 						multisigName: multisig?.name,
-						signatories: newSignatories,
-						threshold: newThreshold
+						signatories: newMultisigData.signatories,
+						threshold: newMultisigData.threshold
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
