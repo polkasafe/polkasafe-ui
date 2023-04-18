@@ -24,7 +24,7 @@ const AddNewOwnerBtn = ({ className }: { className?: string }) => {
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Multisig</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Owners</h3>}
 				open={openAddOwnerModal}
 				className={`${className} w-auto md:min-w-[500px]`}
 			>

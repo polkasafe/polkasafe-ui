@@ -76,7 +76,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 		api.setSigner(signer);
 
 		setLoading(true);
-		setLoadingMessages('Please Sign To Add A Small Existential Deposit To Make Your Multisig Onchain.');
+		setLoadingMessages(`Please Sign To Add A Small (${chainProperties[network].existentialDeposit} ${chainProperties[network].tokenSymbol}) Existential Deposit To Make Your Multisig Onchain.`);
 		try {
 			await transferFunds({
 				amount: inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0],

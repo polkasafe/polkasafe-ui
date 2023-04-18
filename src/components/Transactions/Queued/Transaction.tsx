@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import  { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -46,6 +47,7 @@ interface ITransactionProps {
 
 const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
+	const navigate = useNavigate();
 
 	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
@@ -129,6 +131,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					callDataHex: callDataString,
 					callHash,
 					multisig,
+					navigate,
 					network,
 					note: note || '',
 					setLoadingMessages,

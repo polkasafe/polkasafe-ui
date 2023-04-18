@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Signer } from '@polkadot/api/types';
-import { Button, Form, Input, Spin } from 'antd';
+import { AutoComplete, Button, Form, Input, Spin } from 'antd';
 import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
@@ -20,16 +20,34 @@ import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
+import styled from 'styled-components';
 
 interface ISignatory{
 	name: string
 	address: string
 }
 
-const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
+const addRecipientHeading = () => {
+	const elm = document.getElementById('recipient_list');
+	if (elm) {
+		const parentElm = elm.parentElement;
+		if (parentElm) {
+			const isElmPresent = document.getElementById('recipient_heading');
+			if (!isElmPresent) {
+				const recipientHeading = document.createElement('p');
+				recipientHeading.textContent = 'Recent Addresses';
+				recipientHeading.id = 'recipient_heading';
+				recipientHeading.classList.add('recipient_heading');
+				parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
+			}
+		}
+	}
+};
+
+const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: string }) => {
 	const [newThreshold, setNewThreshold] = useState(2);
 	const { signersMap, accountsMap } = useGetAllAccounts();
-	const { multisigAddresses, activeMultisig, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const [loading, setLoading] = useState(false);
@@ -39,11 +57,11 @@ const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
 
 	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address: '', name: '' }]);
 
-	const onSignatoryChange = (event: any, i: number) => {
+	const onSignatoryChange = (value: any, i: number) => {
 		setSignatoriesArray((prevState) => {
 			const copyArray = [...prevState];
 			const copyObject = { ...copyArray[i] };
-			copyObject.address = event.target.value;
+			copyObject.address = value;
 			copyArray[i] = copyObject;
 			return copyArray;
 		});
@@ -180,7 +198,7 @@ const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
 	return (
 		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful'/> : <FailedTransactionLottie message='Failed!' />}>
 			<Form
-				className='my-0 w-[560px]'
+				className={`my-0 w-[560px] ${className}`}
 			>
 				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
 					<div className='flex flex-col text-white items-center justify-center'>
@@ -217,12 +235,15 @@ const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
 										<label
 											className="text-primary text-xs leading-[13px] font-normal"
 										>Address {i+1}</label>
-										<Input
+										<AutoComplete
+											onClick={addRecipientHeading}
+											options={addressBook.filter((item) => !signatoriesArray.some((e) => e.address === item.address) && !multisig?.signatories.includes(item.address)).map((item) => ({
+												label: item.name,
+												value: item.address
+											}))}
 											id={`Address ${i+1}`}
 											placeholder={`Address ${i+1}`}
-											className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-											value={signatory.address}
-											onChange={(e) => onSignatoryChange(e, i)}
+											onChange={(value) => onSignatoryChange(value, i)}
 										/>
 									</Form.Item>
 								</div>
@@ -282,11 +303,43 @@ const AddOwner = ({ onCancel }: { onCancel?: () => void }) => {
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<CancelBtn onClick={onCancel} />
-					<AddBtn onClick={changeMultisig} loading={loading} disabled={!signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Add' />
+					<AddBtn onClick={changeMultisig} loading={loading} disabled={!signatoriesArray.length || signatoriesArray.some((item) => item.address === '' || multisig?.signatories.includes(item.address))} title='Add' />
 				</div>
 			</Form>
 		</Spin>
 	);
 };
 
-export default AddOwner;
+export default styled(AddOwner)`
+	.ant-select input {
+		font-size: 14px !important;
+		font-style: normal !important;
+		line-height: 15px !important;
+		border: 0 !important;
+		outline: 0 !important;
+		background-color: #24272E !important;
+		border-radius: 8px !important;
+		color: white !important;
+		padding: 12px !important;
+		display: block !important;
+		height: auto !important;
+	}
+	.ant-select-selector {
+		border: none !important;
+		height: 40px !important; 
+		box-shadow: none !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+`;

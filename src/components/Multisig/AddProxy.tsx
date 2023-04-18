@@ -19,7 +19,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
-import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CheckOutlined, CopyIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -97,11 +97,14 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 				<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-2 text-text_secondary'>
 					<div className='flex justify-between items-center'>
 						<span>Txn Hash:</span>
-						<div className='flex items-center gap-x-1'>
+						<div className='flex items-center gap-x-2'>
 							<span className='text-white'>{shortenAddress(txnHash)}</span>
 							<button onClick={() => copyText(txnHash, false, network)}>
-								<CopyIcon className='mr-2 text-primary' />
+								<CopyIcon className='text-primary' />
 							</button>
+							<a href={`https://${network}.subscan.io/extrinsic/${txnHash}}`} target='_blank' rel="noreferrer" >
+								<ExternalLinkIcon  />
+							</a>
 						</div>
 					</div>
 					<div className='flex justify-between items-center'>
