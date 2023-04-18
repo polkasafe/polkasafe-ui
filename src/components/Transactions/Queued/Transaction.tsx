@@ -136,7 +136,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				});
 			}
 			else if(decodedCallData?.args?.call?.args?.delegate){
-				const newMultisig = multisigAddresses.find((item) => item.address === decodedCallData?.args?.call?.args?.delegate?.id);
 				await approveAddProxy({
 					api,
 					approvingAddress: address,
@@ -145,8 +144,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					multisig,
 					network,
 					newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
-					newSignatories: newMultisig?.signatories || [],
-					newThreshold: newMultisig?.threshold || 2,
 					note: note || '',
 					proxyAddress: multisig.proxy || '',
 					setLoadingMessages,
