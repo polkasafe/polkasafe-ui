@@ -34,7 +34,7 @@ const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Multisig</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Remove Signatory</h3>}
 				open={openRemoveSignatoryModal}
 				className={`${className} w-auto md:min-w-[500px]`}
 			>

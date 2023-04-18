@@ -6,6 +6,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import { encodeAddress } from '@polkadot/util-crypto';
+import { NavigateFunction } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -22,6 +23,7 @@ import updateTransactionNote from './updateTransactionNote';
 interface Args {
 	api: ApiPromise,
 	network: string,
+	navigate: NavigateFunction,
 	multisig: IMultisigAddress,
 	callDataHex?: string,
 	callHash: string,
@@ -31,7 +33,7 @@ interface Args {
 	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveProxy ({ api, navigate, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -126,6 +128,7 @@ export async function approveProxy ({ api, approvingAddress, callDataHex, callHa
 							}
 						};
 					});
+					navigate('/');
 				}
 
 			}

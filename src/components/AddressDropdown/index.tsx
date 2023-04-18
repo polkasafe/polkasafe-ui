@@ -9,10 +9,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import Balance from 'src/ui-components/Balance';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import logout from 'src/utils/logout';
+import shortenAddress from 'src/utils/shortenAddress';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IAddress {
@@ -102,9 +104,12 @@ const AddressDropdown = () => {
 						<p className='text-white font-normal text-sm'>
 							{ addressBook?.find(item => item.address === address)?.name }
 						</p>
-						<p className='bg-bg-secondary font-normal text-sm px-2 py-[10px] rounded-lg flex items-center gap-x-3'>
-							<span className='text-text_secondary'>{getEncodedAddress(address, network)}</span>
-							<button onClick={() => copyText(address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+						<p className='bg-bg-secondary w-[400px] font-normal text-sm px-2 py-[10px] rounded-lg flex items-center justify-center'>
+							<div className='flex items-center gap-x-3'>
+								<span className='text-text_secondary'>{shortenAddress(getEncodedAddress(address, network) || address, 10)}</span>
+								<button onClick={() => copyText(getEncodedAddress(address, network) || address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+							</div>
+							<Balance address={address} />
 						</p>
 					</div>
 					<div className='w-full'>
