@@ -5,6 +5,7 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
+import dayjs from 'dayjs';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -79,7 +80,6 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 				return;
 			}
 			else{
-				setLoadingMessages('Creating Your Proxy.');
 				const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
 					body: JSON.stringify({
 						multisigAddress: newMultisigAddress,
@@ -90,6 +90,10 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 				});
 
 				const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
+				// if approval is for removing old multisig from proxy
+				if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
+					return;
+				}
 
 				if(multisigFetchError || !newMultisigData) {
 
@@ -100,6 +104,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 					});
 					return;
 				}
+				setLoadingMessages('Creating Your Proxy.');
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						proxyAddress,
