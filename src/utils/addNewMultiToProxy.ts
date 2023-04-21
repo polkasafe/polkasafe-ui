@@ -28,9 +28,10 @@ interface Props {
     newSignatories: string[];
     newThreshold: number;
     proxyAddress: string;
+	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function addNewMultiToProxy({ proxyAddress, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
+export async function addNewMultiToProxy({ proxyAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -98,6 +99,8 @@ export async function addNewMultiToProxy({ proxyAddress, api, network, recepient
 								note: 'Adding New Multisig to Proxy',
 								to: recepientAddress
 							});
+
+							setTxnHash?.(proxyTx.method.hash.toHex());
 
 							sendNotificationToAddresses({
 								addresses: otherSignatories,

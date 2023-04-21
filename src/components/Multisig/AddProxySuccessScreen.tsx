@@ -18,13 +18,15 @@ interface IAddProxySuccessScreen{
     threshold: number
     signatories: string[]
     onDone?: () => void
+	successMessage?: string
+	waitMessage?: string
 }
 
-const AddProxySuccessScreen = ({ txnHash, createdBy, threshold, signatories, onDone }: IAddProxySuccessScreen) => {
+const AddProxySuccessScreen = ({ txnHash, createdBy, threshold, signatories, onDone, successMessage='Successful!', waitMessage }: IAddProxySuccessScreen) => {
 	const { network } = useGlobalApiContext();
 	return (
 		<div className='flex flex-col items-center'>
-			<SuccessTransactionLottie message='Proxy creation in progress!' waitMessage='All threshold signatories need to sign the Transaction to Create a Proxy.'/>
+			<SuccessTransactionLottie message={successMessage} waitMessage={waitMessage}/>
 			<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-2 text-text_secondary'>
 				{txnHash &&
 					<div className='flex justify-between items-center'>
