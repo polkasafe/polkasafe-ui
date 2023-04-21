@@ -96,15 +96,17 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 			<div className='flex flex-col items-center'>
 				<FailedTransactionLottie message='Proxy creation failed!'/>
 				<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-4 text-text_secondary'>
-					<div className='flex justify-between items-center'>
-						<span>Txn Hash:</span>
-						<div className='flex items-center gap-x-1'>
-							<span className='text-white'>{shortenAddress(txnHash)}</span>
-							<button onClick={() => copyText(txnHash, false, network)}>
-								<CopyIcon className='mr-2 text-primary' />
-							</button>
+					{txnHash &&
+						<div className='flex justify-between items-center'>
+							<span>Txn Hash:</span>
+							<div className='flex items-center gap-x-1'>
+								<span className='text-white'>{shortenAddress(txnHash)}</span>
+								<button onClick={() => copyText(txnHash, false, network)}>
+									<CopyIcon className='mr-2 text-primary' />
+								</button>
+							</div>
 						</div>
-					</div>
+					}
 					<div className='flex justify-between items-center'>
 						<span>Created:</span>
 						<span className='text-white'>{dayjs().format('llll')}</span>

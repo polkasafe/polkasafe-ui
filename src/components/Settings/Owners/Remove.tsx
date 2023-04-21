@@ -105,7 +105,7 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== address) || [];
 
 		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
-		if(multisigAddresses.some((item) => item.address === newMultisigAddress)){
+		if(multisigAddresses.some((item) => item.address === newMultisigAddress.multisigAddress)){
 			queueNotification({
 				header: 'Multisig Exists',
 				message: 'The new edited multisig already exists in your multisigs.',

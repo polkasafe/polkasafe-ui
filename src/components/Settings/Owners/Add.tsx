@@ -161,7 +161,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 
 		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
-		if(multisigAddresses.some((item) => item.address === newMultisigAddress)){
+		if(multisigAddresses.some((item) => item.address === newMultisigAddress.multisigAddress)){
 			queueNotification({
 				header: 'Multisig Exists',
 				message: 'The new edited multisig already exists in your multisigs.',

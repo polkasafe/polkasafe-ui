@@ -115,7 +115,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			console.log(error);
 			setFailure(true);
 			setLoading(false);
-			setTimeout(() => setFailure(false), 5000);
+			createProxy(createMultisigData, false);
 		}
 	};
 
@@ -247,7 +247,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						{ required: "Please add the '${name}'" }
 					}
 				>
-					<div className={`flex flex-col relative ${!homepage && 'max-h-[68vh] overflow-y-auto pr-3'}`}>
+					<div className={`flex flex-col relative ${!homepage && 'max-h-[68vh] overflow-y-auto px-3 py-2'}`}>
 						<div className={classNames(
 							`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 							{
