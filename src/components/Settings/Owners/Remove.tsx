@@ -6,9 +6,11 @@ import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
 import { Form, Spin } from 'antd';
 import React, { useState } from 'react';
+import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
+import RemoveMultisigSVG from 'src/assets/remove-multisig.svg';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import Loader from 'src/components/UserFlow/Loader';
@@ -16,9 +18,12 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IMultisigAddress } from 'src/types';
+import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import queueNotification from 'src/ui-components/QueueNotification';
+import _createMultisig from 'src/utils/_createMultisig';
 import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
@@ -99,6 +104,16 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== address) || [];
 
+		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
+		if(multisigAddresses.some((item) => item.address === newMultisigAddress)){
+			queueNotification({
+				header: 'Multisig Exists',
+				message: 'The new edited multisig already exists in your multisigs.',
+				status: NotificationStatus.WARNING
+			});
+			return;
+		}
+
 		setLoading(true);
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
@@ -148,12 +163,12 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 			>
 				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>1</div>
+						<img src={AddMultisigSVG} />
 						<p className='text-text_secondary'>Add New Multisig</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
+						<img src={RemoveMultisigSVG} />
 						<p className='text-text_secondary'>Remove Old Multisig</p>
 					</div>
 				</div>

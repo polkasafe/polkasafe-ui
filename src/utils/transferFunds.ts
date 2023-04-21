@@ -16,9 +16,10 @@ interface Props {
 	api: ApiPromise;
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
+export async function transferFunds({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -48,6 +49,7 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+					setTxnHash?.(`${txHash}`);
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {

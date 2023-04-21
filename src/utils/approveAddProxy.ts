@@ -15,7 +15,10 @@ import queueNotification from 'src/ui-components/QueueNotification';
 
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
+import getSubstrateAddress from './getSubstrateAddress';
+import { inputToBn } from './inputToBn';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
+import { transferFunds } from './transferFunds';
 import updateTransactionNote from './updateTransactionNote';
 
 interface Args {
@@ -69,6 +72,24 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 	console.log(`Time point is: ${multisigInfo?.when}`);
 
 	const numApprovals = multisigInfo.approvals.length;
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
+
+		setLoadingMessages(`Please Sign To Add A Small (${chainProperties[network].existentialDeposit} ${chainProperties[network].tokenSymbol}) Existential Deposit To Make Your Multisig Onchain.`);
+		try {
+			await transferFunds({
+				amount: inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0],
+				api,
+				network,
+				recepientAddress: multisigData.address,
+				senderAddress: getSubstrateAddress(approvingAddress) || approvingAddress,
+				setLoadingMessages
+			});
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
 	const handleMultisigCreate = async () => {
 		try{
@@ -132,8 +153,8 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 						copyMultisigAddresses[indexOfOld].disabled = true;
 						return {
 							...prevState,
-							activeMultisig: multisigData.proxy || multisigData.address,
-							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+							activeMultisig: multisigData.address,
+							multisigAddresses: copyMultisigAddresses,
 							multisigSettings: {
 								...prevState.multisigSettings,
 								[multisigData.address]: {

@@ -88,6 +88,7 @@ export async function removeOldMultiFromProxy({ multisigAddress, recepientAddres
 								callHash: proxyTx.method.hash.toHex(),
 								from: senderAddress,
 								network,
+								note: 'Removing Old Multisig from Proxy',
 								to: recepientAddress
 							});
 

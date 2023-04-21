@@ -4,7 +4,7 @@
 
 import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Button, Modal, Tooltip } from 'antd';
+import { Button, Modal,Tooltip } from 'antd';
 import React, { FC, useCallback, useEffect,useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -22,7 +22,6 @@ import { CopyIcon, OutlineCloseIcon, QRIcon, WalletIcon } from 'src/ui-component
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -30,40 +29,25 @@ import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
-const DashboardCard = ({ className, setNewTxn, hasProxy }: { className?: string, hasProxy: boolean, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
-	const { api, apiReady } = useGlobalApiContext();
+interface IDashboardCard{
+	className?: string,
+	hasProxy: boolean,
+	setNewTxn: React.Dispatch<React.SetStateAction<boolean>>,
+	transactionLoading: boolean,
+	openTransactionModal: boolean,
+	setOpenTransactionModal: React.Dispatch<React.SetStateAction<boolean>>,
+	isOnchain: boolean
+}
+
+const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, openTransactionModal, setOpenTransactionModal, isOnchain }: IDashboardCard) => {
 	const { activeMultisig, multisigAddresses, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
-
-	const [transactionLoading, setTransactionLoading] = useState(false);
-	const [isOnchain, setIsOnchain] = useState(false);
-	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
 
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-
-	useEffect(() => {
-		const handleNewTransaction = async () => {
-			if(!api || !apiReady || !activeMultisig) return;
-
-			setTransactionLoading(true);
-			// check if wallet has existential deposit
-			const hasExistentialDepositRes = await hasExistentialDeposit(api, activeMultisig, network);
-
-			if(!hasExistentialDepositRes) {
-				setIsOnchain(false);
-			} else {
-				setIsOnchain(true);
-			}
-
-			setTransactionLoading(false);
-		};
-		handleNewTransaction();
-
-	}, [activeMultisig, api, apiReady, network]);
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -111,7 +95,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy }: { className?: string,
 					footer={false}
 					closeIcon={
 						<button
-							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
 							onClick={() => {
 								setOpenTransactionModal(false);
 								setNewTxn(prev => !prev);

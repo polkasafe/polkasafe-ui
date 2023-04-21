@@ -11,7 +11,6 @@ import dayjs from 'dayjs';
 import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
-import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -19,7 +18,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
-import { CheckOutlined, CopyIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -29,6 +28,7 @@ import { transferAndProxyBatchAll } from 'src/utils/transferAndProxyBatchAll';
 import styled from 'styled-components';
 
 import Loader from '../UserFlow/Loader';
+import AddProxySuccessScreen from './AddProxySuccessScreen';
 
 interface IMultisigProps {
 	className?: string
@@ -36,9 +36,10 @@ interface IMultisigProps {
 	homepage?: boolean
     signatories?: string[]
     threshold?: number
+	setProxyInProcess?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, homepage }) => {
+const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, homepage, setProxyInProcess }) => {
 	const { address: userAddress, multisigAddresses, activeMultisig, addressBook } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 
@@ -90,40 +91,6 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 		}
 	};
 
-	const CreateProxySuccessScreen: React.FC = () => {
-		return (
-			<div className='flex flex-col items-center'>
-				<SuccessTransactionLottie message='Proxy creation in progress!'/>
-				<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-2 text-text_secondary'>
-					<div className='flex justify-between items-center'>
-						<span>Txn Hash:</span>
-						<div className='flex items-center gap-x-2'>
-							<span className='text-white'>{shortenAddress(txnHash)}</span>
-							<button onClick={() => copyText(txnHash, false, network)}>
-								<CopyIcon className='text-primary' />
-							</button>
-							<a href={`https://${network}.subscan.io/extrinsic/${txnHash}}`} target='_blank' rel="noreferrer" >
-								<ExternalLinkIcon  />
-							</a>
-						</div>
-					</div>
-					<div className='flex justify-between items-center'>
-						<span>Created:</span>
-						<span className='text-white'>{dayjs().format('llll')}</span>
-					</div>
-					<div className='flex justify-between items-center'>
-						<span>Created By:</span>
-						<span><AddressComponent address={userAddress} /></span>
-					</div>
-					<div className='flex justify-between items-center'>
-						<span>Pending Approvals: <span className='text-white'>1/{multisig?.threshold}</span></span>
-						<span className='flex flex-col gap-y-2 overflow-y-auto max-h-[115px] [&::-webkit-scrollbar]:hidden'>{multisig?.signatories.map((item, i) => (<AddressComponent key={i} address={item} />))}</span>
-					</div>
-				</div>
-			</div>
-		);
-	};
-
 	const CreateProxyFailedScreen: React.FC = () => {
 		return (
 			<div className='flex flex-col items-center'>
@@ -153,7 +120,16 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 
 	return (
 		<>
-			{success ? <CreateProxySuccessScreen/> :
+			{success ? <AddProxySuccessScreen
+				txnHash={txnHash}
+				createdBy={userAddress}
+				threshold={multisig?.threshold || 2}
+				signatories={multisig?.signatories || []}
+				onDone={() => {
+					setProxyInProcess?.(true);
+					onCancel?.();
+				}}
+			/> :
 				failure ? <CreateProxyFailedScreen/> :
 					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						{!homepage &&
