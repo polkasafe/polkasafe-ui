@@ -5,7 +5,7 @@ import { Button } from 'antd';
 import React from 'react';
 import { DeleteIcon } from 'src/ui-components/CustomIcons';
 
-const RemoveBtn = ({ loading, onClick }: { loading?: boolean, onClick?: () => void }) => {
+const RemoveBtn = ({ loading, title, onClick }: { loading?: boolean, onClick?: () => void, title?: string }) => {
 	return (
 		<Button
 			onClick={onClick}
@@ -19,7 +19,7 @@ const RemoveBtn = ({ loading, onClick }: { loading?: boolean, onClick?: () => vo
 				<DeleteIcon className='text-sm' />
 			</span>
 			<span>
-                Remove
+				{title ? title : 'Remove'}
 			</span>
 		</Button>
 	);

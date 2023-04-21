@@ -101,6 +101,7 @@ export async function transferAndProxyBatchAll({ api, setTxnHash, network, recep
 								callHash: proxyTx.method.hash.toHex(),
 								from: senderAddress,
 								network,
+								note: 'Creating a New Proxy.',
 								to: recepientAddress
 							});
 

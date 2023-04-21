@@ -2,15 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input, Timeline } from 'antd';
+import { Button, Collapse, Divider, Input, Modal, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
+import CancelBtn from 'src/components/Multisig/CancelBtn';
+import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
@@ -46,6 +48,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
+	const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
 	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
@@ -61,10 +64,41 @@ const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD
 		getDepositor();
 	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
 
+	const CancelTransaction: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenCancelModal(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Cancel Transaction</h3>}
+				open={openCancelModal}
+				className={' w-auto md:min-w-[500px]'}
+			>
+				<div className='flex flex-col h-full'>
+					<div className='text-white'>Are you sure you want to cancel the Transaction?</div>
+					<div className='flex items-center justify-between mt-[40px]'>
+						<CancelBtn title='No' onClick={() => setOpenCancelModal(false)}/>
+						<RemoveBtn title='Yes, Cancel' loading={loading} onClick={() => {
+							handleCancelTransaction();
+							setOpenCancelModal(false);
+						}} />
+					</div>
+				</div>
+			</Modal>
+		);
+	};
+
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
 		>
+			<CancelTransaction/>
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
@@ -415,7 +449,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD
 								Approve Transaction
 						</Button>}
 						{depositor === address &&
-							<Button loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+							<Button loading={loading} onClick={() => setOpenCancelModal(true)} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 							</Button>
 						}

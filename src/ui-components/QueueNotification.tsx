@@ -4,19 +4,27 @@
 
 /* eslint-disable sort-keys */
 import { notification } from 'antd';
+import type { NotificationPlacement } from 'antd/es/notification/interface';
+import { ReactNode } from 'react';
 import { NotificationStatus } from 'src/types';
 
 interface Props {
-	header: string
-	message?: string
+	header: ReactNode
+	message?: ReactNode
 	durationInSeconds?: number
 	status: NotificationStatus
+	placement?: NotificationPlacement
+	className?: string
+	closeIcon?: ReactNode
 }
-const queueNotification = ({ header, message, durationInSeconds = 4.5, status }: Props) => {
+const queueNotification = ({ header, closeIcon, className, message, durationInSeconds = 4.5, status, placement }: Props) => {
 	const args = {
+		className,
+		closeIcon,
 		message: header,
 		description: message,
-		duration: durationInSeconds
+		duration: durationInSeconds,
+		placement: placement ? placement : 'topRight'
 	};
 
 	// queues notifcation

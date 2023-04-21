@@ -116,7 +116,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							callData={transaction.callData}
 							callHash={transaction.callHash}
 							note={transaction.note || ''}
-							setRefetch={setRefetch}
+							refetch={() => setRefetch(prev => !prev)}
 							amountUSD={amountUSD}
 							numberOfTransactions={queuedTransactions.length || 0}
 						/>

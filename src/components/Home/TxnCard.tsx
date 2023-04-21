@@ -152,7 +152,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								}
 
 								const isProxyApproval = decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id);
-								setProxyInProcess(!!isProxyApproval);
+								setProxyInProcess(decodedCallData && decodedCallData?.args?.proxy_type);
 
 								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
 								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;

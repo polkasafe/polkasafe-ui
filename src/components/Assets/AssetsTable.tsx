@@ -4,7 +4,6 @@
 import styled from '@xstyled/styled-components';
 import { Divider, Modal } from 'antd';
 import React, { FC, useState } from 'react';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { IAsset } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -18,7 +17,6 @@ interface IAssetsProps {
 }
 
 const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
-	const { network } = useGlobalApiContext();
 
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
@@ -78,7 +76,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 									<p title={balance_usd} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
 										{balance_usd ? balance_usd : '-'}
 									</p>
-									<PrimaryButton disabled={name.toLowerCase() !== network} onClick={() => setOpenTransactionModal(true)} className='bg-primary text-white w-fit'>
+									<PrimaryButton onClick={() => setOpenTransactionModal(true)} className='bg-primary text-white w-fit'>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</article>

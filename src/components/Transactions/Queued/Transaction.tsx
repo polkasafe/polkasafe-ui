@@ -40,12 +40,12 @@ interface ITransactionProps {
 	callHash: string;
 	note: string;
 	amountUSD: string;
-	setRefetch?: React.Dispatch<React.SetStateAction<boolean>>
+	refetch?: () => void;
 	setQueuedTransactions?: React.Dispatch<React.SetStateAction<IQueueItem[]>>
 	numberOfTransactions: number
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
@@ -174,10 +174,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 				setOpenLoadingModal(false);
 			}, 5000);
 			if(!openLoadingModal){
-				document.getElementById(callHash)?.remove();
-				if(numberOfTransactions < 2 && setQueuedTransactions){
-					setQueuedTransactions([]);
-				}
+				refetch?.();
 			}
 		} catch (error) {
 			console.log(error);

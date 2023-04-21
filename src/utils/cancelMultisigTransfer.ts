@@ -61,7 +61,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 						if (event.method === 'ExtrinsicSuccess') {
 							queueNotification({
 								header: 'Success!',
-								message: 'Transaction Successful.',
+								message: 'Transaction Cancelled.',
 								status: NotificationStatus.SUCCESS
 							});
 
@@ -80,7 +80,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 							if(!errorModule) {
 								queueNotification({
 									header: 'Error!',
-									message: 'Transaction Failed',
+									message: 'Failed to Cancel Transaction',
 									status: NotificationStatus.ERROR
 								});
 								reject('Transaction Failed');

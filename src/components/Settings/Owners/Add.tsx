@@ -1,12 +1,15 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Button, Form, Input, Spin } from 'antd';
 import React, { useState } from 'react';
+import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
+import RemoveMultisigSVG from 'src/assets/remove-multisig.svg';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import Loader from 'src/components/UserFlow/Loader';
@@ -14,8 +17,12 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IMultisigAddress } from 'src/types';
+import { IMultisigAddress, NotificationStatus } from 'src/types';
+import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import queueNotification from 'src/ui-components/QueueNotification';
+import _createMultisig from 'src/utils/_createMultisig';
 import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
@@ -153,6 +160,16 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 
+		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
+		if(multisigAddresses.some((item) => item.address === newMultisigAddress)){
+			queueNotification({
+				header: 'Multisig Exists',
+				message: 'The new edited multisig already exists in your multisigs.',
+				status: NotificationStatus.WARNING
+			});
+			return;
+		}
+
 		setLoading(true);
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
@@ -202,18 +219,24 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 			>
 				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>1</div>
+						<img src={AddMultisigSVG} />
 						<p className='text-text_secondary'>Add New Multisig</p>
 					</div>
 					<Loader className='bg-primary h-[2px] w-[80px]'/>
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
+						<img src={RemoveMultisigSVG} />
 						<p className='text-text_secondary'>Remove Old Multisig</p>
 					</div>
 				</div>
-				<>
+				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
+					<span>
+						<WarningCircleIcon className='text-base' />
+					</span>
+					<p>Adding Signatories would require you to sign two transactions and approval from other signatories.</p>
+				</section>
+				<div className="max-h-[40vh] overflow-y-auto">
 					{signatoriesArray.map((signatory, i) => (
-						<div className="flex flex-col gap-y-2" key={i}>
+						<div className="flex flex-col gap-y-2 max-h-[20vh] overflow-y-auto" key={i}>
 							<div className="flex items-center gap-x-4">
 								<div className='flex-1 flex items-start gap-x-4'>
 									<Form.Item>
@@ -251,12 +274,10 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 							</div>
 						</div>
 					))}
-					<div className='w-full flex justify-end'>
-						<Button
-							className='border-none text-white bg-primary'
-							onClick={() => onAddSignatory()}>+</Button>
-					</div>
-				</>
+					<Button onClick={() => onAddSignatory()} className='flex border-none outline-none items-center justify-center bg-primary text-white text-sm'>
+						<PlusCircleOutlined /> Add Signatory
+					</Button>
+				</div>
 				<div className="flex flex-col gap-y-3 mt-5">
 					<label
 						className="text-primary text-xs leading-[13px] font-normal"
