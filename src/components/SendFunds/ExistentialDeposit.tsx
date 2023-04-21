@@ -198,7 +198,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 									</div>
 								</section>
 
-								<BalanceInput className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
+								<BalanceInput defaultValue={String(chainProperties[network]?.existentialDeposit)} className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
 
 								<section className='mt-6'>
 									<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>

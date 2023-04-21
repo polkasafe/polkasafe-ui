@@ -10,14 +10,16 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 
 const Settings = () => {
 	const userAddress = localStorage.getItem('address');
-	const { isProxy } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	return (
 		<div>
 			{/* TODO: Add coming soon */}
 			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
-				{!isProxy && <div className='absolute w-full h-full bg-bg-main opacity-80 top-0 left-0 z-30 flex justify-center items-center text-primary font-bold text-[28px]'>Please Add Proxy</div>}
+				{!multisig?.proxy && <div className='absolute w-full h-full bg-bg-main opacity-80 top-0 left-0 z-30 flex justify-center items-center text-primary font-bold text-[28px]'>Please Add Proxy</div>}
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
 					<div className='flex-1'></div>
 					<AddNewOwnerBtn />
