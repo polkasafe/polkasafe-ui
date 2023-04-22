@@ -127,6 +127,8 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 				createdBy={userAddress}
 				threshold={multisig?.threshold || 2}
 				signatories={multisig?.signatories || []}
+				successMessage='Proxy creation in progress!'
+				waitMessage='All threshold signatories need to sign the Transaction to Create a Proxy.'
 				onDone={() => {
 					setProxyInProcess?.(true);
 					onCancel?.();

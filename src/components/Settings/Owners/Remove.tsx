@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
-import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import RemoveMultisigSVG from 'src/assets/remove-multisig.svg';
+import AddProxySuccessScreen from 'src/components/Multisig/AddProxySuccessScreen';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import Loader from 'src/components/UserFlow/Loader';
@@ -38,6 +38,7 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { signersMap, accountsMap } = useGetAllAccounts();
+	const [txnHash, setTxnHash] = useState<string>('');
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
@@ -127,7 +128,8 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 				proxyAddress: multisig?.proxy || '',
 				recepientAddress: activeMultisig,
 				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages
+				setLoadingMessages,
+				setTxnHash
 			});
 			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
 			await removeOldMultiFromProxy({
@@ -143,10 +145,6 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 			});
 			setSuccess(true);
 			setLoading(false);
-			setTimeout(() => {
-				setSuccess(false);
-				onCancel?.();
-			}, 7000);
 			await handleMultisigCreate(newSignatories, newThreshold);
 		} catch (error) {
 			console.log(error);
@@ -157,75 +155,91 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 	};
 
 	return (
-		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful'/> : <FailedTransactionLottie message='Failed!' />}>
-			<Form
-				className='my-0'
-			>
-				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
-					<div className='flex flex-col text-white items-center justify-center'>
-						<img src={AddMultisigSVG} />
-						<p className='text-text_secondary'>Add New Multisig</p>
-					</div>
-					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col text-white items-center justify-center'>
-						<img src={RemoveMultisigSVG} />
-						<p className='text-text_secondary'>Remove Old Multisig</p>
-					</div>
-				</div>
-				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
-					<span>
-						<WarningCircleIcon className='text-base' />
-					</span>
-					<p>Removing a signatory would require you to sign two transactions and approval from other signatories.</p>
-				</section>
-				<div className='text-primary text-sm mb-2'>Remove Signatory*</div>
-				<div className='flex items-center p-3 mb-4 text-text_secondary border-dashed border-2 border-bg-secondary rounded-lg gap-x-5'>
-					<Identicon size={20} theme='polkadot' value={address} />
-					{address}
-				</div>
-				<div className='text-primary text-sm mb-2'>New Threshold</div>
-				<div
-					className='flex items-center gap-x-3'
-				>
-					<p
-						className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
-					>
-						<button
-							onClick={() => {
-								if (newThreshold !== 2) {
-									setNewThreshold(prev => prev - 1);
-								}
-							}}
-							className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+		<>
+			{
+				success ? <AddProxySuccessScreen
+					createdBy={address}
+					signatories={multisig?.signatories || []}
+					threshold={multisig?.threshold || 2}
+					txnHash={txnHash}
+					onDone={() => onCancel?.()}
+					successMessage='Multisig Edit in Progress!'
+					waitMessage='All threshold signatories need to sign the Transaction to Edit the Multisig.'
+				/>
+					:
+					failure ? <FailedTransactionLottie message='Failed!'/>
+						:
+						<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
+							<Form
+								className='my-0'
+							>
+								<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
+									<div className='flex flex-col text-white items-center justify-center'>
+										<img src={AddMultisigSVG} />
+										<p className='text-text_secondary'>Add New Multisig</p>
+									</div>
+									<Loader className='bg-primary h-[2px] w-[80px]'/>
+									<div className='flex flex-col text-white items-center justify-center'>
+										<img src={RemoveMultisigSVG} />
+										<p className='text-text_secondary'>Remove Old Multisig</p>
+									</div>
+								</div>
+								<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
+									<span>
+										<WarningCircleIcon className='text-base' />
+									</span>
+									<p>Removing a signatory would require you to sign two transactions and approval from other signatories.</p>
+								</section>
+								<div className='text-primary text-sm mb-2'>Remove Signatory*</div>
+								<div className='flex items-center p-3 mb-4 text-text_secondary border-dashed border-2 border-bg-secondary rounded-lg gap-x-5'>
+									<Identicon size={20} theme='polkadot' value={address} />
+									{address}
+								</div>
+								<div className='text-primary text-sm mb-2'>New Threshold</div>
+								<div
+									className='flex items-center gap-x-3'
+								>
+									<p
+										className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
+									>
+										<button
+											onClick={() => {
+												if (newThreshold !== 2) {
+													setNewThreshold(prev => prev - 1);
+												}
+											}}
+											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
 									-
-						</button>
-						<span
-							className='text-white text-sm'
-						>
-							{newThreshold}
-						</span>
-						<button
-							onClick={() => {
-								if (newThreshold < (oldSignatoriesLength - 1)) {
-									setNewThreshold(prev => prev + 1);
-								}
-							}}
-							className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+										</button>
+										<span
+											className='text-white text-sm'
+										>
+											{newThreshold}
+										</span>
+										<button
+											onClick={() => {
+												if (newThreshold < (oldSignatoriesLength - 1)) {
+													setNewThreshold(prev => prev + 1);
+												}
+											}}
+											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
 									+
-						</button>
-					</p>
-					<p
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
+										</button>
+									</p>
+									<p
+										className='text-text_secondary font-normal text-sm leading-[15px]'
+									>
 								out of <span className='text-white font-medium'>{oldSignatoriesLength - 1}</span> owners
-					</p>
-				</div>
-				<div className='flex items-center justify-between gap-x-4 mt-[30px]'>
-					<CancelBtn onClick={onCancel} />
-					<RemoveBtn loading={loading} onClick={changeMultisig} />
-				</div>
-			</Form>
-		</Spin>
+									</p>
+								</div>
+								<div className='flex items-center justify-between gap-x-4 mt-[30px]'>
+									<CancelBtn onClick={onCancel} />
+									<RemoveBtn loading={loading} onClick={changeMultisig} />
+								</div>
+							</Form>
+						</Spin>
+			}
+		</>
 	);
 };
 

@@ -8,8 +8,8 @@ import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
-import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import RemoveMultisigSVG from 'src/assets/remove-multisig.svg';
+import AddProxySuccessScreen from 'src/components/Multisig/AddProxySuccessScreen';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import Loader from 'src/components/UserFlow/Loader';
@@ -61,6 +61,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	const [success, setSuccess] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const [txnHash, setTxnHash] = useState<string>('');
 
 	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address: '', name: '' }]);
 
@@ -183,7 +184,8 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 				proxyAddress: multisig?.proxy || '',
 				recepientAddress: activeMultisig,
 				senderAddress: getSubstrateAddress(address) || address,
-				setLoadingMessages
+				setLoadingMessages,
+				setTxnHash
 			});
 			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
 			await removeOldMultiFromProxy({
@@ -199,10 +201,6 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 			});
 			setSuccess(true);
 			setLoading(false);
-			setTimeout(() => {
-				setSuccess(false);
-				onCancel?.();
-			}, 7000);
 			await handleMultisigCreate(newSignatories, newThreshold);
 		} catch (error) {
 			console.log(error);
@@ -213,121 +211,135 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	};
 
 	return (
-		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful'/> : <FailedTransactionLottie message='Failed!' />}>
-			<Form
-				className={`my-0 w-[560px] ${className}`}
-			>
-				<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
-					<div className='flex flex-col text-white items-center justify-center'>
-						<img src={AddMultisigSVG} />
-						<p className='text-text_secondary'>Add New Multisig</p>
-					</div>
-					<Loader className='bg-primary h-[2px] w-[80px]'/>
-					<div className='flex flex-col text-white items-center justify-center'>
-						<img src={RemoveMultisigSVG} />
-						<p className='text-text_secondary'>Remove Old Multisig</p>
-					</div>
-				</div>
-				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
-					<span>
-						<WarningCircleIcon className='text-base' />
-					</span>
-					<p>Adding Signatories would require you to sign two transactions and approval from other signatories.</p>
-				</section>
-				<div className="max-h-[40vh] overflow-y-auto">
-					{signatoriesArray.map((signatory, i) => (
-						<div className="flex flex-col gap-y-2 max-h-[20vh] overflow-y-auto" key={i}>
-							<div className="flex items-center gap-x-4">
-								<div className='flex-1 flex items-start gap-x-4'>
-									<Form.Item>
-										<label
-											className="text-primary text-xs leading-[13px] font-normal"
-										>Name {i+1}</label>
-										<Input
-											placeholder={`Name ${i+1}`}
-											className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-											value={signatory.name}
-											onChange={(e) => onNameChange(e, i)}
-										/>
-									</Form.Item>
-									<Form.Item
-										className='w-full'
-										name={`Address ${i+1}`}
-										rules={[{ message: 'This is Required', required: true }]}
-									>
-										<label
-											className="text-primary text-xs leading-[13px] font-normal"
-										>Address {i+1}</label>
-										<AutoComplete
-											onClick={addRecipientHeading}
-											options={addressBook.filter((item) => !signatoriesArray.some((e) => e.address === item.address) && !multisig?.signatories.includes(item.address)).map((item) => ({
-												label: item.name,
-												value: item.address
-											}))}
-											id={`Address ${i+1}`}
-											placeholder={`Address ${i+1}`}
-											onChange={(value) => onSignatoryChange(value, i)}
-										/>
-									</Form.Item>
+		<>
+			{success ? <AddProxySuccessScreen
+				createdBy={address}
+				signatories={multisig?.signatories || []}
+				threshold={multisig?.threshold || 2}
+				txnHash={txnHash}
+				onDone={() => onCancel?.()}
+				successMessage='Multisig Edit in Progress!'
+				waitMessage='All threshold signatories need to sign the Transaction to Edit the Multisig.'
+			/>
+				:
+				failure ? <FailedTransactionLottie message='Failed!'/>
+					:
+					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
+						<Form
+							className={`my-0 w-[560px] ${className}`}
+						>
+							<div className="flex justify-center gap-x-4 items-center mb-6 w-full">
+								<div className='flex flex-col text-white items-center justify-center'>
+									<img src={AddMultisigSVG} />
+									<p className='text-text_secondary'>Add New Multisig</p>
 								</div>
-								{i !== 0 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}
+								<Loader className='bg-primary h-[2px] w-[80px]'/>
+								<div className='flex flex-col text-white items-center justify-center'>
+									<img src={RemoveMultisigSVG} />
+									<p className='text-text_secondary'>Remove Old Multisig</p>
+								</div>
 							</div>
-						</div>
-					))}
-					<Button onClick={() => onAddSignatory()} className='flex border-none outline-none items-center justify-center bg-primary text-white text-sm'>
-						<PlusCircleOutlined /> Add Signatory
-					</Button>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="address"
-					>
-						Threshold
-					</label>
-					<div
-						className='flex items-center gap-x-3'
-					>
-						<p
-							className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
-						>
-							<button
-								onClick={() => {
-									if (newThreshold !== 2) {
-										setNewThreshold(prev => prev - 1);
-									}
-								}}
-								className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-								-
-							</button>
-							<span
-								className='text-white text-sm'
-							>
-								{newThreshold}
-							</span>
-							<button
-								onClick={() => {
-									if (newThreshold < (multisig?.signatories.length || 0) + signatoriesArray.length) {
-										setNewThreshold(prev => prev + 1);
-									}
-								}}
-								className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-								+
-							</button>
-						</p>
-						<p
-							className='text-text_secondary font-normal text-sm leading-[15px]'
-						>
+							<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
+								<span>
+									<WarningCircleIcon className='text-base' />
+								</span>
+								<p>Adding Signatories would require you to sign two transactions and approval from other signatories.</p>
+							</section>
+							<div className="max-h-[40vh] overflow-y-auto">
+								{signatoriesArray.map((signatory, i) => (
+									<div className="flex flex-col gap-y-2 max-h-[20vh] overflow-y-auto" key={i}>
+										<div className="flex items-center gap-x-4">
+											<div className='flex-1 flex items-start gap-x-4'>
+												<Form.Item>
+													<label
+														className="text-primary text-xs leading-[13px] font-normal"
+													>Name {i+1}</label>
+													<Input
+														placeholder={`Name ${i+1}`}
+														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+														value={signatory.name}
+														onChange={(e) => onNameChange(e, i)}
+													/>
+												</Form.Item>
+												<Form.Item
+													className='w-full'
+													name={`Address ${i+1}`}
+													rules={[{ message: 'This is Required', required: true }]}
+												>
+													<label
+														className="text-primary text-xs leading-[13px] font-normal"
+													>Address {i+1}</label>
+													<AutoComplete
+														onClick={addRecipientHeading}
+														options={addressBook.filter((item) => !signatoriesArray.some((e) => e.address === item.address) && !multisig?.signatories.includes(item.address)).map((item) => ({
+															label: item.name,
+															value: item.address
+														}))}
+														id={`Address ${i+1}`}
+														placeholder={`Address ${i+1}`}
+														onChange={(value) => onSignatoryChange(value, i)}
+													/>
+												</Form.Item>
+											</div>
+											{i !== 0 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}
+										</div>
+									</div>
+								))}
+								<Button onClick={() => onAddSignatory()} className='flex border-none outline-none items-center justify-center bg-primary text-white text-sm'>
+									<PlusCircleOutlined /> Add Signatory
+								</Button>
+							</div>
+							<div className="flex flex-col gap-y-3 mt-5">
+								<label
+									className="text-primary text-xs leading-[13px] font-normal"
+									htmlFor="address"
+								>
+									Threshold
+								</label>
+								<div
+									className='flex items-center gap-x-3'
+								>
+									<p
+										className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
+									>
+										<button
+											onClick={() => {
+												if (newThreshold !== 2) {
+													setNewThreshold(prev => prev - 1);
+												}
+											}}
+											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+											-
+										</button>
+										<span
+											className='text-white text-sm'
+										>
+											{newThreshold}
+										</span>
+										<button
+											onClick={() => {
+												if (newThreshold < (multisig?.signatories.length || 0) + signatoriesArray.length) {
+													setNewThreshold(prev => prev + 1);
+												}
+											}}
+											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
+											+
+										</button>
+									</p>
+									<p
+										className='text-text_secondary font-normal text-sm leading-[15px]'
+									>
 							out of <span className='text-white font-medium'>{(multisig?.signatories.length || 0) + signatoriesArray.length}</span> owners
-						</p>
-					</div>
-				</div>
-				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-					<CancelBtn onClick={onCancel} />
-					<AddBtn onClick={changeMultisig} loading={loading} disabled={!signatoriesArray.length || signatoriesArray.some((item) => item.address === '' || multisig?.signatories.includes(item.address))} title='Add' />
-				</div>
-			</Form>
-		</Spin>
+									</p>
+								</div>
+							</div>
+							<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+								<CancelBtn onClick={onCancel} />
+								<AddBtn onClick={changeMultisig} loading={loading} disabled={!signatoriesArray.length || signatoriesArray.some((item) => item.address === '' || multisig?.signatories.includes(item.address))} title='Add' />
+							</div>
+						</Form>
+					</Spin>}
+		</>
 	);
 };
 
