@@ -16,8 +16,8 @@ export default async function hasExistentialDeposit (api:ApiPromise, address:str
 
 	try {
 		const balanceRes = await api.query.system.account(encodedAddress);
-		const balance = Number(formatBnBalance(balanceRes?.data?.free?.toString() || '0', { numberAfterComma: 6, withThousandDelimitor: false, withUnit: false }, network));
-		return balance >= chainProperties[network].existentialDeposit;
+		const balance = Number(formatBnBalance(balanceRes?.data?.free?.toString() || '0', { numberAfterComma: 12, withThousandDelimitor: false, withUnit: false }, network));
+		return Number(balance) >= Number(chainProperties[network].existentialDeposit);
 	}catch (e) {
 		console.log('hasExistentialDeposit error', e);
 		return false;

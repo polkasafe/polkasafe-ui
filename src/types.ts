@@ -44,7 +44,7 @@ export interface ChainProps {
     'tokenSymbol': TokenSymbol;
     'chainId': number;
     'rpcEndpoint': string;
-    'existentialDeposit': number;
+    'existentialDeposit': string;
 }
 
 export type ChainPropType = {

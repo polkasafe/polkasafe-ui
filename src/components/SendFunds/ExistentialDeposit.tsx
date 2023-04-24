@@ -21,6 +21,7 @@ import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { transferFunds } from 'src/utils/transferFunds';
@@ -90,6 +91,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 		api.setSigner(signer);
 
 		setLoading(true);
+		console.log(formatBnBalance(chainProperties[network].existentialDeposit, {}, network));
 		try {
 			await transferFunds({
 				amount: amount,

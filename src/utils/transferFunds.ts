@@ -26,7 +26,7 @@ export async function transferFunds({ api, setTxnHash, network, recepientAddress
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const AMOUNT_TO_SEND = amount.toNumber();
+	const AMOUNT_TO_SEND = amount;
 	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
 
 	return new Promise<void>((resolve, reject) => {

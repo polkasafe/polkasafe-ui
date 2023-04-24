@@ -32,7 +32,7 @@ const BalanceInput = ({ multisigBalance, className, label = '', onChange, placeh
 			return;
 		}
 
-		const [balance, isValid] = inputToBn(`${value}`, network, false);
+		const [balance, isValid] = inputToBn(`${value.toFixed(13)}`, network, false);
 		setIsValidInput(isValid);
 
 		if(isValid){
