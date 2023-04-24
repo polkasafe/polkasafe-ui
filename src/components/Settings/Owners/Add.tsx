@@ -52,7 +52,6 @@ const addRecipientHeading = () => {
 };
 
 const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: string }) => {
-	const [newThreshold, setNewThreshold] = useState(2);
 	const { signersMap, accountsMap } = useGetAllAccounts();
 	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
@@ -62,6 +61,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [txnHash, setTxnHash] = useState<string>('');
+	const [newThreshold, setNewThreshold] = useState<number>(multisig?.threshold || 2);
 
 	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address: '', name: '' }]);
 
@@ -263,7 +263,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 												</Form.Item>
 												<Form.Item
 													className='w-full'
-													name={`Address ${i+1}`}
+													name={`Address-${i+1}`}
 													rules={[{ message: 'This is Required', required: true }]}
 												>
 													<label
@@ -275,7 +275,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 															label: item.name,
 															value: item.address
 														}))}
-														id={`Address ${i+1}`}
+														id={`Address-${i+1}`}
 														placeholder={`Address ${i+1}`}
 														onChange={(value) => onSignatoryChange(value, i)}
 													/>

@@ -38,7 +38,7 @@ const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold
 				open={openRemoveSignatoryModal}
 				className={`${className} w-auto md:min-w-[500px]`}
 			>
-				<RemoveOwner onCancel={() => setOpenRemoveSignatoryModal(false)} oldSignatoriesLength={signatoriesLength} oldThreshold={threshold} address={address} />
+				<RemoveOwner onCancel={() => setOpenRemoveSignatoryModal(false)} oldSignatoriesLength={signatoriesLength} oldThreshold={threshold} addressToRemove={address} />
 			</Modal>
 		</>
 	);

@@ -20,7 +20,7 @@ interface IAddressComponent{
 const AddressComponent = ({ address, iconSize=30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
-	const { addressBook } = useGlobalUserDetailsContext();
+	const { addressBook, multisigAddresses } = useGlobalUserDetailsContext();
 
 	return (
 		<div
@@ -35,7 +35,7 @@ const AddressComponent = ({ address, iconSize=30 }: IAddressComponent) => {
 				<div
 					className='font-medium text-sm flex text-white'
 				>
-					{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+					{addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
 				</div>
 				<div
 					className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'

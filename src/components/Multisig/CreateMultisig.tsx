@@ -115,7 +115,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			console.log(error);
 			setFailure(true);
 			setLoading(false);
-			createProxy(createMultisigData, false);
+			createProxy(multisigData, false);
 		}
 	};
 
