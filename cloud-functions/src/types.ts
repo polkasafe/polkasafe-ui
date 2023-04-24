@@ -40,7 +40,7 @@ export interface ChainProperties {
 		tokenDecimals: number;
 		tokenSymbol: string;
 		blockTime: number;
-		keyringType: KeypairType;
+		keyringType?: KeypairType;
 		rpcEndpoint: string;
 	};
 }

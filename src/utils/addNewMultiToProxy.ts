@@ -96,7 +96,7 @@ export async function addNewMultiToProxy({ proxyAddress, setTxnHash, api, networ
 								callHash: proxyTx.method.hash.toHex(),
 								from: senderAddress,
 								network,
-								note: 'Adding New Multisig to Proxy',
+								note: 'Adding New Signatories to Multisig',
 								to: recepientAddress
 							});
 

@@ -29,7 +29,7 @@ import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
 
-const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: { address: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
+const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCancel }: { addressToRemove: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
 	const [newThreshold, setNewThreshold] = useState(oldThreshold === oldSignatoriesLength ? oldThreshold - 1 : oldThreshold);
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState<boolean>(false);
@@ -103,7 +103,7 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
 
-		const newSignatories = multisig && multisig.signatories.filter((item) => item !== address) || [];
+		const newSignatories = multisig && multisig.signatories.filter((item) => item !== addressToRemove) || [];
 
 		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
 		if(multisigAddresses.some((item) => item.address === newMultisigAddress.multisigAddress)){
@@ -158,11 +158,11 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 		<>
 			{
 				success ? <AddProxySuccessScreen
-					createdBy={address}
+					createdBy={userAddress}
 					signatories={multisig?.signatories || []}
 					threshold={multisig?.threshold || 2}
 					txnHash={txnHash}
-					onDone={() => onCancel?.()}
+					onDone={() => {onCancel?.(); setSuccess(false);}}
 					successMessage='Multisig Edit in Progress!'
 					waitMessage='All threshold signatories need to sign the Transaction to Edit the Multisig.'
 				/>
@@ -192,8 +192,8 @@ const RemoveOwner = ({ address, oldThreshold, oldSignatoriesLength, onCancel }: 
 								</section>
 								<div className='text-primary text-sm mb-2'>Remove Signatory*</div>
 								<div className='flex items-center p-3 mb-4 text-text_secondary border-dashed border-2 border-bg-secondary rounded-lg gap-x-5'>
-									<Identicon size={20} theme='polkadot' value={address} />
-									{address}
+									<Identicon size={20} theme='polkadot' value={addressToRemove} />
+									{addressToRemove}
 								</div>
 								<div className='text-primary text-sm mb-2'>New Threshold</div>
 								<div

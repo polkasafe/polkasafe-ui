@@ -45,6 +45,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [txnHash, setTxnHash] = useState<string>('');
 
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+
 	useEffect(() => {
 		if(!getSubstrateAddress(selectedSender)){
 			setIsValidSender(false);
@@ -93,7 +95,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 				amount: amount,
 				api,
 				network,
-				recepientAddress: activeMultisig,
+				recepientAddress: multisig?.address || activeMultisig,
 				senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
 				setLoadingMessages,
 				setTxnHash
@@ -125,7 +127,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 				successMessage='Existential Deposit Successful!'
 				amount={amount}
 				sender={selectedSender}
-				recipient={activeMultisig}
+				recipient={multisig?.address || activeMultisig}
 				created_at={new Date()}
 				txnHash={txnHash}
 				onDone={() => {
@@ -150,16 +152,16 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 								<div className='flex items-center justify-center w-10 h-10'>
 									<Identicon
 										className='image identicon mx-2'
-										value={activeMultisig}
+										value={multisig?.address}
 										size={30}
 										theme={'polkadot'}
 									/>
 								</div>
 								<div className='flex flex-col gap-y-[6px]'>
-									<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find(a => a.address === activeMultisig)?.name }</h4>
-									<p className='text-text_secondary font-normal text-xs leading-[13px]'>{activeMultisig}</p>
+									<h4 className='font-medium text-sm leading-[15px] text-white'>{multisig?.name}</h4>
+									<p className='text-text_secondary font-normal text-xs leading-[13px]'>{multisig?.address}</p>
 								</div>
-								<Balance address={activeMultisig} />
+								<Balance address={multisig?.address || activeMultisig} />
 							</div>
 
 							<Form disabled={ loading }>
