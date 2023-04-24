@@ -75,7 +75,6 @@ const Home = ({ className }: { className?: string }) => {
 				const params = JSON.parse(responseJSON.data?.events[0]?.params);
 				const proxyAddress = getEncodedAddress(params[0].value, network);
 				if(proxyAddress){
-					console.log(proxyAddress);
 					setProxyNotInDb(true);
 				}
 			}
