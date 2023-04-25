@@ -40,9 +40,12 @@ interface ISentInfoProps {
 	handleCancelTransaction: () => Promise<void>
 	note: string
 	isProxyApproval: boolean
+	isProxyAddApproval: boolean
+	delegate_id?: string
+	isProxyRemovalApproval?: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -157,18 +160,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD
 						</p>}
 							</div>
 						</div>
-					</> : isProxyApproval ? <></> : <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
-						<span>
-							<WarningCircleIcon className='text-base' />
-						</span>
-						<p className=''>
+					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? <></>
+						: <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
+							<span>
+								<WarningCircleIcon className='text-base' />
+							</span>
+							<p className=''>
 								Transaction was not created on Polkasafe, enter call data to fetch this data.
-						</p>
-					</section>}
+							</p>
+						</section>}
 				{!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
 				}
-				{!isProxyApproval && <Divider className='bg-text_secondary my-5' />}
+				{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && <Divider className='bg-text_secondary my-5' />}
 				<div
 					className='flex items-center gap-x-5 mt-3'
 				>
@@ -246,6 +250,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, isProxyApproval, amount, amountUSD
 							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
 							<span className='flex items-center gap-x-2 text-sm'>
 								<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary'/></button>
+							</span>
+						</p>
+					</div>}
+					{delegate_id &&
+					<div className='flex items-center gap-x-5 mt-3'>
+						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
+							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
+						</span>
+						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+							<Identicon value={delegate_id} size={20} theme='polkadot' />
+							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
+							<span className='flex items-center gap-x-2 text-sm'>
+								<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary'/></button>
 							</span>
 						</p>
 					</div>}

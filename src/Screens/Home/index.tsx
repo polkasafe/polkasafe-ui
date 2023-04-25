@@ -165,7 +165,7 @@ const Home = ({ className }: { className?: string }) => {
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
 								{!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess ?
-									<section className='mb-4  w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+									<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
 									</section>
@@ -182,7 +182,7 @@ const Home = ({ className }: { className?: string }) => {
 												<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
 											</section>
 											:
-											proxyInProcess ?
+											proxyInProcess && !hasProxy ?
 												<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
 													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
 												</section>

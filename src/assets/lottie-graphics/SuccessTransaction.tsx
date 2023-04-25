@@ -25,7 +25,7 @@ function SuccessTransactionLottie({ message, width = 350, waitMessage }: Props):
 				play={true}
 			/>
 			<div className='font-medium text-lg text-success mb-1' >{message}</div>
-			<div className='text-text_secondary' >{waitMessage}</div>
+			<div className='text-text_secondary max-w-[452px]' >{waitMessage}</div>
 		</div>
 	);
 }

@@ -111,10 +111,6 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 				});
 
 				const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
-				// if approval is for removing old multisig from proxy
-				if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
-					return;
-				}
 
 				if(multisigFetchError || !newMultisigData) {
 
@@ -123,6 +119,10 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 						message: 'No Multisig Found',
 						status: NotificationStatus.ERROR
 					});
+					return;
+				}
+				// if approval is for removing old multisig from proxy
+				if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
 					return;
 				}
 				setLoadingMessages('Creating Your Proxy.');

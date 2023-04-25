@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { Signer } from '@polkadot/api/types';
-import { AutoComplete, Button, Form, Input, Spin } from 'antd';
+import { AutoComplete, Button, Form, Input, Spin, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
@@ -277,17 +277,20 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 														}))}
 														id={`Address-${i+1}`}
 														placeholder={`Address ${i+1}`}
+														value={signatoriesArray[i].address}
 														onChange={(value) => onSignatoryChange(value, i)}
 													/>
 												</Form.Item>
 											</div>
 											{i !== 0 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}
+											<Tooltip title='Add Another Signatory' >
+												<Button onClick={() => onAddSignatory()} className='rounded-lg outline-none border-none bg-highlight text-primary'>
+													<PlusCircleOutlined />
+												</Button>
+											</Tooltip>
 										</div>
 									</div>
 								))}
-								<Button onClick={() => onAddSignatory()} className='flex border-none outline-none items-center justify-center bg-primary text-white text-sm'>
-									<PlusCircleOutlined /> Add Signatory
-								</Button>
 							</div>
 							<div className="flex flex-col gap-y-3 mt-5">
 								<label
