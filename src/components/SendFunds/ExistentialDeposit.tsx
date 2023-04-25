@@ -127,6 +127,9 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 		<>
 			{success ? <TransactionSuccessScreen
 				successMessage='Existential Deposit Successful!'
+				waitMessage='Your multisig is now on-chain.
+				You can now, create a proxy which will allow you to change multisig configurations later.
+				'
 				amount={amount}
 				sender={selectedSender}
 				recipient={multisig?.address || activeMultisig}

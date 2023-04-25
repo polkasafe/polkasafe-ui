@@ -2,12 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
+import { Badge } from 'antd';
 import React from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
 import { CopyIcon, ExternalLinkIcon } from './CustomIcons';
@@ -20,17 +22,30 @@ interface IAddressComponent{
 const AddressComponent = ({ address, iconSize=30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
-	const { addressBook, multisigAddresses } = useGlobalUserDetailsContext();
+	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	return (
 		<div
 			className=' flex items-center gap-x-3'
 		>
-			<Identicon
-				value={address}
-				size={iconSize}
-				theme='polkadot'
-			/>
+			{multisig?.proxy && getSubstrateAddress(multisig.proxy) === getSubstrateAddress(address) ?
+				<Badge count='Proxy' offset={[-45, 0]} className='border-none' color='#FF79F2'>
+					<Identicon
+						className={'border-2 rounded-full bg-transparent border-[#FF79F2] p-1'}
+						value={address}
+						size={iconSize}
+						theme='polkadot'
+					/>
+				</Badge>
+				:
+				<Identicon
+					value={address}
+					size={iconSize}
+					theme='polkadot'
+				/>
+			}
 			<div>
 				<div
 					className='font-medium text-sm flex text-white'

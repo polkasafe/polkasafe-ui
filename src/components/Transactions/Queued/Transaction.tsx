@@ -62,10 +62,14 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
 	const [decodedCallData, setDecodedCallData] = useState<any>(null);
 	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
+	const [isProxyAddApproval, setIsProxyAddApproval] = useState<boolean>(false);
+	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
 
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
 	const hash = location.hash.slice(1);
+
+	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(!api || !apiReady) return;
@@ -98,10 +102,20 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	}, [api, apiReady, callDataString, callHash, network]);
 
 	useEffect(() => {
-		if(decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id)){
+		console.log(decodedCallData);
+		if(decodedCallData && decodedCallData?.args?.proxy_type){
 			setIsProxyApproval(true);
 		}
-	}, [decodedCallData]);
+		else if(decodedCallData && decodedCallData?.args?.call?.args?.delegate?.id){
+			const newMultisig = multisigAddresses.find((item) => item.address === decodedCallData?.args?.call?.args?.delegate?.id);
+			if(dayjs(newMultisig?.created_at).isBefore(dayjs(multisig?.created_at))){
+				setIsProxyRemovalApproval(true);
+			}
+			else{
+				setIsProxyAddApproval(true);
+			}
+		}
+	}, [decodedCallData, multisig, multisigAddresses]);
 
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -113,8 +127,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 
 		const signer: Signer = signersMap[wallet];
 		api.setSigner(signer);
-
-		const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 		if(!multisig) return;
 
@@ -273,16 +285,16 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 						<p className='col-span-3 flex items-center gap-x-3'>
 
 							<span
-								className={`flex items-center justify-center w-9 h-9 ${isProxyApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
+								className={`flex items-center justify-center w-9 h-9 ${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
 							>
 								<ArrowUpRightIcon />
 							</span>
 
 							<span>
-								{isProxyApproval ? 'Proxy' : 'Sent'}
+								{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
 							</span>
 						</p>
-						{!isProxyApproval &&
+						{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
 							<p className='col-span-2 flex items-center gap-x-[6px]'>
 								<ParachainIcon src={chainProperties[network].logo} />
 								<span
@@ -299,7 +311,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 						<p className='col-span-2'>
 							{dayjs(date).format('lll')}
 						</p>
-						<p className={`${isProxyApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
+						<p className={`${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
 							<span className='text-waiting'>
 								{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
 							</span>
@@ -341,6 +353,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							handleCancelTransaction={handleCancelTransaction}
 							note={note}
 							isProxyApproval={isProxyApproval}
+							isProxyAddApproval={isProxyAddApproval}
+							delegate_id={decodedCallData?.args?.call?.args?.delegate?.id}
+							isProxyRemovalApproval={isProxyRemovalApproval}
 						/>
 
 					</div>
