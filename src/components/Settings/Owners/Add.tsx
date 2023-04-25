@@ -264,7 +264,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 												<Form.Item
 													className='w-full'
 													name={`Address-${i+1}`}
-													rules={[{ message: 'This is Required', required: true }]}
+													rules={[{ required: true }]}
 												>
 													<label
 														className="text-primary text-xs leading-[13px] font-normal"
@@ -277,17 +277,18 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 														}))}
 														id={`Address-${i+1}`}
 														placeholder={`Address ${i+1}`}
-														value={signatoriesArray[i].address}
 														onChange={(value) => onSignatoryChange(value, i)}
 													/>
 												</Form.Item>
 											</div>
 											{i !== 0 && <Button className='bg-bg-secondary rounded-lg text-white border-none outline-none ' onClick={() => onRemoveSignatory(i)}>-</Button>}
-											<Tooltip title='Add Another Signatory' >
-												<Button onClick={() => onAddSignatory()} className='rounded-lg outline-none border-none bg-highlight text-primary'>
-													<PlusCircleOutlined />
-												</Button>
-											</Tooltip>
+											{i === signatoriesArray.length - 1 &&
+												<Tooltip title='Add Another Signatory' >
+													<Button size='large' onClick={() => onAddSignatory()} className='rounded-lg outline-none border-none bg-highlight text-primary flex justify-center items-center'>
+														<PlusCircleOutlined />
+													</Button>
+												</Tooltip>
+											}
 										</div>
 									</div>
 								))}
