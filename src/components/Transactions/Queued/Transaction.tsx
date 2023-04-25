@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
-import { Collapse, Divider, message } from 'antd';
+import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
@@ -17,7 +17,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
-import { IQueueItem } from 'src/types';
+import { IMultisigAddress, IQueueItem } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
 import { approveAddProxy } from 'src/utils/approveAddProxy';
@@ -53,6 +53,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
+	const [getMultiDataLoading, setGetMultisigDataLoading] = useState(false);
 	const [loadingMessages, setLoadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
@@ -102,20 +103,43 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	}, [api, apiReady, callDataString, callHash, network]);
 
 	useEffect(() => {
-		console.log(decodedCallData);
+		const fetchMultisigData = async (newMultisigAddress: string) => {
+			const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
+				body: JSON.stringify({
+					multisigAddress: newMultisigAddress,
+					network
+				}),
+				headers: firebaseFunctionsHeader(network),
+				method: 'POST'
+			});
+
+			const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
+
+			if(multisigFetchError || !newMultisigData || !multisig) {
+				setGetMultisigDataLoading(false);
+				return;
+			}
+
+			// if approval is for removing old multisig from proxy
+			console.log(dayjs(newMultisigData?.created_at).format('llll'), dayjs(multisig.created_at).format('llll'));
+			if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
+				setGetMultisigDataLoading(false);
+				setIsProxyRemovalApproval(true);
+			}
+			else {
+				setGetMultisigDataLoading(false);
+				setIsProxyAddApproval(true);
+			}
+		};
 		if(decodedCallData && decodedCallData?.args?.proxy_type){
 			setIsProxyApproval(true);
 		}
 		else if(decodedCallData && decodedCallData?.args?.call?.args?.delegate?.id){
-			const newMultisig = multisigAddresses.find((item) => item.address === decodedCallData?.args?.call?.args?.delegate?.id);
-			if(dayjs(newMultisig?.created_at).isBefore(dayjs(multisig?.created_at))){
-				setIsProxyRemovalApproval(true);
-			}
-			else{
-				setIsProxyAddApproval(true);
-			}
+			console.log('aha ');
+			setGetMultisigDataLoading(true);
+			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
-	}, [decodedCallData, multisig, multisigAddresses]);
+	}, [decodedCallData, multisig, multisigAddresses, network]);
 
 	const handleApproveTransaction = async () => {
 		if(!api || !apiReady || noAccounts || !signersMap || !address){
@@ -273,28 +297,32 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 				bordered={false}
 				defaultActiveKey={[`${hash}`]}
 			>
-				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
-					<div
-						onClick={() => {
-							toggleTransactionVisible(!transactionInfoVisible);
-						}}
-						className={classNames(
-							'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
-						)}
-					>
-						<p className='col-span-3 flex items-center gap-x-3'>
-
-							<span
-								className={`flex items-center justify-center w-9 h-9 ${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
+				<Collapse.Panel
+					showArrow={false}
+					key={`${callHash}`}
+					header={
+						getMultiDataLoading ? <Skeleton active paragraph={{ rows: 0 }} /> :
+							<div
+								onClick={() => {
+									toggleTransactionVisible(!transactionInfoVisible);
+								}}
+								className={classNames(
+									'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
+								)}
 							>
-								<ArrowUpRightIcon />
-							</span>
+								<p className='col-span-3 flex items-center gap-x-3'>
 
-							<span>
-								{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
-							</span>
-						</p>
-						{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
+									<span
+										className={`flex items-center justify-center w-9 h-9 ${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
+									>
+										<ArrowUpRightIcon />
+									</span>
+
+									<span>
+										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
+									</span>
+								</p>
+								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
 							<p className='col-span-2 flex items-center gap-x-[6px]'>
 								<ParachainIcon src={chainProperties[network].logo} />
 								<span
@@ -307,24 +335,25 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 									}) : `? ${token}`}
 								</span>
 							</p>
-						}
-						<p className='col-span-2'>
-							{dayjs(date).format('lll')}
-						</p>
-						<p className={`${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
-							<span className='text-waiting'>
-								{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
-							</span>
-							<span className='text-white text-sm'>
-								{
-									transactionInfoVisible?
-										<CircleArrowUpIcon />:
-										<CircleArrowDownIcon />
 								}
-							</span>
-						</p>
-					</div>
-				}>
+								<p className='col-span-2'>
+									{dayjs(date).format('lll')}
+								</p>
+								<p className={`${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
+									<span className='text-waiting'>
+										{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
+									</span>
+									<span className='text-white text-sm'>
+										{
+											transactionInfoVisible?
+												<CircleArrowUpIcon />:
+												<CircleArrowDownIcon />
+										}
+									</span>
+								</p>
+							</div>
+					}
+				>
 					<LoadingModal message={loadingMessages} loading={loading} success={success} failed={failure} open={openLoadingModal} onCancel={() => setOpenLoadingModal(false)} />
 
 					<div
