@@ -121,7 +121,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			}
 
 			// if approval is for removing old multisig from proxy
-			console.log(dayjs(newMultisigData?.created_at).format('llll'), dayjs(multisig.created_at).format('llll'));
 			if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
 				setGetMultisigDataLoading(false);
 				setIsProxyRemovalApproval(true);
@@ -135,7 +134,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			setIsProxyApproval(true);
 		}
 		else if(decodedCallData && decodedCallData?.args?.call?.args?.delegate?.id){
-			console.log('aha ');
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
