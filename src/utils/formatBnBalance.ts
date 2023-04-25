@@ -24,14 +24,14 @@ export  default function formatBnBalance(value: BN | string, options: Options, n
 	}
 	else {
 		prefix = '0';
-		suffix = valueString.padStart(tokenDecimals-1, '0');
+		suffix = valueString.padStart(tokenDecimals, '0');
 	}
 
 	let comma = '.';
 	const { numberAfterComma, withThousandDelimitor = true, withUnit } = options;
 	const numberAfterCommaLtZero = numberAfterComma && numberAfterComma < 0;
 
-	if (numberAfterCommaLtZero || numberAfterComma === 0){
+	if (numberAfterCommaLtZero || numberAfterComma === 0 || suffix === ''){
 		comma = '';
 		suffix = '';
 	} else if (numberAfterComma && numberAfterComma > 0){

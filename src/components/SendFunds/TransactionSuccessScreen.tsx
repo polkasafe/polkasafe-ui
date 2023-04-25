@@ -32,7 +32,7 @@ const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipie
 			<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg my-1 text-text_secondary'>
 				<div className='flex justify-between items-center'>
 					<span>Amount:</span>
-					<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 3, withUnit: true }, network)}</span>
+					<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 4, withUnit: true }, network)}</span>
 				</div>
 				{txnHash &&
 					<div className='flex justify-between items-center'>
