@@ -56,7 +56,7 @@ export default async function initMultisigTransfer({
 
 	// 2. Define relevant constants
 	// const MAX_WEIGHT = new Uint8Array([640000000]);
-	const AMOUNT_TO_SEND = amount.toNumber();
+	const AMOUNT_TO_SEND = amount.toString();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND);
 
 	// remove initator address from signatories

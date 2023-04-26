@@ -109,7 +109,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				senderAddress: getSubstrateAddress(userAddress) || userAddress,
 				setLoadingMessages
 			});
-			setSuccess(true);
+			if(network === 'astar'){
+				createProxy(multisigData, false);
+			}
+			else{
+				setSuccess(true);
+			}
 			setLoading(false);
 		} catch (error) {
 			console.log(error);
