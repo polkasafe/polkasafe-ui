@@ -54,7 +54,8 @@ const Transactions = () => {
 									}
 								)}
 							>
-							Queue
+								{/* <QueueIcon /> */}
+								Queue
 							</button>
 							<button
 								onClick={() => setTab(ETab.HISTORY)}
@@ -65,7 +66,8 @@ const Transactions = () => {
 									}
 								)}
 							>
-							History
+								{/* <HistoryIcon/> */}
+								History
 							</button>
 							<div className='flex-1' />
 							<Button

@@ -44,7 +44,7 @@ const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold
 	);
 };
 
-const ListOwners = ({ className }: { className?: string }) => {
+const ListOwners = ({ className, disabled }: { className?: string, disabled?: boolean }) => {
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 	const { multisigAddresses, activeMultisig, addressBook, address: userAddress } = useGlobalUserDetailsContext();
@@ -124,7 +124,7 @@ const ListOwners = ({ className }: { className?: string }) => {
 										className='text-primary border-none outline-none bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon className='' />
 									</Button>
-									{signatories.length > 2 &&
+									{signatories.length > 2 && !disabled &&
 										<RemoveSignatoryModal threshold={multisig?.threshold || 2} className={className} signatoriesLength={signatories.length || 2} address={address} />
 									}
 								</div>

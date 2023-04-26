@@ -21,6 +21,7 @@ import Balance from 'src/ui-components/Balance';
 import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -69,7 +70,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
 
 		setLoading(true);
-		setLoadingMessages('Please Sign To Create Your Multisig Proxy.');
+		setLoadingMessages(`A Base Amount (${formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.`);
 		try {
 			await transferAndProxyBatchAll({
 				amount: reservedProxyDeposit,
