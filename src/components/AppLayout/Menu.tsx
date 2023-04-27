@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const location = useLocation();
@@ -65,10 +65,16 @@ const Menu: FC<Props> = ({ className }) => {
 	}
 
 	useEffect(() => {
-		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) || [];
-
-		if(filteredMutisigs?.find((multisig) => multisig.address === activeMultisig)){
-			setSelectedMultisigAddress(activeMultisig);
+		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled) || [];
+		const multi = filteredMutisigs?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
+		if(multi){
+			if(!multi.proxy){
+				setUserDetailsContextState(prev => ({ ...prev, isProxy: false }));
+			}
+			else{
+				setUserDetailsContextState(prev => ({ ...prev, isProxy: true }));
+			}
+			setSelectedMultisigAddress(multi.address);
 		}
 		else{
 			if(filteredMutisigs.length) setSelectedMultisigAddress(filteredMutisigs[0].address );
@@ -79,15 +85,16 @@ const Menu: FC<Props> = ({ className }) => {
 	}, [multisigAddresses, network]);
 
 	useEffect(() => {
-		localStorage.setItem('active_multisig', selectedMultisigAddress);
+		const active = multisigAddresses.find(item => item.address === selectedMultisigAddress || item.proxy === selectedMultisigAddress);
+		localStorage.setItem('active_multisig', active?.proxy && isProxy ? active.proxy : selectedMultisigAddress);
 		setUserDetailsContextState((prevState) => {
 			return {
 				...prevState,
-				activeMultisig: selectedMultisigAddress
+				activeMultisig: active?.proxy && isProxy ? active.proxy : selectedMultisigAddress
 			};
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedMultisigAddress]);
+	}, [multisigAddresses, selectedMultisigAddress, isProxy]);
 
 	const AddMultisigModal: FC = () => {
 		return (
@@ -145,12 +152,12 @@ const Menu: FC<Props> = ({ className }) => {
 			<section className='overflow-auto [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
 					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).length : '0'}</span>
+					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
 				</h2>
 				<div>
 					{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
-						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).map((multisig) => {
+						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
@@ -158,14 +165,14 @@ const Menu: FC<Props> = ({ className }) => {
 									setUserDetailsContextState((prevState) => {
 										return {
 											...prevState,
-											activeMultisig: multisig.address
+											activeMultisig: multisig.proxy && isProxy ? multisig.proxy : multisig.address
 										};
 									});
 									setSelectedMultisigAddress(multisig.address);
 								}}>
 									<Identicon
 										className='image identicon mx-2'
-										value={multisig.address}
+										value={(isProxy ? multisig?.proxy : multisig.address) || multisig.address}
 										size={30}
 										theme={'polkadot'}
 									/>

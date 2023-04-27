@@ -7,10 +7,10 @@ import React, { useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import { CheckOutlined, Disc, NotifyMail } from 'src/ui-components/CustomIcons';
 import { CloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 const EmailBadge = () => {
 	const { network } = useGlobalApiContext();

@@ -10,8 +10,8 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 const RenameMultisig = ({ name }: { name: string }) => {
 	const { network } = useGlobalApiContext();
@@ -21,13 +21,15 @@ const RenameMultisig = ({ name }: { name: string }) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig, setUserDetailsContextState, multisigAddresses } = useGlobalUserDetailsContext();
 
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+
 	const handleMultisigNameChange = async () => {
 		try{
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature || !multisigAddresses) {
+			if(!userAddress || !signature || !multisigAddresses || !multisig?.address) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
@@ -36,7 +38,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 
 				const changeNameRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/renameMultisig`, {
 					body: JSON.stringify({
-						address: activeMultisig,
+						address: multisig?.address,
 						name: multisigName
 					}),
 					headers: firebaseFunctionsHeader(network),

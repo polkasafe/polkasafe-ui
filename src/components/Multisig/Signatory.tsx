@@ -40,11 +40,16 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
-	const [addresses, setAddresses] = useState<ISignature[]>(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
-		address: item.address,
-		key: i+1,
-		name: item.name
-	})));
+	const [addresses, setAddresses] = useState<ISignature[]>([]);
+
+	useEffect(() => {
+		setAddresses(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
+			address: item.address,
+			key: i+1,
+			name: item.name
+		})));
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [addressBook]);
 
 	useEffect(() => {
 		if(!api || !apiReady){
@@ -66,7 +71,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		};
 		fetchBalances();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ api, apiReady]);
+	}, [ api, apiReady, addressBook]);
 
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);
@@ -198,8 +203,8 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 							// </Tooltip>
 							<>
 								<div className='text-sm text-text_secondary'>Addresses imported directly from your Polkadot.js wallet</div>
-								{accounts.map((account, i) => (
-									<p onClick={signatories.includes(account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
+								{accounts.filter((item) => item.address !== getEncodedAddress(address, network)).map((account, i) => (
+									<p onClick={signatories.includes(getSubstrateAddress(account.address) || account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
 								))}
 							</>
 						}

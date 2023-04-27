@@ -1,6 +1,7 @@
 import { ChainProperties } from '../types';
 
 export const networks = {
+	ASTAR: 'astar',
 	POLKADOT: 'polkadot',
 	KUSAMA: 'kusama',
 	WESTEND: 'westend',
@@ -39,5 +40,12 @@ export const chainProperties: ChainProperties = {
 		ss58Format: 42,
 		tokenDecimals: 12,
 		tokenSymbol: 'ROC'
+	},
+	[networks.ASTAR]: {
+		blockTime: 12000,
+		rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
+		ss58Format: 5,
+		tokenDecimals: 18,
+		tokenSymbol: 'ASTR'
 	}
 };

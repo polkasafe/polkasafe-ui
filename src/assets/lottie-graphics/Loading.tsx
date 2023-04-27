@@ -24,7 +24,7 @@ function LoadingLottie({ message, width = 350 }: Props): ReactElement {
 				play={true}
 			/>
 			<div className='absolute bottom-10 w-full text-center font-medium text-lg text-white' >{message ? message : 'Waiting to create your transaction'}</div>
-			<div className='text-text_secondary' >This might take a few minutes. So, sit back and relax...</div>
+			<div className='text-text_secondary' >This might take a few seconds. So, sit back and relax...</div>
 		</div>
 	);
 }

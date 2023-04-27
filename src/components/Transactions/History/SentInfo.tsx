@@ -30,7 +30,7 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig)?.threshold || 0;
+	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
 
 	return (
 		<div

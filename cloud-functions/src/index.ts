@@ -72,7 +72,7 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			const token = `<Bytes>${uuidv4()}</Bytes>`;
+			const token = `<Bytes>polkasafe-login-${uuidv4()}</Bytes>`;
 
 			const substrateAddress = getSubstrateAddress(String(address));
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);

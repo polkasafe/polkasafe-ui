@@ -11,9 +11,9 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IAddressBookItem } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import { AddIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 interface INewUserModal{
     open: boolean

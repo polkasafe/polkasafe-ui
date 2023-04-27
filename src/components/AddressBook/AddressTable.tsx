@@ -27,15 +27,14 @@ interface IAddressProps {
 	className?: string
 }
 
-const AddAddress: FC<IAddressProps> = ({ address, className }) => {
-	const { openModal } = useModalContext();
+const TransactionModal = ({ className, defaultAddress }: { className?: string, defaultAddress: string }) => {
+	const [openTransactionModal, setOpenTransactionModal] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-
-	const [openTransactionModal, setOpenTransactionModal] = useState(false);
-
-	const TransactionModal: FC = () => {
-		return (
+	return (
+		<>
+			<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => setOpenTransactionModal(true)}>
+				<p className='font-normal text-sm'>Send</p>
+			</PrimaryButton>
 			<Modal
 				centered
 				footer={false}
@@ -50,14 +49,18 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 				open={openTransactionModal}
 				className={`${className} w-auto md:min-w-[500px]`}
 			>
-				<SendFundsForm onCancel={() => setOpenTransactionModal(false)} />
+				<SendFundsForm defaultSelectedAddress={defaultAddress} onCancel={() => setOpenTransactionModal(false)} />
 			</Modal>
-		);
-	};
+		</>
+	);
+};
+
+const AddAddress: FC<IAddressProps> = ({ address, className }) => {
+	const { openModal } = useModalContext();
+	const { network } = useGlobalApiContext();
 
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
-			<TransactionModal/>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
 					Name
@@ -104,9 +107,7 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>}
-									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => setOpenTransactionModal(true)}>
-										<p className='font-normal text-sm'>Send</p>
-									</PrimaryButton>
+									<TransactionModal defaultAddress={address} className={className} />
 								</div>
 							</article>
 							{address.length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}

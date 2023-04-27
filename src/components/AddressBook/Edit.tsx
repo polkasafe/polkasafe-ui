@@ -11,15 +11,15 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookItem } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nameToEdit: string }) => {
+const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nameToEdit?: string }) => {
 	const { toggleVisibility } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const [newName, setNewName] = useState<string>(nameToEdit);
+	const [newName, setNewName] = useState<string>(nameToEdit || '');
 	const { network } = useGlobalApiContext();
 
 	const handleAddAddress = async () => {
@@ -34,8 +34,6 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 				return;
 			}
 			else{
-
-				console.log(addressToEdit, newName);
 
 				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
 					body: JSON.stringify({

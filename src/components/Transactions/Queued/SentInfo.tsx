@@ -2,15 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input, Timeline } from 'antd';
+import { Button, Collapse, Divider, Input, Modal, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
+import CancelBtn from 'src/components/Multisig/CancelBtn';
+import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
@@ -37,15 +39,20 @@ interface ISentInfoProps {
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
 	note: string
+	isProxyApproval: boolean
+	isProxyAddApproval: boolean
+	delegate_id?: string
+	isProxyRemovalApproval?: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
-	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig);
+	const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
+	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const [updatedNote, setUpdatedNote] = useState(note);
 	const [depositor, setDepositor] = useState<string>('');
@@ -53,21 +60,52 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 	useEffect(() => {
 		const getDepositor = async () => {
 			if(!api || !apiReady) return;
-			const multisigInfos = await getMultisigInfo(activeMultisig, api);
+			const multisigInfos = await getMultisigInfo(activeMultisigObject?.address || activeMultisig, api);
 			const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 			setDepositor(multisigInfo?.depositor?.toString() || '');
 		};
 		getDepositor();
-	}, [activeMultisig, api, apiReady, callHash]);
+	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
+
+	const CancelTransaction: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenCancelModal(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Cancel Transaction</h3>}
+				open={openCancelModal}
+				className={' w-auto md:min-w-[500px]'}
+			>
+				<div className='flex flex-col h-full'>
+					<div className='text-white'>Are you sure you want to cancel the Transaction?</div>
+					<div className='flex items-center justify-between mt-[40px]'>
+						<CancelBtn title='No' onClick={() => setOpenCancelModal(false)}/>
+						<RemoveBtn title='Yes, Cancel' loading={loading} onClick={() => {
+							handleCancelTransaction();
+							setOpenCancelModal(false);
+						}} />
+					</div>
+				</div>
+			</Modal>
+		);
+	};
 
 	return (
 		<div
 			className={classNames('flex gap-x-4', className)}
 		>
+			<CancelTransaction/>
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{amount && recipientAddress ?
+				{ recipientAddress && amount ?
 					<>
 						<p
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
@@ -122,18 +160,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 						</p>}
 							</div>
 						</div>
-					</> : <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
-						<span>
-							<WarningCircleIcon className='text-base' />
-						</span>
-						<p className=''>
+					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? <></>
+						: <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
+							<span>
+								<WarningCircleIcon className='text-base' />
+							</span>
+							<p className=''>
 								Transaction was not created on Polkasafe, enter call data to fetch this data.
-						</p>
-					</section>}
+							</p>
+						</section>}
 				{!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
 				}
-				<Divider className='bg-text_secondary my-5' />
+				{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && <Divider className='bg-text_secondary my-5' />}
 				<div
 					className='flex items-center gap-x-5 mt-3'
 				>
@@ -211,6 +250,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
 							<span className='flex items-center gap-x-2 text-sm'>
 								<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary'/></button>
+							</span>
+						</p>
+					</div>}
+					{delegate_id &&
+					<div className='flex items-center gap-x-5 mt-3'>
+						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
+							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
+						</span>
+						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+							<Identicon value={delegate_id} size={20} theme='polkadot' />
+							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
+							<span className='flex items-center gap-x-2 text-sm'>
+								<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary'/></button>
 							</span>
 						</p>
 					</div>}
@@ -414,7 +466,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, amount, amountUSD, className, call
 								Approve Transaction
 						</Button>}
 						{depositor === address &&
-							<Button loading={loading} onClick={handleCancelTransaction} className='w-full border-none text-white text-sm font-normal bg-failure'>
+							<Button loading={loading} onClick={() => setOpenCancelModal(true)} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 							</Button>
 						}

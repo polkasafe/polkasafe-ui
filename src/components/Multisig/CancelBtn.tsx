@@ -8,9 +8,10 @@ import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 interface ICancelBtnProps {
 	onClick?: ()=>void;
 	className?: string;
+	title?: string;
 }
 
-const CancelBtn: FC<ICancelBtnProps> = ({ onClick, className }) => {
+const CancelBtn: FC<ICancelBtnProps> = ({ onClick, className, title }) => {
 	return (
 		<button onClick={onClick}
 			className={classNames('flex items-center w-[30%] gap-x-[10.83px] text-failure text-sm font-normal leading-[15px] bg-failure bg-opacity-10 p-3 rounded-lg min-w-[120px] justify-center', className)}
@@ -21,7 +22,7 @@ const CancelBtn: FC<ICancelBtnProps> = ({ onClick, className }) => {
 				<OutlineCloseIcon className='w-[5px] h-[5px]' />
 			</span>
 			<span>
-                Cancel
+				{title ? title : 'Cancel'}
 			</span>
 		</button>
 	);

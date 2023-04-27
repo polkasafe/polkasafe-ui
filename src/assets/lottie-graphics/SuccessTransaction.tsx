@@ -13,7 +13,7 @@ interface Props {
 	waitMessage?: string
 }
 
-function SuccessTransactionLottie({ message, width = 350 }: Props): ReactElement {
+function SuccessTransactionLottie({ message, width = 350, waitMessage }: Props): ReactElement {
 
 	return (
 		<div className='w-full flex flex-col justify-center items-center'>
@@ -24,7 +24,8 @@ function SuccessTransactionLottie({ message, width = 350 }: Props): ReactElement
 				}}
 				play={true}
 			/>
-			<div className='font-medium text-lg text-success' >{message}</div>
+			<div className='font-medium text-lg text-success mb-1' >{message}</div>
+			<div className='text-text_secondary max-w-[452px]' >{waitMessage}</div>
 		</div>
 	);
 }
