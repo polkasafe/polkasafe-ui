@@ -141,6 +141,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
+							activeMultisig: multisigData.address,
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 							multisigSettings: {
 								...prevState?.multisigSettings,
