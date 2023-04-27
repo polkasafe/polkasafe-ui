@@ -308,10 +308,10 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						</div>
 					</div>:<div>
 						{viewReviews?<div>
-							<Owners threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
+							<Owners multisigThreshold={multisigData?.threshold} threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={onCancel} />
-								{signatoriesWithName.length ?
+								{signatoriesWithName.length && multisigData?.threshold ?
 									<AddBtn title='Continue' onClick={handleViewReviews}/>
 									:
 									<AddBtn disabled={signatoriesArray.length < 2 || threshold < 2 || threshold > signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>
