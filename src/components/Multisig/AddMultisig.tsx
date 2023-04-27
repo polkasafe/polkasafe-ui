@@ -45,7 +45,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 					open={openLinkMultisig}
 					className='w-auto md:min-w-[500px]'
 				>
-					<LinkMultisig onCancel={() => setOpenLinkMultisig(false)} />
+					<LinkMultisig onCancel={() => {setOpenLinkMultisig(false); onCancel?.();}} />
 				</Modal>
 			</>
 		);
