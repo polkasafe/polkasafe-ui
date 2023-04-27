@@ -88,7 +88,7 @@ const Owners = ({ signatories, threshold, setThreshold, setSignatoriesWithName, 
 					</div>
 				</div>
 				<div className='px-4 overflow-auto w-full'>
-					{signatories.length !== 0 && <p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>}
+					{signatories.length !== 0 && <p className='text-text_secondary mt-5'>This safe on <span className='text-white capitalize'>{network}</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>}
 					<Form
 						className='my-0 mt-5'
 					>

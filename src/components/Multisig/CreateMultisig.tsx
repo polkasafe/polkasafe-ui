@@ -321,7 +321,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						</div>
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 							<CancelBtn onClick={onCancel}/>
-							<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
+							<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 						</div>
 					</div>
 				</Form>
