@@ -48,7 +48,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const { setUserDetailsContextState, address: userAddress, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 
-	const { toggleSwitch, toggleOnSwitch } = useModalContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
+
 	const [multisigName, setMultisigName] = useState<string>('');
 	const [threshold, setThreshold] = useState<number | null>(2);
 	const [signatories, setSignatories] = useState<string[]>([userAddress]);
@@ -261,13 +263,13 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						)}>
 							<div className='relative'>
 								<div className='flex items-center justify-between'>
-									{toggleSwitch?<div className="flex items-center justify-between w-[45vw] gap-x-4">
+									{!uploadSignatoriesJson?<div className="flex items-center justify-between w-[45vw] gap-x-4">
 										<Search addAddress={addAddress} setAddAddress={setAddAddress} />
 										<AddAddressModal/>
 									</div>:null}
-									<div className='flex flex-col items-end justify-center absolute top-1 right-1'>
+									<div className='flex flex-col items-end justify-center absolute top-1 right-1 z-50'>
 										<div className='flex items-center justify-center mb-2'>
-											<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size="small" onChange={toggleOnSwitch}/>
+											<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size='small' onChange={(checked) => setUploadSignatoriesJson(checked)} />
 										</div>
 									</div>
 								</div>
@@ -279,11 +281,11 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 									validateStatus={signatories.length < 2 ? 'error' : 'success'}
 								>
 									<div className='w-full flex items-center justify-between'>
-										{toggleSwitch? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
+										{!uploadSignatoriesJson? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
 										<DashDotIcon className='mt-5'/>
 										<div className='w-[40%] overflow-auto'>
 											<br />
-											{toggleSwitch? <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>The signatories has the ability to create transactions using the multisig and approve transactions sent by others. Once the threshold is reached with approvals, the multisig transaction is enacted on-chain.
+											{!uploadSignatoriesJson? <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>The signatories has the ability to create transactions using the multisig and approve transactions sent by others. Once the threshold is reached with approvals, the multisig transaction is enacted on-chain.
 										Since the multisig function like any other account, once created it is available for selection anywhere accounts are used and needs to be funded before use.
 											</p> : <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>Supply a JSON file with the list of signatories.</p>}
 										</div>
