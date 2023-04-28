@@ -1,7 +1,6 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Form, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -13,7 +12,7 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
@@ -22,6 +21,7 @@ import { CopyIcon, QRIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import { setSigner } from 'src/utils/setSigner';
 import { transferFunds } from 'src/utils/transferFunds';
 import styled from 'styled-components';
 
@@ -29,9 +29,9 @@ import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 
-	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { accounts } = useGetWalletAccounts(loggedInWallet);
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
@@ -75,15 +75,9 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	};
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap ) return;
+		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(selectedSender, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		setLoading(true);
 		try {

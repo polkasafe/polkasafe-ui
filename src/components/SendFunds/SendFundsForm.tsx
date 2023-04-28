@@ -4,7 +4,6 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -19,7 +18,6 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
@@ -31,6 +29,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
+import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -62,9 +61,8 @@ const addRecipientHeading = () => {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address, isProxy } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -104,15 +102,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	}, [amount, api, apiReady, recipientAddress]);
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap || !address){
+		if(!api || !apiReady || !address){
 			return;
 		}
 
-		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
-		if(!signersMap[wallet]) return;
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({

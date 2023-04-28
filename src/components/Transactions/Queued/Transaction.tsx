@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Signer } from '@polkadot/api/types';
 import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -16,7 +15,6 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress, IQueueItem } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
@@ -26,8 +24,8 @@ import { approveProxy } from 'src/utils/approveProxy';
 import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
 import { cancelProxy } from 'src/utils/cancelProxy';
 import decodeCallData from 'src/utils/decodeCallData';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
+import { setSigner } from 'src/utils/setSigner';
 
 import SentInfo from './SentInfo';
 
@@ -49,14 +47,13 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
-	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
 	const [getMultiDataLoading, setGetMultisigDataLoading] = useState(false);
 	const [loadingMessages, setLoadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
-	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
@@ -140,15 +137,11 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	}, [decodedCallData, multisig, multisigAddresses, network]);
 
 	const handleApproveTransaction = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap || !address){
+		if(!api || !apiReady || !address){
 			return;
 		}
 
-		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
-		if(!signersMap[wallet]) return;
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		if(!multisig) return;
 
@@ -222,15 +215,11 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	};
 
 	const handleCancelTransaction = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap || !address){
+		if(!api || !apiReady || !address){
 			return;
 		}
 
-		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
-		if(!signersMap[wallet]) return;
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
