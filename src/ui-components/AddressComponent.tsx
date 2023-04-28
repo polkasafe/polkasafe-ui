@@ -17,9 +17,10 @@ import { CopyIcon, ExternalLinkIcon } from './CustomIcons';
 interface IAddressComponent{
     address: string
     iconSize?: number
+	withBadge?: boolean
 }
 
-const AddressComponent = ({ address, iconSize=30 }: IAddressComponent) => {
+const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -31,20 +32,43 @@ const AddressComponent = ({ address, iconSize=30 }: IAddressComponent) => {
 			className=' flex items-center gap-x-3'
 		>
 			{multisig?.proxy && getSubstrateAddress(multisig.proxy) === getSubstrateAddress(address) ?
-				<Badge count='Proxy' offset={[-45, 0]} className='border-none' color='#FF79F2'>
-					<Identicon
+				withBadge ?
+					<Badge count='Proxy' offset={[-45, 0]} className='border-none' color='#FF79F2'>
+						<Identicon
+							className={'border-2 rounded-full bg-transparent border-[#FF79F2] p-1'}
+							value={address}
+							size={iconSize}
+							theme='polkadot'
+						/>
+					</Badge> : <Identicon
 						className={'border-2 rounded-full bg-transparent border-[#FF79F2] p-1'}
 						value={address}
 						size={iconSize}
 						theme='polkadot'
 					/>
-				</Badge>
 				:
-				<Identicon
-					value={address}
-					size={iconSize}
-					theme='polkadot'
-				/>
+				multisig?.address === getSubstrateAddress(address) ?
+					withBadge ?
+						<Badge count='Multisig' offset={[-45, 0]} className='border-none' color='#1573FE'>
+							<Identicon
+								className={'border-2 rounded-full bg-transparent border-primary p-1'}
+								value={address}
+								size={iconSize}
+								theme='polkadot'
+							/>
+						</Badge> :
+						<Identicon
+							className={'border-2 rounded-full bg-transparent border-primary p-1'}
+							value={address}
+							size={iconSize}
+							theme='polkadot'
+						/>
+					:
+					<Identicon
+						value={address}
+						size={iconSize}
+						theme='polkadot'
+					/>
 			}
 			<div>
 				<div

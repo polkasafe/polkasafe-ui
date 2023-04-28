@@ -7,6 +7,7 @@ import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -20,12 +21,13 @@ interface IReceivedInfoProps {
 	date: string;
 	// time: string;
 	from: string
+	to: string
 	callHash: string
 	note?: string
 	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, date, from, callHash, note, loading }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -78,6 +80,16 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, amount_usd, amountType, 
 				</div>
 			</div>
 			<Divider className='bg-text_secondary my-5' />
+			<div
+				className=' flex items-center gap-x-7 mb-3'
+			>
+				<span
+					className='text-text_secondary font-normal text-sm leading-[15px]'
+				>
+					To:
+				</span>
+				<AddressComponent address={to} />
+			</div>
 			<div
 				className='w-full max-w-[418px] flex items-center gap-x-5'
 			>
