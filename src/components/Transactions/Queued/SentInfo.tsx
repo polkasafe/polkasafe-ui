@@ -191,6 +191,27 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</span>
 					</p>
 				</div>
+				{depositor &&
+					<div
+						className='flex items-center gap-x-5 mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+								Created by:
+						</span>
+						<p
+							className='flex items-center gap-x-3 leading-[13px]'
+						>
+							<Identicon value={depositor} theme='polkadot' size={20} />
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{depositor}
+							</span>
+						</p>
+					</div>
+				}
 				<div
 					className='flex items-center gap-x-5 mt-3'
 				>

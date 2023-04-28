@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Signer } from '@polkadot/api/types';
-import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Form, Input, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -16,6 +15,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -153,19 +153,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 
 							<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
 							{/* TODO: Make into reusable component */}
-							<div className=' p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
-								<div className='flex items-center justify-center w-10 h-10'>
-									<Identicon
-										className='image identicon mx-2'
-										value={multisig?.address}
-										size={30}
-										theme={'polkadot'}
-									/>
-								</div>
-								<div className='flex flex-col gap-y-[6px]'>
-									<h4 className='font-medium text-sm leading-[15px] text-white'>{multisig?.name}</h4>
-									<p className='text-text_secondary font-normal text-xs leading-[13px]'>{multisig?.address}</p>
-								</div>
+							<div className=' p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
+								<AddressComponent withBadge={false} address={multisig?.address || activeMultisig} />
 								<Balance address={multisig?.address || activeMultisig} />
 							</div>
 

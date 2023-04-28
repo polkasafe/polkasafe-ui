@@ -5,7 +5,6 @@
 // import { WarningOutlined } from '@ant-design/icons';
 
 import { Signer } from '@polkadot/api/types';
-import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -22,6 +21,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { NotificationStatus } from 'src/types';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -192,16 +192,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
-									<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
-										<Identicon
-											value={activeMultisig}
-											size={30}
-											theme='polkadot'
-										/>
-										<div className='flex flex-col gap-y-[6px] truncate'>
-											<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
-											<p className='text-text_secondary font-normal text-xs leading-[13px]'>{(activeMultisig)}</p>
-										</div>
+									<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
+										<AddressComponent withBadge={false} address={activeMultisig} />
 										<Balance address={activeMultisig} onChange={setMultisigBalance} />
 									</article>
 									<article className='w-[412px] flex items-center'>

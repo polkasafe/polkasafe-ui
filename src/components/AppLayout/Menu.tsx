@@ -165,7 +165,8 @@ const Menu: FC<Props> = ({ className }) => {
 									setUserDetailsContextState((prevState) => {
 										return {
 											...prevState,
-											activeMultisig: multisig.proxy ? multisig.proxy : multisig.address
+											activeMultisig: multisig.proxy ? multisig.proxy : multisig.address,
+											isProxy: multisig.proxy ? true : false
 										};
 									});
 									setSelectedMultisigAddress(multisig.address);
