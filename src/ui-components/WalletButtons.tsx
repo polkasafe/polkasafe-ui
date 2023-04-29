@@ -1,7 +1,6 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { isWeb3Injected } from '@polkadot/extension-dapp';
 import { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 import React, { useEffect, useState } from 'react';
 import PolkadotWalletIcon from 'src/assets/wallet/polkadotjs-icon.svg';
@@ -31,9 +30,7 @@ const WalletButtons = ({ setAccounts, setWallet, className, setNoAccounts, setNo
 	const getAccounts = async (chosenWallet: Wallet): Promise<undefined> => {
 		const injectedWindow = window as Window & InjectedWindow;
 
-		const wallet = isWeb3Injected
-			? injectedWindow.injectedWeb3[chosenWallet]
-			: null;
+		const wallet = injectedWindow.injectedWeb3[chosenWallet];
 
 		if (!wallet) {
 			setNoExtenstion?.(true);

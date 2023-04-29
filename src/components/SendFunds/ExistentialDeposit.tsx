@@ -81,7 +81,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const handleSubmit = async () => {
 		if(!api || !apiReady ) return;
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		setLoading(true);
 		console.log(formatBnBalance(chainProperties[network].existentialDeposit, {}, network));

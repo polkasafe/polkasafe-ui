@@ -106,7 +106,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			return;
 		}
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({
