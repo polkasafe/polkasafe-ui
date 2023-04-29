@@ -73,6 +73,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					activeMultisig: localStorage.getItem('active_multisig') || '',
 					address: '',
 					addressBook: [],
+					loggedInWallet: Wallet.POLKADOT,
 					multisigAddresses: [],
 					multisigSettings: {}
 				};
