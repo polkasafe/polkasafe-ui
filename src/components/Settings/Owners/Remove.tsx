@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
 import { Form, Spin } from 'antd';
 import React, { useState } from 'react';
@@ -19,15 +18,14 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
 import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
+import { setSigner } from 'src/utils/setSigner';
 
 const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCancel }: { addressToRemove: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
 	const [newThreshold, setNewThreshold] = useState(oldThreshold === oldSignatoriesLength ? oldThreshold - 1 : oldThreshold);
@@ -35,9 +33,8 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const [success, setSuccess] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { signersMap, accountsMap } = useGetAllAccounts();
 	const [txnHash, setTxnHash] = useState<string>('');
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
@@ -95,13 +92,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(userAddress, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== addressToRemove) || [];
 

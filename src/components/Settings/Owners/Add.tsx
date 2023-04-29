@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Signer } from '@polkadot/api/types';
 import { AutoComplete, Button, Form, Input, Spin, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
@@ -18,15 +17,14 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
 import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
+import { setSigner } from 'src/utils/setSigner';
 import styled from 'styled-components';
 
 interface ISignatory{
@@ -52,8 +50,7 @@ const addRecipientHeading = () => {
 };
 
 const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: string }) => {
-	const { signersMap, accountsMap } = useGetAllAccounts();
-	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const [loading, setLoading] = useState(false);
@@ -151,13 +148,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(address, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 

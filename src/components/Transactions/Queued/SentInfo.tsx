@@ -12,6 +12,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -200,16 +201,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						>
 								Created by:
 						</span>
-						<p
-							className='flex items-center gap-x-3 leading-[13px]'
-						>
-							<Identicon value={depositor} theme='polkadot' size={20} />
-							<span
-								className='text-white font-normal text-sm leading-[15px]'
-							>
-								{depositor}
-							</span>
-						</p>
+						<AddressComponent address={depositor} />
 					</div>
 				}
 				<div

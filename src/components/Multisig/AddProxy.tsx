@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
 import { Spin } from 'antd';
 import BN from 'bn.js';
@@ -15,15 +14,14 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import { transferAndProxyBatchAll } from 'src/utils/transferAndProxyBatchAll';
 import styled from 'styled-components';
@@ -41,10 +39,9 @@ interface IMultisigProps {
 }
 
 const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, homepage, setProxyInProcess }) => {
-	const { address: userAddress, multisigAddresses, activeMultisig, addressBook } = useGlobalUserDetailsContext();
+	const { address: userAddress, multisigAddresses, activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 
-	const { noAccounts, signersMap, accountsMap } = useGetAllAccounts();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [success, setSuccess] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
@@ -55,15 +52,9 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 	const [txnHash, setTxnHash] = useState<string>('');
 
 	const createProxy = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap ) return;
+		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(userAddress, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		setSigner(api, loggedInWallet);
 
 		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
 			.muln(1)
