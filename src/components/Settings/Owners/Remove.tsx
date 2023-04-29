@@ -92,7 +92,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== addressToRemove) || [];
 

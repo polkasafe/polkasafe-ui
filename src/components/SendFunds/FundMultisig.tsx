@@ -77,7 +77,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const handleSubmit = async () => {
 		if(!api || !apiReady ) return;
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		setLoading(true);
 		try {

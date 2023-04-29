@@ -148,7 +148,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 

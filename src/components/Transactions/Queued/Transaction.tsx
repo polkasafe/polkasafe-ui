@@ -141,7 +141,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			return;
 		}
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		if(!multisig) return;
 
@@ -219,7 +219,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			return;
 		}
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 

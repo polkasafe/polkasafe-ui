@@ -54,7 +54,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 	const createProxy = async () => {
 		if(!api || !apiReady ) return;
 
-		setSigner(api, loggedInWallet);
+		await setSigner(api, loggedInWallet);
 
 		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
 			.muln(1)
