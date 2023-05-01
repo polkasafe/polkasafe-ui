@@ -12,6 +12,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { INotification } from 'src/types';
 import { NotificationIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
+import styled from 'styled-components';
 
 import NotificationCard from './NotificationCard';
 
@@ -19,6 +20,25 @@ export enum ENotificationStatus {
 	READ = 'READ',
 	UNREAD = 'UNREAD'
 }
+
+const Container = styled.div`
+/* Track */
+& ::-webkit-scrollbar-track {
+  border-radius: 10px;
+//   background: #737579; 
+}
+ 
+/* Handle */
+& ::-webkit-scrollbar-thumb {
+//   background: #505258; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+& ::-webkit-scrollbar-thumb:hover {
+//   background: #24272E; 
+}
+`;
 
 const Notification= () => {
 	const { network } = useGlobalApiContext();
@@ -67,7 +87,7 @@ const Notification= () => {
 	}, [address]);
 
 	return (
-		<div
+		<Container
 			className='relative'
 			onBlur={() => {
 				if (!isMouseEnter.current) {
@@ -83,7 +103,7 @@ const Notification= () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] px-3 z-10 min-w-[300px] sm:min-w-[344px] max-h-[420px] overflow-y-auto',
+					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] z-10 min-w-[350px] sm:min-w-[344px] max-h-[460px] px-1',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
@@ -97,34 +117,35 @@ const Notification= () => {
 					isMouseEnter.current = false;
 				}}
 			>
-				<div className='flex gap-x-5 items-center justify-between mb-5'>
+				<div className='flex gap-x-5 items-center justify-between mb-5 px-4'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
 					<button onClick={() => markAllRead()} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>
 						Mark all as read
 					</button>
 				</div>
-
-				<div>
-					{ loading ? <Loader size='large'/> :
-						notifications.length > 0 ?
-							<section>
-								<div className='flex flex-col gap-y-[10px] mt-2'>
-									{notifications.map((notification, index) => {
-										return <NotificationCard key={index} {...notification} />;
-									})}
-								</div>
-							</section>
-							:
-							<section className='flex flex-col items-center'>
-								<div className='mt-10'>
-									<img src={noNotification} alt="No notification icon" />
-								</div>
-								<p className='text-white text-base font-medium mt-10'>No new notifications</p>
-							</section>
-					}
+				<div className='overflow-y-auto px-4 pt-0 max-h-[375px] '>
+					<div>
+						{ loading ? <Loader size='large'/> :
+							notifications.length > 0 ?
+								<section>
+									<div className='flex flex-col gap-y-[10px] mt-2'>
+										{notifications.map((notification, index) => {
+											return <NotificationCard key={index} {...notification} />;
+										})}
+									</div>
+								</section>
+								:
+								<section className='flex flex-col items-center'>
+									<div className='mt-10'>
+										<img src={noNotification} alt="No notification icon" />
+									</div>
+									<p className='text-white text-base font-medium mt-10'>No new notifications</p>
+								</section>
+						}
+					</div>
 				</div>
 			</div>
-		</div>
+		</Container>
 	);
 };
 
