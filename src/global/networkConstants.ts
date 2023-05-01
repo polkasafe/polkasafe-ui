@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-// import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
+import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
 import rococoLogo from 'src/assets/parachains-logos/rococo-logo.svg';
@@ -10,7 +10,7 @@ import westendLogo from 'src/assets/parachains-logos/westend-logo.png';
 import { ChainPropType } from 'src/types';
 
 export const networks = {
-	// ASTAR: 'astar',
+	ASTAR: 'astar',
 	KUSAMA: 'kusama',
 	POLKADOT: 'polkadot',
 	ROCOCO: 'rococo',
@@ -18,7 +18,7 @@ export const networks = {
 };
 
 export const tokenSymbol = {
-	// ASTR: 'ASTR',
+	ASTR: 'ASTR',
 	DOT: 'DOT',
 	KSM: 'KSM',
 	ROC: 'ROC',
@@ -65,16 +65,16 @@ export const chainProperties: ChainPropType = {
 		ss58Format: 42,
 		tokenDecimals: 12,
 		tokenSymbol: tokenSymbol.ROC
+	},
+	[networks.ASTAR]: {
+		blockTime: 12000,
+		chainId: 0,
+		existentialDeposit: '0.000000000001',
+		logo: astarLogo,
+		rpcEndpoint: 'wss://astar.public.blastapi.io',
+		ss58Format: 5,
+		tokenDecimals: 18,
+		tokenSymbol: tokenSymbol.ASTR
 	}
-	// [networks.ASTAR]: {
-	// blockTime: 12000,
-	// chainId: 0,
-	// existentialDeposit: '0.000000000001',
-	// logo: astarLogo,
-	// rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
-	// ss58Format: 5,
-	// tokenDecimals: 18,
-	// tokenSymbol: tokenSymbol.ASTR
-	// }
 
 };
