@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Form, Spin } from 'antd';
+import { Button, Form, Spin, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
@@ -193,29 +193,34 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 									<p
 										className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
 									>
-										<button
-											onClick={() => {
-												if (newThreshold !== 2) {
-													setNewThreshold(prev => prev - 1);
-												}
-											}}
-											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-									-
-										</button>
+										<Tooltip title={newThreshold === 2 && 'Minimum Threshold must be 2'}>
+											<Button
+												onClick={() => {
+													if (newThreshold !== 2) {
+														setNewThreshold(prev => prev - 1);
+													}
+												}}
+												className={`p-0 outline-none border rounded-full flex items-center justify-center ${newThreshold === 2 ? 'border-text_secondary text-text_secondary' : 'text-primary border-primary'} w-[14.5px] h-[14.5px]`}
+											>
+												-
+											</Button>
+										</Tooltip>
 										<span
 											className='text-white text-sm'
 										>
 											{newThreshold}
 										</span>
-										<button
-											onClick={() => {
-												if (newThreshold < (oldSignatoriesLength - 1)) {
-													setNewThreshold(prev => prev + 1);
-												}
-											}}
-											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-									+
-										</button>
+										<Tooltip title={newThreshold === oldSignatoriesLength - 1 && 'Threshold must be Less than or Equal to Signatories'}>
+											<Button
+												onClick={() => {
+													if (newThreshold < oldSignatoriesLength - 1) {
+														setNewThreshold(prev => prev + 1);
+													}
+												}}
+												className={`p-0 outline-none border rounded-full flex items-center justify-center ${newThreshold === oldSignatoriesLength - 1 ? 'border-text_secondary text-text_secondary' : 'text-primary border-primary'} w-[14.5px] h-[14.5px]`}>
+												+
+											</Button>
+										</Tooltip>
 									</p>
 									<p
 										className='text-text_secondary font-normal text-sm leading-[15px]'

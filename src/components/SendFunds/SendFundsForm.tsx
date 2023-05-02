@@ -230,7 +230,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 													id='recipient'
 													placeholder="Send to Address.."
 													onChange={(value) => setRecipientAddress(value)}
-													value={addressBook.find((item) => item.address === recipientAddress)?.name || getEncodedAddress(recipientAddress, network)}
 													defaultValue={getEncodedAddress(defaultSelectedAddress || addressBook[0].address, network)}
 												/>
 												<div className='absolute right-2'>
