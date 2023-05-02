@@ -5,7 +5,7 @@
 // import { WarningOutlined } from '@ant-design/icons';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
+import { AutoComplete, Checkbox, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -26,6 +26,7 @@ import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
@@ -62,7 +63,7 @@ const addRecipientHeading = () => {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
@@ -87,6 +88,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [transactionData, setTransactionData] = useState<any>({});
 
+	const [recipientNotInAddressBook, setRecipientNotInAddressBook] = useState<boolean>(false);
+	const [addAddressCheck, setAddAddressCheck] = useState<boolean>(true);
+
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
@@ -96,6 +100,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		} else {
 			setValidRecipient(true);
 		}
+
+		if(addressBook.some((item) => getSubstrateAddress(item.address) === getSubstrateAddress(recipientAddress))){
+			setRecipientNotInAddressBook(false);
+		} else {
+			setRecipientNotInAddressBook(true);
+		}
+
 		if(api && apiReady && recipientAddress && amount){
 			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
 			let tx: SubmittableExtrinsic<'promise'>;
@@ -107,6 +118,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				setCallData(call.method.toHex());
 			}
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
 
 	const handleSubmit = async () => {
@@ -148,6 +160,23 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTimeout(() => {
 				setFailure(false);
 			}, 5000);
+		} finally {
+			if(addAddressCheck && validRecipient && recipientNotInAddressBook){
+				const newAddressBook = await addToAddressBook({
+					address: recipientAddress,
+					addressBook,
+					name: DEFAULT_ADDRESS_NAME,
+					network
+				});
+				if(newAddressBook){
+					setUserDetailsContextState(prev => {
+						return {
+							...prev,
+							addressBook: newAddressBook
+						};
+					});
+				}
+			}
 		}
 	};
 
@@ -240,6 +269,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												</div>
 											</div>
 										</Form.Item>
+										{recipientNotInAddressBook &&
+											<Checkbox className='text-white mt-2 [&>span>span]:border-primary' checked={addAddressCheck} onChange={(e) => setAddAddressCheck(e.target.checked)} >
+												Add Address to Address Book
+											</Checkbox>
+										}
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>
