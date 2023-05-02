@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ApiPromise } from '@polkadot/api';
-import { isWeb3Injected } from '@polkadot/extension-dapp';
 import { Injected, InjectedWindow } from '@polkadot/extension-inject/types';
 import { APP_NAME } from 'src/global/appName';
 import { Wallet } from 'src/types';
@@ -11,9 +10,7 @@ import { Wallet } from 'src/types';
 export const setSigner = async (api: ApiPromise, chosenWallet: Wallet) => {
 	const injectedWindow = window as Window & InjectedWindow;
 
-	const wallet = isWeb3Injected
-		? injectedWindow.injectedWeb3[chosenWallet]
-		: null;
+	const wallet = injectedWindow.injectedWeb3[chosenWallet];
 
 	if (!wallet) {
 		return;

@@ -29,6 +29,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 	const handleSetNetwork = (networkToSet: string) => {
 		localStorage.setItem('network', networkToSet);
 		setNetwork(networkToSet);
+		toggleVisibility(false);
 	};
 
 	return (
