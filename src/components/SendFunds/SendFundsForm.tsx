@@ -4,6 +4,7 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -97,9 +98,16 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}
 		if(api && apiReady && recipientAddress && amount){
 			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-			setCallData(call.method.toHex());
+			let tx: SubmittableExtrinsic<'promise'>;
+			if(isProxy && multisig?.proxy){
+				tx = api.tx.proxy.proxy(multisig.proxy, null, call);
+				setCallData(tx.method.toHex());
+			}
+			else {
+				setCallData(call.method.toHex());
+			}
 		}
-	}, [amount, api, apiReady, recipientAddress]);
+	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || !address){

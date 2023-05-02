@@ -13,6 +13,7 @@ import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
+import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { IAddressBookItem, IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -115,11 +116,33 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					setLoading(false);
 					return;
 				}
+				let proxyAddress = null;
+				const response = await fetch(
+					`https://${network}.api.subscan.io/api/scan/events`,
+					{
+						body: JSON.stringify({
+							row: 1,
+							page: 0,
+							module: 'proxy',
+							call: 'PureCreated',
+							address: multisigAddress
+						}),
+						headers: SUBSCAN_API_HEADERS,
+						method: 'POST'
+					}
+				);
+
+				const responseJSON = await response.json();
+				if(responseJSON.data.count !== 0){
+					const params = JSON.parse(responseJSON.data?.events[0]?.params);
+					proxyAddress = getEncodedAddress(params[0].value, network);
+				}
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
 						threshold,
-						multisigName
+						multisigName,
+						proxyAddress
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
@@ -138,6 +161,13 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 				}
 
 				if(multisigData){
+					queueNotification({
+						header: 'Success!',
+						message: 'Multisig Linked',
+						status: NotificationStatus.SUCCESS
+					});
+					setLoading(false);
+					onCancel();
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
@@ -152,16 +182,13 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 							}
 						};
 					});
-					Promise.all(signatoriesWithName.map(
+					const results = await Promise.allSettled(signatoriesWithName.map(
 						(signatory) => handleAddAddress(signatory.address, signatory.name)
-					)).then(() => {
-						queueNotification({
-							header: 'Success!',
-							message: 'Multisig Linked',
-							status: NotificationStatus.SUCCESS
-						});
-						setLoading(false);
-						onCancel();
+					));
+					results.forEach((result) => {
+						if(result.status === 'rejected'){
+							console.log('ERROR', result.reason);
+						}
 					});
 				}
 

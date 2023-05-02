@@ -475,7 +475,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</Timeline.Item>
 					</Timeline>
 					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
-						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
 								Approve Transaction
 						</Button>}
 						{depositor === address &&
