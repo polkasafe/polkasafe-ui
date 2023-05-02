@@ -43,7 +43,7 @@ export const chainProperties: ChainProperties = {
 	},
 	[networks.ASTAR]: {
 		blockTime: 12000,
-		rpcEndpoint: 'wss://astar.public.blastapi.io',
+		rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
 		ss58Format: 5,
 		tokenDecimals: 18,
 		tokenSymbol: 'ASTR'

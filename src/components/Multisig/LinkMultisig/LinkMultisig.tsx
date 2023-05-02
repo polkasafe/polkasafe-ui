@@ -117,25 +117,27 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					return;
 				}
 				let proxyAddress = null;
-				const response = await fetch(
-					`https://${network}.api.subscan.io/api/scan/events`,
-					{
-						body: JSON.stringify({
-							row: 1,
-							page: 0,
-							module: 'proxy',
-							call: 'PureCreated',
-							address: multisigAddress
-						}),
-						headers: SUBSCAN_API_HEADERS,
-						method: 'POST'
-					}
-				);
+				if(network !== 'astar'){
+					const response = await fetch(
+						`https://${network}.api.subscan.io/api/scan/events`,
+						{
+							body: JSON.stringify({
+								row: 1,
+								page: 0,
+								module: 'proxy',
+								call: 'PureCreated',
+								address: multisigAddress
+							}),
+							headers: SUBSCAN_API_HEADERS,
+							method: 'POST'
+						}
+					);
 
-				const responseJSON = await response.json();
-				if(responseJSON.data.count !== 0){
-					const params = JSON.parse(responseJSON.data?.events[0]?.params);
-					proxyAddress = getEncodedAddress(params[0].value, network);
+					const responseJSON = await response.json();
+					if(responseJSON.data.count !== 0){
+						const params = JSON.parse(responseJSON.data?.events[0]?.params);
+						proxyAddress = getEncodedAddress(params[0].value, network);
+					}
 				}
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
