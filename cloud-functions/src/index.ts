@@ -19,8 +19,8 @@ import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE } from './constants/notification_engine_constants';
-import callNotificationTrigger from './notification-engine/utils/callNotificationTrigger';
+import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
+import { NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE } from './notification-engine/notification_engine_constants';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -964,6 +964,7 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 });
 
 export const notify = functions.https.onRequest(async (req, res) => {
+	// TODO: Get template from db
 	corsHandler(req, res, async () => {
 		const apiKey = req.get('x-api-key');
 		const source = req.get('x-source');
@@ -976,7 +977,7 @@ export const notify = functions.https.onRequest(async (req, res) => {
 		if (args && (typeof args !== 'object' || Array.isArray(args))) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			callNotificationTrigger(source as NOTIFICATION_SOURCE, trigger, args);
+			await callNotificationTrigger(source as NOTIFICATION_SOURCE, trigger, args);
 
 			return res.status(200).json({ data: 'Notification(s) sent successfully.' });
 		} catch (err:unknown) {
