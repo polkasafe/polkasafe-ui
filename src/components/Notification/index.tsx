@@ -23,22 +23,28 @@ export enum ENotificationStatus {
 }
 
 const Container = styled.div`
-/* Track */
-& ::-webkit-scrollbar-track {
-  border-radius: 10px;
-//   background: #737579; 
-}
- 
-/* Handle */
-& ::-webkit-scrollbar-thumb {
-//   background: #505258; 
-  border-radius: 10px;
-}
+	/* Track */
+	& ::-webkit-scrollbar-track {
+		border-radius: 10px;
+		background: #1B2028;
+	}
 
-/* Handle on hover */
-& ::-webkit-scrollbar-thumb:hover {
-//   background: #24272E; 
-}
+	/* Handle */
+	& ::-webkit-scrollbar-thumb {
+		background: #1B2028;
+		border-radius: 10px;
+	}
+
+	/* Handle on hover */
+	& ::-webkit-scrollbar-thumb:hover {
+		//   background: #24272E; 
+	}
+	&:hover{
+		& ::-webkit-scrollbar-thumb {
+			background: #505258; 
+			border-radius: 10px;
+		}
+	}
 `;
 
 const Notification= () => {
