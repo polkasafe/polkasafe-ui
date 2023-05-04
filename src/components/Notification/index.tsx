@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import classNames from 'classnames';
+import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import noNotification from 'src/assets/icons/no-notification.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -42,12 +43,13 @@ const Container = styled.div`
 
 const Notification= () => {
 	const { network } = useGlobalApiContext();
-	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState, notifiedTill } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState(true);
 	const [notifications, setNotifications] = useState<INotification[]>([]);
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
+	const unreadNotificationAvailable = !notifications.length ? undefined :  notifications.filter(({ created_at }) => notifiedTill && dayjs(notifiedTill).isAfter(created_at) ? false : true);
 
 	const getNotifications = useCallback(async () => {
 		if(!address) return;
@@ -103,7 +105,7 @@ const Notification= () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] z-10 min-w-[350px] sm:min-w-[344px] max-h-[460px] px-1',
+					'absolute top-16 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] z-10 min-w-[344px] sm:min-w-[400px] max-h-[460px] px-1',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
@@ -117,13 +119,17 @@ const Notification= () => {
 					isMouseEnter.current = false;
 				}}
 			>
-				<div className='flex gap-x-5 items-center justify-between mb-5 px-4'>
+				<div className='flex gap-x-5 items-center justify-between mb-1 px-3'>
 					<h3 className='text-white font-bold text-xl'>Notifications</h3>
-					<button onClick={() => markAllRead()} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>
-						Mark all as read
-					</button>
+					{
+						!!unreadNotificationAvailable?.length &&
+						<button
+							onClick={() => markAllRead()} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>
+								Mark all as read
+						</button>
+					}
 				</div>
-				<div className='overflow-y-auto px-4 pt-0 max-h-[375px] '>
+				<div className='overflow-y-auto px-3 pt-0 max-h-[375px] '>
 					<div>
 						{ loading ? <Loader size='large'/> :
 							notifications.length > 0 ?
