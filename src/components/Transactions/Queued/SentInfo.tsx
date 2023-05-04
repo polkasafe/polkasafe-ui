@@ -12,6 +12,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -191,6 +192,18 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</span>
 					</p>
 				</div>
+				{depositor &&
+					<div
+						className='flex items-center gap-x-5 mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+								Created by:
+						</span>
+						<AddressComponent address={depositor} />
+					</div>
+				}
 				<div
 					className='flex items-center gap-x-5 mt-3'
 				>
@@ -462,7 +475,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</Timeline.Item>
 					</Timeline>
 					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
-						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className='w-full border-none text-white text-sm font-normal bg-primary'>
+						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
 								Approve Transaction
 						</Button>}
 						{depositor === address &&

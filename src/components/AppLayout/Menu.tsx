@@ -165,14 +165,15 @@ const Menu: FC<Props> = ({ className }) => {
 									setUserDetailsContextState((prevState) => {
 										return {
 											...prevState,
-											activeMultisig: multisig.proxy && isProxy ? multisig.proxy : multisig.address
+											activeMultisig: multisig.proxy ? multisig.proxy : multisig.address,
+											isProxy: multisig.proxy ? true : false
 										};
 									});
 									setSelectedMultisigAddress(multisig.address);
 								}}>
 									<Identicon
 										className='image identicon mx-2'
-										value={(isProxy ? multisig?.proxy : multisig.address) || multisig.address}
+										value={multisig.address}
 										size={30}
 										theme={'polkadot'}
 									/>

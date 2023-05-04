@@ -2,9 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Signer } from '@polkadot/api/types';
 import Identicon from '@polkadot/react-identicon';
-import { Form, Spin } from 'antd';
+import { Button, Form, Spin, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
@@ -19,15 +18,14 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
 import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
+import { setSigner } from 'src/utils/setSigner';
 
 const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCancel }: { addressToRemove: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
 	const [newThreshold, setNewThreshold] = useState(oldThreshold === oldSignatoriesLength ? oldThreshold - 1 : oldThreshold);
@@ -35,9 +33,8 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const [success, setSuccess] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { signersMap, accountsMap } = useGetAllAccounts();
 	const [txnHash, setTxnHash] = useState<string>('');
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
@@ -95,13 +92,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(userAddress, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		await setSigner(api, loggedInWallet);
 
 		const newSignatories = multisig && multisig.signatories.filter((item) => item !== addressToRemove) || [];
 
@@ -202,29 +193,34 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 									<p
 										className='flex items-center justify-center gap-x-[16.83px] p-[12.83px] bg-bg-secondary rounded-lg'
 									>
-										<button
-											onClick={() => {
-												if (newThreshold !== 2) {
-													setNewThreshold(prev => prev - 1);
-												}
-											}}
-											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-									-
-										</button>
+										<Tooltip title={newThreshold === 2 && 'Minimum Threshold must be 2'}>
+											<Button
+												onClick={() => {
+													if (newThreshold !== 2) {
+														setNewThreshold(prev => prev - 1);
+													}
+												}}
+												className={`p-0 outline-none border rounded-full flex items-center justify-center ${newThreshold === 2 ? 'border-text_secondary text-text_secondary' : 'text-primary border-primary'} w-[14.5px] h-[14.5px]`}
+											>
+												-
+											</Button>
+										</Tooltip>
 										<span
 											className='text-white text-sm'
 										>
 											{newThreshold}
 										</span>
-										<button
-											onClick={() => {
-												if (newThreshold < (oldSignatoriesLength - 1)) {
-													setNewThreshold(prev => prev + 1);
-												}
-											}}
-											className='text-primary border rounded-full flex items-center justify-center border-primary w-[14.5px] h-[14.5px]'>
-									+
-										</button>
+										<Tooltip title={newThreshold === oldSignatoriesLength - 1 && 'Threshold must be Less than or Equal to Signatories'}>
+											<Button
+												onClick={() => {
+													if (newThreshold < oldSignatoriesLength - 1) {
+														setNewThreshold(prev => prev + 1);
+													}
+												}}
+												className={`p-0 outline-none border rounded-full flex items-center justify-center ${newThreshold === oldSignatoriesLength - 1 ? 'border-text_secondary text-text_secondary' : 'text-primary border-primary'} w-[14.5px] h-[14.5px]`}>
+												+
+											</Button>
+										</Tooltip>
 									</p>
 									<p
 										className='text-text_secondary font-normal text-sm leading-[15px]'

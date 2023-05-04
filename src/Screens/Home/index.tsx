@@ -51,7 +51,7 @@ const Home = ({ className }: { className?: string }) => {
 
 	useEffect(() => {
 		const fetchProxyData = async () => {
-			if(!multisig) return;
+			if(!multisig || network === 'astar') return;
 			const response = await fetch(
 				`https://${network}.api.subscan.io/api/scan/events`,
 				{

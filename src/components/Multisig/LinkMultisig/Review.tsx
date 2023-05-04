@@ -82,7 +82,7 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 							</div>
 							<div className="flex items-center justify-between mx-5 mb-5">
 								<p className='text-text_secondary'>Confirmations:</p>
-								<p><span className='text-primary'>{multisigData?.signatories.length}</span> out {multisigData?.signatories.length} owners</p>
+								<p><span className='text-primary'>{multisigData?.threshold}</span> out {multisigData?.signatories.length} owners</p>
 							</div>
 						</div>
 					</div>
