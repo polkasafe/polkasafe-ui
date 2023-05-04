@@ -18,7 +18,14 @@ interface Props {
 
 const PrimaryButton = ({ className, children, onClick, size, loading, disabled }: Props) => {
 	return (
-		<Button disabled={disabled} size={size} loading={loading} className={classNames('flex items-center border-none outline-none shadow-md rounded-lg bg-purple_secondary text-blue_primary font-medium text-base md:font-bold md:text-lg', className)} onClick={onClick}>
+		<Button disabled={disabled} size={size} loading={loading} className={classNames(
+			'flex items-center border-none outline-none shadow-md rounded-lg font-medium text-base md:font-bold md:text-lg',
+			className,
+			{
+				'bg-highlight text-text_secondary': disabled,
+				'bg-primary text-white': !disabled
+			}
+		)} onClick={onClick}>
 			{children}
 		</Button>
 	);

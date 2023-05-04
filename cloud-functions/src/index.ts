@@ -4,7 +4,17 @@ import { v4 as uuidv4 } from 'uuid';
 import cors = require('cors');
 import { cryptoWaitReady, decodeAddress, encodeAddress, signatureVerify } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-import { IAddressBookItem, IContactFormResponse, IFeedback, IMultisigAddress, IMultisigSettings, INotification, ITransaction, IUser, IUserResponse } from './types';
+import {
+	IAddressBookItem,
+	IContactFormResponse,
+	IFeedback,
+	IMultisigAddress,
+	IMultisigSettings,
+	INotification,
+	ITransaction,
+	IUser,
+	IUserResponse,
+	IUserNotificationPreferences } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -956,6 +966,36 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 			return res.status(200).json({ error: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in setTransactionCallData :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const updateNotificationPreferences = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { notificationPreferences } = req.body as { notificationPreferences: IUserNotificationPreferences };
+		if (!notificationPreferences ||
+			typeof notificationPreferences !== 'object' ||
+			!('channelPreferences' in notificationPreferences && 'triggerPreferences' in notificationPreferences) ||
+			typeof notificationPreferences.channelPreferences !== 'object' ||
+			typeof notificationPreferences.triggerPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ notificationPreferences });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateNotificationPreferences :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

@@ -7,7 +7,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, UserDetailsContextType, Wallet } from 'src/types';
+import { IUser, IUserNotificationPreferences, UserDetailsContextType, Wallet } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
@@ -22,6 +22,14 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	loggedInWallet: Wallet.POLKADOT,
 	multisigAddresses: [],
 	multisigSettings: {},
+	notificationPreferences: {
+		channelPreferences: {},
+		triggerPreferences:{
+			newTransaction: true,
+			pendingTransaction: 2,
+			transactionExecuted: true
+		}
+	},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
@@ -62,7 +70,8 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					createdAt: userData?.created_at,
 					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
 					multisigAddresses: userData?.multisigAddresses,
-					multisigSettings: userData?.multisigSettings || {}
+					multisigSettings: userData?.multisigSettings || {},
+					notificationPreferences: userData?.notificationPreferences || {} as IUserNotificationPreferences
 				};
 			});
 		}else {

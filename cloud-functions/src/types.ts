@@ -99,3 +99,30 @@ export interface INotification {
 	type: 'sent' | 'recieved' | 'cancelled' | 'info'
 	network: string
 }
+
+export enum CHANNEL {
+	EMAIL = 'email',
+	TELEGRAM = 'telegram',
+	DISCORD = 'discord',
+	ELEMENT = 'element',
+	SLACK = 'slack',
+	IN_APP = 'in_app'
+  }
+
+export interface IUserNotificationChannelPreferences {
+	name: CHANNEL;
+	enabled: boolean;
+	handle: string;
+	verfied: boolean;
+}
+
+export interface ITriggerPreferences{
+	newTransaction: boolean;
+	transactionExecuted: boolean;
+	pendingTransaction: number;
+}
+
+export interface IUserNotificationPreferences {
+	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
+	triggerPreferences: ITriggerPreferences;
+}

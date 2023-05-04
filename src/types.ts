@@ -6,6 +6,33 @@ import { Dispatch, SetStateAction } from 'react';
 
 import { networks, tokenSymbol } from './global/networkConstants';
 
+export enum CHANNEL {
+	EMAIL = 'email',
+	TELEGRAM = 'telegram',
+	DISCORD = 'discord',
+	ELEMENT = 'element',
+	SLACK = 'slack',
+	IN_APP = 'in_app'
+  }
+
+export interface IUserNotificationChannelPreferences {
+	name: CHANNEL;
+	enabled: boolean;
+	handle: string;
+	verfied: boolean;
+}
+
+export interface ITriggerPreferences{
+	newTransaction: boolean;
+	transactionExecuted: boolean;
+	pendingTransaction: number;
+}
+
+export interface IUserNotificationPreferences {
+	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
+	triggerPreferences: ITriggerPreferences;
+}
+
 export interface UserDetailsContextType {
 	loggedInWallet: Wallet;
     activeMultisig: string;
@@ -14,6 +41,7 @@ export interface UserDetailsContextType {
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notificationPreferences: IUserNotificationPreferences;
     addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
@@ -70,6 +98,7 @@ export interface IUser {
 	created_at: Date;
 	multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notificationPreferences: IUserNotificationPreferences;
 }
 
 export interface IMultisigAddress {

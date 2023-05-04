@@ -14,6 +14,7 @@ import { ReactComponent as ArrowDownLeftSVG } from 'src/assets/icons/arrow-down-
 import { ReactComponent as ArrowRightSVG } from 'src/assets/icons/arrow-right.svg';
 import { ReactComponent as ArrowUpRightSVG } from 'src/assets/icons/arrow-up-right.svg';
 import { ReactComponent as AssetsSVG } from 'src/assets/icons/assets.svg';
+import { ReactComponent as BellIconSVG } from 'src/assets/icons/bell-icon.svg';
 import { ReactComponent as BrainSVG } from 'src/assets/icons/brain-icon.svg';
 import { ReactComponent as ChainSVG } from 'src/assets/icons/chain-icon.svg';
 import { ReactComponent as CheckOutlinedSVG } from 'src/assets/icons/CheckOutlined.svg';
@@ -31,9 +32,11 @@ import { ReactComponent as DashDotSVG } from 'src/assets/icons/dash-dot.svg';
 import { ReactComponent as DatePickerSVG } from 'src/assets/icons/date-picker-icon.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DiscSVG } from 'src/assets/icons/disc.svg';
+import { ReactComponent as DiscordIconSVG } from 'src/assets/icons/discord-icon.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
+import { ReactComponent as ElementIconSVG } from 'src/assets/icons/element-icon.svg';
 import { ReactComponent as ExportArrowSVG } from 'src/assets/icons/export-arrow.svg';
 import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
@@ -41,6 +44,7 @@ import { ReactComponent as ImportArrowSVG } from 'src/assets/icons/import-arrow.
 import { ReactComponent as KeySVG } from 'src/assets/icons/key.svg';
 import { ReactComponent as LineSVG } from 'src/assets/icons/line.svg';
 import { ReactComponent as LinkSVG } from 'src/assets/icons/link.svg';
+import { ReactComponent as MailIconSVG } from 'src/assets/icons/mail-icon.svg';
 import { ReactComponent as MenuSVG } from 'src/assets/icons/menu.svg';
 import { ReactComponent as MultisigLockSVG } from 'src/assets/icons/multisig-lock.svg';
 import { ReactComponent as NoNotificationSVG } from 'src/assets/icons/no-notification.svg';
@@ -63,8 +67,10 @@ import { ReactComponent as RightArrowOutlinedSVG } from 'src/assets/icons/RightA
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
 import { ReactComponent as ShareSVG } from 'src/assets/icons/share-icon.svg';
+import { ReactComponent as SlackIconSVG } from 'src/assets/icons/slack-icon.svg';
 import { ReactComponent as SquareDownArrowSVG } from 'src/assets/icons/square-down-arrow.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
+import { ReactComponent as TelegramIconSVG } from 'src/assets/icons/telegram-icon.svg';
 import { ReactComponent as TransactionSVG } from 'src/assets/icons/transaction.svg';
 import { ReactComponent as TrashSVG } from 'src/assets/icons/trash.svg';
 import { ReactComponent as UploadBoxSVG } from 'src/assets/icons/upload-box.svg';
@@ -354,4 +360,28 @@ export const PolkadotWalletIcon = (props: Partial<CustomIconComponentProps>) => 
 
 export const SubWalletIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SubWalletSVG} {...props} />
+);
+
+export const BellIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={BellIconSVG} {...props} />
+);
+
+export const MailIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={MailIconSVG} {...props} />
+);
+
+export const TelegramIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={TelegramIconSVG} {...props} />
+);
+
+export const DiscordIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DiscordIconSVG} {...props} />
+);
+
+export const ElementIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ElementIconSVG} {...props} />
+);
+
+export const SlackIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={SlackIconSVG} {...props} />
 );

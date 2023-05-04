@@ -11,6 +11,8 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
+import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import RemoveOwner from './Remove';
@@ -97,6 +99,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 			{
 				signatories?.filter((item) => item !== userAddress).map((address, index) => {
 					const name = addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME;
+					const encodedAddress = getEncodedAddress(address, network);
 					return (
 						<article key={index}>
 							<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
@@ -106,21 +109,21 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 								<div className='col-span-2 flex items-center'>
 									<Identicon
 										className='image identicon mx-2'
-										value={address}
+										value={encodedAddress}
 										size={30}
 										theme={'polkadot'}
 									/>
-									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
+									<span title={encodedAddress || address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{shortenAddress(encodedAddress || address, 10)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
-										<a href={`https://${network}.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
+										<a href={`https://${network}.subscan.io/account/${encodedAddress}`} target='_blank' rel="noreferrer" >
 											<ExternalLinkIcon  />
 										</a>
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center gap-x-[10px]'>
 									<Button
-										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={address} />) }
+										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={encodedAddress || address} />) }
 										className='text-primary border-none outline-none bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon className='' />
 									</Button>
