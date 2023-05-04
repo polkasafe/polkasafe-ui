@@ -111,11 +111,14 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 					} as IUser;
 
 					const resUser: IUserResponse = {
-						address: addressDoc.address,
+						address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
-						addressBook: addressDoc.addressBook,
-						multisigAddresses,
+						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })),
+						multisigAddresses: multisigAddresses.map((item) => (
+							{ ...item,
+								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+							})),
 						multisigSettings: addressDoc.multisigSettings
 					};
 
