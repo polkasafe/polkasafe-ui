@@ -24,9 +24,10 @@ interface Props{
 	setSignatoriesArray: React.Dispatch<React.SetStateAction<ISignatory[]>>
 	threshold: number
 	setThreshold: React.Dispatch<React.SetStateAction<number>>
+	multisigThreshold?: number
 }
 
-const Owners = ({ signatories, threshold, setThreshold, setSignatoriesWithName, signatoriesArray, setSignatoriesArray }: Props) => {
+const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSignatoriesWithName, signatoriesArray, setSignatoriesArray }: Props) => {
 
 	const { network } = useGlobalApiContext();
 
@@ -88,44 +89,50 @@ const Owners = ({ signatories, threshold, setThreshold, setSignatoriesWithName, 
 					</div>
 				</div>
 				<div className='px-4 overflow-auto w-full'>
-					{signatories.length !== 0 && <p className='text-text_secondary mt-5'>This safe on <span className='text-white'>Polkadot</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>}
 					<Form
 						className='my-0 mt-5'
 					>
-						{signatories.length ?
-							signatories?.map((item, i: number) => (
-
-								<div className="flex flex-col gap-y-3 mb-5" key={i}>
-									<label
-										className="text-primary text-xs leading-[13px] font-normal"
-										htmlFor="name1"
-									>Owner Name {i+1}</label>
-									<div className="flex items-center">
-
-										<Input
-											placeholder="John Doe"
-											className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-											id="name"
-											value={item.name}
-											onChange={(e) => {
-												const copyArray = [...signatories];
-												const copyObject = { ...copyArray[i] };
-												copyObject.name = e.target.value;
-												copyArray[i] = copyObject;
-												setSignatoriesWithName(copyArray);
-											}}
-											defaultValue={item.name}
-										/>
-										<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
-											<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary'/></button>
-											<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
-												<ExternalLinkIcon className='text-text_secondary hover:text-primary' />
-											</a>
-										</div>
-									</div>
-								</div>
-							)) :
+						{signatories.length && multisigThreshold ?
 							<>
+								<p className='text-text_secondary mb-3'>This safe on <span className='text-white capitalize'>{network}</span> has {signatories?.length} owners. Optional: Provide a name for each owner.</p>
+								{
+									signatories?.map((item, i: number) => (
+
+										<div className="flex flex-col gap-y-3 mb-5" key={i}>
+											<label
+												className="text-primary text-xs leading-[13px] font-normal"
+												htmlFor="name1"
+											>Owner Name {i+1}</label>
+											<div className="flex items-center">
+
+												<Input
+													placeholder="John Doe"
+													className="lg:w-[20vw] md:w-[25vw] text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+													id="name"
+													value={item.name}
+													onChange={(e) => {
+														const copyArray = [...signatories];
+														const copyObject = { ...copyArray[i] };
+														copyObject.name = e.target.value;
+														copyArray[i] = copyObject;
+														setSignatoriesWithName(copyArray);
+													}}
+													defaultValue={item.name}
+												/>
+												<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
+													<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary'/></button>
+													<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
+														<ExternalLinkIcon className='text-text_secondary hover:text-primary' />
+													</a>
+												</div>
+											</div>
+										</div>
+									))
+								}
+							</>
+							:
+							<>
+								<p className='text-text_secondary mb-3'>We cannot find this Multisig, Please enter the Signatories and threshold of this Multisig.</p>
 								{signatoriesArray.map((signatory, i) => (
 									<div className="flex flex-col gap-y-3" key={i}>
 										<div className="flex items-center gap-x-4">

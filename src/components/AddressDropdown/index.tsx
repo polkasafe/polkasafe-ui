@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { Wallet } from 'src/types';
 import Balance from 'src/ui-components/Balance';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -38,6 +39,7 @@ const AddressDropdown = () => {
 				activeMultisig: localStorage.getItem('active_multisig') || '',
 				address: '',
 				addressBook: [],
+				loggedInWallet: Wallet.POLKADOT,
 				multisigAddresses: []
 			};
 		});

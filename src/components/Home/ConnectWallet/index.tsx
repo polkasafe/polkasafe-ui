@@ -1,7 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { InjectedWindow } from '@polkadot/extension-inject/types';
+import { InjectedAccount,InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -11,23 +11,26 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IUser } from 'src/types';
 import { Wallet } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
+import WalletButtons from 'src/ui-components/WalletButtons';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
-	const { accounts, noAccounts, noExtension } = useGetWalletAccounts();
+	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
 	const [address, setAddress] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [signing, setSigning] = useState<boolean>(false);
+	const [noAccounts, setNoAccounts] = useState<boolean>(false);
+	const [noExtension, setNoExtension] = useState<boolean>(false);
+	const [selectedWallet, setSelectedWallet] = useState<Wallet>(Wallet.POLKADOT);
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);
@@ -68,7 +71,7 @@ const ConnectWallet = () => {
 			} else {
 				const injectedWindow = window as Window & InjectedWindow;
 
-				const wallet = injectedWindow.injectedWeb3[Wallet.POLKADOT];
+				const wallet = injectedWindow.injectedWeb3[selectedWallet];
 
 				if (!wallet) {
 					setLoading(false);
@@ -98,6 +101,7 @@ const ConnectWallet = () => {
 				if(!connectAddressErr && userData){
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
+					localStorage.setItem('logged_in_wallet', selectedWallet);
 
 					setUserDetailsContextState((prevState) => {
 						return {
@@ -105,6 +109,7 @@ const ConnectWallet = () => {
 							address: userData?.address,
 							addressBook: userData?.addressBook || [],
 							createdAt: userData?.created_at,
+							loggedInWallet: selectedWallet,
 							multisigAddresses: userData?.multisigAddresses,
 							multisigSettings: userData?.multisigSettings || {}
 						};
@@ -123,39 +128,44 @@ const ConnectWallet = () => {
 	return (
 		<>
 			<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
-				<img src={ConnectWalletImg} alt='Wallet' height={150} width={150} className='mb-4' />
+				<img src={ConnectWalletImg} alt='Wallet' height={150} width={150} className='my-4' />
 				{
 					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :
-						noExtension ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>Extension Not Found.</p><p>Please Install Polkadot-Js Wallet Extension.</p></p> :
-							noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'><p className='mb-3'>No Accounts Found.</p><p>Please Install Polkadot-Js Wallet Extension And Add Accounts.</p></p> :
-								<>
-									<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
-									<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
-									<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
-									{
-										showAccountsDropdown?
-											<div className='mt-[30px]'>
-												<AccountSelectionForm
-													disabled={loading}
-													accounts={accounts}
-													address={address}
-													onAccountChange={onAccountChange}
-													title='Choose linked account'
-												/>
-											</div>
-											: null
-									}
-									<Button
-										icon={<WalletIcon/>}
-										size='large'
-										loading={loading}
-										onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
-										className='mt-[60px] border-none outline-none flex items-center justify-center bg-primary text-white max-w-[350px] w-full'
-									>
+						<>
+							<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
+							<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
+							<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
+							{
+								showAccountsDropdown?
+									<div className='mt-[30px]'>
+										<WalletButtons setNoAccounts={setNoAccounts} setNoExtenstion={setNoExtension} className='mb-4' setWallet={setSelectedWallet} setAccounts={setAccounts} />
+										{
+											noExtension ?
+												<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'>Please Install {selectedWallet === Wallet.POLKADOT ? 'Polkadot-Js' : 'Subwallet'} Extension.</p> :
+												noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'>No Accounts Found. Please Install the Extension And Add Accounts.</p> :
+													<AccountSelectionForm
+														disabled={loading}
+														accounts={accounts}
+														address={address}
+														onAccountChange={onAccountChange}
+														title='Choose linked account'
+													/>
+										}
+									</div>
+									: null
+							}
+							<Button
+								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
+								icon={<WalletIcon/>}
+								size='large'
+								loading={loading}
+								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
+								className={`mt-[30px] border-none outline-none flex items-center justify-center ${(noExtension || noAccounts || !address) && showAccountsDropdown ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} max-w-[350px] w-full`}
+							>
 								Connect Wallet
-									</Button>
-									{signing && <div className='text-white mt-1'>Please Sign This Randomly Generated Text To Login.</div>}
-								</>
+							</Button>
+							{signing && <div className='text-white mt-1'>Please Sign This Randomly Generated Text To Login.</div>}
+						</>
 
 				}
 			</div>

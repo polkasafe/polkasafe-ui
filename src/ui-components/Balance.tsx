@@ -20,7 +20,7 @@ const Balance = ({ address, className, onChange }: Props) => {
 	useEffect(() => {
 		if (!api || !apiReady || !address) return;
 
-		api.query.system.account(address).then(res => {
+		api.query?.system?.account(address).then(res => {
 			const balanceStr = res?.data?.free?.toString() || '0';
 			setBalance(balanceStr);
 			if(onChange){

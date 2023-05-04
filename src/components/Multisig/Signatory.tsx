@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IAddressBookItem } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -36,7 +36,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
-	const { accounts } = useGetAllAccounts();
+	const { accounts } = useGetWalletAccounts();
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 

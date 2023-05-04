@@ -4,9 +4,8 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { Signer } from '@polkadot/api/types';
-import Identicon from '@polkadot/react-identicon';
-import { AutoComplete, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { AutoComplete, Checkbox, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -20,17 +19,19 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
 import { NotificationStatus } from 'src/types';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
 import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
+import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -62,9 +63,8 @@ const addRecipientHeading = () => {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address, isProxy } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { accountsMap, noAccounts, signersMap } = useGetAllAccounts();
 	const { api, apiReady } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -88,6 +88,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [transactionData, setTransactionData] = useState<any>({});
 
+	const [recipientNotInAddressBook, setRecipientNotInAddressBook] = useState<boolean>(false);
+	const [addAddressCheck, setAddAddressCheck] = useState<boolean>(true);
+
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
@@ -97,22 +100,33 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		} else {
 			setValidRecipient(true);
 		}
+
+		if(addressBook.some((item) => getSubstrateAddress(item.address) === getSubstrateAddress(recipientAddress))){
+			setRecipientNotInAddressBook(false);
+		} else {
+			setRecipientNotInAddressBook(true);
+		}
+
 		if(api && apiReady && recipientAddress && amount){
 			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-			setCallData(call.method.toHex());
+			let tx: SubmittableExtrinsic<'promise'>;
+			if(isProxy && multisig?.proxy){
+				tx = api.tx.proxy.proxy(multisig.proxy, null, call);
+				setCallData(tx.method.toHex());
+			}
+			else {
+				setCallData(call.method.toHex());
+			}
 		}
-	}, [amount, api, apiReady, recipientAddress]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap || !address){
+		if(!api || !apiReady || !address){
 			return;
 		}
 
-		const wallet = accountsMap[getEncodedAddress(address, network) || ''];
-		if(!signersMap[wallet]) return;
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		await setSigner(api, loggedInWallet);
 
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({
@@ -146,6 +160,23 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTimeout(() => {
 				setFailure(false);
 			}, 5000);
+		} finally {
+			if(addAddressCheck && validRecipient && recipientNotInAddressBook){
+				const newAddressBook = await addToAddressBook({
+					address: recipientAddress,
+					addressBook,
+					name: DEFAULT_ADDRESS_NAME,
+					network
+				});
+				if(newAddressBook){
+					setUserDetailsContextState(prev => {
+						return {
+							...prev,
+							addressBook: newAddressBook
+						};
+					});
+				}
+			}
 		}
 	};
 
@@ -192,16 +223,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
-									<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
-										<Identicon
-											value={activeMultisig}
-											size={30}
-											theme='polkadot'
-										/>
-										<div className='flex flex-col gap-y-[6px] truncate'>
-											<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find((multisig) => multisig.address === activeMultisig)?.name}</h4>
-											<p className='text-text_secondary font-normal text-xs leading-[13px]'>{(activeMultisig)}</p>
-										</div>
+									<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
+										<AddressComponent withBadge={false} address={activeMultisig} />
 										<Balance address={activeMultisig} onChange={setMultisigBalance} />
 									</article>
 									<article className='w-[412px] flex items-center'>
@@ -236,7 +259,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 													id='recipient'
 													placeholder="Send to Address.."
 													onChange={(value) => setRecipientAddress(value)}
-													value={addressBook.find((item) => item.address === recipientAddress)?.name || getEncodedAddress(recipientAddress, network)}
 													defaultValue={getEncodedAddress(defaultSelectedAddress || addressBook[0].address, network)}
 												/>
 												<div className='absolute right-2'>
@@ -247,6 +269,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												</div>
 											</div>
 										</Form.Item>
+										{recipientNotInAddressBook &&
+											<Checkbox className='text-white mt-2 [&>span>span]:border-primary' checked={addAddressCheck} onChange={(e) => setAddAddressCheck(e.target.checked)} >
+												Add Address to Address Book
+											</Checkbox>
+										}
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>

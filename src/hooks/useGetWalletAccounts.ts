@@ -21,7 +21,7 @@ const initResponse: Response = {
 	noExtension: true
 };
 
-const useGetWalletAccounts = () => {
+const useGetWalletAccounts = (chosenWallet?: Wallet) => {
 	const { api, apiReady } = useContext(ApiContext);
 	const { network } = useGlobalApiContext();
 
@@ -86,7 +86,7 @@ const useGetWalletAccounts = () => {
 	};
 
 	useEffect(() => {
-		getWalletAccounts(Wallet.POLKADOT);
+		getWalletAccounts(chosenWallet || Wallet.POLKADOT);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [api, apiReady]);
 

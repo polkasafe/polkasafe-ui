@@ -282,8 +282,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
-			// check if substrateSignatories contains the address of the user
-			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
+			// check if substrateSignatories contains the address of the user (not if creating a new proxy)
+			if (!proxyAddress && !substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
 
 			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
 			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });

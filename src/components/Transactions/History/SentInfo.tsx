@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -25,9 +26,10 @@ interface ISentInfoProps {
 	note?: string
 	loading?: boolean
 	amount_usd: number
+	from: string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
@@ -84,6 +86,16 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, amount_usd, amountType, classNam
 					</div>
 				</div>
 				<Divider className='bg-text_secondary my-5' />
+				<div
+					className='flex items-center gap-x-7 mb-3'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+							From:
+					</span>
+					<AddressComponent address={from} />
+				</div>
 				<div
 					className='flex items-center gap-x-5'
 				>
