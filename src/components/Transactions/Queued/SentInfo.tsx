@@ -50,9 +50,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
-	console.log('address', address);
-	console.log('multisigAddress', multisigAddresses);
-	console.log('addressBook', addressBook);
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
 	const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);

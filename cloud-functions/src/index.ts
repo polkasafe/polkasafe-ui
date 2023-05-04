@@ -361,6 +361,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				threshold: Number(threshold)
 			};
 
+			const newMultisigWithEncodedSignatories = {
+				...newMultisig,
+				signatories: newMultisig.signatories.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)) };
+
 			if (proxyAddress) {
 				newMultisig.proxy = proxyAddress;
 			}
@@ -368,7 +372,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
-			res.status(200).json({ data: newMultisig });
+			res.status(200).json({ data: newMultisigWithEncodedSignatories });
 
 			if (oldProxyMultisigRef) {
 				await oldProxyMultisigRef.update({
