@@ -190,7 +190,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
-				return res.status(200).json({ data: newAddressBook });
+				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
@@ -310,6 +310,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 					...multisigDocData,
 					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate(),
+					signatories: multisigDocData?.signatories?.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)),
 					updated_at: multisigDocData?.updated_at?.toDate() || multisigDocData?.created_at.toDate()
 				};
 
