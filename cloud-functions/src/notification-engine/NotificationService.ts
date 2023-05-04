@@ -1,9 +1,11 @@
 import TelegramBot from 'node-telegram-bot-api';
+import axios from 'axios';
+import { WebClient as SlackWebClient } from '@slack/web-api';
 import { Client as DiscordClient, GatewayIntentBits, TextChannel } from 'discord.js';
 import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
 import { IPolkasafeNotification } from './polkasafe/_utils/types';
-import { CHANNEL, DISCORD_BOT_TOKEN, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
 
 export class NotificationService {
 	constructor(
@@ -23,15 +25,17 @@ export class NotificationService {
 	public async sendNotification(): Promise<void> {
 		if (!this.notificationPreferences.triggerPreferences[this.trigger]) return;
 
-		if (this.notificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) this.sendEmailNotification();
-		if (this.notificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled) this.sendTelegramNotification();
-		if (this.notificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled) this.sendDiscordNotification();
-		if (this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled) this.sendElementNotification();
-		if (this.notificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled) this.sendInAppNotification();
-		if (this.notificationPreferences.channelPreferences[CHANNEL.SLACK].enabled) this.sendSlackNotification();
+		this.sendEmailNotification();
+		this.sendTelegramNotification();
+		this.sendDiscordNotification();
+		this.sendElementNotification();
+		this.sendSlackNotification();
+		this.sendInAppNotification();
 	}
 
 	private async sendEmailNotification(): Promise<void> {
+		if (!SENDGRID_API_KEY || !this.notificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) return;
+
 		const FROM = {
 			email: NOTIFICATION_SOURCE_EMAIL[this.source],
 			name: this.source
@@ -49,7 +53,7 @@ export class NotificationService {
 	}
 
 	private async sendTelegramNotification(): Promise<void> {
-		if (!TELEGRAM_BOT_TOKEN) return;
+		if (!TELEGRAM_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled) return;
 		const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
 		const chatId = this.notificationPreferences.channelPreferences[CHANNEL.TELEGRAM].handle;
@@ -58,7 +62,7 @@ export class NotificationService {
 	}
 
 	private async sendDiscordNotification(): Promise<void> {
-		if (!DISCORD_BOT_TOKEN) return;
+		if (!DISCORD_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled) return;
 		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 		const channelId = this.notificationPreferences.channelPreferences[CHANNEL.DISCORD].handle;
@@ -70,14 +74,42 @@ export class NotificationService {
 	}
 
 	private async sendElementNotification(): Promise<void> {
-		console.log('message : ', this.message);
+		if (!ELEMENT_API_KEY || !this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled) return;
+		const roomId = this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle;
+
+		const requestBody = {
+			roomId: this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle,
+			body: this.message,
+			messageType: 'text'
+		};
+
+		const config = {
+			headers: { 'Authorization': `Bearer ${ELEMENT_API_KEY}` }
+		};
+
+		try {
+			await axios.post('https://api.element.io/v1/rooms/' + roomId + '/send', requestBody, config);
+		} catch (error) {
+			console.error('Error in sending Element message: ', error);
+		}
 	}
 
 	private async sendSlackNotification(): Promise<void> {
-		console.log('message : ', this.message);
+		if (!SLACK_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.SLACK].enabled) return;
+		const client = new SlackWebClient(SLACK_BOT_TOKEN);
+		try {
+			await client.chat.postMessage({
+				channel: this.notificationPreferences.channelPreferences[CHANNEL.SLACK].handle,
+				text: this.message
+			});
+		} catch (error) {
+			console.error(`Error sending slack message: ${error}`);
+		}
 	}
 
 	private async sendInAppNotification(): Promise<void> {
+		if (!this.notificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled) return;
+
 		const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 		let newNotificationRef;
 		let newNotification;
