@@ -54,6 +54,4 @@ export default async function initMultisigTransfer(args: Args) {
 			notificationServiceInstance.sendNotification();
 		}
 	}
-
-	return 'a';
 }
