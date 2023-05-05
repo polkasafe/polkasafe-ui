@@ -153,7 +153,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				}
 
 				if(multisigData){
-					if(multisigAddresses?.some((item) => item.address === multisigData.address)){
+					if(multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)){
 						queueNotification({
 							header: 'Multisig Exist!',
 							message: 'Please try adding a different multisig.',
