@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Input, MenuProps } from 'antd';
 import { Checkbox, Dropdown } from 'antd';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -16,13 +16,14 @@ import queueNotification from 'src/ui-components/QueueNotification';
 const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
-	const { notificationPreferences } = useGlobalUserDetailsContext();
+	const { notificationPreferences, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const triggerPreferences = notificationPreferences?.triggerPreferences || {};
 	const [notifyAfter, setNotifyAfter] = useState<number>(notificationPreferences?.triggerPreferences?.pendingTransaction || 2);
 	const [email, setEmail] = useState<string>('');
 	const [newTxn, setNewTxn] = useState<boolean>(notificationPreferences?.triggerPreferences?.newTransaction || true);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(notificationPreferences?.triggerPreferences?.transactionExecuted || true);
 	const [pendingTxn, setPendingTxn] = useState(notificationPreferences?.triggerPreferences?.pendingTransaction === 0 ? false : true);
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
 		return {
@@ -35,7 +36,7 @@ const Notifications = () => {
 		setNotifyAfter(Number(key));
 	};
 
-	const updateNotificationPreferences = async () => {
+	const updateNotificationPreferences = useCallback(async () => {
 
 		try{
 			const userAddress = localStorage.getItem('address');
@@ -56,6 +57,7 @@ const Notifications = () => {
 						transactionExecuted: txnExecuted
 					}
 				};
+				setLoading(true);
 
 				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateNotificationPreferences`, {
 					body: JSON.stringify({
@@ -73,6 +75,7 @@ const Notifications = () => {
 						message: updatePreferencesError,
 						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
 					return;
 				}
 
@@ -82,6 +85,11 @@ const Notifications = () => {
 						message: 'Your Notification Preferences has been Updated.',
 						status: NotificationStatus.SUCCESS
 					});
+					setUserDetailsContextState(prev => ({
+						...prev,
+						notificationPreferences: newPreferences
+					}));
+					setLoading(false);
 				}
 
 			}
@@ -92,8 +100,14 @@ const Notifications = () => {
 				message: 'Error in Updating Notification Preferences.',
 				status: NotificationStatus.ERROR
 			});
+			setLoading(false);
 		}
-	};
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [email, network, newTxn, notifyAfter, pendingTxn, txnExecuted]);
+
+	useEffect(() => {
+		updateNotificationPreferences();
+	}, [updateNotificationPreferences]);
 
 	return (
 		<div className='flex flex-col gap-y-4'>
@@ -102,10 +116,10 @@ const Notifications = () => {
 				<div className='col-span-7'>
 					<p className='mb-4'>Configure the notifications you want Polkasafe to send in your linked channels</p>
 					<div className='flex flex-col gap-y-3'>
-						<Checkbox className='text-white m-0 [&>span>span]:border-primary' value={newTxn} onChange={(e) => setNewTxn(e.target.checked)}>New Transaction needs to be signed</Checkbox>
-						<Checkbox className='text-white m-0 [&>span>span]:border-primary' value={txnExecuted} onChange={(e) => setTxnExecuted(e.target.checked)}>Transaction has been signed and executed</Checkbox>
+						<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' value={newTxn} onChange={(e) => setNewTxn(e.target.checked)}>New Transaction needs to be signed</Checkbox>
+						<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' value={txnExecuted} onChange={(e) => setTxnExecuted(e.target.checked)}>Transaction has been signed and executed</Checkbox>
 						<div className='flex items-center gap-x-3'>
-							<Checkbox className='text-white m-0 [&>span>span]:border-primary' value={pendingTxn} onChange={(e) => setPendingTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' value={pendingTxn} onChange={(e) => setPendingTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
 							<Dropdown disabled={!pendingTxn} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
 								<button className={`'flex items-center gap-x-2 border ${!pendingTxn ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/></button>
 							</Dropdown>

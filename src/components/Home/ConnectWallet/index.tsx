@@ -112,7 +112,14 @@ const ConnectWallet = () => {
 							loggedInWallet: selectedWallet,
 							multisigAddresses: userData?.multisigAddresses,
 							multisigSettings: userData?.multisigSettings || {},
-							notificationPreferences: userData?.notificationPreferences || {}
+							notificationPreferences: userData?.notificationPreferences || {
+								channelPreferences: {},
+								triggerPreferences: {
+									newTransaction: true,
+									pendingTransaction: 2,
+									transactionExecuted: true
+								}
+							}
 						};
 					});
 					setLoading(false);
