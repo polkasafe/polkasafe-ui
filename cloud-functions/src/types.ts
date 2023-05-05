@@ -16,6 +16,7 @@ export interface IUser {
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notificationPreferences?: IUserNotificationPreferences;
 }
 
 export interface IUserResponse extends IUser {

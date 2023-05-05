@@ -14,7 +14,7 @@ import {
 	ITransaction,
 	IUser,
 	IUserResponse,
-	IUserNotificationPreferences } from './types';
+	ITriggerPreferences } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -129,7 +129,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 							{ ...item,
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
-						multisigSettings: addressDoc.multisigSettings
+						multisigSettings: addressDoc.multisigSettings,
+						notificationPreferences: addressDoc.notificationPreferences
 					};
 
 					return res.status(200).json({ data: resUser });
@@ -979,7 +980,7 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 	});
 });
 
-export const updateNotificationPreferences = functions.https.onRequest(async (req, res) => {
+export const updateNotificationTriggerPreferences = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
@@ -988,18 +989,19 @@ export const updateNotificationPreferences = functions.https.onRequest(async (re
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { notificationPreferences } = req.body as { notificationPreferences: IUserNotificationPreferences };
-		if (!notificationPreferences ||
-			typeof notificationPreferences !== 'object' ||
-			!('channelPreferences' in notificationPreferences && 'triggerPreferences' in notificationPreferences) ||
-			typeof notificationPreferences.channelPreferences !== 'object' ||
-			typeof notificationPreferences.triggerPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
+		const { triggerPreferences } = req.body as { triggerPreferences: ITriggerPreferences };
+		if (!triggerPreferences ||
+			typeof triggerPreferences !== 'object' ||
+			!('newTransaction' in triggerPreferences && 'transactionExecuted' in triggerPreferences && 'pendingTransaction' in triggerPreferences) ||
+			typeof triggerPreferences.newTransaction !== 'boolean' ||
+			typeof triggerPreferences.transactionExecuted !== 'boolean' ||
+			typeof triggerPreferences.pendingTransaction !== 'number') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			addressRef.update({ notificationPreferences });
+			addressRef.update({ ['notificationPreferences.triggerPreferences']: triggerPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {

@@ -61,6 +61,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 		const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
 		if(!connectAddressErr && userData){
+			console.log('notifications', userData?.notificationPreferences);
 			setUserDetailsContextState((prevState) => {
 				return {
 					...prevState,
