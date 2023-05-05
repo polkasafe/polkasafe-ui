@@ -2,8 +2,8 @@ import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
-import template from './template';
 import getTemplateRender from '../../global-utils/getTemplateRender';
+import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 
 interface Args {
 	network: string;
@@ -27,7 +27,6 @@ export default async function initMultisigTransfer(args: Args) {
 	}, [] as string[]);
 
 	const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
-
 	for (const address of substrateAddresses) {
 		const addressDoc = await firestore_db.collection('addresses').doc(address).get();
 		const addressData = addressDoc?.data();
@@ -35,6 +34,10 @@ export default async function initMultisigTransfer(args: Args) {
 			const userNotificationPreferences: IUserNotificationPreferences = addressData.notification_preferences;
 
 			const subject = 'New multisig transaction to sign on Polkasafe.';
+			const template = await getTriggerTemplate(firestore_db, NOTIFICATION_SOURCE.POLKASAFE, 'initMultisigTransfer');
+
+			if (!template) throw Error('Template not found for trigger');
+
 			const { htmlMessage, textMessage } = getTemplateRender(template, {
 				link: `/transactions?tab=Queue#${callHash}`,
 				network
