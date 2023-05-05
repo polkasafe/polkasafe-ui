@@ -5,6 +5,7 @@ import { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-i
 import React, { useEffect, useState } from 'react';
 import PolkadotWalletIcon from 'src/assets/wallet/polkadotjs-icon.svg';
 import SubWalletIcon from 'src/assets/wallet/subwallet-icon.svg';
+import TalismanIcon from 'src/assets/wallet/talisman-icon.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
@@ -95,6 +96,7 @@ const WalletButtons = ({ setAccounts, setWallet, className, setNoAccounts, setNo
 		<div className={`flex items-center justify-center gap-x-5 mb-2 ${className}`}>
 			<WalletButton className={`${selectedWallet === Wallet.POLKADOT? 'border border-solid border-primary bg-highlight': 'border-none'}`} disabled={!apiReady} onClick={(event) => handleWalletClick((event as any), Wallet.POLKADOT)} name="Polkadot" icon={PolkadotWalletIcon} />
 			<WalletButton className={`${selectedWallet === Wallet.SUBWALLET? 'border border-solid border-primary bg-highlight': 'border-none'}`} disabled={!apiReady} onClick={(event) => handleWalletClick((event as any), Wallet.SUBWALLET)} name="Subwallet" icon={SubWalletIcon} />
+			<WalletButton className={`${selectedWallet === Wallet.TALISMAN? 'border border-solid border-primary bg-highlight': 'border-none'}`} disabled={!apiReady} onClick={(event) => handleWalletClick((event as any), Wallet.TALISMAN)} name="Talisman" icon={TalismanIcon} />
 		</div>
 	);
 };
