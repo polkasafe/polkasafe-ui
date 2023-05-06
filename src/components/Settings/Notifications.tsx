@@ -83,7 +83,7 @@ const Notifications = () => {
 
 				const updateNotificationTriggerRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateNotificationTriggerPreferences`, {
 					body: JSON.stringify({
-						notificationPreferences: newPreferences
+						triggerPreferences: newPreferences
 					}),
 					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
@@ -215,22 +215,22 @@ const Notifications = () => {
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-text_secondary'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2'><MailIcon /> Email Notifications</span></div>
-				<Form className='col-span-5 flex items-center gap-x-3'>
+				<Form className='col-span-5 flex items-start gap-x-3'>
 					<Form.Item
 						name='email'
 						rules={[{ required: true }]}
 						help={!emailValid && 'Please enter a valid email'}
-						className='border-0 outline-0 my-0 p-0'
+						className='border-0 outline-0 my-0 p-0 w-full'
 						validateStatus={!emailValid ? 'error' : 'success'}
 					>
 						<Input
 							id='email'
 							onChange={(a) => setEmail(a.target.value)}
 							placeholder={'Enter email'}
-							className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-2 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
+							className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-2 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						/>
 					</Form.Item>
-					<PrimaryButton loading={verificationLoading} className={`text-white ${!email ? 'bg-highlight' : 'bg-primary'}`} onClick={verifyEmail} disabled={!email || !emailValid}>
+					<PrimaryButton loading={verificationLoading} className={`text-white ${!email || !emailValid ? 'bg-highlight' : 'bg-primary'}`} onClick={verifyEmail} disabled={!email || !emailValid}>
 						<p className='font-normal text-sm'>Verify</p>
 					</PrimaryButton>
 				</Form>
