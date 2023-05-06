@@ -14,7 +14,8 @@ import {
 	ITransaction,
 	IUser,
 	IUserResponse,
-	ITriggerPreferences } from './types';
+	ITriggerPreferences,
+	IUserNotificationChannelPreferences } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -1005,7 +1006,65 @@ export const updateNotificationTriggerPreferences = functions.https.onRequest(as
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
-			functions.logger.error('Error in updateNotificationPreferences :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in updateNotificationTriggerPreferences :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const updateNotificationChannelPreferences = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { channelPreferences } = req.body as { channelPreferences: IUserNotificationChannelPreferences };
+		if (!channelPreferences || typeof channelPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ ['notificationPreferences.channelPreferences']: channelPreferences });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateNotificationChannelPreferences :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const verifyEmail = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { email, token } = req.body;
+		if (!email || !token) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			const data = await addressRef.get();
+			const verifyEmail = data.data()?.notificationPreferences?.channelPreferences?.email?.handle;
+			const verifyToken = data.data()?.notificationPreferences?.channelPreferences?.email?.verification_token;
+			if (token === verifyToken && email === verifyEmail) {
+				addressRef.update({ ['notificationPreferences.channelPreferences.email.verified']: true });
+				return res.status(200).json({ data: responseMessages.success });
+			} else {
+				return res.status(400).json({ error: responseMessages.invalid_params });
+			}
+		} catch (err:unknown) {
+			functions.logger.error('Error in verifyEmail :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
