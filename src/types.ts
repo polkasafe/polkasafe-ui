@@ -51,6 +51,7 @@ export interface UserDetailsContextType {
 export enum Wallet {
     POLKADOT = 'polkadot-js',
 	SUBWALLET = 'subwallet-js',
+	TALISMAN = 'talisman',
 }
 
 export interface AccountMeta {
