@@ -9,6 +9,7 @@ import { ITransaction } from '../types';
 interface IResponse {
 	error?: string | null;
 	data: ITransaction[];
+	count: number;
 }
 
 export default async function getHistoryTransactions(
@@ -18,6 +19,7 @@ export default async function getHistoryTransactions(
 	page: number
 ): Promise<IResponse> {
 	const returnValue: IResponse = {
+		count: 0,
 		data: [],
 		error: ''
 	};
@@ -58,6 +60,7 @@ export default async function getHistoryTransactions(
 		}
 
 		returnValue.data = transactions;
+		returnValue.count = response.data.count;
 	} catch (err) {
 		console.log('Error in getTransfersByAddress:', err);
 		returnValue.error = String(err) || 'Something went wrong while fetching data';
