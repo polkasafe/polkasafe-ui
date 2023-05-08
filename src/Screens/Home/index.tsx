@@ -51,7 +51,7 @@ const Home = ({ className }: { className?: string }) => {
 
 	useEffect(() => {
 		const fetchProxyData = async () => {
-			if(!multisig) return;
+			if(!multisig || network === 'astar') return;
 			const response = await fetch(
 				`https://${network}.api.subscan.io/api/scan/events`,
 				{
@@ -165,40 +165,40 @@ const Home = ({ className }: { className?: string }) => {
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
 								{network !== 'astar' && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
-									<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+									<section className='mb-3 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
 									</section>
 									:
 									!isOnchain ?
-										<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+										<section className='mb-3 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
 											<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
-											<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
+											<button onClick={() => setOpenTransactionModal(true)} className='border-none outline-none text-waiting bg-transparent p-0' >Add Existential Deposit</button>
 										</section>
 										:
 										proxyNotInDb ?
-											<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
-												<p className='text-white'>Your Proxy has been Created.</p>
-												<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
+											<section className='mb-3 w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
+												<span className='text-white'>Your Proxy has been Created.</span>
+												<button onClick={() => window.location.reload()} className='border-none outline-none text-waiting bg-transparent p-0' >Refresh</button>
 											</section>
 											:
 											proxyInProcess && !hasProxy ?
-												<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+												<section className='mb-3 w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-2'>
 													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
 												</section>
 												:
 												<></>
 								}
 								<EmailBadge/>
-								<div className="grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1">
-									<div className='col-start-1 col-end-13 xl:col-end-8'>
-										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal}  hasProxy={hasProxy} setNewTxn={setNewTxn} className='mt-3' />
+								<div className="mb-6 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
+									<div className='col-start-1 col-end-13 lg:col-end-8'>
+										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal}  hasProxy={hasProxy} setNewTxn={setNewTxn}/>
 									</div>
-									<div className='col-start-1 col-end-13 xl:col-start-8'>
-										<AddressCard className='mt-3' />
+									<div className='col-start-1 col-end-13 lg:col-start-8 h-full'>
+										<AddressCard />
 									</div>
 								</div>
-								<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
+								<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
 									<div className='col-start-1 col-end-13 lg:col-end-13'>
 										<TxnCard setProxyInProcess={setProxyInProcess} newTxn={newTxn} />
 									</div>

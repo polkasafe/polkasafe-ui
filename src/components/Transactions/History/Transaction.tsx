@@ -28,8 +28,9 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [note, setNote] = useState<string>('');
-	const { activeMultisig } = useGlobalUserDetailsContext();
-	const type: 'Sent' | 'Received' = activeMultisig === from ? 'Sent' : 'Received';
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
+	const type: 'Sent' | 'Received' = multisig?.address === from || multisig?.proxy === from ? 'Sent' : 'Received';
 	const location = useLocation();
 	const hash = location.hash.slice(1);
 
@@ -151,6 +152,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								note={note}
 								loading={loading}
 								amount_usd={amount_usd}
+								to={to}
 							/>
 							:
 							<SentInfo
@@ -160,6 +162,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								recipient={to}
 								callHash={callHash}
 								note={note}
+								from={from}
 								loading={loading}
 								amount_usd={amount_usd}
 							/>

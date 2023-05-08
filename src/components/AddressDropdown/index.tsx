@@ -3,12 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
+import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { Wallet } from 'src/types';
 import Balance from 'src/ui-components/Balance';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -22,7 +24,7 @@ interface IAddress {
     imgSrc: string;
 }
 const AddressDropdown = () => {
-	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, addressBook, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const navigate = useNavigate();
 
@@ -38,6 +40,7 @@ const AddressDropdown = () => {
 				activeMultisig: localStorage.getItem('active_multisig') || '',
 				address: '',
 				addressBook: [],
+				loggedInWallet: Wallet.POLKADOT,
 				multisigAddresses: []
 			};
 		});
@@ -47,7 +50,7 @@ const AddressDropdown = () => {
 
 	if(!address){
 		return (
-			<Link to={'/'} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+			<Link to={'/'} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-sm'>
 				<WarningRoundedIcon className='text-base text-primary'/>
 				Not Connected
 			</Link>
@@ -63,7 +66,7 @@ const AddressDropdown = () => {
 				}
 			}}
 		>
-			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
+			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-sm'>
 				<p className='flex items-center gap-x-3'>
 					{<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
 						<Identicon size={20} value={address} theme='polkadot' />
@@ -80,7 +83,7 @@ const AddressDropdown = () => {
 
 			<div
 				className={classNames(
-					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-40 min-w-[274px]',
+					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-main py-[13.5px] px-3 z-40 min-w-[300px]',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
@@ -93,38 +96,36 @@ const AddressDropdown = () => {
 					isMouseEnter.current = false;
 				}}
 			>
-				<div className='flex items-center justify-center flex-col gap-y-9'>
-					<div className='flex items-center justify-center flex-col gap-y-[10px]'>
+				<div className='flex items-center justify-center flex-col gap-y-5'>
+					<div className='flex items-center justify-center flex-col gap-y-2'>
 						<Identicon
 							className='border-2 rounded-full bg-transparent border-primary p-1'
 							value={address}
-							size={70}
+							size={50}
 							theme='polkadot'
 						/>
 						<p className='text-white font-normal text-sm'>
 							{ addressBook?.find(item => item.address === address)?.name }
 						</p>
-						<p className='bg-bg-secondary w-[400px] font-normal text-sm px-2 py-[10px] rounded-lg flex items-center justify-center'>
-							<div className='flex items-center gap-x-3'>
-								<span className='text-text_secondary'>{shortenAddress(getEncodedAddress(address, network) || address, 10)}</span>
-								<button onClick={() => copyText(getEncodedAddress(address, network) || address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
-							</div>
-							<Balance address={address} />
+						<p className='bg-bg-secondary mb-1 w-[300px] font-normal gap-x-2 text-sm p-2 rounded-lg flex items-center justify-center'>
+							<span className='text-text_secondary'>{shortenAddress(getEncodedAddress(address, network) || address, 12)}</span>
+							<button onClick={() => copyText(getEncodedAddress(address, network) || address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
 						</p>
+						<Balance className='ml-0' address={address} />
 					</div>
 					<div className='w-full'>
-						<p className='border-t border-text_secondary flex items-center text-normal text-sm justify-between w-full p-3'>
+						<p className='border-t border-text_secondary flex items-center text-normal text-sm justify-between w-full p-2'>
 							<span className='text-text_secondary'>Wallet</span>
-							<span className='text-white'>Polkadot.js</span>
+							<span className='text-white capitalize'>{loggedInWallet}</span>
 						</p>
-						<p className='border-t border-b border-text_secondary flex items-center text-normal text-sm justify-between w-full p-3'>
+						<p className='border-t border-b border-text_secondary flex items-center text-normal text-sm justify-between w-full p-2'>
 							<span className='text-text_secondary'>Network</span>
 							<span className='text-white capitalize'>{ network }</span>
 						</p>
 					</div>
-					<button onClick={handleDisconnect} className='rounded-lg bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-3 text-failure'>
+					<Button onClick={handleDisconnect} className='rounded-lg outline-none border-none bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-2 text-failure'>
 						Disconnect
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>

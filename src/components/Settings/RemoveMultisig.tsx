@@ -74,8 +74,8 @@ const RemoveMultisigAddress = () => {
 							multisigAddresses: newMutlisigArray,
 							multisigSettings: {
 								...prevState.multisigSettings,
-								[activeMultisig]: {
-									...prevState.multisigSettings[activeMultisig],
+								[multisig.address]: {
+									...prevState.multisigSettings[multisig.address],
 									deleted: true
 								}
 							}

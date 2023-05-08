@@ -77,7 +77,7 @@ const Notification= () => {
 		>
 			<button onClick={() => {
 				(isVisible ? toggleVisibility(false) : toggleVisibility(true));
-			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-lg'>
+			}} className='flex items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-lg'>
 				<NotificationIcon />
 			</button>
 

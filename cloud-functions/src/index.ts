@@ -111,11 +111,14 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 					} as IUser;
 
 					const resUser: IUserResponse = {
-						address: addressDoc.address,
+						address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
-						addressBook: addressDoc.addressBook,
-						multisigAddresses,
+						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })),
+						multisigAddresses: multisigAddresses.map((item) => (
+							{ ...item,
+								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+							})),
 						multisigSettings: addressDoc.multisigSettings
 					};
 
@@ -187,7 +190,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
-				return res.status(200).json({ data: newAddressBook });
+				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err:unknown) {
@@ -282,8 +285,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
 
-			// check if substrateSignatories contains the address of the user
-			if (!substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
+			// check if substrateSignatories contains the address of the user (not if creating a new proxy)
+			if (!proxyAddress && !substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
 
 			const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
 			if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
@@ -307,6 +310,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 					...multisigDocData,
 					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate(),
+					signatories: multisigDocData?.signatories?.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)),
 					updated_at: multisigDocData?.updated_at?.toDate() || multisigDocData?.created_at.toDate()
 				};
 
@@ -357,6 +361,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				threshold: Number(threshold)
 			};
 
+			const newMultisigWithEncodedSignatories = {
+				...newMultisig,
+				signatories: newMultisig.signatories.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)) };
+
 			if (proxyAddress) {
 				newMultisig.proxy = proxyAddress;
 			}
@@ -364,7 +372,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			await multisigRef.set(newMultisig, { merge: true });
 
 			functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
-			res.status(200).json({ data: newMultisig });
+			res.status(200).json({ data: newMultisigWithEncodedSignatories });
 
 			if (oldProxyMultisigRef) {
 				await oldProxyMultisigRef.update({

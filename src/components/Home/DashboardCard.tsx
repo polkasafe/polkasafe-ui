@@ -87,8 +87,8 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const TransactionModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
-					<PlusCircleOutlined /> New Transaction
+				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-primary text-white'>
+					New Transaction
 				</PrimaryButton>
 				<Modal
 					centered
@@ -118,7 +118,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const FundMultisigModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'>
+				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-highlight text-primary '>
 					<WalletIcon /> Fund Multisig
 				</PrimaryButton>
 				<Modal
@@ -143,10 +143,10 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 
 	return (
 		<div>
-			<h2 className="text-lg font-bold text-white">Overview</h2>
-			<div className={`${className} relative bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-80 mt-3`}>
+			<h2 className="text-lg font-bold text-white mb-2">Overview</h2>
+			<div className={`${className} relative bg-bg-main flex flex-col rounded-lg p-5 shadow-lg h-80`}>
 				<div className='absolute right-5 top-5'>
-					<div className="flex gap-x-4 my-3 items-center">
+					<div className="flex gap-x-4 items-center">
 						<a className='w-5' target='_blank' href={'https://polkadot.js.org/apps/#/accounts'} rel="noreferrer">
 							<img className='w-5' src={polkadotIcon} alt="icon" />
 						</a>
@@ -197,18 +197,18 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-wrap">
-					<div className='m-2'>
+				<div className="flex flex-1 gap-x-5 mt-8 flex-wrap">
+					<div>
 						<div className='text-white'>Signatories</div>
 						<div className='font-bold text-xl text-primary'>
 							{currentMultisig?.signatories.length || 0}
 						</div>
 					</div>
-					<div className='m-2'>
+					<div>
 						<div className='text-white'>Tokens</div>
 						<div className='font-bold text-xl text-primary'>{assetsData.length}</div>
 					</div>
-					<div className='m-2'>
+					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-xl text-primary'>
 							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}

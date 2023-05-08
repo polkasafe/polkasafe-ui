@@ -10,7 +10,7 @@ import { Link, useLocation } from 'react-router-dom';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ExternalLinkIcon, HistoryIcon, QueueIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
 	QUEUE,
@@ -45,10 +45,11 @@ const Transactions = () => {
 						<div
 							className='flex items-center mb-4'
 						>
-							<button
+							<Button
 								onClick={() => setTab(ETab.QUEUE)}
+								icon={<QueueIcon />}
 								className={classNames(
-									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									' font-medium text-sm leading-[15px] w-[100px] flex items-center text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.QUEUE
 									}
@@ -56,11 +57,12 @@ const Transactions = () => {
 							>
 								{/* <QueueIcon /> */}
 								Queue
-							</button>
-							<button
+							</Button>
+							<Button
 								onClick={() => setTab(ETab.HISTORY)}
+								icon={<HistoryIcon />}
 								className={classNames(
-									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									'rounded-lg font-medium text-sm flex items-center leading-[15px] w-[100px] text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.HISTORY
 									}
@@ -68,11 +70,10 @@ const Transactions = () => {
 							>
 								{/* <HistoryIcon/> */}
 								History
-							</button>
+							</Button>
 							<div className='flex-1' />
 							<Button
 								onClick={() => setRefetch(prev => !prev)}
-								size='large'
 								icon={<SyncOutlined spin={loading} className='text-primary'  />}
 								className={'text-primary flex items-center bg-highlight outline-none border-none font-medium text-sm'}
 							>

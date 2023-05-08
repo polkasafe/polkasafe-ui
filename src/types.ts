@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { networks, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
+	loggedInWallet: Wallet;
     activeMultisig: string;
 	isProxy: boolean;
     address: string;
@@ -19,7 +20,9 @@ export interface UserDetailsContextType {
 }
 
 export enum Wallet {
-    POLKADOT = 'polkadot-js'
+    POLKADOT = 'polkadot-js',
+	SUBWALLET = 'subwallet-js',
+	TALISMAN = 'talisman',
 }
 
 export interface AccountMeta {

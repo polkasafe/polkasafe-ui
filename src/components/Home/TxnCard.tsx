@@ -127,18 +127,18 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 
 	return (
 		<div>
-			<div className="grid grid-cols-12 gap-4 my-3 grid-row-2 lg:grid-row-1">
+			<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
 				{/* Txn Queue */}
 				<div className='col-start-1 col-end-13 md:col-end-7'>
-					<div className="flex justify-between flex-row w-full">
-						<h2 className="text-xl font-bold text-white">Transaction Queue</h2>
+					<div className="flex justify-between flex-row w-full mb-2">
+						<h2 className="text-lg font-bold text-white">Transaction Queue</h2>
 						<Link to="/transactions?tab=Queue" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
 					</div>
 
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
 						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
@@ -201,14 +201,14 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 
 				{/* Txn History */}
 				<div className='md:col-start-7 col-start-1 col-end-13'>
-					<div className="flex justify-between flex-row w-full">
-						<h2 className="text-xl font-bold text-white">Transaction History</h2>
+					<div className="flex justify-between flex-row w-full mb-2">
+						<h2 className="text-lg font-bold text-white">Transaction History</h2>
 						<Link to="/transactions?tab=History" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
 					</div>
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg mt-2 h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
 						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?

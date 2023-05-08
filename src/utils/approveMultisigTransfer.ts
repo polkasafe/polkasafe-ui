@@ -10,6 +10,7 @@ import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
@@ -69,6 +70,8 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	console.log(`Time point is: ${multisigInfo?.when}`);
 
 	const numApprovals = multisigInfo.approvals.length;
+
+	let blockHash = '';
 
 	return new Promise<void>((resolve, reject) => {
 
@@ -135,11 +138,15 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 						console.log('Transaction has been broadcasted');
 						setLoadingMessages('Transaction has been broadcasted');
 					} else if (status.isInBlock) {
+						blockHash = status.asInBlock.toHex();
 						console.log('Transaction is in block');
 						setLoadingMessages('Transaction is in block');
 					} else if (status.isFinalized) {
 						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 						console.log(`asMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+						const block = await api.rpc.chain.getBlock(blockHash);
+						const blockNumber = block.block.header.number.toNumber();
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
@@ -153,6 +160,17 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 
 								// update note for transaction history
 								updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
+
+								addNewTransaction({
+									amount: amount || new BN(0),
+									block_number: blockNumber,
+									callData: callDataHex,
+									callHash: txHash.toHex(),
+									from: multisig.address,
+									network,
+									note,
+									to: recipientAddress || ''
+								});
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,

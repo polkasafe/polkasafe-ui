@@ -29,6 +29,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 	const handleSetNetwork = (networkToSet: string) => {
 		localStorage.setItem('network', networkToSet);
 		setNetwork(networkToSet);
+		toggleVisibility(false);
 	};
 
 	return (
@@ -43,7 +44,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 			<button
 				onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true) }
 				className={classNames(
-					'flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm',
+					'flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-sm',
 					className
 				)}
 			>
