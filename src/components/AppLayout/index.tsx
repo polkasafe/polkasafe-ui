@@ -56,7 +56,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
 					<div className='hidden lg:block w-full max-w-[240px]'></div>
-					<Content className='bg-bg-secondary p-[30px] rounded-lg'>
+					<Content className='bg-bg-secondary p-[40px] rounded-lg'>
 						{ multisigChanged ? <Loader size='large' /> :  <SwitchRoutes />}
 					</Content>
 				</Layout>
@@ -69,7 +69,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 export default styled(AppLayout)`
 	background: transparent !important;
 	.min-h {
-		min-height: calc(100vh - 90px - 80px);
+		min-height: calc(100vh - 70px - 80px);
 	}
 	.ant-drawer-content-wrapper {
 		max-width: 240px;

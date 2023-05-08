@@ -136,7 +136,7 @@ const Menu: FC<Props> = ({ className }) => {
 							menuItems.map((item) => {
 								return <li className='w-full' key={item.key}>
 									<Link
-										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-2 font-medium text-base', {
 											'bg-highlight text-primary': item.key === location.pathname
 										})}
 										to={item.key} >
@@ -149,17 +149,16 @@ const Menu: FC<Props> = ({ className }) => {
 					</ul>
 				</section>
 			</div>
-			<section className='overflow-auto [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
-				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
-					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
-				</h2>
-				<div>
-					{multisigAddresses &&
+			<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
+				<span>Multisigs</span>
+				<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
+			</h2>
+			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
+				{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
 						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
-								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-2 font-medium text-base', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
 								})} onClick={() => {
 									setUserDetailsContextState((prevState) => {
@@ -174,7 +173,7 @@ const Menu: FC<Props> = ({ className }) => {
 									<Identicon
 										className='image identicon mx-2'
 										value={multisig.address}
-										size={30}
+										size={25}
 										theme={'polkadot'}
 									/>
 									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
@@ -182,11 +181,10 @@ const Menu: FC<Props> = ({ className }) => {
 							</li>;
 						})}
 					</ul>}
-				</div>
 			</section>
 			{userAddress &&
 				<section className='mt-auto'>
-					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+					<button className='text-white bg-primary p-2 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
 						onClick={() => setOpenAddMultisig(true)}>
 						<UserPlusIcon className='text-xl' />
 						<span className='font-normal text-sm'>Add Multisig</span>

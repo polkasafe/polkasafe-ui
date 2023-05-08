@@ -41,7 +41,7 @@ const DonateInfo = () => {
 						</a>
 					</span>
 				</p>
-				<a href='https://polkadot.js.org/extension/' rel="noreferrer" target={'_blank'} className='text-primary px-[10px] py-3 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
+				<a href='https://polkadot.js.org/extension/' rel="noreferrer" target={'_blank'} className='text-primary px-[10px] py-2 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
 					<WalletIcon className='text-base'/>
 					<span className='font-bold text-sm cursor-pointer'>
                         Create Wallet
