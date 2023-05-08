@@ -9,32 +9,36 @@ import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferenc
 
 export class NotificationService {
 	constructor(
-		private readonly source: NOTIFICATION_SOURCE,
-		private readonly trigger: string,
-		private readonly notificationPreferences: IUserNotificationPreferences,
-		private readonly htmlMessage: string,
-		private readonly message: string,
-		private readonly subject: string,
-		private readonly sourceArgs?: {[index: string]: any} // additional data a source might need
+		protected readonly source: NOTIFICATION_SOURCE,
+		protected readonly trigger: string,
+		protected readonly notificationPreferences: IUserNotificationPreferences,
+		protected readonly htmlMessage: string,
+		protected readonly message: string,
+		protected readonly subject: string,
+		protected readonly sourceArgs?: {[index: string]: any} // additional data a source might need
 	) {
 		if (SENDGRID_API_KEY) {
 			sgMail.setApiKey(SENDGRID_API_KEY);
 		}
 	}
 
-	public async sendNotification(): Promise<void> {
+	public async notifyAllChannels(): Promise<void> {
 		if (!this.notificationPreferences.triggerPreferences[this.trigger]) return;
+		const userNotificationPreferences = this.notificationPreferences;
 
-		this.sendEmailNotification();
-		this.sendTelegramNotification();
-		this.sendDiscordNotification();
-		this.sendElementNotification();
-		this.sendSlackNotification();
-		this.sendInAppNotification();
+		this.sendEmailNotification(userNotificationPreferences);
+		this.sendTelegramNotification(userNotificationPreferences);
+		this.sendDiscordNotification(userNotificationPreferences);
+		this.sendElementNotification(userNotificationPreferences);
+		this.sendSlackNotification(userNotificationPreferences);
+		this.sendInAppNotification(userNotificationPreferences);
 	}
 
-	private async sendEmailNotification(): Promise<void> {
-		if (!SENDGRID_API_KEY || !this.notificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) return;
+	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
+		if (!SENDGRID_API_KEY ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled ||
+			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].verified)
+		) return;
 
 		const FROM = {
 			email: NOTIFICATION_SOURCE_EMAIL[this.source],
@@ -46,26 +50,26 @@ export class NotificationService {
 			html: this.htmlMessage,
 			subject: this.subject,
 			text: this.message,
-			to: this.notificationPreferences.channelPreferences[CHANNEL.EMAIL].handle
+			to: userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].handle
 		};
 
 		sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
 	}
 
-	private async sendTelegramNotification(): Promise<void> {
-		if (!TELEGRAM_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled) return;
+	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!TELEGRAM_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled) return;
 		const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
-		const chatId = this.notificationPreferences.channelPreferences[CHANNEL.TELEGRAM].handle;
+		const chatId = userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].handle;
 
 		bot.sendMessage(chatId, this.message).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
-	private async sendDiscordNotification(): Promise<void> {
-		if (!DISCORD_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled) return;
+	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!DISCORD_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled) return;
 		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
-		const channelId = this.notificationPreferences.channelPreferences[CHANNEL.DISCORD].handle;
+		const channelId = userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].handle;
 		const channel = client.channels.cache.get(channelId) as TextChannel;
 		if (!channel) return console.error(`Failed to find channel with id ${channelId}`);
 
@@ -73,12 +77,12 @@ export class NotificationService {
 		client.destroy();
 	}
 
-	private async sendElementNotification(): Promise<void> {
-		if (!ELEMENT_API_KEY || !this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled) return;
-		const roomId = this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle;
+	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!ELEMENT_API_KEY || !userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled) return;
+		const roomId = userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle;
 
 		const requestBody = {
-			roomId: this.notificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle,
+			roomId: userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle,
 			body: this.message,
 			messageType: 'text'
 		};
@@ -94,12 +98,12 @@ export class NotificationService {
 		}
 	}
 
-	private async sendSlackNotification(): Promise<void> {
-		if (!SLACK_BOT_TOKEN || !this.notificationPreferences.channelPreferences[CHANNEL.SLACK].enabled) return;
+	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!SLACK_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.SLACK].enabled) return;
 		const client = new SlackWebClient(SLACK_BOT_TOKEN);
 		try {
 			await client.chat.postMessage({
-				channel: this.notificationPreferences.channelPreferences[CHANNEL.SLACK].handle,
+				channel: userNotificationPreferences.channelPreferences[CHANNEL.SLACK].handle,
 				text: this.message
 			});
 		} catch (error) {
@@ -107,8 +111,8 @@ export class NotificationService {
 		}
 	}
 
-	private async sendInAppNotification(): Promise<void> {
-		if (!this.notificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled) return;
+	public async sendInAppNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled) return;
 
 		const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 		let newNotificationRef;
@@ -121,7 +125,7 @@ export class NotificationService {
 			newNotificationRef = firestore_db.collection('notifications').doc();
 			newNotification = {
 				id: newNotificationRef.id,
-				address: this.notificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle,
+				address: userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle,
 				created_at: new Date(),
 				message: this.message,
 				type: 'sent',

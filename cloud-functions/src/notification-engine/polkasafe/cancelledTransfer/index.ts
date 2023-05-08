@@ -6,7 +6,7 @@ import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import isValidTemplateArgs from '../../global-utils/isValidTemplateArgs';
 
-const TRIGGER_NAME = 'initMultisigTransfer';
+const TRIGGER_NAME = 'cancelledTransfer';
 
 interface Args {
 	network: string;
@@ -14,7 +14,7 @@ interface Args {
 	callHash: string;
 }
 
-export default async function initMultisigTransfer(args: Args) {
+export default async function cancelledTransfer(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { network, addresses, callHash } = args;

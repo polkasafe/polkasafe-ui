@@ -17,7 +17,8 @@ export interface IUserNotificationChannelPreferences {
 	name: CHANNEL;
 	enabled: boolean;
 	handle: string;
-	verfied: boolean;
+	verified: boolean;
+	verification_token?: string;
 }
 
 export interface IUserNotificationPreferences {
