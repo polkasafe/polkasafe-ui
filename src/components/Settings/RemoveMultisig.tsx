@@ -97,7 +97,7 @@ const RemoveMultisigAddress = () => {
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
-					{multisigAddresses?.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+					{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
 				</span>
                 ?
 			</p>
