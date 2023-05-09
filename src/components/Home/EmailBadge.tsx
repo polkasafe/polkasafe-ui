@@ -84,7 +84,7 @@ const EmailBadge = () => {
 				<div className='flex items-center justify-center'>
 					<Disc className='mx-4'/>
 					<div>
-						<h1 className='text-white text-lg font-bold'>Get Notified</h1>
+						<h1 className='text-white text-lg font-semibold mb-[2px]'>Get Notified</h1>
 						<p className='text-white text-xs'>Enter your email to get notifications for your Safe</p>
 					</div>
 				</div>

@@ -10,8 +10,8 @@ const { Footer: AntdFooter } = Layout;
 
 const Footer = () => {
 	return (
-		<AntdFooter className='flex text-white bg-bg-main flex-row items-center p-0 lg:h-[80px] shadow-top'>
-			<div className='hidden lg:block w-[240px]'></div>
+		<AntdFooter className='flex text-white bg-bg-main flex-row items-center p-0 lg:h-[60px] shadow-top'>
+			<div className='hidden lg:block w-[180px]'></div>
 			<section className='flex-1 flex flex-col py-[30px] lg:py-0 lg:items-center lg:flex-row lg:justify-between gap-x-2 gap-y-3 px-[30px]'>
 				<div className='flex gap-2 md:gap-10 items-center justify-between'>
 					<p className='hidden md:block'>
