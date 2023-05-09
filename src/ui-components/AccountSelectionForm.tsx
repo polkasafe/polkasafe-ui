@@ -17,8 +17,8 @@ interface IAccountSelectionFormProps {
 
 const AccountSelectionForm: FC<IAccountSelectionFormProps> = ({ accounts, address, onAccountChange, title, disabled }) => {
 	return (
-		<article className='flex flex-col gap-y-3 w-[350px]'>
-			<h3 className='text-primary font-normal text-sm leading-[13px]'>{title}</h3>
+		<article className='flex flex-col gap-y-2 w-[320px]'>
+			<h3 className='text-primary font-normal text-xs'>{title}</h3>
 			<AddressDropdown
 				disabled={disabled}
 				accounts={accounts}

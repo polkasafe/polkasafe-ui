@@ -202,8 +202,8 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 					</section> */}
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
-									<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>

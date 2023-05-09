@@ -117,18 +117,18 @@ const Menu: FC<Props> = ({ className }) => {
 	};
 
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[20px] px-4')}>
 			<AddMultisigModal/>
 			<div className='flex flex-col gap-y-11 mb-3'>
 				<section>
 					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
-						<Badge offset={[-15, 45]} count='Beta' color='#1573FE'>
-							<img src={polkasafeLogo} alt="polkasafe logo" />
+						<Badge offset={[-15, 40]} size='small' count='Beta' color='#1573FE'>
+							<img src={polkasafeLogo} height={17} width={130} alt="polkasafe logo" />
 						</Badge>
 					</Link>
 				</section>
 				<section>
-					<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary'>
+					<h2 className='uppercase text-text_secondary ml-3 text-[10px] font-primary'>
 						Menu
 					</h2>
 					<ul className='flex flex-col py-2 text-white list-none'>
@@ -136,7 +136,7 @@ const Menu: FC<Props> = ({ className }) => {
 							menuItems.map((item) => {
 								return <li className='w-full' key={item.key}>
 									<Link
-										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-2 font-medium text-base', {
+										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-2.5 font-medium text-sm', {
 											'bg-highlight text-primary': item.key === location.pathname
 										})}
 										to={item.key} >
@@ -149,16 +149,16 @@ const Menu: FC<Props> = ({ className }) => {
 					</ul>
 				</section>
 			</div>
-			<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
+			<h2 className='uppercase text-text_secondary ml-3 text-[10px] font-primary flex items-center justify-between'>
 				<span>Multisigs</span>
-				<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
+				<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-5 w-5 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
 			</h2>
 			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				{multisigAddresses &&
-					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
+					<ul className='flex flex-col gap-y-2 py-2.5 text-white list-none'>
 						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
-								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-2 font-medium text-base', {
+								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-2.5 font-medium text-sm', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
 								})} onClick={() => {
 									setUserDetailsContextState((prevState) => {
@@ -173,7 +173,7 @@ const Menu: FC<Props> = ({ className }) => {
 									<Identicon
 										className='image identicon mx-2'
 										value={multisig.address}
-										size={25}
+										size={23}
 										theme={'polkadot'}
 									/>
 									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
@@ -184,10 +184,10 @@ const Menu: FC<Props> = ({ className }) => {
 			</section>
 			{userAddress &&
 				<section className='mt-auto'>
-					<button className='text-white bg-primary p-2 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+					<button className='text-white bg-primary p-2.5 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
 						onClick={() => setOpenAddMultisig(true)}>
-						<UserPlusIcon className='text-xl' />
-						<span className='font-normal text-sm'>Add Multisig</span>
+						<UserPlusIcon className='text-sm' />
+						<span className='font-normal text-xs'>Add Multisig</span>
 					</button>
 				</section>
 			}

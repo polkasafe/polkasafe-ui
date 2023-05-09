@@ -50,8 +50,8 @@ const AddressDropdown = () => {
 
 	if(!address){
 		return (
-			<Link to={'/'} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-sm'>
-				<WarningRoundedIcon className='text-base text-primary'/>
+			<Link to={'/'} className='flex items-center justify-center gap-x-2 outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-xs'>
+				<WarningRoundedIcon className='text-sm text-primary'/>
 				Not Connected
 			</Link>
 		);
@@ -66,16 +66,16 @@ const AddressDropdown = () => {
 				}
 			}}
 		>
-			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-3 outline-none border-none text-white bg-highlight rounded-lg p-2 shadow-none text-sm'>
-				<p className='flex items-center gap-x-3'>
-					{<span className='bg-primary flex items-center justify-center rounded-full w-4 h-4'>
-						<Identicon size={20} value={address} theme='polkadot' />
+			<button onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true)} className='flex items-center justify-center gap-x-2 outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-xs'>
+				<p className='flex items-center gap-x-2'>
+					{<span className='bg-primary flex items-center justify-center rounded-full'>
+						<Identicon size={15} value={address} theme='polkadot' />
 					</span>}
-					<span title={address} className='hidden md:inline-flex w-24 overflow-hidden truncate'>
+					<span title={address} className='hidden md:inline-flex w-20 overflow-hidden truncate'>
 						{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 					</span>
 				</p>
-				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-base', {
+				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-sm', {
 					'text-primary': address,
 					'text-white': !address
 				})} />

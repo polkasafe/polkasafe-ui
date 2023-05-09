@@ -47,7 +47,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 						theme='polkadot'
 					/>
 				:
-				multisig?.address === getSubstrateAddress(address) ?
+				multisig?.address === address ?
 					withBadge ?
 						<Badge count='Multisig' offset={[-45, 0]} className='border-none' color='#1573FE'>
 							<Identicon
@@ -83,7 +83,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 						{shortenAddress(getEncodedAddress(address, network) || '')}
 					</span>
 					<span
-						className='flex items-center gap-x-2 text-sm'
+						className='flex items-center gap-x-2'
 					>
 						<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
 						<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >

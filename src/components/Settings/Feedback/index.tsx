@@ -86,7 +86,7 @@ const Feedback = () => {
 
 	return (
 		<>
-			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
+			<h2 className='font-semibold text-lg leading-[22px] text-white mb-4'>
 				Feedback
 			</h2>
 			<article className='bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>

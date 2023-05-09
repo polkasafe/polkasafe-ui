@@ -23,7 +23,7 @@ const Settings = () => {
 
 	return (
 		<div>
-			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
+			<h2 className='font-semibold text-lg text-white mb-4'>Manage Safe Owners</h2>
 			<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
 				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
 					{multisig?.proxy ?

@@ -55,7 +55,6 @@ const Transactions = () => {
 									}
 								)}
 							>
-								{/* <QueueIcon /> */}
 								Queue
 							</Button>
 							<Button
@@ -68,7 +67,6 @@ const Transactions = () => {
 									}
 								)}
 							>
-								{/* <HistoryIcon/> */}
 								History
 							</Button>
 							<div className='flex-1' />

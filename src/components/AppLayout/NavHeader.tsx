@@ -25,7 +25,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 	const { address } = useGlobalUserDetailsContext();
 	return (
 		<Header className='bg-bg-main flex flex-row items-center p-0 h-[70px]'>
-			<section className='hidden lg:block w-[240px]'></section>
+			<section className='hidden lg:block w-[200px]'></section>
 			<section className='pr-4 lg:pr-8 pl-0 flex-1 flex items-center gap-x-2'>
 				<article className='lg:hidden'>
 					<button className='flex items-center justify-center outline-none border-none bg-bg-secondary text-primary rounded-xl px-[18px] py-[12px] md:px-[20px] md:py-[14px] font-bold text-xl md:text-2xl' onClick={() => {

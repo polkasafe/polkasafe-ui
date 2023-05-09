@@ -165,32 +165,32 @@ const Home = ({ className }: { className?: string }) => {
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
 								{network !== 'astar' && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
-									<section className='mb-3 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
+									<section className='mb-3 text-xs border border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
 									</section>
 									:
 									!isOnchain ?
-										<section className='mb-3 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
+										<section className='mb-3 text-xs border border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
 											<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
 											<button onClick={() => setOpenTransactionModal(true)} className='border-none outline-none text-waiting bg-transparent p-0' >Add Existential Deposit</button>
 										</section>
 										:
 										proxyNotInDb ?
-											<section className='mb-3 w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
+											<section className='mb-3 text-xs w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-3'>
 												<span className='text-white'>Your Proxy has been Created.</span>
 												<button onClick={() => window.location.reload()} className='border-none outline-none text-waiting bg-transparent p-0' >Refresh</button>
 											</section>
 											:
 											proxyInProcess && !hasProxy ?
-												<section className='mb-3 w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-2'>
+												<section className='mb-3 text-xs w-full text-waiting bg-waiting bg-opacity-10 py-2 px-3 rounded-lg flex items-center gap-x-2'>
 													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
 												</section>
 												:
 												<></>
 								}
 								<EmailBadge/>
-								<div className="mb-6 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
+								<div className="mb-5 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
 										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal}  hasProxy={hasProxy} setNewTxn={setNewTxn}/>
 									</div>

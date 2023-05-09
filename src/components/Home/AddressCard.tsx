@@ -23,17 +23,17 @@ const AddressCard = ({ className }: { className?: string }) => {
 	return (
 		<div>
 			<div className="flex justify-between flex-row w-full mb-2">
-				<h2 className="text-lg font-bold text-white">Address Book</h2>
+				<h2 className="text-base font-bold text-white">Address Book</h2>
 				<div className="flex items-center justify-center text-primary cursor-pointer">
 					<Link to="/address-book" className='mx-2 text-primary text-sm'>View All</Link>
 					<RightArrowOutlined/>
 				</div>
 			</div>
-			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-80`}>
-				<div className='flex flex-col px-5 h-80 overflow-auto w-[full]'>
+			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-[18rem]`}>
+				<div className='flex flex-col px-5 h-[18rem] overflow-auto w-[full]'>
 					{addressBook.map((item, i) => (
 						<div key={i}>
-							<AddressComponent address={item.address} />
+							<AddressComponent iconSize={25} address={item.address} />
 							{addressBook.length - 1 !== i? <Divider className='bg-text_secondary mt-2 mb-3' />: null}
 						</div>
 					))}
