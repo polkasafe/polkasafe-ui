@@ -128,21 +128,21 @@ const ConnectWallet = () => {
 	return (
 		<>
 			<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
-				<img src={ConnectWalletImg} alt='Wallet' height={150} width={150} className='my-4' />
+				<img src={ConnectWalletImg} alt='Wallet' height={120} width={120} className='mb-4 mt-1' />
 				{
 					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :
 						<>
-							<h2 className='font-bold text-xl leading-[22px] text-white'>Get Started</h2>
-							<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white'>Connect your wallet</p>
-							<p className='text-text_secondary text-sm leading-[15px] font-normal mt-[30px]'>Your first step towards creating a safe & secure MultiSig</p>
+							<h2 className='font-bold text-lg text-white'>Get Started</h2>
+							<p className='mt-[10px]  text-normal text-sm text-white'>Connect your wallet</p>
+							<p className='text-text_secondary text-sm font-normal mt-[20px]'>Your first step towards creating a safe & secure MultiSig</p>
 							{
 								showAccountsDropdown?
-									<div className='mt-[30px]'>
+									<div className='mt-[20px]'>
 										<WalletButtons setNoAccounts={setNoAccounts} setNoExtenstion={setNoExtension} className='mb-4' setWallet={setSelectedWallet} setAccounts={setAccounts} />
 										{
 											noExtension ?
-												<p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'>Please Install {selectedWallet === Wallet.POLKADOT ? 'Polkadot-Js' : 'Subwallet'} Extension.</p> :
-												noAccounts ? <p className='mt-[10px]  text-normal leading-[15px] text-sm text-white text-center'>No Accounts Found. Please Install the Extension And Add Accounts.</p> :
+												<p className='mt-[10px]  text-normal text-sm text-white text-center'>Please Install {selectedWallet === Wallet.POLKADOT ? 'Polkadot-Js' : 'Subwallet'} Extension.</p> :
+												noAccounts ? <p className='mt-[10px]  text-normal text-sm text-white text-center'>No Accounts Found. Please Install the Extension And Add Accounts.</p> :
 													<AccountSelectionForm
 														disabled={loading}
 														accounts={accounts}
@@ -157,10 +157,9 @@ const ConnectWallet = () => {
 							<Button
 								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
 								icon={<WalletIcon/>}
-								size='large'
 								loading={loading}
 								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
-								className={`mt-[30px] border-none outline-none flex items-center justify-center ${(noExtension || noAccounts || !address) && showAccountsDropdown ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} max-w-[350px] w-full`}
+								className={`mt-[25px] text-sm border-none outline-none flex items-center justify-center ${(noExtension || noAccounts || !address) && showAccountsDropdown ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} max-w-[320px] w-full`}
 							>
 								Connect Wallet
 							</Button>

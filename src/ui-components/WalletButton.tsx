@@ -15,8 +15,8 @@ interface Props {
 
 const WalletButton = ({ disabled, onClick, icon, className }: Props) => {
 	return (
-		<Button className={`flex items-center py-5 px-8 justify-center rounded-md bg-bg-secondary outline-none ${className}`} onClick={onClick} disabled={disabled}>
-			<img src={icon} alt='parachain icon' height={25} width={25} />
+		<Button className={`flex items-center py-4 px-7 justify-center rounded-md bg-bg-secondary outline-none ${className}`} onClick={onClick} disabled={disabled}>
+			<img src={icon} alt='parachain icon' height={20} width={20} />
 		</Button>
 	);
 };

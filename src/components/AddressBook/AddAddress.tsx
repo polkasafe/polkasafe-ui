@@ -4,8 +4,8 @@
 
 import { Form, Input, message } from 'antd';
 import React, { useState } from 'react';
-import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
+import AddBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';

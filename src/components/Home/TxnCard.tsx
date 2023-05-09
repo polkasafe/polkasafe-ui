@@ -131,7 +131,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 				{/* Txn Queue */}
 				<div className='col-start-1 col-end-13 md:col-end-7'>
 					<div className="flex justify-between flex-row w-full mb-2">
-						<h2 className="text-lg font-bold text-white">Transaction Queue</h2>
+						<h2 className="text-base font-bold text-white">Transaction Queue</h2>
 						<Link to="/transactions?tab=Queue" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
@@ -139,7 +139,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					</div>
 
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
-						<h1 className="text-primary text-md mb-4">Pending Transactions</h1>
+						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
 						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
 								let decodedCallData = null;
@@ -202,14 +202,14 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 				{/* Txn History */}
 				<div className='md:col-start-7 col-start-1 col-end-13'>
 					<div className="flex justify-between flex-row w-full mb-2">
-						<h2 className="text-lg font-bold text-white">Transaction History</h2>
+						<h2 className="text-base font-bold text-white">Transaction History</h2>
 						<Link to="/transactions?tab=History" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
 							<RightArrowOutlined/>
 						</Link>
 					</div>
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
-						<h1 className="text-primary text-md mb-4">Completed Transactions</h1>
+						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?
 							transactions.filter((_, i) => i < 10).map((transaction, i) => {

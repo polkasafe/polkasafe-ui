@@ -398,8 +398,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					</section> */}
 
 							<section className='flex items-center gap-x-5 justify-center mt-10'>
-								<CancelBtn className='w-[300px]' onClick={onCancel} />
-								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance))} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+								<CancelBtn className='w-[250px]' onClick={onCancel} />
+								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 							</section>
 						</Form>
 					</Spin>

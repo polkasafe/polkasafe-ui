@@ -30,7 +30,7 @@ const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, togg
 			>
 				<OutlineCloseIcon className='text-primary w-2 h-2' />
 			</button>}
-			title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{title}</h3>}
+			title={<h3 className='text-white mb-8 text-lg font-semibold'>{title}</h3>}
 			open={isVisible}
 			className='w-auto md:min-w-[500px]'
 		>

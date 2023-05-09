@@ -80,26 +80,26 @@ const EmailBadge = () => {
 	}
 	return (
 		<>
-			{showBadge?<div className='flex items-center justify-between w-[100%] mb-6 py-2 px-3 bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
+			{showBadge?<div className='flex items-center justify-between w-[100%] mb-5 py-3 px-1 bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
 				<div className='flex items-center justify-center'>
-					<Disc className='mx-5'/>
+					<Disc className='mx-4'/>
 					<div>
 						<h1 className='text-white text-lg font-bold'>Get Notified</h1>
-						<p className='text-white text-sm'>Enter your email to get notifications for your Safe</p>
+						<p className='text-white text-xs'>Enter your email to get notifications for your Safe</p>
 					</div>
 				</div>
 				<div className="flex items-center justify-around mr-5">
-					<Input value={inputValue} className='placeholder-text_placeholder text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
-					<Button loading={loading} disabled={!inputValue} className='flex items-center justify-center bg-primary text-white border-none ml-1' onClick={handleAddEmail} ><NotifyMail />Notify me</Button>
+					<Input value={inputValue} className='placeholder-text_placeholder text-white p-1 outline-none border-none min-w-[250px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
+					<Button loading={loading} size='small' disabled={!inputValue} className='flex items-center justify-center bg-primary text-xs text-white border-none ml-1' onClick={handleAddEmail} ><NotifyMail />Notify me</Button>
 				</div>
 			</div>:
 				<div>
-					{showDiv?<div className='flex items-center justify-between w-[100%] mb-6 px-3 py-2 bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
+					{showDiv?<div className='flex items-center justify-between w-[100%] mb-6 py-3 px-1 bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
 						<div className='flex items-center justify-center'>
 							<CheckOutlined className='mx-5 text-success'/>
 							<div>
 								<h1 className='text-white text-lg font-bold'>Email has been updated successfully!</h1>
-								<p className='text-white text-sm'>You’re all set to receive regular notifications on your mail 👍</p>
+								<p className='text-white text-xs'>You’re all set to receive regular notifications on your mail 👍</p>
 							</div>
 						</div>
 						<div className="flex items-center justify-around mr-5">
