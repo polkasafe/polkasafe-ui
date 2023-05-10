@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import validator from 'validator';
 
 const TRIGGER_NAME = 'verifyEmail';
+const SOURCE = NOTIFICATION_SOURCE.POLKASAFE;
 
 interface Args {
 	email: string;
@@ -21,7 +22,7 @@ export default async function verifyEmail(args: Args) {
 	const substrateAddress = getSubstrateAddress(address);
 	if (!email || !address || !substrateAddress || !validator.isEmail(email)) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
-	const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 	const addressDoc = await firestore_db.collection('addresses').doc(address).get();
 	const addressData = addressDoc?.data();
 	if (addressData) {
@@ -42,7 +43,7 @@ export default async function verifyEmail(args: Args) {
 			}
 		};
 
-		const triggerTemplate = await getTriggerTemplate(firestore_db, NOTIFICATION_SOURCE.POLKASAFE, TRIGGER_NAME);
+		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 		const subject = triggerTemplate.subject;
@@ -52,7 +53,7 @@ export default async function verifyEmail(args: Args) {
 		});
 
 		const notificationServiceInstance = new NotificationService(
-			NOTIFICATION_SOURCE.POLKASAFE,
+			SOURCE,
 			TRIGGER_NAME,
 			updatedNotificationPreferences,
 			htmlMessage,

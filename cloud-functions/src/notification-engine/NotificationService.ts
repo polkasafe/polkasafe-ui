@@ -6,6 +6,7 @@ import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
 import { IPolkasafeNotification } from './polkasafe/_utils/types';
 import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
+import { IPANotification } from './polkassembly/_utils/types';
 
 export class NotificationService {
 	constructor(
@@ -112,7 +113,9 @@ export class NotificationService {
 	}
 
 	public async sendInAppNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled) return;
+		if (!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled ||
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle
+		) return;
 
 		const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 		let newNotificationRef;
@@ -131,6 +134,19 @@ export class NotificationService {
 				type: 'sent',
 				network: String(this.sourceArgs.network)
 			} as IPolkasafeNotification;
+			break;
+
+		case NOTIFICATION_SOURCE.POLKASSEMBLY:
+			if (!this.sourceArgs?.network) return;
+			newNotificationRef = firestore_db.collection('networks').doc(this.sourceArgs.network).collection('notifications').doc();
+			newNotification = {
+				id: newNotificationRef.id,
+				userId: Number(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle),
+				created_at: new Date(),
+				message: this.message,
+				network: String(this.sourceArgs.network),
+				title: this.subject
+			} as IPANotification;
 		}
 
 		if (newNotificationRef && newNotification) newNotificationRef.set(newNotification, { merge: true });

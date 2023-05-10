@@ -6,6 +6,7 @@ import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 
 const TRIGGER_NAME = 'approvalReminder';
+const SOURCE = NOTIFICATION_SOURCE.POLKASAFE;
 
 interface Args {
 	network: string;
@@ -20,13 +21,13 @@ export default async function approvalReminder(args: Args) {
 	const substrateAddress = getSubstrateAddress(address);
 	if (!network || !address || !callHash || !substrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
-	const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 	const addressDoc = await firestore_db.collection('addresses').doc(address).get();
 	const addressData = addressDoc?.data();
 	if (addressData) {
 		const userNotificationPreferences: IUserNotificationPreferences = addressData.notification_preferences;
 
-		const triggerTemplate = await getTriggerTemplate(firestore_db, NOTIFICATION_SOURCE.POLKASAFE, TRIGGER_NAME);
+		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 		const subject = triggerTemplate.subject;
@@ -36,7 +37,7 @@ export default async function approvalReminder(args: Args) {
 		});
 
 		const notificationServiceInstance = new NotificationService(
-			NOTIFICATION_SOURCE.POLKASAFE,
+			SOURCE,
 			TRIGGER_NAME,
 			userNotificationPreferences,
 			htmlMessage,
