@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Divider, Modal } from 'antd';
+import { Badge, Divider, Modal, Tooltip } from 'antd';
 import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
@@ -77,8 +77,8 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 					return (
 						<>
 							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white my-2' key={index}>
-								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
-									{name}
+								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
+									{name} {index === 0 && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
 								</p>
 								<div className='col-span-2 flex items-center'>
 									<Identicon

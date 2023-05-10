@@ -165,25 +165,25 @@ const Home = ({ className }: { className?: string }) => {
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
 								{network !== 'astar' && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
-									<section className='mb-2 scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+									<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
 									</section>
 									:
 									!isOnchain ?
-										<section className='mb-2 scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+										<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 											<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
 											<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
 										</section>
 										:
 										proxyNotInDb ?
-											<section className='mb-2 scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+											<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 												<p className='text-white'>Your Proxy has been Created.</p>
 												<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
 											</section>
 											:
 											proxyInProcess && !hasProxy ?
-												<section className='mb-2 scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+												<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
 												</section>
 												:
@@ -205,12 +205,12 @@ const Home = ({ className }: { className?: string }) => {
 								</div>
 							</section>
 							:
-							<section className='bg-bg-main p-5 rounded-lg h-full'>
+							<section className='bg-bg-main p-5 rounded-lg scale-90 w-[111%] h-[111%] origin-top-left'>
 								<section className='grid grid-cols-2 gap-x-5'>
 									<Loader className='bg-primary col-span-1' />
 									<Loader className='bg-primary col-span-1' />
 								</section>
-								<AddMultisig homepage />
+								<AddMultisig className='mt-4' homepage />
 							</section>}
 					</>
 					:

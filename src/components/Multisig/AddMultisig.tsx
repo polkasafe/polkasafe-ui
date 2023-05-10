@@ -127,10 +127,6 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 };
 
 export default styled(AddMultisig)`
-	.ant-switch-inner-checked {
-		background-color: #645ADF !important;
-	}
-
 	.ant-spin-nested-loading .ant-spin-blur{
 		opacity: 0 !important;
 	}

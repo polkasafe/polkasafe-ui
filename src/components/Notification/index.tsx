@@ -126,7 +126,7 @@ const Notification= () => {
 				}}
 			>
 				<div className='flex gap-x-5 items-center justify-between mb-1 px-3'>
-					<h3 className='text-white font-bold text-xl'>Notifications</h3>
+					<h3 className='text-white font-bold text-lg'>Notifications</h3>
 					{
 						!!unreadNotificationAvailable?.length &&
 						<button
@@ -149,7 +149,7 @@ const Notification= () => {
 								:
 								<section className='flex flex-col items-center'>
 									<div className='mt-10'>
-										<img src={noNotification} alt="No notification icon" />
+										<img src={noNotification} className='w-10 h-10' alt="No notification icon" />
 									</div>
 									<p className='text-white text-base font-medium mt-10'>No new notifications</p>
 								</section>

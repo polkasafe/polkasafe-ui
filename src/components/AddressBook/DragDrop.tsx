@@ -73,8 +73,8 @@ const DragDrop = ({ setAddresses }: { setAddresses: React.Dispatch<React.SetStat
 				<p className="ant-upload-drag-icon">
 					<UploadBoxIcon className='my-2'/>
 				</p>
-				<p className="ant-upload-text text-white">Drag and Drop CSV file to upload</p>
-				<p className='text-text_secondary'>OR</p>
+				<p className="ant-upload-text text-white text-base">Drag and Drop CSV file to upload</p>
+				<p className='text-text_secondary text-sm'>OR</p>
 				<Button className='mt-3 bg-primary text-primary border-none bg-opacity-10'>Browse</Button>
 			</Dragger>
 		</>

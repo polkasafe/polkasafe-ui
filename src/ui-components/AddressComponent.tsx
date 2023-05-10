@@ -72,7 +72,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 			}
 			<div>
 				<div
-					className='font-medium text-[13px] flex text-white'
+					className='font-medium text-sm flex text-white'
 				>
 					{addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
 				</div>
