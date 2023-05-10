@@ -7,6 +7,7 @@ import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFr
 import { IPAUserPreference, EPAProposalType, IPAPostComment, IPAUser, IPACommentReply } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
+import sendMentionNotifications from '../_utils/sendMentionNotifications';
 
 const TRIGGER_NAME = 'newReplyAdded';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -53,6 +54,7 @@ export default async function newReplyAdded(args: Args) {
 	if (!commentAuthorPreferencesDocData || Number(commentAuthorPreferencesDocData.user_id) === Number(replyAuthorData.id)) return; // skip if user replied to his own comment
 
 	const commentAuthorNotificationPreferences: IUserNotificationPreferences = commentAuthorPreferencesDocData.notification_settings;
+	if (!commentAuthorNotificationPreferences) return;
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
@@ -82,4 +84,13 @@ export default async function newReplyAdded(args: Args) {
 		}
 	);
 	notificationServiceInstance.notifyAllChannels();
+
+	await sendMentionNotifications({
+		firestore_db,
+		authorUsername: replyAuthorData.username,
+		htmlContent: replyHTML,
+		network,
+		type: 'reply',
+		url: commentUrl
+	});
 }

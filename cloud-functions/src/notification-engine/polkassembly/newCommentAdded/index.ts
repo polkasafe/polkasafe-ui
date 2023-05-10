@@ -7,6 +7,7 @@ import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFr
 import { IPAUserPreference, EPAProposalType, IPAPostComment, IPAUser } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
+import sendMentionNotifications from '../_utils/sendMentionNotifications';
 
 const TRIGGER_NAME = 'newCommentAdded';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -44,8 +45,10 @@ export default async function newCommentAdded(args: Args) {
 	if (!commentAuthorDoc.exists) return;
 
 	const commentAuthorData = commentAuthorDoc.data() as IPAUser;
-
 	const commentUrl = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}#${commentId}`;
+
+	const converter = new showdown.Converter();
+	const commentHTML = converter.makeHtml(commentDocData.content);
 
 	for (const doc of postSubcribersSnapshot.docs) {
 		const userPreferenceDocData = doc.data() as IPAUserPreference;
@@ -56,12 +59,10 @@ export default async function newCommentAdded(args: Args) {
 		const userData = userDoc.data() as IPAUser;
 
 		const userNotificationPreferences: IUserNotificationPreferences = userPreferenceDocData.notification_settings;
+		if (!userNotificationPreferences) continue;
 
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
-		const converter = new showdown.Converter();
-		const commentHTML = converter.makeHtml(commentDocData.content);
 
 		const subject = triggerTemplate.subject;
 		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
@@ -86,4 +87,13 @@ export default async function newCommentAdded(args: Args) {
 		);
 		notificationServiceInstance.notifyAllChannels();
 	}
+
+	await sendMentionNotifications({
+		firestore_db,
+		authorUsername: commentAuthorData.username,
+		htmlContent: commentHTML,
+		network,
+		type: 'comment',
+		url: commentUrl
+	});
 }
