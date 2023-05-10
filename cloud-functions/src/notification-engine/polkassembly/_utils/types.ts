@@ -35,6 +35,16 @@ export interface IPAPostComment {
   user_profile_img: string;
 }
 
+export interface IPACommentReply {
+  user_id: number,
+  content: string,
+  created_at: Date,
+  id: string,
+  updated_at: Date,
+  username: string,
+  user_profile_img: string,
+}
+
 export enum EPASocialType {
 	EMAIL = 'Email',
 	RIOT = 'Riot',
