@@ -109,7 +109,7 @@ const Menu: FC<Props> = ({ className }) => {
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
 				open={openAddMultisig}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
 				<AddMultisig onCancel={() => setOpenAddMultisig(false)} isModalPopup = {true}  />
 			</Modal>
@@ -117,13 +117,13 @@ const Menu: FC<Props> = ({ className }) => {
 	};
 
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[20px] px-4')}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[25px] px-3')}>
 			<AddMultisigModal/>
-			<div className='flex flex-col gap-y-11 mb-3'>
-				<section>
-					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
-						<Badge offset={[-15, 40]} size='small' count='Beta' color='#1573FE'>
-							<img src={polkasafeLogo} height={17} width={130} alt="polkasafe logo" />
+			<div className='flex flex-col mb-3'>
+				<section className='flex mb-7 justify-center w-full'>
+					<Link className='text-white' to='/'>
+						<Badge offset={[-15, 35]} size='small' count='Beta' color='#1573FE'>
+							<img src={polkasafeLogo} alt="polkasafe logo" className='h-[25px]' />
 						</Badge>
 					</Link>
 				</section>
@@ -136,7 +136,7 @@ const Menu: FC<Props> = ({ className }) => {
 							menuItems.map((item) => {
 								return <li className='w-full' key={item.key}>
 									<Link
-										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-2.5 font-medium text-sm', {
+										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 											'bg-highlight text-primary': item.key === location.pathname
 										})}
 										to={item.key} >
@@ -155,10 +155,10 @@ const Menu: FC<Props> = ({ className }) => {
 			</h2>
 			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				{multisigAddresses &&
-					<ul className='flex flex-col gap-y-2 py-2.5 text-white list-none'>
+					<ul className='flex flex-col gap-y-2 py-3 text-white list-none'>
 						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
-								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-2.5 font-medium text-sm', {
+								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
 								})} onClick={() => {
 									setUserDetailsContextState((prevState) => {
@@ -184,10 +184,10 @@ const Menu: FC<Props> = ({ className }) => {
 			</section>
 			{userAddress &&
 				<section className='mt-auto'>
-					<button className='text-white bg-primary p-2.5 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
 						onClick={() => setOpenAddMultisig(true)}>
 						<UserPlusIcon className='text-sm' />
-						<span className='font-normal text-xs'>Add Multisig</span>
+						<span className='font-medium text-xs'>Add Multisig</span>
 					</button>
 				</section>
 			}

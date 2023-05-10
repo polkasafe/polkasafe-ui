@@ -40,7 +40,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 					trigger={null}
 					collapsible={false}
 					collapsed={true}
-					className={'hidden overflow-y-hidden bg-bg-main sidebar lg:block top-0 bottom-0 left-0 h-screen fixed z-40 w-full max-w-[200px]'}
+					className={'hidden overflow-y-hidden bg-bg-main sidebar lg:block top-0 bottom-0 left-0 h-screen fixed z-40 w-full max-w-[180px]'}
 				>
 					<Menu />
 				</Sider>
@@ -50,12 +50,12 @@ const AppLayout = ({ className }: { className?: string }) => {
 					onClose={() => setSideDrawer(false)}
 					open={sideDrawer}
 					getContainer={false}
-					className='w-full max-w-[200px] p-0'
+					className='w-full max-w-[180px] p-0'
 				>
 					<Menu />
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
-					<div className='hidden lg:block w-full max-w-[200px]'></div>
+					<div className='hidden lg:block w-full max-w-[180px]'></div>
 					<Content className='bg-bg-secondary p-[30px] rounded-lg'>
 						{ multisigChanged ? <Loader size='large' /> :  <SwitchRoutes />}
 					</Content>
@@ -69,7 +69,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 export default styled(AppLayout)`
 	background: transparent !important;
 	.min-h {
-		min-height: calc(100vh - 70px - 80px);
+		min-height: calc(100vh - 70px - 60px);
 	}
 	.ant-drawer-content-wrapper {
 		max-width: 240px;
