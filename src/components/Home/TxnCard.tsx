@@ -138,7 +138,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 						</Link>
 					</div>
 
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto scale-90 w-[111%] origin-top-left">
 						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
 						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
@@ -155,7 +155,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								setProxyInProcess(decodedCallData && decodedCallData?.args?.proxy_type);
 
 								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
-								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;
+								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;
 
 								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
 									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
@@ -208,7 +208,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 							<RightArrowOutlined/>
 						</Link>
 					</div>
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 scale-90 w-[111%] origin-top-left overflow-auto">
 						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?
@@ -221,9 +221,9 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.to, network))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
 													:
-													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.from, network))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
 												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
 											</div>

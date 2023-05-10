@@ -47,7 +47,7 @@ const TransactionModal = ({ className, defaultAddress }: { className?: string, d
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
 				open={openTransactionModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
 				<SendFundsForm defaultSelectedAddress={defaultAddress} onCancel={() => setOpenTransactionModal(false)} />
 			</Modal>
@@ -60,7 +60,7 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 	const { network } = useGlobalApiContext();
 
 	return (
-		<div className='text-sm font-medium leading-[15px] '>
+		<div className='text-sm font-medium leading-[15px] h-[60vh] overflow-y-auto'>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
 					Name

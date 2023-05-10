@@ -8,10 +8,12 @@ import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { usePagination } from 'src/hooks/usePagination';
 // import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 // import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
+import Pagination from 'src/ui-components/Pagination';
 import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
@@ -31,9 +33,8 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const { network } = useGlobalApiContext();
 	const location = useLocation();
-
+	const { currentPage, setPage, totalDocs, setTotalDocs } = usePagination();
 	const [transactions, setTransactions] = useState<ITransaction[]>();
-
 	useEffect(() => {
 		const hash = location.hash.slice(1);
 		const elem = document.getElementById(hash);
@@ -50,30 +51,34 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 			}
 			setLoading(true);
 			try{
-				const { data: multisigTransactions, error: multisigError } = await getHistoryTransactions(
+				let data:any = [];
+				let docs:number = 0;
+				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getHistoryTransactions(
 					multisig.address,
 					network,
-					10,
-					1
+					multisig.proxy ? 5 : 10,
+					currentPage
 				);
 				if(multisig.proxy){
-					const { data: proxyTransactions, error: proxyError } = await getHistoryTransactions(
+					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
 						multisig.proxy,
 						network,
-						10,
-						1
+						10 - multisigTransactions.length,
+						currentPage
 					);
-					if(multisigTransactions && !proxyError){
+					if(proxyTransactions && !proxyError){
 						setLoading(false);
-						setTransactions(proxyTransactions);
+						data = proxyTransactions;
+						docs = proxyTransactionsCount;
 					}
 				}
 
 				if(multisigTransactions){
 					setLoading(false);
-					setTransactions(prev => {
-						return [...prev || [], ...multisigTransactions];
-					});
+					data = [...data, ...multisigTransactions];
+					setTransactions(data);
+					docs = docs + multisigTransactionsCount;
+					setTotalDocs(docs);
 				}
 				if(multisigError){
 					setLoading(false);
@@ -85,22 +90,37 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 		};
 		getTransactions();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, multisig, network, signature, userAddress, refetch]);
+	}, [activeMultisig, multisig, network, signature, userAddress, refetch, currentPage]);
 
 	if(loading) return <Loader size='large'/>;
 
 	return (
 		<>
-			{(transactions && transactions.length > 0)? <div className='flex flex-col gap-y-[10px]'>
-				{transactions.sort((a, b) => dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? 1 : -1).map((transaction, index) => {
-					return <section id={transaction.callHash} key={index}>
-						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
-							{created_at}
-						</h4> */}
-						<Transaction {...transaction} />;
-					</section>;
-				})}
-			</div>: <NoTransactionsHistory/>}
+			{
+				(transactions && transactions.length > 0) ?
+					<div className='flex flex-col gap-y-[10px] mb-2'>
+						{transactions.sort((a, b) => dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? 1 : -1).map((transaction, index) => {
+							return <section id={transaction.callHash} key={index}>
+								{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
+									{created_at}
+								</h4> */}
+								<Transaction {...transaction} />
+							</section>;
+						})}
+					</div>
+					:
+					<NoTransactionsHistory/>
+			}
+			{totalDocs && totalDocs > 10 &&
+				<div className='flex justify-center'>
+					<Pagination
+						className='self-end'
+						currentPage={currentPage}
+						defaultPageSize={2}
+						setPage={setPage}
+						totalDocs={totalDocs || 1}
+					/>
+				</div>}
 		</>
 	);
 };

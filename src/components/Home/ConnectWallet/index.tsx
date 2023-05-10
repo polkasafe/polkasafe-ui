@@ -127,7 +127,7 @@ const ConnectWallet = () => {
 
 	return (
 		<>
-			<div className='rounded-xl flex flex-col items-center justify-center min-h-[500px] bg-bg-main'>
+			<div className='rounded-xl flex flex-col items-center justify-center min-h-[400px] bg-bg-main'>
 				<img src={ConnectWalletImg} alt='Wallet' height={120} width={120} className='mb-4 mt-1' />
 				{
 					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :

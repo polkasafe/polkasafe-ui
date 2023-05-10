@@ -19,6 +19,7 @@ const ModalBtn: FC<IModalBtnProps> = ({ className, disabled=false, title, loadin
 			disabled={disabled}
 			loading={loading}
 			onClick={onClick}
+			size='large'
 			className={`${className} flex p-2 items-center justify-center gap-x-[10.83px] border-none outline-none text-sm ${disabled ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} rounded-lg min-w-[120px]`}
 		>
 			<span

@@ -34,7 +34,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
 				open={openTransactionModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
 				<SendFundsForm onCancel={() => setOpenTransactionModal(false)} />
 			</Modal>
@@ -42,7 +42,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 	};
 
 	return (
-		<div className='text-sm font-medium leading-[15px] '>
+		<div className='text-sm font-medium leading-[15px] scale-[80%] w-[125%] h-[125%] origin-top-left'>
 			<TransactionModal/>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
