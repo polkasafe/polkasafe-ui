@@ -155,7 +155,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								setProxyInProcess(decodedCallData && decodedCallData?.args?.proxy_type);
 
 								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
-								const destAddressName = addressBook?.find((address) => address.address === destSubstrateAddress)?.name;
+								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;
 
 								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
 									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
@@ -221,9 +221,9 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.to))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.to, network))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
 													:
-													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getSubstrateAddress(transaction.from))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
+													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.from, network))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
 												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
 											</div>
