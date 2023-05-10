@@ -105,7 +105,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
 					open={openTransactionModal}
-					className={`${className} w-auto md:min-w-[500px]`}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
 					{isOnchain ?
 						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
@@ -133,7 +133,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold'>Fund Multisig</h3>}
 					open={openFundMultisigModal}
-					className={`${className} w-auto md:min-w-[500px]`}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
 					<FundMultisig setNewTxn={setNewTxn} onCancel={() => setOpenFundMultisigModal(false)} />
 				</Modal>
@@ -144,7 +144,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	return (
 		<>
 			<h2 className="text-base font-bold text-white mb-2">Overview</h2>
-			<div className={`${className} relative bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-[18rem]`}>
+			<div className={`${className} relative bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-[17rem] scale-90 w-[111%] origin-top-left`}>
 				<div className='absolute right-5 top-5'>
 					<div className="flex gap-x-4 items-center">
 						<a className='w-5' target='_blank' href={'https://polkadot.js.org/apps/#/accounts'} rel="noreferrer">

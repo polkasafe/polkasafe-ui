@@ -39,9 +39,9 @@ const Details = () => {
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Remove Multisig</h3>}
 					open={openRemoveModal}
-					className={'w-auto md:min-w-[500px]'}
+					className={'w-auto md:min-w-[500px] scale-90'}
 				>
-					<RemoveMultisigAddress/>
+					<RemoveMultisigAddress onCancel={() => setOpenRemoveModal(false)}/>
 				</Modal>
 			</>
 		);

@@ -10,6 +10,7 @@ import { Link, useLocation } from 'react-router-dom';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ExternalLinkIcon, HistoryIcon, QueueIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
@@ -43,13 +44,14 @@ const Transactions = () => {
 				{address ?
 					<>
 						<div
-							className='flex items-center mb-4'
+							className='flex items-center mb-4 scale-90 w-[111%] origin-top-left'
 						>
 							<Button
 								onClick={() => setTab(ETab.QUEUE)}
-								icon={<QueueIcon />}
+								// icon={<QueueIcon />}
+								size='large'
 								className={classNames(
-									' font-medium text-sm leading-[15px] w-[100px] flex items-center text-white outline-none border-none',
+									' font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.QUEUE
 									}
@@ -59,9 +61,10 @@ const Transactions = () => {
 							</Button>
 							<Button
 								onClick={() => setTab(ETab.HISTORY)}
-								icon={<HistoryIcon />}
+								// icon={<HistoryIcon />}
+								size='large'
 								className={classNames(
-									'rounded-lg font-medium text-sm flex items-center leading-[15px] w-[100px] text-white outline-none border-none',
+									'rounded-lg font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.HISTORY
 									}
@@ -71,9 +74,10 @@ const Transactions = () => {
 							</Button>
 							<div className='flex-1' />
 							<Button
+								size='large'
 								onClick={() => setRefetch(prev => !prev)}
 								icon={<SyncOutlined spin={loading} className='text-primary'  />}
-								className={'text-primary flex items-center bg-highlight outline-none border-none font-medium text-sm'}
+								className={'text-primary bg-highlight outline-none border-none font-medium text-sm'}
 							>
 							Refresh
 							</Button>

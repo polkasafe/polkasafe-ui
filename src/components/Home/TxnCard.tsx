@@ -138,7 +138,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 						</Link>
 					</div>
 
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto scale-90 w-[111%] origin-top-left">
 						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
 						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
@@ -208,7 +208,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 							<RightArrowOutlined/>
 						</Link>
 					</div>
-					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto">
+					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 scale-90 w-[111%] origin-top-left overflow-auto">
 						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
 						{!historyLoading ? (transactions && transactions.length > 0) ?

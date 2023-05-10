@@ -21,7 +21,6 @@ interface IModalProps extends IModal {
 const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, toggleVisibility }) => {
 	return (
 		<AntDModal
-			// width={1000}
 			centered
 			footer={false}
 			closeIcon={<button
@@ -32,7 +31,7 @@ const Modal: FC<IModalProps> = ({ isVisible, children, CloseBtnNode, title, togg
 			</button>}
 			title={<h3 className='text-white mb-8 text-lg font-semibold'>{title}</h3>}
 			open={isVisible}
-			className='w-auto md:min-w-[500px]'
+			className='w-auto md:min-w-[500px] scale-90'
 		>
 			{children}
 		</AntDModal>

@@ -29,7 +29,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 					<RightArrowOutlined/>
 				</div>
 			</div>
-			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-[18rem]`}>
+			<div className={`${className} bg-bg-main flex flex-col justify-around rounded-lg py-5 shadow-lg h-[17rem] scale-90 w-[111%] origin-top-left`}>
 				<div className='flex flex-col px-5 h-[18rem] overflow-auto w-[full]'>
 					{addressBook.map((item, i) => (
 						<div key={i}>

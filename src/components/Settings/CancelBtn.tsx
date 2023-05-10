@@ -21,6 +21,7 @@ const CancelBtn: FC<ICancelBtnProps> = ({ className, onClick, title, loading }) 
 		// TODO: use ant-d component and use loading instead of disabled
 		<Button
 			disabled={loading}
+			size='large'
 			className={classNames('flex items-center gap-x-[10.83px] text-failure text-sm font-normal leading-[15px] bg-failure bg-opacity-10 border-none outline-none rounded-lg min-w-[120px] justify-center', className)}
 			onClick={onClick}
 		>
