@@ -23,48 +23,54 @@ const Settings = () => {
 
 	return (
 		<div>
-			<h2 className='font-semibold text-lg text-white mb-4'>Manage Safe Owners</h2>
-			<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
-				<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
-					{multisig?.proxy ?
-						<div className='bg-bg-secondary rounded-lg p-3 w-auto flex items-center gap-x-4'>
-							<div className='flex flex-col items-start'>
-								<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-primary text-white'}>Multisig</div>
-								<div className='flex items-center text-text_secondary'>
-									{shortenAddress(multisig?.address || '', 10)}
-									<button className='ml-2 mr-1' onClick={() => copyText(multisig?.address || '', true, network)}><CopyIcon /></button>
-									<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.address || '', network)}`} target='_blank' rel="noreferrer" >
-										<ExternalLinkIcon  />
-									</a>
+			{!multisigAddresses || !multisig ?
+				<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+					<p className='text-white'>Looks Like You Don&apos;t have a Multisig. Please Create One to use our Features.</p>
+				</section> : <>
+					<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
+					<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
+						<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
+							{multisig?.proxy ?
+								<div className='bg-bg-secondary rounded-lg p-3 w-auto flex items-center gap-x-4'>
+									<div className='flex flex-col items-start'>
+										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-primary text-white'}>Multisig</div>
+										<div className='flex items-center text-text_secondary'>
+											{shortenAddress(multisig?.address || '', 10)}
+											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.address || '', true, network)}><CopyIcon /></button>
+											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.address || '', network)}`} target='_blank' rel="noreferrer" >
+												<ExternalLinkIcon  />
+											</a>
+										</div>
+									</div>
+									<div className='h-[50px] w-[50px] rounded-full flex items-center justify-center bg-text_secondary text-bg-main text-xl'><ArrowRightOutlined /></div>
+									<div className='flex flex-col items-start'>
+										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-[#FF79F2] text-highlight'}>Proxy</div>
+										<div className='flex items-center text-text_secondary'>
+											{shortenAddress(multisig?.proxy || '', 10)}
+											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy || '', true, network)}><CopyIcon /></button>
+											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.proxy || '', network)}`} target='_blank' rel="noreferrer" >
+												<ExternalLinkIcon  />
+											</a>
+										</div>
+									</div>
 								</div>
-							</div>
-							<div className='h-[50px] w-[50px] rounded-full flex items-center justify-center bg-text_secondary text-bg-main text-xl'><ArrowRightOutlined /></div>
-							<div className='flex flex-col items-start'>
-								<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-[#FF79F2] text-highlight'}>Proxy</div>
-								<div className='flex items-center text-text_secondary'>
-									{shortenAddress(multisig?.proxy || '', 10)}
-									<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy || '', true, network)}><CopyIcon /></button>
-									<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.proxy || '', network)}`} target='_blank' rel="noreferrer" >
-										<ExternalLinkIcon  />
-									</a>
-								</div>
-							</div>
-						</div>
-						:
-						<div className='flex-1'></div>
-					}
-					<AddNewOwnerBtn disabled={!multisig?.proxy} />
-				</section>
-				<section className='mt-[30px]'>
-					<ListOwners disabled={!multisig?.proxy} />
-				</section>
-			</div>
+								:
+								<div className='flex-1'></div>
+							}
+							<AddNewOwnerBtn disabled={!multisig?.proxy} />
+						</section>
+						<section className='mt-[30px]'>
+							<ListOwners disabled={!multisig?.proxy} />
+						</section>
+					</div>
+				</>}
 			{userAddress &&
-			<div className='mt-[30px] grid md:grid-cols-2 gap-[30px]'>
-				<section className='col-span-1'>
+			<div className='mt-[30px] flex gap-x-[30px]'>
+				{multisigAddresses && activeMultisig && multisig &&
+				<section className='w-full'>
 					<Details />
-				</section>
-				<section className='col-span-1'>
+				</section>}
+				<section className='w-full max-w-[50%]'>
 					<Feedback />
 				</section>
 			</div>}
