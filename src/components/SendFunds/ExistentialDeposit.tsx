@@ -11,7 +11,6 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
@@ -56,7 +55,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	}, [selectedSender]);
 
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));
 
@@ -164,6 +163,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 											>
 												<div className="flex items-center">
 													<AutoComplete
+														filterOption={true}
 														onClick={addSenderHeading}
 														options={autocompleteAddresses}
 														id='sender'
