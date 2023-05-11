@@ -75,7 +75,6 @@ export default async function newReplyAdded(args: Args) {
 	const notificationServiceInstance = new NotificationService(
 		SOURCE,
 		TRIGGER_NAME,
-		commentAuthorNotificationPreferences,
 		htmlMessage,
 		textMessage,
 		subject,
@@ -83,7 +82,7 @@ export default async function newReplyAdded(args: Args) {
 			network
 		}
 	);
-	notificationServiceInstance.notifyAllChannels();
+	notificationServiceInstance.notifyAllChannels(commentAuthorNotificationPreferences);
 
 	await sendMentionNotifications({
 		firestore_db,

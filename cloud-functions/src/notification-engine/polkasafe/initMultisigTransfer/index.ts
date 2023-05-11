@@ -49,7 +49,6 @@ export default async function initMultisigTransfer(args: Args) {
 			const notificationServiceInstance = new NotificationService(
 				SOURCE,
 				TRIGGER_NAME,
-				userNotificationPreferences,
 				htmlMessage,
 				textMessage,
 				subject,
@@ -57,7 +56,7 @@ export default async function initMultisigTransfer(args: Args) {
 					network
 				}
 			);
-			notificationServiceInstance.notifyAllChannels();
+			notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 		}
 	}
 }

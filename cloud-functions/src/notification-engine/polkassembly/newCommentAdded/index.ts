@@ -77,7 +77,6 @@ export default async function newCommentAdded(args: Args) {
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
-			userNotificationPreferences,
 			htmlMessage,
 			textMessage,
 			subject,
@@ -85,7 +84,7 @@ export default async function newCommentAdded(args: Args) {
 				network
 			}
 		);
-		notificationServiceInstance.notifyAllChannels();
+		notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 	}
 
 	await sendMentionNotifications({

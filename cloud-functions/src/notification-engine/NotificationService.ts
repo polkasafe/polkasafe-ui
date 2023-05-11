@@ -12,7 +12,6 @@ export class NotificationService {
 	constructor(
 		protected readonly source: NOTIFICATION_SOURCE,
 		protected readonly trigger: string,
-		protected readonly notificationPreferences: IUserNotificationPreferences,
 		protected readonly htmlMessage: string,
 		protected readonly message: string,
 		protected readonly subject: string,
@@ -23,9 +22,8 @@ export class NotificationService {
 		}
 	}
 
-	public async notifyAllChannels(): Promise<void> {
-		if (!this.notificationPreferences.triggerPreferences[this.trigger]) return;
-		const userNotificationPreferences = this.notificationPreferences;
+	public async notifyAllChannels(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		if (!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled) return;
 
 		this.sendEmailNotification(userNotificationPreferences);
 		this.sendTelegramNotification(userNotificationPreferences);
@@ -37,6 +35,7 @@ export class NotificationService {
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
 		if (!SENDGRID_API_KEY ||
+			(!isVerificationEmail && !userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled)||
 			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].verified)
 		) return;
@@ -58,7 +57,11 @@ export class NotificationService {
 	}
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!TELEGRAM_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled) return;
+		if (!TELEGRAM_BOT_TOKEN ||
+			!userNotificationPreferences.triggerPreferences[this.trigger].enabled ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled
+		) return;
+
 		const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
 		const chatId = userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].handle;
@@ -67,7 +70,10 @@ export class NotificationService {
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!DISCORD_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled) return;
+		if (!DISCORD_BOT_TOKEN ||
+			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled
+		) return;
 		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 		const channelId = userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].handle;
@@ -79,7 +85,11 @@ export class NotificationService {
 	}
 
 	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!ELEMENT_API_KEY || !userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled) return;
+		if (!ELEMENT_API_KEY ||
+			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled
+		) return;
+
 		const roomId = userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle;
 
 		const requestBody = {
@@ -100,7 +110,11 @@ export class NotificationService {
 	}
 
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!SLACK_BOT_TOKEN || !userNotificationPreferences.channelPreferences[CHANNEL.SLACK].enabled) return;
+		if (!SLACK_BOT_TOKEN ||
+			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.SLACK].enabled
+		) return;
+
 		const client = new SlackWebClient(SLACK_BOT_TOKEN);
 		try {
 			await client.chat.postMessage({
@@ -113,7 +127,8 @@ export class NotificationService {
 	}
 
 	public async sendInAppNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled ||
+		if (!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
+			!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle
 		) return;
 

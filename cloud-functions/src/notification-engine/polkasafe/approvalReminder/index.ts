@@ -39,7 +39,6 @@ export default async function approvalReminder(args: Args) {
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
-			userNotificationPreferences,
 			htmlMessage,
 			textMessage,
 			subject,
@@ -47,6 +46,6 @@ export default async function approvalReminder(args: Args) {
 				network
 			}
 		);
-		notificationServiceInstance.notifyAllChannels();
+		notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 	}
 }

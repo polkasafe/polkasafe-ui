@@ -46,7 +46,6 @@ export default async function verifyEmail(args: Args) {
 	const notificationServiceInstance = new NotificationService(
 		SOURCE,
 		TRIGGER_NAME,
-		pseudoNotificationPreferences,
 		htmlMessage,
 		textMessage,
 		subject

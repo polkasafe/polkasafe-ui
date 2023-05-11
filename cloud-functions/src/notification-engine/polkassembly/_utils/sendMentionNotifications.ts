@@ -62,7 +62,6 @@ export default async function sendMentionNotifications({ firestore_db, authorUse
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
-			mentionedUserNotificationPreferences,
 			htmlMessage,
 			textMessage,
 			subject,
@@ -70,6 +69,6 @@ export default async function sendMentionNotifications({ firestore_db, authorUse
 				network
 			}
 		);
-		notificationServiceInstance.notifyAllChannels();
+		notificationServiceInstance.notifyAllChannels(mentionedUserNotificationPreferences);
 	}
 }
