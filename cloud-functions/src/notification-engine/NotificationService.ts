@@ -37,7 +37,7 @@ export class NotificationService {
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
 		if (!SENDGRID_API_KEY ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled ||
+			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].verified)
 		) return;
 
