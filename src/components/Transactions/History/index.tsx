@@ -95,10 +95,10 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	if(loading) return <Loader size='large'/>;
 
 	return (
-		<div className='flex flex-col h-[calc(100%-50px)] justify-between'>
+		<>
 			{
 				(transactions && transactions.length > 0) ?
-					<div className='flex flex-col gap-y-[10px]'>
+					<div className='flex flex-col gap-y-[10px] mb-2'>
 						{transactions.sort((a, b) => dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? 1 : -1).map((transaction, index) => {
 							return <section id={transaction.callHash} key={index}>
 								{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
@@ -111,14 +111,17 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					:
 					<NoTransactionsHistory/>
 			}
-			{totalDocs && totalDocs > 10 && <Pagination
-				className='self-end'
-				currentPage={currentPage}
-				defaultPageSize={2}
-				setPage={setPage}
-				totalDocs={totalDocs}
-			/>}
-		</div>
+			{totalDocs && totalDocs > 10 &&
+				<div className='flex justify-center'>
+					<Pagination
+						className='self-end'
+						currentPage={currentPage}
+						defaultPageSize={2}
+						setPage={setPage}
+						totalDocs={totalDocs || 1}
+					/>
+				</div>}
+		</>
 	);
 };
 

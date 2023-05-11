@@ -10,7 +10,8 @@ import { Link, useLocation } from 'react-router-dom';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ExternalLinkIcon, HistoryIcon, QueueIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
 	QUEUE,
@@ -43,38 +44,40 @@ const Transactions = () => {
 				{address ?
 					<>
 						<div
-							className='flex items-center mb-4'
+							className='flex items-center mb-4 scale-90 w-[111%] origin-top-left'
 						>
-							<button
+							<Button
 								onClick={() => setTab(ETab.QUEUE)}
+								// icon={<QueueIcon />}
+								size='large'
 								className={classNames(
-									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									' font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.QUEUE
 									}
 								)}
 							>
-								{/* <QueueIcon /> */}
 								Queue
-							</button>
-							<button
+							</Button>
+							<Button
 								onClick={() => setTab(ETab.HISTORY)}
+								// icon={<HistoryIcon />}
+								size='large'
 								className={classNames(
-									'rounded-lg p-3 font-medium text-sm leading-[15px] w-[100px] text-white',
+									'rounded-lg font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
 									{
 										'text-primary bg-highlight': tab === ETab.HISTORY
 									}
 								)}
 							>
-								{/* <HistoryIcon/> */}
 								History
-							</button>
+							</Button>
 							<div className='flex-1' />
 							<Button
-								onClick={() => setRefetch(prev => !prev)}
 								size='large'
+								onClick={() => setRefetch(prev => !prev)}
 								icon={<SyncOutlined spin={loading} className='text-primary'  />}
-								className={'text-primary flex items-center bg-highlight outline-none border-none font-medium text-sm'}
+								className={'text-primary bg-highlight outline-none border-none font-medium text-sm'}
 							>
 							Refresh
 							</Button>

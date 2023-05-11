@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -15,9 +14,8 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
-const RemoveMultisigAddress = () => {
+const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 	const { activeMultisig, multisigAddresses, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const { toggleVisibility } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
 
@@ -81,7 +79,7 @@ const RemoveMultisigAddress = () => {
 							}
 						};
 					});
-					toggleVisibility();
+					onCancel();
 				}
 			}
 		} catch (error){
@@ -102,7 +100,7 @@ const RemoveMultisigAddress = () => {
                 ?
 			</p>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn onClick={onCancel}/>
 				<RemoveBtn loading={loading} onClick={handleRemoveSafe} />
 			</div>
 		</Form>

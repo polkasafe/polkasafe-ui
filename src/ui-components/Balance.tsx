@@ -31,7 +31,7 @@ const Balance = ({ address, className, onChange }: Props) => {
 	}, [address, api, apiReady]);
 
 	return (
-		<div className={`${className} bg-highlight rounded-lg px-[10px] py-[6px] ml-auto font-normal text-xs leading-[13px] flex items-center justify-center`}>
+		<div className={`bg-highlight rounded-lg px-[10px] py-[6px] ml-auto font-normal text-xs leading-[13px] flex items-center justify-center ${className}`}>
 			<span className='text-primary mr-2'>Balance: </span>
 			<span className='text-white'>{formatBnBalance(balance, { numberAfterComma: 4, withUnit: true }, network)}</span>
 		</div>

@@ -103,11 +103,11 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	.ant-switch {
-		background: #1573FE !important;
+		background: #1A2A42 !important;
 	}
 
 	.ant-switch-checked{
-		background-color: blue_primary !important;
+		background-color: #1573FE !important;
 	}
 
 	.ant-segmented-item-selected .ant-segmented-item-label {

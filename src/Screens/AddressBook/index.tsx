@@ -21,7 +21,7 @@ const AddressBook = () => {
 	const { openModal } = useModalContext();
 	const userAddress = localStorage.getItem('address');
 	return (
-		<div className='h-[70vh] overflow-y-auto bg-bg-main rounded-lg'>
+		<div className='scale-[80%] w-[125%] h-[125%] origin-top-left overflow-x-hidden bg-bg-main rounded-lg'>
 			{userAddress ?
 				<div className="grid grid-cols-12 gap-4">
 					<div className="col-start-1 col-end-13">

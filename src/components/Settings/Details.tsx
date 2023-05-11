@@ -39,9 +39,9 @@ const Details = () => {
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Remove Multisig</h3>}
 					open={openRemoveModal}
-					className={'w-auto md:min-w-[500px]'}
+					className={'w-auto md:min-w-[500px] scale-90'}
 				>
-					<RemoveMultisigAddress/>
+					<RemoveMultisigAddress onCancel={() => setOpenRemoveModal(false)}/>
 				</Modal>
 			</>
 		);
@@ -49,7 +49,7 @@ const Details = () => {
 
 	return (
 		<div className='h-full flex flex-col'>
-			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
+			<h2 className='font-semibold text-lg leading-[22px] text-white mb-4'>
 				Details
 			</h2>
 			<article className=' flex flex-col flex-1 bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>

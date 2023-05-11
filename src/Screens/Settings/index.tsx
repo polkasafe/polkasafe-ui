@@ -22,15 +22,15 @@ const Settings = () => {
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	return (
-		<div>
+		<div className='scale-[80%] h-[125%] w-[125%] origin-top-left'>
 			{!multisigAddresses || !multisig ?
-				<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+				<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 					<p className='text-white'>Looks Like You Don&apos;t have a Multisig. Please Create One to use our Features.</p>
 				</section> : <>
 					<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
 					<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
-						<section className='flex items-center justify-between flex-col gap-5 md:flex-row'>
-							{multisig?.proxy ?
+						{multisig?.proxy ?
+							<section className='flex items-center justify-between flex-col gap-5 md:flex-row mb-6'>
 								<div className='bg-bg-secondary rounded-lg p-3 w-auto flex items-center gap-x-4'>
 									<div className='flex flex-col items-start'>
 										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-primary text-white'}>Multisig</div>
@@ -54,12 +54,13 @@ const Settings = () => {
 										</div>
 									</div>
 								</div>
-								:
-								<div className='flex-1'></div>
-							}
-							<AddNewOwnerBtn disabled={!multisig?.proxy} />
-						</section>
-						<section className='mt-[30px]'>
+								<AddNewOwnerBtn disabled={!multisig?.proxy} />
+							</section> :
+							<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+								<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
+							</section>
+						}
+						<section>
 							<ListOwners disabled={!multisig?.proxy} />
 						</section>
 					</div>
