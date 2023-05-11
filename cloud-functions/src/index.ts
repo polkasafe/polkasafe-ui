@@ -185,7 +185,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 				if (addressIndex > -1) {
 					addressBook[addressIndex] = { name, address: substrateAddressToAdd };
 					await addressRef.set({ addressBook }, { merge: true });
-					return res.status(200).json({ data: addressBook });
+					return res.status(200).json({ data: addressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 				}
 
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
