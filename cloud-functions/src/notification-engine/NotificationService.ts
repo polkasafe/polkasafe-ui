@@ -4,7 +4,7 @@ import { WebClient as SlackWebClient } from '@slack/web-api';
 import { Client as DiscordClient, GatewayIntentBits, TextChannel } from 'discord.js';
 import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
-import { IPolkasafeNotification } from './polkasafe/_utils/types';
+import { IPSNotification } from './polkasafe/_utils/types';
 import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
 import { IPANotification } from './polkassembly/_utils/types';
 
@@ -145,10 +145,11 @@ export class NotificationService {
 				id: newNotificationRef.id,
 				address: userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle,
 				created_at: new Date(),
+				link: this.sourceArgs.link || '',
 				message: this.message,
 				type: 'sent',
 				network: String(this.sourceArgs.network)
-			} as IPolkasafeNotification;
+			} as IPSNotification;
 			break;
 
 		case NOTIFICATION_SOURCE.POLKASSEMBLY:
