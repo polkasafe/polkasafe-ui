@@ -19,6 +19,8 @@ import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
+import { NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE } from './notification-engine/notification_engine_constants';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -969,6 +971,26 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 	});
 });
 
-// set
-// TODO: return BE data first and then save data to BE and return data from BE;
-// store last updated at
+export const notify = functions.https.onRequest(async (req, res) => {
+	// TODO: Get template from db
+	corsHandler(req, res, async () => {
+		const apiKey = req.get('x-api-key');
+		const source = req.get('x-source');
+
+		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY) return res.status(401).json({ error: responseMessages.unauthorised });
+		if (!source || !Object.values(NOTIFICATION_SOURCE).includes(source as any)) return res.status(400).json({ error: responseMessages.invalid_headers });
+
+		const { trigger, args } = req.body;
+		if (!trigger) return res.status(400).json({ error: responseMessages.missing_params });
+		if (args && (typeof args !== 'object' || Array.isArray(args))) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			await callNotificationTrigger(source as NOTIFICATION_SOURCE, trigger, args);
+
+			return res.status(200).json({ data: 'Notification(s) sent successfully.' });
+		} catch (err:unknown) {
+			functions.logger.error('Error in notify :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
