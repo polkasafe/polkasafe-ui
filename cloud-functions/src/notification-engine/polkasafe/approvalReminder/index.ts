@@ -49,7 +49,7 @@ export default async function approvalReminder(args: Args) {
 			network,
 			multisigName: userMultisigName || defaultMultisigName,
 			multisigAddress: from,
-			link
+			link: `https://app.polkasafe.xyz${link}`
 		});
 
 		const notificationServiceInstance = new NotificationService(
