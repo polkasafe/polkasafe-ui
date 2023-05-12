@@ -9,11 +9,11 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IAddressBookItem } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import { AddIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 interface INewUserModal{
     open: boolean
@@ -22,10 +22,10 @@ interface INewUserModal{
 
 const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 
-	const { accounts } = useGetAllAccounts();
 	const [loading, setLoading] = useState(false);
 	const { network } = useGlobalApiContext();
-	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
+	const { accounts } = useGetWalletAccounts(loggedInWallet);
 
 	const handleAddAddress = async (address: string, name: string) => {
 		try{

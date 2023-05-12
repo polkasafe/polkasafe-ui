@@ -7,7 +7,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, UserDetailsContextType } from 'src/types';
+import { IUser, UserDetailsContextType, Wallet } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
@@ -18,6 +18,8 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	createdAt: new Date(),
+	isProxy: false,
+	loggedInWallet: Wallet.POLKADOT,
 	multisigAddresses: [],
 	multisigSettings: {},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
@@ -54,9 +56,11 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			setUserDetailsContextState((prevState) => {
 				return {
 					...prevState,
+					activeMultisig: localStorage.getItem('active_multisig') || '',
 					address: userData?.address,
 					addressBook: userData?.addressBook || [],
 					createdAt: userData?.created_at,
+					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
 					multisigAddresses: userData?.multisigAddresses,
 					multisigSettings: userData?.multisigSettings || {}
 				};
@@ -69,6 +73,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					activeMultisig: localStorage.getItem('active_multisig') || '',
 					address: '',
 					addressBook: [],
+					loggedInWallet: Wallet.POLKADOT,
 					multisigAddresses: [],
 					multisigSettings: {}
 				};

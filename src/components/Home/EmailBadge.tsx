@@ -7,10 +7,10 @@ import React, { useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import { CheckOutlined, Disc, NotifyMail } from 'src/ui-components/CustomIcons';
 import { CloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 const EmailBadge = () => {
 	const { network } = useGlobalApiContext();
@@ -80,7 +80,7 @@ const EmailBadge = () => {
 	}
 	return (
 		<>
-			{showBadge?<div className='flex items-center justify-between w-[100%] mb-5 h-[87px] bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
+			{showBadge?<div className='flex items-center justify-between scale-[80%] w-[125%] h-[125%] origin-top-left mb-2 h-[87px] bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
 				<div className='flex items-center justify-center'>
 					<Disc className='mx-5'/>
 					<div>
@@ -89,12 +89,12 @@ const EmailBadge = () => {
 					</div>
 				</div>
 				<div className="flex items-center justify-around mr-5">
-					<Input value={inputValue} className='placeholder-text_placeholder text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
+					<Input value={inputValue} className='placeholder-text_secondary text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
 					<Button loading={loading} disabled={!inputValue} className='flex items-center justify-center bg-primary text-white border-none ml-1 py-4' onClick={handleAddEmail} ><NotifyMail />Notify me</Button>
 				</div>
 			</div>:
 				<div>
-					{showDiv?<div className='flex items-center justify-between w-[100%] mb-5 h-[87px] bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
+					{showDiv?<div className='flex items-center justify-between scale-[80%] w-[125%] h-[125%] origin-top-left mb-2 h-[87px] bg-gradient-to-r from-highlight to-bg-main rounded-lg'>
 						<div className='flex items-center justify-center'>
 							<CheckOutlined className='mx-5 text-success'/>
 							<div>
@@ -112,6 +112,7 @@ const EmailBadge = () => {
 					</div>:null}
 				</div>}
 		</>
+
 	);
 };
 

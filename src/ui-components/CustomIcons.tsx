@@ -5,6 +5,7 @@
 import Icon from '@ant-design/icons';
 import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import React from 'react';
+import { ReactComponent as HistorySVG } from 'src/assets/History.svg';
 import { ReactComponent as AddSVG } from 'src/assets/icons/add.svg';
 import { ReactComponent as AddBoxSVG } from 'src/assets/icons/add-box.svg';
 import { ReactComponent as AddressBookSVG } from 'src/assets/icons/address-book.svg';
@@ -74,6 +75,9 @@ import { ReactComponent as WarningCircleSVG } from 'src/assets/icons/warning-cir
 import { ReactComponent as WarningRoundedSVG } from 'src/assets/icons/warning-rounded.svg';
 import { ReactComponent as KusamaSVG } from 'src/assets/parachains-icons/kusama.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/parachains-icons/polkadot.svg';
+import { ReactComponent as QueueSVG } from 'src/assets/Queue.svg';
+import { ReactComponent as PolkadotWalletSVG } from 'src/assets/wallet/polkadotjs-icon.svg';
+import { ReactComponent as SubWalletSVG } from 'src/assets/wallet/subwallet-icon.svg';
 
 export const AddIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={AddSVG} {...props} />
@@ -334,4 +338,20 @@ export const CheckOutlined = (props: Partial<CustomIconComponentProps>) => (
 );
 export const Disc = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={DiscSVG} {...props} />
+);
+
+export const HistoryIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={HistorySVG} {...props} />
+);
+
+export const QueueIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={QueueSVG} {...props} />
+);
+
+export const PolkadotWalletIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PolkadotWalletSVG} {...props} />
+);
+
+export const SubWalletIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={SubWalletSVG} {...props} />
 );

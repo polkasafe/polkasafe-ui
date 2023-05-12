@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Modal } from 'antd';
+import { Button, Modal,Tooltip } from 'antd';
 import React, { FC, useCallback, useEffect,useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -22,7 +22,6 @@ import { CopyIcon, OutlineCloseIcon, QRIcon, WalletIcon } from 'src/ui-component
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -30,40 +29,25 @@ import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
 
-const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn: React.Dispatch<React.SetStateAction<boolean>>}) => {
-	const { api, apiReady } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
+interface IDashboardCard{
+	className?: string,
+	hasProxy: boolean,
+	setNewTxn: React.Dispatch<React.SetStateAction<boolean>>,
+	transactionLoading: boolean,
+	openTransactionModal: boolean,
+	setOpenTransactionModal: React.Dispatch<React.SetStateAction<boolean>>,
+	isOnchain: boolean
+}
+
+const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, openTransactionModal, setOpenTransactionModal, isOnchain }: IDashboardCard) => {
+	const { activeMultisig, multisigAddresses, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
-
-	const [transactionLoading, setTransactionLoading] = useState(false);
-	const [isOnchain, setIsOnchain] = useState(false);
-	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
 
-	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig);
-
-	useEffect(() => {
-		const handleNewTransaction = async () => {
-			if(!api || !apiReady || !activeMultisig) return;
-
-			setTransactionLoading(true);
-			// check if wallet has existential deposit
-			const hasExistentialDepositRes = await hasExistentialDeposit(api, activeMultisig, network);
-
-			if(!hasExistentialDepositRes) {
-				setIsOnchain(false);
-			} else {
-				setIsOnchain(true);
-			}
-
-			setTransactionLoading(false);
-		};
-		handleNewTransaction();
-
-	}, [activeMultisig, api, apiReady, network]);
+	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -103,22 +87,25 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const TransactionModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-5 bg-primary text-white text-sm'>
-					<PlusCircleOutlined /> New Transaction
+				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-primary text-white'>
+					New Transaction
 				</PrimaryButton>
 				<Modal
 					centered
 					footer={false}
 					closeIcon={
 						<button
-							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-							onClick={() => setOpenTransactionModal(false)}
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
+							onClick={() => {
+								setOpenTransactionModal(false);
+								setNewTxn(prev => !prev);
+							}}
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
 					open={openTransactionModal}
-					className={`${className} w-auto md:min-w-[500px]`}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
 					{isOnchain ?
 						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
@@ -131,7 +118,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	const FundMultisigModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-5 bg-highlight text-primary text-sm'>
+				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-highlight text-primary '>
 					<WalletIcon /> Fund Multisig
 				</PrimaryButton>
 				<Modal
@@ -144,9 +131,9 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Fund Multisig</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold'>Fund Multisig</h3>}
 					open={openFundMultisigModal}
-					className={`${className} w-auto md:min-w-[500px]`}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
 					<FundMultisig setNewTxn={setNewTxn} onCancel={() => setOpenFundMultisigModal(false)} />
 				</Modal>
@@ -155,11 +142,11 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 	};
 
 	return (
-		<div>
-			<h2 className="text-lg font-bold text-white">Overview</h2>
-			<div className={`${className} relative bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-80 mt-3`}>
+		<>
+			<h2 className="text-base font-bold text-white mb-2">Overview</h2>
+			<div className={`${className} relative bg-bg-main flex flex-col justify-between rounded-lg p-5 shadow-lg h-[17rem] scale-90 w-[111%] origin-top-left`}>
 				<div className='absolute right-5 top-5'>
-					<div className="flex gap-x-4 my-3 items-center">
+					<div className="flex gap-x-4 items-center">
 						<a className='w-5' target='_blank' href={'https://polkadot.js.org/apps/#/accounts'} rel="noreferrer">
 							<img className='w-5' src={polkadotIcon} alt="icon" />
 						</a>
@@ -181,41 +168,49 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<div className='flex gap-x-3 items-center'>
 						<div className='relative'>
 							<Identicon
-								className='border-2 rounded-full bg-transparent border-primary p-1.5'
+								className={`border-2 rounded-full bg-transparent ${hasProxy && isProxy ? 'border-[#FF79F2]' : 'border-primary'} p-1.5`}
 								value={activeMultisig}
-								size={70}
+								size={50}
 								theme='polkadot'
 							/>
-							<div className="bg-primary rounded-lg absolute -bottom-0 mt-3 left-[27px] text-white px-2">
+							<div className={`${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'} text-sm rounded-lg absolute -bottom-0 left-[16px] px-2`}>
 								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>
-							<div className='text-lg font-bold text-white'>{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}</div>
-							<div className="flex">
-								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className='text-md font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
+							<div className='text-base font-bold text-white flex items-center gap-x-2'>
+								{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}
+								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
+								{hasProxy &&
+								<Tooltip title='Switch Account'>
+									<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' /></Button>
+								</Tooltip>
+								}
+							</div>
+							<div className="flex text-xs">
+								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className=' font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
 								<button className='ml-2 mr-1' onClick={() => copyText(activeMultisig, true, network)}><CopyIcon className='text-primary' /></button>
-								<button onClick={() => openModal('Address Qr', <AddressQr address={activeMultisig} />)}>
+								<button onClick={() => openModal('Address QR', <AddressQr address={activeMultisig} />)}>
 									<QRIcon className='text-primary'/>
 								</button>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-wrap">
-					<div className='m-2'>
+				<div className="flex gap-x-5 flex-wrap text-xs">
+					<div>
 						<div className='text-white'>Signatories</div>
-						<div className='font-bold text-xl text-primary'>
+						<div className='font-bold text-lg text-primary'>
 							{currentMultisig?.signatories.length || 0}
 						</div>
 					</div>
-					<div className='m-2'>
+					<div>
 						<div className='text-white'>Tokens</div>
-						<div className='font-bold text-xl text-primary'>{assetsData.length}</div>
+						<div className='font-bold text-lg text-primary'>{assetsData.length}</div>
 					</div>
-					<div className='m-2'>
+					<div>
 						<div className='text-white'>USD Amount</div>
-						<div className='font-bold text-xl text-primary'>
+						<div className='font-bold text-lg text-primary'>
 							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
 						</div>
 					</div>
@@ -225,7 +220,7 @@ const DashboardCard = ({ className, setNewTxn }: { className?: string, setNewTxn
 					<FundMultisigModal/>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

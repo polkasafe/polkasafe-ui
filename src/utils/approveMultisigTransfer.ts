@@ -7,9 +7,10 @@ import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
+import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import { getMultisigInfo } from './getMultisigInfo';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
@@ -19,7 +20,7 @@ interface Args {
 	api: ApiPromise,
 	network: string,
 	multisig: IMultisigAddress,
-	callDataHex?: string,
+	callDataHex: string,
 	callHash: string,
 	amount?: BN,
 	approvingAddress: string,
@@ -38,12 +39,12 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 2. Set relevant vars
 	const ZERO_WEIGHT = new Uint8Array(0);
 	let WEIGHT: any = ZERO_WEIGHT;
-	let call: any;
 	let AMOUNT_TO_SEND: number;
 	let displayAmount: string;
 
 	// remove approving address address from signatories
 	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
+	if(!callDataHex) return;
 
 	if(callDataHex && amount && recipientAddress) {
 		AMOUNT_TO_SEND = amount.toNumber();
@@ -56,8 +57,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		// invalid call data for this call hash
 		if (!callData.hash.eq(callHash)) return;
 
-		// 3. tx call
-		call = api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND);
 	}
 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
@@ -71,6 +70,8 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	console.log(`Time point is: ${multisigInfo?.when}`);
 
 	const numApprovals = multisigInfo.approvals.length;
+
+	let blockHash = '';
 
 	return new Promise<void>((resolve, reject) => {
 
@@ -125,7 +126,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				});
 		} else {
 			api.tx.multisig
-				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, call.method.toHex(), WEIGHT as any)
+				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex, WEIGHT as any)
 				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
@@ -137,11 +138,15 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 						console.log('Transaction has been broadcasted');
 						setLoadingMessages('Transaction has been broadcasted');
 					} else if (status.isInBlock) {
+						blockHash = status.asInBlock.toHex();
 						console.log('Transaction is in block');
 						setLoadingMessages('Transaction is in block');
 					} else if (status.isFinalized) {
 						console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 						console.log(`asMulti tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+
+						const block = await api.rpc.chain.getBlock(blockHash);
+						const blockNumber = block.block.header.number.toNumber();
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
@@ -155,6 +160,17 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 
 								// update note for transaction history
 								updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
+
+								addNewTransaction({
+									amount: amount || new BN(0),
+									block_number: blockNumber,
+									callData: callDataHex,
+									callHash: txHash.toHex(),
+									from: multisig.address,
+									network,
+									note,
+									to: recipientAddress || ''
+								});
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,
@@ -201,6 +217,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		}
 
 		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
-		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${call.method.hash}, ${WEIGHT})\n`);
+		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${callHash}, ${WEIGHT})\n`);
 	});
 }

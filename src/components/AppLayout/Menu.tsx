@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const location = useLocation();
@@ -65,10 +65,16 @@ const Menu: FC<Props> = ({ className }) => {
 	}
 
 	useEffect(() => {
-		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) || [];
-
-		if(filteredMutisigs?.find((multisig) => multisig.address === activeMultisig)){
-			setSelectedMultisigAddress(activeMultisig);
+		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled) || [];
+		const multi = filteredMutisigs?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
+		if(multi){
+			if(!multi.proxy){
+				setUserDetailsContextState(prev => ({ ...prev, isProxy: false }));
+			}
+			else{
+				setUserDetailsContextState(prev => ({ ...prev, isProxy: true }));
+			}
+			setSelectedMultisigAddress(multi.address);
 		}
 		else{
 			if(filteredMutisigs.length) setSelectedMultisigAddress(filteredMutisigs[0].address );
@@ -79,15 +85,16 @@ const Menu: FC<Props> = ({ className }) => {
 	}, [multisigAddresses, network]);
 
 	useEffect(() => {
-		localStorage.setItem('active_multisig', selectedMultisigAddress);
+		const active = multisigAddresses.find(item => item.address === selectedMultisigAddress || item.proxy === selectedMultisigAddress);
+		localStorage.setItem('active_multisig', active?.proxy && isProxy ? active.proxy : selectedMultisigAddress);
 		setUserDetailsContextState((prevState) => {
 			return {
 				...prevState,
-				activeMultisig: selectedMultisigAddress
+				activeMultisig: active?.proxy && isProxy ? active.proxy : selectedMultisigAddress
 			};
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedMultisigAddress]);
+	}, [multisigAddresses, selectedMultisigAddress, isProxy]);
 
 	const AddMultisigModal: FC = () => {
 		return (
@@ -102,7 +109,7 @@ const Menu: FC<Props> = ({ className }) => {
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
 				open={openAddMultisig}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90 origin-center`}
 			>
 				<AddMultisig onCancel={() => setOpenAddMultisig(false)} isModalPopup = {true}  />
 			</Modal>
@@ -110,18 +117,18 @@ const Menu: FC<Props> = ({ className }) => {
 	};
 
 	return (
-		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[30px] px-5')}>
+		<div className={classNames(className, 'bg-bg-main flex flex-col h-full py-[25px] px-3')}>
 			<AddMultisigModal/>
-			<div className='flex flex-col gap-y-11 mb-3'>
-				<section>
-					<Link className='text-white flex items-center gap-x-2 ml-3' to='/'>
-						<Badge offset={[-15, 45]} count='Beta' color='#1573FE'>
-							<img src={polkasafeLogo} alt="polkasafe logo" />
+			<div className='flex flex-col mb-3'>
+				<section className='flex mb-7 justify-center w-full'>
+					<Link className='text-white' to='/'>
+						<Badge offset={[-15, 35]} size='small' count='Beta' color='#1573FE'>
+							<img src={polkasafeLogo} alt="polkasafe logo" className='h-[25px]' />
 						</Badge>
 					</Link>
 				</section>
 				<section>
-					<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary'>
+					<h2 className='uppercase text-text_secondary ml-3 text-[10px] font-primary'>
 						Menu
 					</h2>
 					<ul className='flex flex-col py-2 text-white list-none'>
@@ -129,7 +136,7 @@ const Menu: FC<Props> = ({ className }) => {
 							menuItems.map((item) => {
 								return <li className='w-full' key={item.key}>
 									<Link
-										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+										className={classNames('flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 											'bg-highlight text-primary': item.key === location.pathname
 										})}
 										to={item.key} >
@@ -142,23 +149,23 @@ const Menu: FC<Props> = ({ className }) => {
 					</ul>
 				</section>
 			</div>
-			<section className='overflow-auto [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
-				<h2 className='uppercase text-text_secondary ml-3 text-xs font-primary flex items-center justify-between'>
-					<span>Multisigs</span>
-					<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-6 w-6 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).length : '0'}</span>
-				</h2>
-				<div>
-					{multisigAddresses &&
-					<ul className='flex flex-col gap-y-2 py-2 text-white list-none'>
-						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted)).map((multisig) => {
+			<h2 className='uppercase text-text_secondary ml-3 text-[10px] font-primary flex items-center justify-between'>
+				<span>Multisigs</span>
+				<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-5 w-5 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
+			</h2>
+			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
+				{multisigAddresses &&
+					<ul className='flex flex-col gap-y-2 py-3 text-white list-none'>
+						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
-								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-base', {
+								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
 								})} onClick={() => {
 									setUserDetailsContextState((prevState) => {
 										return {
 											...prevState,
-											activeMultisig: multisig.address
+											activeMultisig: multisig.proxy ? multisig.proxy : multisig.address,
+											isProxy: multisig.proxy ? true : false
 										};
 									});
 									setSelectedMultisigAddress(multisig.address);
@@ -166,7 +173,7 @@ const Menu: FC<Props> = ({ className }) => {
 									<Identicon
 										className='image identicon mx-2'
 										value={multisig.address}
-										size={30}
+										size={23}
 										theme={'polkadot'}
 									/>
 									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
@@ -174,14 +181,13 @@ const Menu: FC<Props> = ({ className }) => {
 							</li>;
 						})}
 					</ul>}
-				</div>
 			</section>
 			{userAddress &&
 				<section className='mt-auto'>
 					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
 						onClick={() => setOpenAddMultisig(true)}>
-						<UserPlusIcon className='text-xl' />
-						<span className='font-normal text-sm'>Add Multisig</span>
+						<UserPlusIcon className='text-sm' />
+						<span className='font-medium text-xs'>Add Multisig</span>
 					</button>
 				</section>
 			}

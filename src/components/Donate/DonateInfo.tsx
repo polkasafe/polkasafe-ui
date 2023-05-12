@@ -12,7 +12,7 @@ import QR from './QR';
 const DonateInfo = () => {
 	return (
 		<>
-			<div className='flex flex-col gap-y-10 md:flex-row md:gap-x-20 items-center'>
+			<div className='flex flex-col gap-y-10 md:flex-row md:gap-x-20 items-center text-white'>
 				<article className='flex flex-col justify-between h-full'>
 					<p className='text-sm font-normal'>
 						If you like the product, feel free to Donate us!
@@ -29,7 +29,7 @@ const DonateInfo = () => {
 				</article>
 			</div>
 			<Divider className='bg-text_secondary my-8' />
-			<div className='flex items-center gap-x-5 gap-y-5 flex-col md:flex-row justify-between'>
+			<div className='flex items-center gap-x-5 gap-y-5 flex-col md:flex-row justify-between text-white'>
 				<p className='flex gap-x-2 flex-col xl:flex-row xl:items-center'>
 					<span className='text-sm font-normal leading-[15px]'>
                         If you don{'\''}t have a polkadot wallet, don{'\''}t worry, you can create one for free at
@@ -41,7 +41,7 @@ const DonateInfo = () => {
 						</a>
 					</span>
 				</p>
-				<a href='https://polkadot.js.org/extension/' rel="noreferrer" target={'_blank'} className='text-primary px-[10px] py-3 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
+				<a href='https://polkadot.js.org/extension/' rel="noreferrer" target={'_blank'} className='text-primary px-[10px] py-2 bg-highlight rounded-lg flex items-center border-none outline-none gap-x-[10.83px]'>
 					<WalletIcon className='text-base'/>
 					<span className='font-bold text-sm cursor-pointer'>
                         Create Wallet

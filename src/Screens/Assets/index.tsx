@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AssetsTable from 'src/components/Assets/AssetsTable';
+import MultisigDropdown from 'src/components/Assets/MultisigDropdown';
 // import DropDown from 'src/components/Assets/DropDown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -17,16 +18,19 @@ import Loader from 'src/ui-components/Loader';
 const Assets = () => {
 
 	const [loading, setLoading] = useState<boolean>(false);
+	const { address, activeMultisig, isProxy, multisigAddresses } = useGlobalUserDetailsContext();
+	const [activeAddress, setActiveAddress] = useState<'Proxy' | 'Multisig'>(isProxy ? 'Proxy' : 'Multisig');
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
-	const { address, activeMultisig } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleGetAssets = useCallback(async () => {
 		try{
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !activeMultisig) {
+			if(!address || !signature || !multisig) {
 				console.log('ERROR');
 				return;
 			}
@@ -35,7 +39,7 @@ const Assets = () => {
 				setLoading(true);
 				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
 					body: JSON.stringify({
-						address: activeMultisig,
+						address: activeAddress === 'Proxy' ? multisig.proxy : multisig.address,
 						network
 					}),
 					headers: firebaseFunctionsHeader(network),
@@ -60,7 +64,7 @@ const Assets = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	}, [activeMultisig, network]);
+	}, [activeAddress, multisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
@@ -74,8 +78,9 @@ const Assets = () => {
 				<div className="grid grid-cols-12 gap-4">
 					<div className="col-start-1 col-end-13">
 						<div className="flex items-center justify-between">
-							<div className='flex items-center'>
-								<h2 className="text-lg font-bold text-white mt-3 ml-5">Tokens</h2>
+							<div className='flex items-end gap-x-4'>
+								<h2 className="text-base font-bold text-white mt-3 ml-5">Tokens</h2>
+								{multisig && multisig?.proxy && <MultisigDropdown activeAddress={activeAddress} setActiveAddress={setActiveAddress} />}
 							</div>
 							{/* <div className='flex items-center justify-center mr-5 mt-3'>
 						<p className='text-text_secondary mx-2'>Currency:</p>

@@ -13,9 +13,10 @@ import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
+import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { IAddressBookItem, IMultisigAddress } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import _createMultisig from 'src/utils/_createMultisig';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 
@@ -115,11 +116,35 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					setLoading(false);
 					return;
 				}
+				let proxyAddress = null;
+				if(network !== 'astar'){
+					const response = await fetch(
+						`https://${network}.api.subscan.io/api/scan/events`,
+						{
+							body: JSON.stringify({
+								row: 1,
+								page: 0,
+								module: 'proxy',
+								call: 'PureCreated',
+								address: multisigAddress
+							}),
+							headers: SUBSCAN_API_HEADERS,
+							method: 'POST'
+						}
+					);
+
+					const responseJSON = await response.json();
+					if(responseJSON.data.count !== 0){
+						const params = JSON.parse(responseJSON.data?.events[0]?.params);
+						proxyAddress = getEncodedAddress(params[0].value, network);
+					}
+				}
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
 						signatories,
 						threshold,
-						multisigName
+						multisigName,
+						proxyAddress
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
@@ -138,9 +163,17 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 				}
 
 				if(multisigData){
+					queueNotification({
+						header: 'Success!',
+						message: 'Multisig Linked',
+						status: NotificationStatus.SUCCESS
+					});
+					setLoading(false);
+					onCancel();
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
+							activeMultisig: multisigData.address,
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 							multisigSettings: {
 								...prevState?.multisigSettings,
@@ -151,16 +184,13 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 							}
 						};
 					});
-					Promise.all(signatoriesWithName.map(
+					const results = await Promise.allSettled(signatoriesWithName.map(
 						(signatory) => handleAddAddress(signatory.address, signatory.name)
-					)).then(() => {
-						queueNotification({
-							header: 'Success!',
-							message: 'Multisig Linked',
-							status: NotificationStatus.SUCCESS
-						});
-						setLoading(false);
-						onCancel();
+					));
+					results.forEach((result) => {
+						if(result.status === 'rejected'){
+							console.log('ERROR', result.reason);
+						}
 					});
 				}
 
@@ -308,10 +338,10 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						</div>
 					</div>:<div>
 						{viewReviews?<div>
-							<Owners threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
+							<Owners multisigThreshold={multisigData?.threshold} threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={onCancel} />
-								{signatoriesWithName.length ?
+								{signatoriesWithName.length && multisigData?.threshold ?
 									<AddBtn title='Continue' onClick={handleViewReviews}/>
 									:
 									<AddBtn disabled={signatoriesArray.length < 2 || threshold < 2 || threshold > signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>

@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Divider, Modal } from 'antd';
+import { Badge, Divider, Modal, Tooltip } from 'antd';
 import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
@@ -27,15 +27,14 @@ interface IAddressProps {
 	className?: string
 }
 
-const AddAddress: FC<IAddressProps> = ({ address, className }) => {
-	const { openModal } = useModalContext();
+const TransactionModal = ({ className, defaultAddress }: { className?: string, defaultAddress: string }) => {
+	const [openTransactionModal, setOpenTransactionModal] = useState<boolean>(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-
-	const [openTransactionModal, setOpenTransactionModal] = useState(false);
-
-	const TransactionModal: FC = () => {
-		return (
+	return (
+		<>
+			<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => setOpenTransactionModal(true)}>
+				<p className='font-normal text-sm'>Send</p>
+			</PrimaryButton>
 			<Modal
 				centered
 				footer={false}
@@ -48,16 +47,20 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
 				open={openTransactionModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
-				<SendFundsForm onCancel={() => setOpenTransactionModal(false)} />
+				<SendFundsForm defaultSelectedAddress={defaultAddress} onCancel={() => setOpenTransactionModal(false)} />
 			</Modal>
-		);
-	};
+		</>
+	);
+};
+
+const AddAddress: FC<IAddressProps> = ({ address, className }) => {
+	const { openModal } = useModalContext();
+	const { network } = useGlobalApiContext();
 
 	return (
-		<div className='text-sm font-medium leading-[15px] '>
-			<TransactionModal/>
+		<div className='text-sm font-medium leading-[15px] h-[60vh] overflow-y-auto'>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
 					Name
@@ -74,8 +77,8 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 					return (
 						<>
 							<article className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white my-2' key={index}>
-								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
-									{name}
+								<p title={name} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
+									{name} {index === 0 && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
 								</p>
 								<div className='col-span-2 flex items-center'>
 									<Identicon
@@ -104,9 +107,7 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<DeleteIcon />
 									</button>}
-									<PrimaryButton disabled={!activeMultisig} className='bg-primary text-white w-fit' onClick={() => setOpenTransactionModal(true)}>
-										<p className='font-normal text-sm'>Send</p>
-									</PrimaryButton>
+									<TransactionModal defaultAddress={address} className={className} />
 								</div>
 							</article>
 							{address.length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}

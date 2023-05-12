@@ -6,8 +6,8 @@ import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 
 interface Props {
 	recepientAddress: string;
@@ -16,16 +16,17 @@ interface Props {
 	api: ApiPromise;
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function transferFunds({ api, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
+export async function transferFunds({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const AMOUNT_TO_SEND = amount.toNumber();
+	const AMOUNT_TO_SEND = amount;
 	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
 
 	return new Promise<void>((resolve, reject) => {
@@ -48,6 +49,7 @@ export async function transferFunds({ api, network, recepientAddress, senderAddr
 				} else if (status.isFinalized) {
 					console.log(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
 					console.log(`transfer tx: https://${network}.subscan.io/extrinsic/${txHash}`);
+					setTxnHash?.(`${txHash}`);
 
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {

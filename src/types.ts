@@ -7,7 +7,9 @@ import { Dispatch, SetStateAction } from 'react';
 import { networks, tokenSymbol } from './global/networkConstants';
 
 export interface UserDetailsContextType {
+	loggedInWallet: Wallet;
     activeMultisig: string;
+	isProxy: boolean;
     address: string;
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
@@ -18,7 +20,9 @@ export interface UserDetailsContextType {
 }
 
 export enum Wallet {
-    POLKADOT = 'polkadot-js'
+    POLKADOT = 'polkadot-js',
+	SUBWALLET = 'subwallet-js',
+	TALISMAN = 'talisman',
 }
 
 export interface AccountMeta {
@@ -43,7 +47,7 @@ export interface ChainProps {
     'tokenSymbol': TokenSymbol;
     'chainId': number;
     'rpcEndpoint': string;
-    'existentialDeposit': number;
+    'existentialDeposit': string;
 }
 
 export type ChainPropType = {
@@ -128,3 +132,10 @@ export interface INotification {
 	type: 'sent' | 'recieved' | 'cancelled' | 'info',
 	network: string
 }
+
+export enum NotificationStatus {
+	SUCCESS= 'success',
+	ERROR = 'error',
+	WARNING = 'warning',
+	INFO = 'info'
+  }

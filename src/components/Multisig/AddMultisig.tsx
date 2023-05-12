@@ -43,9 +43,9 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Link Multisig</h3>}
 					open={openLinkMultisig}
-					className='w-auto md:min-w-[500px]'
+					className='w-auto md:min-w-[500px] scale-90'
 				>
-					<LinkMultisig onCancel={() => setOpenLinkMultisig(false)} />
+					<LinkMultisig onCancel={() => {setOpenLinkMultisig(false); onCancel?.();}} />
 				</Modal>
 			</>
 		);
@@ -64,7 +64,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Multisig</h3>}
 				open={openCreateMultisig}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
 				<CreateMultisig onCancel={() => {
 					setOpenCreateMultisig(false);
@@ -83,7 +83,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 					setMultisigVisible(false);
 				}} />
 			</div>:<div className='h-full flex flex-col justify-center'>
-				<div className='p-5 '>
+				<div className='p-5'>
 					<div className='text-center mb-10'>
 						<h1 className='text-lg font-bold text-white'>Add Multisig</h1>
 						<p className='text-white'>MultiSig is a secure digital wallet that requires one or multiple owners to authorize the transaction.</p>
@@ -127,10 +127,6 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 };
 
 export default styled(AddMultisig)`
-	.ant-switch-inner-checked {
-		background-color: #645ADF !important;
-	}
-
 	.ant-spin-nested-loading .ant-spin-blur{
 		opacity: 0 !important;
 	}

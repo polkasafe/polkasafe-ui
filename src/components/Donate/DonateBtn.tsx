@@ -14,8 +14,8 @@ const DonateBtn = () => {
 			<button onClick={() => openModal(
 				'Donate Us!',
 				<DonateInfo />
-			)} className='flex items-center justify-center gap-x-[11px] outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm'>
-				<DollarIcon className='text-base text-primary'/>
+			)} className='flex items-center justify-center gap-x-2 outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-xs'>
+				<DollarIcon className='text-sm text-primary'/>
 				<span className='hidden md:inline-flex text-primary'>
                     Donate
 				</span>

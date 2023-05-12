@@ -1,22 +1,20 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Signer } from '@polkadot/api/types';
-import Identicon from '@polkadot/react-identicon';
 import { AutoComplete, Form, Input, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import React, { FC, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
-import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetAllAccounts from 'src/hooks/useGetAllAccounts';
+import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
+import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -24,16 +22,17 @@ import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIco
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import { setSigner } from 'src/utils/setSigner';
 import { transferFunds } from 'src/utils/transferFunds';
 import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
+import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
-
-	const { accounts, accountsMap, noAccounts, signersMap } = useGetAllAccounts();
+	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
+	const { accounts } = useGetWalletAccounts(loggedInWallet);
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
@@ -43,6 +42,9 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const [failure, setFailure] = useState(false);
 	const [isValidSender, setIsValidSender] = useState(true);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const [txnHash, setTxnHash] = useState<string>('');
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(!getSubstrateAddress(selectedSender)){
@@ -76,15 +78,9 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	};
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady || noAccounts || !signersMap ) return;
+		if(!api || !apiReady ) return;
 
-		const encodedSender = getEncodedAddress(selectedSender, network) || '';
-
-		const wallet = accountsMap[encodedSender];
-		if(!signersMap[wallet]) {console.log('no signer wallet'); return;}
-
-		const signer: Signer = signersMap[wallet];
-		api.setSigner(signer);
+		await setSigner(api, loggedInWallet);
 
 		setLoading(true);
 		try {
@@ -92,19 +88,13 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 				amount: amount,
 				api,
 				network,
-				recepientAddress: activeMultisig,
+				recepientAddress: multisig?.address || activeMultisig,
 				senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
-				setLoadingMessages
+				setLoadingMessages,
+				setTxnHash
 			});
 			setLoading(false);
 			setSuccess(true);
-			setTimeout(() => {
-				setSuccess(false);
-				onCancel();
-				if(setNewTxn){
-					setNewTxn(prev => !prev);
-				}
-			}, 7000);
 		} catch (error) {
 			console.log(error);
 			setLoading(false);
@@ -125,104 +115,110 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	};
 
 	return (
-		<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}>
-			<div className={className}>
-				<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
-					<span>
-						<WarningCircleIcon className='text-base' />
-					</span>
-					<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
-				</section>
+		<>
+			{success ? <TransactionSuccessScreen
+				successMessage='Existential Deposit Successful!'
+				waitMessage='Your multisig is now on-chain.
+				You can now, create a proxy which will allow you to change multisig configurations later.
+				'
+				amount={amount}
+				sender={selectedSender}
+				recipient={multisig?.address || activeMultisig}
+				created_at={new Date()}
+				txnHash={txnHash}
+				onDone={() => {
+					setNewTxn?.(prev => !prev);
+					onCancel();
+				}}
+			/>
+				: failure ? <FailedTransactionLottie message='Failed!' />
+					:
+					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
+						<div className={className}>
+							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+								<WarningCircleIcon />
+								<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
+							</section>
 
-				<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
-				{/* TODO: Make into reusable component */}
-				<div className=' p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
-					<div className='flex items-center justify-center w-10 h-10'>
-						<Identicon
-							className='image identicon mx-2'
-							value={activeMultisig}
-							size={30}
-							theme={'polkadot'}
-						/>
-					</div>
-					<div className='flex flex-col gap-y-[6px]'>
-						<h4 className='font-medium text-sm leading-[15px] text-white'>{multisigAddresses?.find(a => a.address === activeMultisig)?.name }</h4>
-						<p className='text-text_secondary font-normal text-xs leading-[13px]'>{activeMultisig}</p>
-					</div>
-					<Balance address={activeMultisig} />
-				</div>
-
-				<Form disabled={ loading }>
-					<section className='mt-6'>
-						<div className='flex items-center justify-between mb-2'>
-							<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
-							<Balance address={selectedSender} />
-						</div>
-						<div className='flex items-center gap-x-[10px]'>
-							<div className='w-full'>
-								<Form.Item
-									name="sender"
-									rules={[{ required: true }]}
-									help={!isValidSender && 'Please add a valid Address.'}
-									className='border-0 outline-0 my-0 p-0'
-									validateStatus={selectedSender && isValidSender ? 'success' : 'error'}
-								>
-									<div className="flex items-center">
-										<AutoComplete
-											onClick={addSenderHeading}
-											options={autocompleteAddresses}
-											id='sender'
-											placeholder="Send from Address.."
-											onChange={(value) => setSelectedSender(value)}
-											defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
-										/>
-										<div className='absolute right-2'>
-											<button onClick={() => copyText(selectedSender, true, network)}>
-												<CopyIcon className='mr-2 text-primary' />
-											</button>
-											<QrModal />
-										</div>
-									</div>
-								</Form.Item>
+							<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
+							{/* TODO: Make into reusable component */}
+							<div className=' p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
+								<AddressComponent withBadge={false} address={multisig?.address || activeMultisig} />
+								<Balance address={multisig?.address || activeMultisig} />
 							</div>
-						</div>
-					</section>
 
-					<BalanceInput className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
-
-					<section className='mt-6'>
-						<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
-						<div className='flex items-center gap-x-[10px]'>
-							<article className='w-full'>
-								<Form.Item
-									name="existential_deposit"
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<div className='flex items-center h-[40px]'>
-										<Input
-											disabled={true}
-											type='number'
-											placeholder={String(chainProperties[network].existentialDeposit)}
-											className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
-											id="existential_deposit"
-										/>
-										<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
-											<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-											<span>{ chainProperties[network].tokenSymbol}</span>
+							<Form disabled={ loading }>
+								<section className='mt-6'>
+									<div className='flex items-center justify-between mb-2'>
+										<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
+										<Balance address={selectedSender} />
+									</div>
+									<div className='flex items-center gap-x-[10px]'>
+										<div className='w-full'>
+											<Form.Item
+												name="sender"
+												rules={[{ required: true }]}
+												help={!isValidSender && 'Please add a valid Address.'}
+												className='border-0 outline-0 my-0 p-0'
+												validateStatus={selectedSender && isValidSender ? 'success' : 'error'}
+											>
+												<div className="flex items-center">
+													<AutoComplete
+														onClick={addSenderHeading}
+														options={autocompleteAddresses}
+														id='sender'
+														placeholder="Send from Address.."
+														onChange={(value) => setSelectedSender(value)}
+														defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
+													/>
+													<div className='absolute right-2'>
+														<button onClick={() => copyText(selectedSender, true, network)}>
+															<CopyIcon className='mr-2 text-primary' />
+														</button>
+														<QrModal />
+													</div>
+												</div>
+											</Form.Item>
 										</div>
 									</div>
-								</Form.Item>
-							</article>
-						</div>
-					</section>
+								</section>
 
-					<section className='flex items-center gap-x-5 justify-center mt-10'>
-						<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
-						<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
-					</section>
-				</Form>
-			</div>
-		</Spin>
+								<BalanceInput defaultValue={String(chainProperties[network]?.existentialDeposit)} className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
+
+								<section className='mt-6'>
+									<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
+									<div className='flex items-center gap-x-[10px]'>
+										<article className='w-full'>
+											<Form.Item
+												name="existential_deposit"
+												className='border-0 outline-0 my-0 p-0'
+											>
+												<div className='flex items-center'>
+													<Input
+														disabled={true}
+														type='number'
+														placeholder={String(chainProperties[network].existentialDeposit)}
+														className="text-sm font-normal leading-[15px] outline-0 p-2.5 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
+														id="existential_deposit"
+													/>
+													<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
+														<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
+														<span>{ chainProperties[network].tokenSymbol}</span>
+													</div>
+												</div>
+											</Form.Item>
+										</article>
+									</div>
+								</section>
+
+								<section className='flex items-center gap-x-5 justify-center mt-10'>
+									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+								</section>
+							</Form>
+						</div>
+					</Spin>}
+		</>
 	);
 };
 

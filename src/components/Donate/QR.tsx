@@ -16,7 +16,7 @@ const QR = () => {
 			<div className='flex items-center justify-center'>
 				<AddressQr address='165gUhnbTdZEfjY4drYNybJuRBf3MLJfZxQUraJDeX17B4Pb' />
 			</div>
-			<div className='flex items-center gap-x-3 justify-center bg-highlight rounded-lg py-[10px] px-5'>
+			<div className='flex items-center gap-x-3 justify-center bg-highlight rounded-lg p-2'>
 				<p className='text-xs md:text-sm leading-[15px]'>
 					<span className='text-primary font-medium'>
                         dot:

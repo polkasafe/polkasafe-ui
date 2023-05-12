@@ -4,7 +4,6 @@
 import styled from '@xstyled/styled-components';
 import { Divider, Modal } from 'antd';
 import React, { FC, useState } from 'react';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { IAsset } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -18,7 +17,6 @@ interface IAssetsProps {
 }
 
 const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
-	const { network } = useGlobalApiContext();
 
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
@@ -36,7 +34,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
 				open={openTransactionModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
 				<SendFundsForm onCancel={() => setOpenTransactionModal(false)} />
 			</Modal>
@@ -44,7 +42,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 	};
 
 	return (
-		<div className='text-sm font-medium leading-[15px] '>
+		<div className='text-sm font-medium leading-[15px] scale-[80%] w-[125%] h-[125%] origin-top-left'>
 			<TransactionModal/>
 			<article className='grid grid-cols-4 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-1'>
@@ -78,7 +76,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 									<p title={balance_usd} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
 										{balance_usd ? balance_usd : '-'}
 									</p>
-									<PrimaryButton disabled={name.toLowerCase() !== network} onClick={() => setOpenTransactionModal(true)} className='bg-primary text-white w-fit'>
+									<PrimaryButton onClick={() => setOpenTransactionModal(true)} className='bg-primary text-white w-fit'>
 										<p className='font-normal text-sm'>Send</p>
 									</PrimaryButton>
 								</article>

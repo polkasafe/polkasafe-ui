@@ -4,16 +4,16 @@
 
 import { Form, Input, message } from 'antd';
 import React, { useState } from 'react';
-import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
+import AddBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookItem } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { NotificationStatus } from 'src/ui-components/types';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 interface IMultisigProps {
@@ -21,9 +21,10 @@ interface IMultisigProps {
 	addAddress?: string
 	onCancel?: () => void
 	setAddAddress?: React.Dispatch<React.SetStateAction<string>>
+	setSignatories?: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
+const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress, setSignatories }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
 
@@ -85,12 +86,19 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 				}
 
 				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							addressBook: addAddressData
-						};
-					});
+					if(setSignatories){
+						setSignatories((prevState) => {
+							return [...prevState, address];
+						});
+					}
+					else{
+						setUserDetailsContextState((prevState) => {
+							return {
+								...prevState,
+								addressBook: addAddressData
+							};
+						});
+					}
 
 					queueNotification({
 						header: 'Success!',
