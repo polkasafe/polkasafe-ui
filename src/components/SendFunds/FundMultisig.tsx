@@ -11,7 +11,6 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
@@ -53,7 +52,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	}, [selectedSender]);
 
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));
 
@@ -154,6 +153,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 											>
 												<div className="flex items-center">
 													<AutoComplete
+														filterOption={true}
 														onClick={addSenderHeading}
 														options={autocompleteAddresses}
 														id='sender'
