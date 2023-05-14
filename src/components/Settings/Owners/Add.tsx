@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { AutoComplete, Button, Form, Input, Spin, Tooltip } from 'antd';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import AddMultisigSVG from 'src/assets/add-multisig.svg';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
@@ -13,6 +13,7 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -51,6 +52,7 @@ const addRecipientHeading = () => {
 
 const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: string }) => {
 	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
+	const { client } = useContext<any>(TestContext);
 	const { api, apiReady, network } = useGlobalApiContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const [loading, setLoading] = useState(false);
@@ -148,7 +150,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 	const changeMultisig = async () => {
 		if(!api || !apiReady ) return;
 
-		await setSigner(api, loggedInWallet);
+		const injector = await setSigner(api, loggedInWallet);
 
 		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
 
@@ -161,35 +163,41 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 			});
 			return;
 		}
-
 		setLoading(true);
+
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
-			await addNewMultiToProxy({
-				api,
-				network,
-				newSignatories,
-				newThreshold,
-				oldSignatories: multisig?.signatories || [],
-				oldThreshold: multisig?.threshold || 2,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(address) || address,
-				setLoadingMessages,
-				setTxnHash
-			});
-			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
-			await removeOldMultiFromProxy({
-				api,
-				multisigAddress: multisig?.address || '',
-				network,
-				newSignatories,
-				newThreshold,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(address) || address,
-				setLoadingMessages
-			});
+
+			// Edit Multisig needs multisig address, new signatories, new threshold, injector, and an event grabber function ::BySDK::
+			const data = await client.editMultisig(multisig?.address, newSignatories, newThreshold, injector, setLoadingMessages);
+
+			console.log(data);
+
+			// await addNewMultiToProxy({
+			// 	api,
+			// 	network,
+			// 	newSignatories,
+			// 	newThreshold,
+			// 	oldSignatories: multisig?.signatories || [],
+			// 	oldThreshold: multisig?.threshold || 2,
+			// 	proxyAddress: multisig?.proxy || '',
+			// 	recepientAddress: activeMultisig,
+			// 	senderAddress: getSubstrateAddress(address) || address,
+			// 	setLoadingMessages,
+			// 	setTxnHash
+			// });
+			// setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
+			// await removeOldMultiFromProxy({
+			// 	api,
+			// 	multisigAddress: multisig?.address || '',
+			// 	network,
+			// 	newSignatories,
+			// 	newThreshold,
+			// 	proxyAddress: multisig?.proxy || '',
+			// 	recepientAddress: activeMultisig,
+			// 	senderAddress: getSubstrateAddress(address) || address,
+			// 	setLoadingMessages
+			// });
 			setSuccess(true);
 			setLoading(false);
 			await handleMultisigCreate(newSignatories, newThreshold);

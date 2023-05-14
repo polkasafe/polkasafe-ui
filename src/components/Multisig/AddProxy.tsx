@@ -7,12 +7,13 @@ import Identicon from '@polkadot/react-identicon';
 import { Spin } from 'antd';
 import BN from 'bn.js';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
@@ -39,6 +40,8 @@ interface IMultisigProps {
 }
 
 const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, homepage, setProxyInProcess }) => {
+	const { client } = useContext<any>(TestContext);
+
 	const { address: userAddress, multisigAddresses, activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 
@@ -53,8 +56,9 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 
 	const createProxy = async () => {
 		if(!api || !apiReady ) return;
+		console.log('call');
 
-		await setSigner(api, loggedInWallet);
+		const injector = await setSigner(api, loggedInWallet);
 
 		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
 			.muln(1)
@@ -63,17 +67,20 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 		setLoading(true);
 		setLoadingMessages(`A Base Amount (${formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.`);
 		try {
-			await transferAndProxyBatchAll({
-				amount: reservedProxyDeposit,
-				api,
-				network,
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages,
-				setTxnHash,
-				signatories: signatories ? signatories : multisig?.signatories || [],
-				threshold: threshold ? threshold : multisig?.threshold || 2
-			});
+			// Create proxy accepts multisig address, injector, and an event grabber function ::BySDK::
+			const data = await client.createProxy(activeMultisig, injector, setLoadingMessages);
+			console.log(data);
+			// await transferAndProxyBatchAll({
+			// 	amount: reservedProxyDeposit,
+			// 	api,
+			// 	network,
+			// 	recepientAddress: activeMultisig,
+			// 	senderAddress: getSubstrateAddress(userAddress) || userAddress,
+			// 	setLoadingMessages,
+			// 	setTxnHash,
+			// 	signatories: signatories ? signatories : multisig?.signatories || [],
+			// 	threshold: threshold ? threshold : multisig?.threshold || 2
+			// });
 			setSuccess(true);
 			setLoading(false);
 		} catch (error) {

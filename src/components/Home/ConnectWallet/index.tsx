@@ -4,9 +4,10 @@
 import { InjectedAccount,InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ConnectWalletImg from 'src/assets/connect-wallet.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -20,6 +21,7 @@ import WalletButtons from 'src/ui-components/WalletButtons';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const ConnectWallet = () => {
+	const { client } = useContext<any>(TestContext);
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
@@ -88,17 +90,21 @@ const ConnectWallet = () => {
 					data: stringToHex(token),
 					type: 'bytes'
 				});
-
+				// Setting the signature, needs signature, network, and address ::BySDK::
+				await client.setSignature(signature, network, substrateAddress);
+				// connect address needs an address ::BySDK::
+				const { data:userData, error } = await client.connectAddress(substrateAddress);
+				console.log(userData);
 				setSigning(false);
 
-				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
-					method: 'POST'
-				});
+				// const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+				// headers: firebaseFunctionsHeader(network, substrateAddress, signature),
+				// 	method: 'POST'
+				// });
 
-				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
+				// const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
-				if(!connectAddressErr && userData){
+				if(!error && userData){
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
 					localStorage.setItem('logged_in_wallet', selectedWallet);

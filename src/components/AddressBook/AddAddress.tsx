@@ -3,11 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Form, Input, message } from 'antd';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -24,6 +25,7 @@ interface IMultisigProps {
 }
 
 const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
+	const { client } = useContext<any>(TestContext);
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
 
@@ -62,16 +64,19 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 					return;
 				}
 
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
-					body: JSON.stringify({
-						address,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
+				// Add Address needs address and name ::BySDK::
+				const { data: addAddressData, error: addAddressError } = await client.addToAddressBook(address, name);
 
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
+				// const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+				// 	body: JSON.stringify({
+				// 		address,
+				// 		name
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network),
+				// 	method: 'POST'
+				// });
+
+				// const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
 				if(addAddressError) {
 

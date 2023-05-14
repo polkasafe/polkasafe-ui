@@ -6,11 +6,12 @@ import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import  { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -44,6 +45,7 @@ interface ITransactionProps {
 }
 
 const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
+	const { client } = useContext<any>(TestContext);
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
@@ -101,16 +103,18 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 
 	useEffect(() => {
 		const fetchMultisigData = async (newMultisigAddress: string) => {
-			const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
-				body: JSON.stringify({
-					multisigAddress: newMultisigAddress,
-					network
-				}),
-				headers: firebaseFunctionsHeader(network),
-				method: 'POST'
-			});
+			// Get multisig data by address needs and address ::BySDK::
+			const { data: newMultisigData, error: multisigFetchError } = await client.getMultisigDataByAddress(newMultisigAddress);
+			// const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
+			// 	body: JSON.stringify({
+			// 		multisigAddress: newMultisigAddress,
+			// 		network
+			// 	}),
+			// 	headers: firebaseFunctionsHeader(network),
+			// 	method: 'POST'
+			// });
 
-			const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
+			// const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
 
 			if(multisigFetchError || !newMultisigData || !multisig) {
 				setGetMultisigDataLoading(false);
@@ -141,7 +145,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			return;
 		}
 
-		await setSigner(api, loggedInWallet);
+		const injector = await setSigner(api, loggedInWallet);
 
 		if(!multisig) return;
 
@@ -152,47 +156,54 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 				return;
 			}
 			if(decodedCallData?.args?.proxy_type){
-				await approveProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					navigate,
-					network,
-					note: note || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
+				// Approve transaction needs address, callHash, calldata, injector, requestType (can be 'proxy' | 'wallet' | 'edit_proxy'), and an event grabber function ::BySDK::
+				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'proxy', setLoadingMessages);
+				console.log(data);
+				// await approveProxy({
+				// 	api,
+				// 	approvingAddress: address,
+				// 	callDataHex: callDataString,
+				// 	callHash,
+				// 	multisig,
+				// 	navigate,
+				// 	network,
+				// 	note: note || '',
+				// 	setLoadingMessages,
+				// 	setUserDetailsContextState
+				// });
 			}
 			else if(decodedCallData?.args?.call?.args?.delegate){
-				await approveAddProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
-					note: note || '',
-					proxyAddress: multisig.proxy || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
+				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'edit_proxy', setLoadingMessages);
+				console.log(data);
+				// await approveAddProxy({
+				// 	api,
+				// 	approvingAddress: address,
+				// 	callDataHex: callDataString,
+				// 	callHash,
+				// 	multisig,
+				// 	network,
+				// 	newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
+				// 	note: note || '',
+				// 	proxyAddress: multisig.proxy || '',
+				// 	setLoadingMessages,
+				// 	setUserDetailsContextState
+				// });
 			}
 			else{
-				await approveMultisigTransfer({
-					amount: new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					note: note || '',
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-					setLoadingMessages
-				});
+				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'wallet', setLoadingMessages);
+				console.log(data);
+				// await approveMultisigTransfer({
+				// 	amount: new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
+				// 	api,
+				// 	approvingAddress: address,
+				// 	callDataHex: callDataString,
+				// 	callHash,
+				// 	multisig,
+				// 	network,
+				// 	note: note || '',
+				// 	recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
+				// 	setLoadingMessages
+				// });
 			}
 			setLoading(false);
 			setSuccess(true);
@@ -219,7 +230,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			return;
 		}
 
-		await setSigner(api, loggedInWallet);
+		const injector = await setSigner(api, loggedInWallet);
 
 		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
@@ -231,27 +242,30 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
 				return;
 			}
-			if(decodedCallData?.args?.proxy_type){
-				await cancelProxy({
-					api,
-					approvingAddress: address,
-					callHash,
-					multisig,
-					network,
-					setLoadingMessages
-				});
-			}
-			else{
-				await cancelMultisigTransfer({
-					api,
-					approvingAddress: address,
-					callHash,
-					multisig,
-					network,
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-					setLoadingMessages
-				});
-			}
+			// Cancel transaction needs address, callHash, injector, and an event grabber function ::BySDK::
+			const data = await client.cancelTransaction(multisig.address, callHash, injector, setLoadingMessages);
+			console.log( data );
+			// if(decodedCallData?.args?.proxy_type){
+			// 	await cancelProxy({
+			// 		api,
+			// 		approvingAddress: address,
+			// 		callHash,
+			// 		multisig,
+			// 		network,
+			// 		setLoadingMessages
+			// 	});
+			// }
+			// else{
+			// 	await cancelMultisigTransfer({
+			// 		api,
+			// 		approvingAddress: address,
+			// 		callHash,
+			// 		multisig,
+			// 		network,
+			// 		recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
+			// 		setLoadingMessages
+			// 	});
+			// }
 			setLoading(false);
 			setSuccess(true);
 			setTimeout(() => {

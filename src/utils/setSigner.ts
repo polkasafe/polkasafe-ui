@@ -36,4 +36,5 @@ export const setSigner = async (api: ApiPromise, chosenWallet: Wallet) => {
 		return;
 	}
 	api.setSigner(injected.signer);
+	return injected;
 };

@@ -4,12 +4,13 @@
 import { AutoComplete, Form, Input, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
@@ -31,6 +32,7 @@ import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { client } = useContext<any>(TestContext);
 	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
 
@@ -80,8 +82,9 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const handleSubmit = async () => {
 		if(!api || !apiReady ) return;
 
-		await setSigner(api, loggedInWallet);
-
+		const injector = await setSigner(api, loggedInWallet);
+		if(injector)
+			api.setSigner(injector.signer);
 		setLoading(true);
 		try {
 			await transferFunds({

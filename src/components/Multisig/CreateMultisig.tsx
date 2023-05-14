@@ -5,7 +5,7 @@
 
 import { Form, Input, InputNumber, Modal, Spin, Switch } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import React, { FC, useContext, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
@@ -13,6 +13,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -43,6 +44,7 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
+	const { client } = useContext<any>(TestContext);
 	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 
@@ -129,17 +131,21 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			else{
 				setLoading(true);
 				setLoadingMessages('Creating Your Multisig.');
-				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-					body: JSON.stringify({
-						signatories,
-						threshold,
-						multisigName
-					}),
-					headers: firebaseFunctionsHeader(network, address, signature),
-					method: 'POST'
-				});
+				// Removing userAddress as SDK will add user as a signatories so no need to add user address ::BySDK::
+				const payloadSignatories = signatories.filter(s => s!==userAddress);
+				const { data: multisigData, error: multisigError } = await client.createMultisig(payloadSignatories, threshold, multisigName, 'wallet');
 
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+				// const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+				// 	body: JSON.stringify({
+				// 		signatories,
+				// 		threshold,
+				// 		multisigName
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network, address, signature),
+				// 	method: 'POST'
+				// });
+
+				// const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
 
 				if(multisigError) {
 					queueNotification({

@@ -3,9 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import dayjs from 'dayjs';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -27,6 +28,7 @@ interface IQueued{
 }
 
 const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
+	const { client } = useContext<any>(TestContext);
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
@@ -61,19 +63,20 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 				return;
 			}
 			else{
+				// Get multisig queue need address, page and limit ::BySDK::
+				const { data: queueTransactions, error: queueTransactionsError } = await client.getMultisigQueue(multisig?.address, 1, 10);
+				// const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
+				// 	body: JSON.stringify({
+				// 		limit: 10,
+				// 		multisigAddress: multisig?.address,
+				// 		network,
+				// 		page: 1
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network),
+				// 	method: 'POST'
+				// });
 
-				const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
-					body: JSON.stringify({
-						limit: 10,
-						multisigAddress: multisig?.address,
-						network,
-						page: 1
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: queueTransactions, error: queueTransactionsError } = await getQueueTransactions.json() as { data: IQueueItem[], error: string };
+				// const { data: queueTransactions, error: queueTransactionsError } = await getQueueTransactions.json() as { data: IQueueItem[], error: string };
 
 				if(queueTransactionsError) {
 					setLoading(false);

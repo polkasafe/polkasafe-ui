@@ -9,13 +9,14 @@ import { AutoComplete, Checkbox, Divider, Form, Input, Modal, Spin, Switch } fro
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
@@ -62,6 +63,7 @@ const addRecipientHeading = () => {
 };
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
+	const { client } = useContext<any>(TestContext);
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
@@ -125,8 +127,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		if(!api || !apiReady || !address){
 			return;
 		}
+		console.log('coming');
 
-		await setSigner(api, loggedInWallet);
+		const injected = await setSigner(api, loggedInWallet);
 
 		if(!multisig || !recipientAddress || !amount){
 			queueNotification({
@@ -138,18 +141,21 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}
 		setLoading(true);
 		try {
-			const queueItemData = await initMultisigTransfer({
-				amount,
-				api,
-				initiatorAddress: address,
-				isProxy,
-				multisig,
-				network,
-				note,
-				recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
-				setLoadingMessages,
-				transferKeepAlive: true
-			});
+			// Transfer funds need an recipient address, amount, senderAddress, injector, multisig, isProxy, and an event grabber function ::BySDK::
+			const queueItemData = await client.transferFunds(recipientAddress, amount, address, injected, multisig, isProxy, setLoadingMessages);
+			console.log(queueItemData);
+			// const queueItemData = await initMultisigTransfer({
+			// 	amount,
+			// 	api,
+			// 	initiatorAddress: address,
+			// 	isProxy,
+			// 	multisig,
+			// 	network,
+			// 	note,
+			// 	recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
+			// 	setLoadingMessages,
+			// 	transferKeepAlive: true
+			// });
 			setTransactionData(queueItemData);
 			setLoading(false);
 			setSuccess(true);

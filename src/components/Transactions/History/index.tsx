@@ -3,10 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { usePagination } from 'src/hooks/usePagination';
 // import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -26,6 +27,7 @@ interface IHistory{
 }
 
 const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
+	const { client } = useContext<any>(TestContext);
 
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
@@ -53,19 +55,23 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 			try{
 				let data:any = [];
 				let docs:number = 0;
-				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getHistoryTransactions(
-					multisig.address,
-					network,
-					multisig.proxy ? 5 : 10,
-					currentPage
-				);
+				// Get Transactions needs address, page, and limit ::BySDK::
+				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await client.getTransactionsForMultisig(multisig.address, multisig.proxy ? 5 : 10, currentPage);
+				// const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getHistoryTransactions(
+				// 	multisig.address,
+				// 	network,
+				// 	multisig.proxy ? 5 : 10,
+				// 	currentPage
+				// );
 				if(multisig.proxy){
-					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
-						multisig.proxy,
-						network,
-						10 - multisigTransactions.length,
-						currentPage
-					);
+					// Get Transactions needs address, page, and limit ::BySDK::
+					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await client.getTransactionsForMultisig(multisig.proxy, 10 - multisigTransactions.length, currentPage);
+					// const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
+					// 	multisig.proxy,
+					// 	network,
+					// 	10 - multisigTransactions.length,
+					// 	currentPage
+					// );
 					if(proxyTransactions && !proxyError){
 						setLoading(false);
 						data = proxyTransactions;

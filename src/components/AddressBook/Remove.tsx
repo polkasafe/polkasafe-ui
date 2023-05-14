@@ -3,11 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Form } from 'antd';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
+import { TestContext } from 'src/context/TestContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -15,6 +16,7 @@ import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, name: string }) => {
+	const { client } = useContext<any>(TestContext);
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { toggleVisibility } = useModalContext();
 	const [loading, setLoading] = useState<boolean>(false);
@@ -36,17 +38,18 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 					setLoading(false);
 					return;
 				}
+				// Remove address needs address name ::BySDK::
+				const { data: removeAddressData, error: removeAddressError } = await client.removeFromAddressBook(address, name);
+				// const removeAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/removeFromAddressBook`, {
+				// 	body: JSON.stringify({
+				// 		address: addressToRemove,
+				// 		name
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network),
+				// 	method: 'POST'
+				// });
 
-				const removeAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/removeFromAddressBook`, {
-					body: JSON.stringify({
-						address: addressToRemove,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: removeAddressData, error: removeAddressError } = await removeAddressRes.json() as { data: any, error: string };
+				// const { data: removeAddressData, error: removeAddressError } = await removeAddressRes.json() as { data: any, error: string };
 
 				if(removeAddressError) {
 
