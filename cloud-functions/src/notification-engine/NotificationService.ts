@@ -35,9 +35,9 @@ export class NotificationService {
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
 		if (!SENDGRID_API_KEY ||
-			(!isVerificationEmail && !userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled)||
-			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].enabled) ||
-			(!isVerificationEmail && !userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].verified)
+			(!isVerificationEmail && !userNotificationPreferences?.triggerPreferences?.[this.trigger]?.enabled)||
+			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.enabled) ||
+			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified)
 		) return;
 
 		const FROM = {
@@ -50,7 +50,7 @@ export class NotificationService {
 			html: this.htmlMessage,
 			subject: this.subject,
 			text: this.message,
-			to: userNotificationPreferences.channelPreferences[CHANNEL.EMAIL].handle
+			to: userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.handle
 		};
 
 		sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
@@ -58,13 +58,13 @@ export class NotificationService {
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!TELEGRAM_BOT_TOKEN ||
-			!userNotificationPreferences.triggerPreferences[this.trigger].enabled ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].enabled
+			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled
 		) return;
 
 		const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
-		const chatId = userNotificationPreferences.channelPreferences[CHANNEL.TELEGRAM].handle;
+		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
 		bot.sendMessage(chatId, this.message).catch((error) => console.error('Error in sending telegram : ', error));
 	}
@@ -72,11 +72,11 @@ export class NotificationService {
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!DISCORD_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].enabled
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled
 		) return;
 		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
-		const channelId = userNotificationPreferences.channelPreferences[CHANNEL.DISCORD].handle;
+		const channelId = userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle;
 		const channel = client.channels.cache.get(channelId) as TextChannel;
 		if (!channel) return console.error(`Failed to find channel with id ${channelId}`);
 
@@ -87,13 +87,13 @@ export class NotificationService {
 	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!ELEMENT_API_KEY ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].enabled
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.enabled
 		) return;
 
-		const roomId = userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle;
+		const roomId = userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle;
 
 		const requestBody = {
-			roomId: userNotificationPreferences.channelPreferences[CHANNEL.ELEMENT].handle,
+			roomId: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle,
 			body: this.message,
 			messageType: 'text'
 		};
@@ -112,13 +112,13 @@ export class NotificationService {
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!SLACK_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.SLACK].enabled
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled
 		) return;
 
 		const client = new SlackWebClient(SLACK_BOT_TOKEN);
 		try {
 			await client.chat.postMessage({
-				channel: userNotificationPreferences.channelPreferences[CHANNEL.SLACK].handle,
+				channel: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
 				text: this.message
 			});
 		} catch (error) {
@@ -128,7 +128,7 @@ export class NotificationService {
 
 	public async sendInAppNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences[CHANNEL.IN_APP].enabled ||
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle
 		) return;
 
