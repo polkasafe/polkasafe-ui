@@ -29,14 +29,14 @@ export default async function approvalReminder(args: Args) {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
 	const { from } = await getTransactionData(firestore_db, callHash);
-	if (from === address) return; // no need to send notification to creator
+	if (from === address || from === substrateAddress) return; // no need to send notification to creator
 
 	const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
-	const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, address);
+	const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, substrateAddress);
 	const { deleted, name: userMultisigName } = multisigSettings[multisigAddress] as IPSMultisigSettings;
 
 	if (deleted) throw Error(`User has deleted multisig: ${multisigAddress}`);
-	if (!notification_preferences) throw Error(`User has no notification preferences: ${address}`);
+	if (!notification_preferences) throw Error(`User has no notification preferences: ${substrateAddress}`);
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);

@@ -72,15 +72,21 @@ export class NotificationService {
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!DISCORD_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled ||
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
 		) return;
-		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+
+		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages] });
+		await client.login(DISCORD_BOT_TOKEN).catch((error) => {
+			console.error('Error in logging in discord client : ', error);
+			return;
+		});
 
 		const channelId = userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle;
 		const channel = client.channels.cache.get(channelId) as TextChannel;
 		if (!channel) return console.error(`Failed to find channel with id ${channelId}`);
 
-		channel.send(this.message).catch((error) => console.error('Error in sending Discord message : ', error));
+		await channel.send(this.message).catch((error) => console.error('Error in sending Discord message : ', error));
 		client.destroy();
 	}
 
@@ -112,7 +118,8 @@ export class NotificationService {
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!SLACK_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
-			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled ||
+			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
 
 		const client = new SlackWebClient(SLACK_BOT_TOKEN);
