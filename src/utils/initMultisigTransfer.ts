@@ -46,7 +46,6 @@ export default async function initMultisigTransfer({
 	transferKeepAlive,
 	setLoadingMessages
 }: Args) {
-
 	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
 	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
 
@@ -63,8 +62,14 @@ export default async function initMultisigTransfer({
 	const AMOUNT_TO_SEND = amount.toString();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND);
 
+	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+
 	// remove initator address from signatories
-	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== encodedInitiatorAddress);
+	const otherSignatories =  encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
 	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
