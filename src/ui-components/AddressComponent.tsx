@@ -18,9 +18,10 @@ interface IAddressComponent{
     address: string
     iconSize?: number
 	withBadge?: boolean
+	name?: string
 }
 
-const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComponent) => {
+const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -72,9 +73,9 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 			}
 			<div>
 				<div
-					className='font-medium text-[13px] flex text-white'
+					className='font-medium text-sm flex text-white'
 				>
-					{addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
+					{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
 				</div>
 				<div
 					className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'

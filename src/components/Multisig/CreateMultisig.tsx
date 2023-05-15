@@ -27,7 +27,6 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
 import { transferFunds } from 'src/utils/transferFunds';
-import styled from 'styled-components';
 
 import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
@@ -184,7 +183,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
 				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
-					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
+					<AddAddress setSignatories={setSignatories} onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
 				</Modal>
 			</>
 		);
@@ -323,8 +322,4 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	);
 };
 
-export default styled(CreateMultisig)`
-	.ant-switch-inner-checked {
-		background-color: #645ADF !important;
-	}
-`;
+export default CreateMultisig;

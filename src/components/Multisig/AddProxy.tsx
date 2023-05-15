@@ -24,7 +24,6 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import { transferAndProxyBatchAll } from 'src/utils/transferAndProxyBatchAll';
-import styled from 'styled-components';
 
 import Loader from '../UserFlow/Loader';
 import AddProxySuccessScreen from './AddProxySuccessScreen';
@@ -178,8 +177,4 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 	);
 };
 
-export default styled(AddProxy)`
-	.ant-switch-inner-checked {
-		background-color: #645ADF !important;
-	}
-`;
+export default AddProxy;

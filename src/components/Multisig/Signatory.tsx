@@ -178,14 +178,14 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-y-auto'>
 						{addresses.length > 0 ? addresses.map((address) => {
-							const lowBalance = address.balance && Number(address.balance) < Number(inputToBn(`${chainProperties[network].existentialDeposit}`, network)[0]);
+							const lowBalance = address.balance && (Number(address.balance) < Number(inputToBn(`${chainProperties[network].existentialDeposit}`, network)[0]) || Number(address.balance) === 0);
 							return (
 								<p onClick={signatories.includes(address.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white flex items-center gap-x-2' draggable onDragStart={dragStart}>
 									{address.name}
 									{lowBalance && signatories.includes(address.address) &&
 										<Tooltip title={
-											<div className='text-text_secondary'>
-												<div className='text-bold text-lg text-white mb-3'>Insufficient Balance</div>
+											<div className='text-text_secondary text-xs'>
+												<div className='text-bold text-sm text-white mb-3'>Insufficient Balance</div>
 												<div>This account does not have sufficient balance in their account to sign the transaction for creation of proxy</div>
 												<div className='mt-2 text-primary'><a href='https://polkadot.js.org/apps/#/accounts' target='_blank' rel="noreferrer">Send Funds</a></div>
 											</div>

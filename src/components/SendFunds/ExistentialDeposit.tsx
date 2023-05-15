@@ -11,7 +11,6 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
@@ -56,7 +55,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	}, [selectedSender]);
 
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));
 
@@ -135,8 +134,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 					:
 					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						<div className={className}>
-							<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal text-xs flex items-center gap-x-2'>
-								<WarningCircleIcon className='text-sm' />
+							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+								<WarningCircleIcon />
 								<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
 							</section>
 
@@ -164,6 +163,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 											>
 												<div className="flex items-center">
 													<AutoComplete
+														filterOption={true}
 														onClick={addSenderHeading}
 														options={autocompleteAddresses}
 														id='sender'

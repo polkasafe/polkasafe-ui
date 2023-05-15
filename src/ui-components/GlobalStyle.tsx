@@ -103,11 +103,11 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	.ant-switch {
-		background: #1573FE !important;
+		background: #1A2A42 !important;
 	}
 
 	.ant-switch-checked{
-		background-color: blue_primary !important;
+		background-color: #1573FE !important;
 	}
 
 	.ant-segmented-item-selected .ant-segmented-item-label {
@@ -178,6 +178,8 @@ export const GlobalStyle = createGlobalStyle`
 		border: 1px solid #1573FE !important;
 		border-radius: 12px !important;
 		padding-bottom: 10px !important;
+		transform: scale(0.9) !important;
+		transform-origin: center !important;
 	}
 	.ant-select-item-option-content {
 		color: white !important;

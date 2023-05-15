@@ -109,7 +109,7 @@ const Menu: FC<Props> = ({ className }) => {
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
 				open={openAddMultisig}
-				className={`${className} w-auto md:min-w-[500px] scale-90`}
+				className={`${className} w-auto md:min-w-[500px] scale-90 origin-center`}
 			>
 				<AddMultisig onCancel={() => setOpenAddMultisig(false)} isModalPopup = {true}  />
 			</Modal>

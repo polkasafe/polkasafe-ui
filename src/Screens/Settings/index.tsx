@@ -24,7 +24,7 @@ const Settings = () => {
 	return (
 		<div className='scale-[80%] h-[125%] w-[125%] origin-top-left'>
 			{!multisigAddresses || !multisig ?
-				<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+				<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 					<p className='text-white'>Looks Like You Don&apos;t have a Multisig. Please Create One to use our Features.</p>
 				</section> : <>
 					<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>Manage Safe Owners</h2>
@@ -56,7 +56,7 @@ const Settings = () => {
 								</div>
 								<AddNewOwnerBtn disabled={!multisig?.proxy} />
 							</section> :
-							<section className='mb-4 border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-2'>
+							<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 								<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 							</section>
 						}

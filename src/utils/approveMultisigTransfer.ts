@@ -12,6 +12,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import { getMultisigInfo } from './getMultisigInfo';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
@@ -43,7 +44,12 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	let displayAmount: string;
 
 	// remove approving address address from signatories
-	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
+	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 	if(!callDataHex) return;
 
 	if(callDataHex && amount && recipientAddress) {

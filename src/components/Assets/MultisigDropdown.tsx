@@ -32,7 +32,7 @@ const MultisigDropdown: FC<IMultisigDropdownProps> = ({ className, activeAddress
 			<button
 				onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true) }
 				className={classNames(
-					'flex items-center justify-center gap-x-4 outline-none border-none text-white rounded-lg p-1 shadow-none text-sm',
+					'flex items-center justify-center scale-90 gap-x-4 outline-none border-none text-white rounded-lg p-1 shadow-none text-sm',
 					{
 						'bg-[#FF79F2] text-highlight': activeAddress === 'Proxy',
 						'bg-primary text-white': activeAddress === 'Multisig'
@@ -53,7 +53,7 @@ const MultisigDropdown: FC<IMultisigDropdownProps> = ({ className, activeAddress
 			</button>
 			<div
 				className={classNames(
-					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-50 min-w-[214px]',
+					'absolute scale-[80%] right-[-70px] rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-50 min-w-[214px]',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible

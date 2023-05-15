@@ -247,13 +247,9 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						};
 					});
 					signatoriesArray.forEach((signatory) => {
-						let name: string = '';
-						addressBook.forEach((item) => {
-							if(item.address === signatory.address){
-								name = item.name;
-							}
-						});
-						signatory.name = name;
+						const signatoryAddress = getEncodedAddress(signatory.address, network);
+						signatory.name = addressBook.find((item) => item.address === signatoryAddress)?.name || '';
+						signatory.address = signatoryAddress || signatory.address;
 					});
 					setSignatoriesWithName(signatoriesArray);
 					setNameAddress(false);

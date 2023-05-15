@@ -89,7 +89,7 @@ const EmailBadge = () => {
 					</div>
 				</div>
 				<div className="flex items-center justify-around mr-5">
-					<Input value={inputValue} className='placeholder-text_placeholder text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
+					<Input value={inputValue} className='placeholder-text_secondary text-white p-2 outline-none border-none min-w-[300px] mr-1' placeholder='name@example.com' onChange={handleChange}></Input>
 					<Button loading={loading} disabled={!inputValue} className='flex items-center justify-center bg-primary text-white border-none ml-1 py-4' onClick={handleAddEmail} ><NotifyMail />Notify me</Button>
 				</div>
 			</div>:

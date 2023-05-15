@@ -111,7 +111,7 @@ const Notification= () => {
 
 			<div
 				className={classNames(
-					'absolute scale-90 top-10 -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] z-10 min-w-[344px] sm:min-w-[400px] max-h-[460px] px-1',
+					'absolute scale-90 top-[30px] -right-40 bg-bg-main rounded-xl border border-primary py-[13.5px] z-10 min-w-[344px] sm:min-w-[400px] max-h-[460px] px-1',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible
@@ -126,7 +126,7 @@ const Notification= () => {
 				}}
 			>
 				<div className='flex gap-x-5 items-center justify-between mb-1 px-3'>
-					<h3 className='text-white font-bold text-xl'>Notifications</h3>
+					<h3 className='text-white font-bold text-lg'>Notifications</h3>
 					{
 						!!unreadNotificationAvailable?.length &&
 						<button
@@ -149,7 +149,7 @@ const Notification= () => {
 								:
 								<section className='flex flex-col items-center'>
 									<div className='mt-10'>
-										<img src={noNotification} alt="No notification icon" />
+										<img src={noNotification} className='w-10 h-10' alt="No notification icon" />
 									</div>
 									<p className='text-white text-base font-medium mt-10'>No new notifications</p>
 								</section>
