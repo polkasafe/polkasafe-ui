@@ -19,8 +19,8 @@ import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import { NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE } from './notification-engine/notification_engine_constants';
+import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -972,7 +972,6 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 });
 
 export const notify = functions.https.onRequest(async (req, res) => {
-	// TODO: Get template from db
 	corsHandler(req, res, async () => {
 		const apiKey = req.get('x-api-key');
 		const source = req.get('x-source');
