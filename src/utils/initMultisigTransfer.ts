@@ -12,6 +12,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 export interface IMultiTransferResponse {
@@ -46,6 +47,9 @@ export default async function initMultisigTransfer({
 	setLoadingMessages
 }: Args) {
 
+	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
+	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
+
 	//promise to be resolved when transaction is finalized
 
 	// 1. Use formatBalance to display amounts
@@ -60,7 +64,7 @@ export default async function initMultisigTransfer({
 	const displayAmount = formatBalance(AMOUNT_TO_SEND);
 
 	// remove initator address from signatories
-	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== initiatorAddress);
+	const otherSignatories =  multisig.signatories.sort().filter((signatory) => signatory !== encodedInitiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
 	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
@@ -85,7 +89,7 @@ export default async function initMultisigTransfer({
 		if(isProxy && multisig.proxy){
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, 0 as any)
-				.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
@@ -181,13 +185,13 @@ export default async function initMultisigTransfer({
 						status: NotificationStatus.ERROR
 					});
 				});
-			console.log(`Sending ${displayAmount} from multisig: ${multisig.proxy} to ${recipientAddress}, initiated by ${initiatorAddress}`);
+			console.log(`Sending ${displayAmount} from multisig: ${multisig.proxy} to ${recipientAddress}, initiated by ${encodedInitiatorAddress}`);
 		}
 		else{
 			//for transaction from multisig address
 			api.tx.multisig
 				.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT as any)
-				.signAndSend(initiatorAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
@@ -283,7 +287,7 @@ export default async function initMultisigTransfer({
 						status: NotificationStatus.ERROR
 					});
 				});
-			console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${initiatorAddress}`);
+			console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${encodedInitiatorAddress}`);
 		}
 		console.log(`Submitted values : approveAsMulti(${multisig.threshold},
 		otherSignatories: ${JSON.stringify(otherSignatories)},
