@@ -1,3 +1,5 @@
+import { IUserNotificationPreferences } from '../../notification_engine_constants';
+
 export interface IPSNotification {
 	id: string,
 	address: string,
@@ -45,11 +47,12 @@ export interface IPSMultisigSettings {
 	name: string;
 }
 
-export interface IUser {
+export interface IPSUser {
 	address: string;
 	email: string | null;
 	addressBook?: IPSAddressBookItem[];
 	created_at: Date;
 	multisigAddresses: IPSMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IPSMultisigSettings};
+	notification_preferences?: IUserNotificationPreferences;
 }
