@@ -42,7 +42,7 @@ export class NotificationService {
 
 		const FROM = {
 			email: NOTIFICATION_SOURCE_EMAIL[this.source],
-			name: this.source
+			name: `${this.source.charAt(0).toUpperCase()}${this.source.slice(1)}`
 		};
 
 		const msg = {
