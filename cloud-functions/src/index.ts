@@ -1005,6 +1005,29 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 		const { message } = req.body;
 		const { text, chat } = message;
 
+		if (text.startsWith('/start')) {
+			await bot.sendMessage(
+				chat.id,
+				`Welcome to the Polkasafe & Polkassembly Bot!
+
+				To interact with this bot, you can use the following commands:
+
+				- '/polkasafe/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkasafe. Replace '<web3Address>' with the actual address you want to remove and '<verificationToken>' with the verification token provided.
+
+				- '/polkasafe/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkasafe. Replace '<web3Address>' with the address you want to add and '<verificationToken>' with the verification token provided.
+
+				- '/polkassembly/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkassembly. Replace '<web3Address>' with the actual address you want to remove and '<verificationToken>' with the verification token provided.
+
+				- '/polkassembly/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkassembly. Replace '<web3Address>' with the address you want to add and '<verificationToken>' with the verification token provided.
+
+				Please note that you need to replace '<web3Address>' with the actual web3 address you want to add or remove, and '<verificationToken>' with the token provided for verification.
+
+				If you have any questions or need further assistance, feel free to ask!
+				`
+			);
+			return res.sendStatus(200);
+		}
+
 		if (text.startsWith('/polkasafe/add')) {
 			const commandParts = text.split(' ');
 			const web3Address = commandParts[1];
