@@ -24,7 +24,7 @@ import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, ExternalLinkIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
@@ -308,10 +308,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							}
 						>
 							<AddAddressModal/>
-							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(totalGas)) &&
+							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(new BN(totalGas.toNumber() * (multisig?.threshold || 2)))) &&
 							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 								<WarningCircleIcon />
-								<p>Your balance is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+								<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(new BN(totalGas.toNumber() * (multisig?.threshold || 2))), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+								<a href='https://wiki.polkadot.network/docs/learn-account-multisig#multisig-transactions-with-extrinsic-tab' target='_blank' rel="noreferrer" className='text-primary underline flex items-center gap-x-1'>More Info <ExternalLinkIcon/></a>
 							</section>}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
@@ -490,7 +491,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 							<section className='flex items-center gap-x-5 justify-center mt-10'>
 								<CancelBtn className='w-[250px]' onClick={onCancel} />
-								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(new BN(totalGas.toNumber() * (multisig?.threshold || 2))))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 							</section>
 						</Form>
 					</Spin>
