@@ -1083,6 +1083,84 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 			}
 		}
 
+		if (text.startsWith('/polkasafe/remove')) {
+			const commandParts = text.split(' ');
+			const web3Address = commandParts[1];
+			const verificationToken = commandParts[2];
+
+			if (!web3Address || !verificationToken) {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid command. Please use the following format: /polkasafe/remove <web3Address> <verificationToken>'
+				);
+				return res.sendStatus(200);
+			}
+
+			// check if the address is valid
+			if (!isValidWeb3Address(web3Address)) {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid web3 address.'
+				);
+				return res.sendStatus(200);
+			}
+
+			const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+
+			// check if address exists
+			const addressRef = await firestore_db.collection('addresses').doc(web3Address).get();
+			if (!addressRef.exists) {
+				await bot.sendMessage(
+					chat.id,
+					'Address not found.'
+				);
+				return res.sendStatus(200);
+			}
+
+			// check if the verification token is valid
+			const addressData = addressRef.data() as IPSUser;
+			if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token) {
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'No verification token found.'
+				);
+				return res.sendStatus(200);
+			} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token === verificationToken) {
+				const newNotificationPreferences = {
+					...(addressData.notification_preferences || {}),
+					channelPreferences: {
+						...(addressData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: false,
+							verified: false,
+							handle: '',
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await firestore_db.collection('addresses').doc(web3Address).update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Address removed successfully. You will not receive notifications on this chat anymore.'
+				);
+				return res.sendStatus(200);
+			} else {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid verification token.'
+				);
+				return res.sendStatus(200);
+			}
+		}
+
 		return res.sendStatus(200);
 	});
 });
