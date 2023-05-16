@@ -1057,7 +1057,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 							name: CHANNEL.TELEGRAM,
 							enabled: true,
 							verified: true,
-							handle: chat.id,
+							handle: String(chat.id),
 							verification_token: ''
 						}
 					}
