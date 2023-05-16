@@ -19,14 +19,20 @@ import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE } from './notification-engine/notification_engine_constants';
+
+import { CHANNEL, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
+import TelegramBot = require('node-telegram-bot-api');
+import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
+import { IPSUser } from './notification-engine/polkasafe/_utils/types';
+import getSourceFirebaseAdmin from './notification-engine/global-utils/getSourceFirebaseAdmin';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
 
-// TODO: Remove cors before production
 const corsHandler = cors({ origin: true });
+
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN || '', { polling: false });
 
 const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
@@ -991,5 +997,92 @@ export const notify = functions.https.onRequest(async (req, res) => {
 			functions.logger.error('Error in notify :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
+	});
+});
+
+export const telegramBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const { message } = req.body;
+		const { text, chat } = message;
+
+		if (text.startsWith('/polkasafe/add')) {
+			const commandParts = text.split(' ');
+			const web3Address = commandParts[1];
+			const verificationToken = commandParts[2];
+
+			if (!web3Address || !verificationToken) {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid command. Please use the following format: /polkasafe/add <web3Address> <verificationToken>'
+				);
+				return res.sendStatus(200);
+			}
+
+			// check if the address is valid
+			if (!isValidWeb3Address(web3Address)) {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid web3 address.'
+				);
+				return res.sendStatus(200);
+			}
+
+			const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+
+			// check if address exists
+			const addressRef = await firestore_db.collection('addresses').doc(web3Address).get();
+			if (!addressRef.exists) {
+				await bot.sendMessage(
+					chat.id,
+					'Address not found.'
+				);
+				return res.sendStatus(200);
+			}
+
+			// check if the verification token is valid
+			const addressData = addressRef.data() as IPSUser;
+			if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token) {
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'No verification token found.'
+				);
+				return res.sendStatus(200);
+			} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token === verificationToken) {
+				const newNotificationPreferences = {
+					...(addressData.notification_preferences || {}),
+					channelPreferences: {
+						...(addressData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: true,
+							verified: true,
+							handle: chat.id,
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await firestore_db.collection('addresses').doc(web3Address).update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Address added successfully. You will now receive notifications on this chat.'
+				);
+				return res.sendStatus(200);
+			} else {
+				await bot.sendMessage(
+					chat.id,
+					'Invalid verification token.'
+				);
+				return res.sendStatus(200);
+			}
+		}
+
+		return res.sendStatus(200);
 	});
 });
