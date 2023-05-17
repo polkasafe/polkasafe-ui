@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import Identicon from '@polkadot/react-identicon';
 import { Button, Form, Input, InputNumber } from 'antd';
 import React from 'react';
-import profileImg from 'src/assets/icons/profile-img.png';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { CheckOutlined, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -119,7 +119,9 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 													}}
 													defaultValue={item.name}
 												/>
-												<div className='flex ml-3'><img className='mx-2 w-5 h-5' src={profileImg} alt="img" /><div className='text-white'>{shortenAddress(item.address)}</div>
+												<div className='flex ml-3'>
+													<Identicon value={item.address} size={20} theme='polkadot' />
+													<div className='text-white'>{shortenAddress(item.address)}</div>
 													<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary'/></button>
 													<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
 														<ExternalLinkIcon className='text-text_secondary hover:text-primary' />

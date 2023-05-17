@@ -5,7 +5,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { encodeAddress } from '@polkadot/util-crypto';
 import { NavigateFunction } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -16,6 +15,7 @@ import { IMultisigAddress, UserDetailsContextType } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import { getMultisigInfo } from './getMultisigInfo';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
@@ -45,7 +45,12 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 	let WEIGHT: any = ZERO_WEIGHT;
 
 	// remove approving address address from signatories
-	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
+	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 
 	if(callDataHex) {
 
@@ -158,8 +163,8 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 		}
 		else{
 			const params = JSON.parse(responseJSON.data?.events[0]?.params);
-			const proxyAddress = encodeAddress(params[0].value, chainProperties[network].ss58Format);
-			await handleMultisigCreate(proxyAddress);
+			const proxyAddress = getEncodedAddress(params[0].value, network);
+			await handleMultisigCreate(proxyAddress || '');
 		}
 	};
 
