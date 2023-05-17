@@ -14,5 +14,3 @@ ui-debug.log
 
 #misc
 .vscode
-.env
-.env.local
