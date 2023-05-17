@@ -14,7 +14,7 @@ const { Dragger } = Upload;
 const DragDrop = ({ setAddresses }: { setAddresses: React.Dispatch<React.SetStateAction<IAddress[]>>}) => {
 
 	const props: UploadProps = {
-		accept: '.json',
+		accept: '.json, .csv',
 		beforeUpload: file => {
 			const reader = new FileReader();
 

@@ -6,7 +6,7 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AutoComplete, Button, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
+import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -24,10 +24,11 @@ import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
@@ -47,8 +48,7 @@ interface ISendFundsFormProps {
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-	const { api, apiReady } = useGlobalApiContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
@@ -75,6 +75,14 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 
+	const [totalDeposit, setTotalDeposit] = useState<BN>(new BN(0));
+
+	const [totalGas, setTotalGas] = useState<BN>(new BN(0));
+
+	const [initiatorBalance, setInitiatorBalance] = useState<BN>(new BN(0));
+
+	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
+
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
@@ -98,6 +106,30 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
+
+	useEffect(() => {
+		const fetchBalanceInfos = async () => {
+			if(!api || !apiReady || !address || !recipientAddress){
+				return;
+			}
+			setFetchBalancesLoading(true);
+			//deposit balance
+			const depositBase = api.consts.multisig.depositBase.toString();
+			const depositFactor = api.consts.multisig.depositFactor.toString();
+			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
+
+			//gas fee
+			const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
+			const gasInfo = await txn.paymentInfo(address);
+			setTotalGas(new BN(gasInfo.partialFee.toString()));
+
+			//initiator balance
+			const initiatorBalance = await api.query.system.account(address);
+			setInitiatorBalance(new BN(initiatorBalance.data.free.toString()));
+			setFetchBalancesLoading(false);
+		};
+		fetchBalanceInfos();
+	}, [address, amount, api, apiReady, recipientAddress]);
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || !address){
@@ -276,6 +308,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							}
 						>
 							<AddAddressModal/>
+							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(totalGas)) &&
+							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+								<WarningCircleIcon />
+								<p>Your balance is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+							</section>}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
@@ -453,7 +490,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 							<section className='flex items-center gap-x-5 justify-center mt-10'>
 								<CancelBtn className='w-[250px]' onClick={onCancel} />
-								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 							</section>
 						</Form>
 					</Spin>
