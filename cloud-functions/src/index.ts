@@ -1227,6 +1227,7 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 			await discordClient.login(DISCORD_BOT_TOKEN);
 
 			discordClient.on('interactionCreate', async (interaction) => {
+				functions.logger.info('Interaction received', { interaction });
 				if (!interaction.isCommand()) return;
 
 				const { commandName, options } = interaction;
@@ -1294,7 +1295,7 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 
 			return res.status(200).end();
 		} catch (err:unknown) {
-			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in discordBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
