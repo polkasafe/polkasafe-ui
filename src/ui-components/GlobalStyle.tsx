@@ -210,4 +210,19 @@ export const GlobalStyle = createGlobalStyle`
 		background-color: #fff !important;
 		color: #000 !important;
 	}
+
+	::-webkit-scrollbar-track {
+		border-radius: 10px;
+		background: #1B2028;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: #1B2028;
+		border-radius: 10px;
+	}
+
+	.overflow-y-auto:hover::-webkit-scrollbar-thumb,
+	.overflow-auto:hover::-webkit-scrollbar-thumb{
+		background: linear-gradient(white,#AFCFFF) !important;
+	}
 `;
