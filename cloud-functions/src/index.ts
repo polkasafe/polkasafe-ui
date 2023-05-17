@@ -1218,6 +1218,8 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 			});
 		}
 
+		await discordClient.login(DISCORD_BOT_TOKEN);
+
 		try {
 			discordClient.on('interactionCreate', async (interaction) => {
 				if (!interaction.isCommand()) return;
