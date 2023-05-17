@@ -26,7 +26,7 @@ import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
 import { IPSUser } from './notification-engine/polkasafe/_utils/types';
 import getSourceFirebaseAdmin from './notification-engine/global-utils/getSourceFirebaseAdmin';
-import { Client as DiscordClient, GatewayIntentBits } from 'discord.js';
+import { Client as DiscordClient, GatewayIntentBits, InteractionResponseType, InteractionType } from 'discord.js';
 
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
@@ -1211,6 +1211,12 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 			DISCORD_PUBLIC_KEY
 		);
 		if (!isValidRequest) return res.status(401).send('Invalid request signature.');
+
+		if (req.body.type === InteractionType.Ping) {
+			return res.status(200).send({
+				type: InteractionResponseType.Pong
+			});
+		}
 
 		try {
 			discordClient.on('interactionCreate', async (interaction) => {
