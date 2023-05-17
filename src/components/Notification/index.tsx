@@ -13,7 +13,6 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { INotification } from 'src/types';
 import { NotificationIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
-import styled from 'styled-components';
 
 import NotificationCard from './NotificationCard';
 
@@ -21,31 +20,6 @@ export enum ENotificationStatus {
 	READ = 'READ',
 	UNREAD = 'UNREAD'
 }
-
-const Container = styled.div`
-	/* Track */
-	& ::-webkit-scrollbar-track {
-		border-radius: 10px;
-		background: #1B2028;
-	}
-
-	/* Handle */
-	& ::-webkit-scrollbar-thumb {
-		background: #1B2028;
-		border-radius: 10px;
-	}
-
-	/* Handle on hover */
-	& ::-webkit-scrollbar-thumb:hover {
-		//   background: #24272E; 
-	}
-	&:hover{
-		& ::-webkit-scrollbar-thumb {
-			background: #505258; 
-			border-radius: 10px;
-		}
-	}
-`;
 
 const Notification= () => {
 	const { network } = useGlobalApiContext();
@@ -95,7 +69,7 @@ const Notification= () => {
 	}, [address]);
 
 	return (
-		<Container
+		<div
 			className='relative'
 			onBlur={() => {
 				if (!isMouseEnter.current) {
@@ -157,7 +131,7 @@ const Notification= () => {
 					</div>
 				</div>
 			</div>
-		</Container>
+		</div>
 	);
 };
 

@@ -53,7 +53,7 @@ export const emailTemplateContainer = (source: NOTIFICATION_SOURCE, content: str
 			<div class="polk-container">
 				${content}
 				<br/><br/>
-				You can deactivate this notification in your notification settings: <a href="${domain}/notification-settings">${domain}/notification-settings</a><br /><br />
+				You can deactivate this notification in your <a href="${domain}/notification-settings">notification settings</a>.<br /><br />
 				${source.charAt(0).toUpperCase()}${source.slice(1)} Team
 			</div>
 			<div class="footer">
