@@ -20,19 +20,26 @@ import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { CHANNEL, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
 import { IPSUser } from './notification-engine/polkasafe/_utils/types';
 import getSourceFirebaseAdmin from './notification-engine/global-utils/getSourceFirebaseAdmin';
+import { Client as DiscordClient, GatewayIntentBits } from 'discord.js';
+
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+import { verifyKey } from 'discord-interactions';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
 
 const corsHandler = cors({ origin: true });
 
+// Notification Engine
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN || '', { polling: false });
+const discordClient = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages] });
 
 const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
@@ -1185,5 +1192,217 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 		}
 
 		return res.sendStatus(200);
+	});
+});
+
+export const discordBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		if (!DISCORD_PUBLIC_KEY) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
+
+		const signature = req.headers['x-signature-ed25519'];
+		const timestamp = req.headers['x-signature-timestamp'];
+
+		if (!signature || !timestamp) return res.status(401).send('Invalid request signature.');
+
+		const isValidRequest = verifyKey(
+			req.rawBody,
+			String(signature),
+			String(timestamp),
+			DISCORD_PUBLIC_KEY
+		);
+		if (!isValidRequest) return res.status(401).send('Invalid request signature.');
+
+		try {
+			discordClient.on('interactionCreate', async (interaction) => {
+				if (!interaction.isCommand()) return;
+
+				const { commandName, options } = interaction;
+
+				if (commandName === 'polkasafe') {
+					const subCommandOption = options.get('sub-command');
+					const subCommand = subCommandOption?.value;
+
+					if (subCommand === 'remove-address') {
+						const web3AddressOption = options.get('web3-address');
+						const verificationTokenOption = options.get('verification-token');
+
+						const web3Address = web3AddressOption?.value;
+						const verificationToken = verificationTokenOption?.value;
+
+						// TODO: Implement the logic to remove the web3 address from Polkasafe
+
+						await interaction.reply(
+							`Web3 address ${web3Address} removed from Polkasafe. Verification token: ${verificationToken}`
+						);
+					} else if (subCommand === 'add-address') {
+						const web3AddressOption = options.get('web3-address');
+						const verificationTokenOption = options.get('verification-token');
+
+						const web3Address = web3AddressOption?.value;
+						const verificationToken = verificationTokenOption?.value;
+
+						// TODO: Implement the logic to add the web3 address to Polkasafe
+
+						await interaction.reply(
+							`Web3 address ${web3Address} added to Polkasafe. Verification token: ${verificationToken}`
+						);
+					}
+				} else if (commandName === 'polkassembly') {
+					const subCommandOption = options.get('sub-command');
+					const subCommand = subCommandOption?.value;
+
+					if (subCommand === 'remove-address') {
+						const web3AddressOption = options.get('web3-address');
+						const verificationTokenOption = options.get('verification-token');
+
+						const web3Address = web3AddressOption?.value;
+						const verificationToken = verificationTokenOption?.value;
+
+						// TODO: Implement the logic to remove the web3 address from Polkassembly
+
+						await interaction.reply(
+							`Web3 address ${web3Address} removed from Polkassembly. Verification token: ${verificationToken}`
+						);
+					} else if (subCommand === 'add-address') {
+						const web3AddressOption = options.get('web3-address');
+						const verificationTokenOption = options.get('verification-token');
+
+						const web3Address = web3AddressOption?.value;
+						const verificationToken = verificationTokenOption?.value;
+
+						// TODO: Implement the logic to add the web3 address to Polkassembly
+
+						await interaction.reply(
+							`Web3 address ${web3Address} added to Polkassembly. Verification token: ${verificationToken}`
+						);
+					}
+				}
+			});
+
+			return res.status(200).end();
+		} catch (error) {
+			console.error(`Error processing interaction: ${error}`);
+			return res.status(500).send('Error processing interaction.');
+		}
+	});
+});
+
+export const registerDiscordCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const apiKey = req.get('x-api-key');
+
+		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY || !DISCORD_CLIENT_ID || !DISCORD_BOT_TOKEN) return res.status(401).json({ error: responseMessages.unauthorised });
+
+		await discordClient.login(DISCORD_BOT_TOKEN);
+		if (!DISCORD_BOT_TOKEN) return res.status(500).send('DISCORD_BOT_TOKEN is not set.');
+
+		const commands = [
+			{
+				name: 'polkasafe',
+				description: 'Manage Polkasafe web3 addresses',
+				options: [
+					{
+						name: 'remove-address',
+						description: 'Remove a web3 address from Polkasafe',
+						type: 1,
+						options: [
+							{
+								name: 'web3-address',
+								description: 'The address to remove',
+								type: 3,
+								required: true
+							},
+							{
+								name: 'verification-token',
+								description: 'The verification token',
+								type: 3,
+								required: true
+							}
+						]
+					},
+					{
+						name: 'add-address',
+						description: 'Add a web3 address to Polkasafe',
+						type: 1,
+						options: [
+							{
+								name: 'web3-address',
+								description: 'The address to add',
+								type: 3,
+								required: true
+							},
+							{
+								name: 'verification-token',
+								description: 'The verification token',
+								type: 3,
+								required: true
+							}
+						]
+					}
+				]
+			},
+			{
+				name: 'polkassembly',
+				description: 'Manage Polkassembly web3 addresses',
+				options: [
+					{
+						name: 'remove-address',
+						description: 'Remove a web3 address from Polkassembly',
+						type: 1,
+						options: [
+							{
+								name: 'web3-address',
+								description: 'The address to remove',
+								type: 3,
+								required: true
+							},
+							{
+								name: 'verification-token',
+								description: 'The verification token',
+								type: 3,
+								required: true
+							}
+						]
+					},
+					{
+						name: 'add-address',
+						description: 'Add a web3 address to Polkassembly',
+						type: 1,
+						options: [
+							{
+								name: 'web3-address',
+								description: 'The address to add',
+								type: 3,
+								required: true
+							},
+							{
+								name: 'verification-token',
+								description: 'The verification token',
+								type: 3,
+								required: true
+							}
+						]
+					}
+				]
+			}
+		];
+
+		try {
+			console.log('Started refreshing application (/) commands.');
+
+			const rest = new REST({ version: '9' }).setToken(DISCORD_BOT_TOKEN);
+
+			await rest.put(
+				Routes.applicationCommands(DISCORD_CLIENT_ID),
+				{ body: commands },
+			);
+
+			console.log('Successfully registered application (/) commands.');
+
+			return res.status(200).send('Commands registered successfully.');
+		} catch (error) {
+			console.error(error);
+			return res.status(500).send('Failed to register commands.');
+		}
 	});
 });
