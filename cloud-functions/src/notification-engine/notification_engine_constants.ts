@@ -48,5 +48,7 @@ export const NOTIFICATION_ENGINE_API_KEY = process.env.NOTIFICATION_ENGINE_API_K
 export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+export const DISCORD_PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY;
+export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 export const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 export const ELEMENT_API_KEY = process.env.ELEMENT_API_KEY;
