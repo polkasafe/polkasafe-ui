@@ -1203,6 +1203,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 export const discordBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		try {
+			functions.logger.info('req. received', { req });
 			if (!DISCORD_PUBLIC_KEY) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
 
 			const signature = req.headers['x-signature-ed25519'];
