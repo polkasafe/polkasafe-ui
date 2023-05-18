@@ -20,7 +20,7 @@ import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
@@ -33,6 +33,7 @@ import { Routes } from 'discord-api-types/v9';
 import { verifyKey } from 'discord-interactions';
 import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
+import { WebClient } from '@slack/web-api';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1483,6 +1484,32 @@ export const registerDiscordBotCommands = functions.https.onRequest(async (req, 
 			console.log('Successfully registered application (/) commands.');
 
 			return res.status(200).send('Commands registered successfully.');
+		} catch (err:unknown) {
+			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const slackBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		try {
+			const web = new WebClient(SLACK_BOT_TOKEN);
+
+			functions.logger.info('slackBotCommands req :', { req });
+
+			// Extract the slash command parameters from the request
+			const { command, text, user_id } = req.body;
+			const [web3Address, verificationToken] = text.split(' ');
+			functions.logger.info('command :', command);
+
+			// Send a response back to Slack
+			await web.chat.postMessage({
+				channel: user_id,
+				text: `Polkasafe address "${web3Address}" and verification token "${verificationToken}" received.`
+			});
+
+			return res.status(200).end();
 		} catch (err:unknown) {
 			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
