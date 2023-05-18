@@ -86,7 +86,7 @@ const Feedback = () => {
 
 	return (
 		<>
-			<h2 className='font-bold text-xl leading-[22px] text-white mb-4'>
+			<h2 className='font-semibold text-lg leading-[22px] text-white mb-4'>
 				Feedback
 			</h2>
 			<article className='bg-bg-main p-5 rounded-xl text-text_secondary text-sm font-normal leading-[15px]'>
@@ -103,13 +103,13 @@ const Feedback = () => {
 						return <span
 							onClick={() => setRating(5-i)}
 							key={emoji}
-							className={`p-[10px] text-[32px] flex items-center justify-center ${rating === (5-i) ? 'bg-highlight' : 'bg-bg-secondary'} cursor-pointer rounded-lg leading-none w-[52px] h-[52px]`}
+							className={`p-[10px] border-solid  border-primary text-[32px] flex items-center justify-center ${rating === (5-i) ? 'bg-highlight border' : 'bg-bg-secondary'} cursor-pointer rounded-lg leading-none w-[52px] h-[52px]`}
 						>
 							{emoji}
 						</span>;
 					})}
 				</div>
-				<Button onClick={handleSubmitFeedback} loading={loading} size='large' className='bg-highlight text-primary w-full border-none outline-none'>Share Feedback</Button>
+				<Button onClick={handleSubmitFeedback} size='large' loading={loading} className='bg-highlight text-primary w-full border-none outline-none'>Share Feedback</Button>
 			</article>
 		</>
 	);

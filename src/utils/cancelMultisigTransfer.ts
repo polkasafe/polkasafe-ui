@@ -9,6 +9,7 @@ import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import getEncodedAddress from './getEncodedAddress';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Props {
@@ -29,7 +30,12 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 	});
 
 	// remove approving address address from signatories
-	const otherSignatories = multisig.signatories.sort().filter((signatory) => signatory !== approvingAddress);
+	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 
 	// 3. Retrieve and unwrap the timepoint
 	const info = await api.query.multisig.multisigs(multisig.address, callHash);

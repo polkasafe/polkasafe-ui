@@ -44,7 +44,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 			<button
 				onClick={() => isVisible ? toggleVisibility(false) : toggleVisibility(true) }
 				className={classNames(
-					'flex items-center justify-center gap-x-5 outline-none border-none text-white bg-highlight rounded-lg p-3 shadow-none text-sm',
+					'flex items-center justify-center gap-x-4 outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-xs',
 					className
 				)}
 			>
@@ -52,7 +52,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 					'flex items-center'
 				)}>
 					<span className={classNames(
-						'flex items-center w-4 h-4',
+						'flex items-center w-3 h-3',
 						iconClassName
 					)}>
 						<ParachainIcon src={chainProperties[network].logo} />
@@ -64,11 +64,11 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 						{isCardToken? chainProperties[network].tokenSymbol: network}
 					</span>
 				</p>
-				<CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/>
+				<CircleArrowDownIcon className='hidden md:inline-flex text-sm text-primary'/>
 			</button>
 			<div
 				className={classNames(
-					'absolute top-16 right-0 rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-50 min-w-[214px]',
+					'absolute scale-90 top-[45px] left-[-50px] rounded-xl border border-primary bg-bg-secondary py-[13.5px] px-3 z-50 min-w-[214px]',
 					{
 						'opacity-0 h-0 pointer-events-none hidden': !isVisible,
 						'opacity-100 h-auto': isVisible

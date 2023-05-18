@@ -11,6 +11,6 @@ export default async function callNotificationTrigger(source: NOTIFICATION_SOURC
 			throw new Error(`${trigger} is not a trigger module function`);
 		}
 	} catch (e: any) {
-		throw new Error(`Failed to import notification trigger module ${triggerModulePath}: ${e.message}`);
+		throw new Error(`Error in notification trigger module ${triggerModulePath}: ${e.message}`);
 	}
 }

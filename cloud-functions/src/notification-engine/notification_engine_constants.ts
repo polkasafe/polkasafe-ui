@@ -21,9 +21,14 @@ export interface IUserNotificationChannelPreferences {
 	verification_token?: string;
 }
 
+export interface IUserNotificationTriggerPreferences {
+	name: string;
+	enabled: boolean;
+}
+
 export interface IUserNotificationPreferences {
 	channelPreferences: {[index:string]: IUserNotificationChannelPreferences}
-	triggerPreferences: {[index:string] : any}
+	triggerPreferences: {[index:string] : IUserNotificationTriggerPreferences}
 }
 
 export const NOTIFICATION_SOURCE_FIREBASE_ADMIN_CONFIG: {[index in NOTIFICATION_SOURCE] : string} = {

@@ -4,7 +4,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { NotificationStatus } from 'src/types';
@@ -12,6 +11,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import { IMultiTransferResponse } from './initMultisigTransfer';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
@@ -34,7 +34,13 @@ export async function removeOldMultiFromProxy({ multisigAddress, recepientAddres
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const otherSignatories = sortAddresses(newSignatories.filter((sig) => sig !== senderAddress));
+	const encodedSignatories = newSignatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+
+	const otherSignatories = encodedSignatories.filter((sig) => sig !== senderAddress);
 	const removeProxyTx = api.tx.proxy.removeProxy(multisigAddress, 'Any', 0);
 	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, removeProxyTx);
 

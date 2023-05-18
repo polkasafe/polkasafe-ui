@@ -19,7 +19,7 @@ const NetworkCard: FC<INetworkCardProps> = ({ isCardToken, onClick, selectedNetw
 	const isSelected = selectedNetwork === network;
 
 	return (
-		<button onClick={onClick} className={classNames('border-none outline-none shadow-none flex items-center gap-x-4 justify-between rounded-lg p-3 min-w-[190px]', {
+		<button onClick={onClick} className={classNames('border-none outline-none shadow-none flex items-center gap-x-4 justify-between rounded-lg p-2 min-w-[190px]', {
 			'bg-highlight': isSelected
 		})}>
 			<p className='flex items-center gap-x-[6px]'>

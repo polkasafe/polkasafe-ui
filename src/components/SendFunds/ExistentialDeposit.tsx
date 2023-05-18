@@ -11,7 +11,6 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
@@ -56,7 +55,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	}, [selectedSender]);
 
 	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: addressBook?.find((item) => item.address === account.address)?.name || account.name || DEFAULT_ADDRESS_NAME,
+		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));
 
@@ -135,10 +134,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 					:
 					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						<div className={className}>
-							<section className='mb-4 w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[16px] flex items-center gap-x-[11px]'>
-								<span>
-									<WarningCircleIcon className='text-base' />
-								</span>
+							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+								<WarningCircleIcon />
 								<p>The Existential Deposit is required to get your wallet On-Chain. This allows you to create transactions and perform other activities.</p>
 							</section>
 
@@ -166,6 +163,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 											>
 												<div className="flex items-center">
 													<AutoComplete
+														filterOption={true}
 														onClick={addSenderHeading}
 														options={autocompleteAddresses}
 														id='sender'
@@ -195,12 +193,12 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 												name="existential_deposit"
 												className='border-0 outline-0 my-0 p-0'
 											>
-												<div className='flex items-center h-[40px]'>
+												<div className='flex items-center'>
 													<Input
 														disabled={true}
 														type='number'
 														placeholder={String(chainProperties[network].existentialDeposit)}
-														className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
+														className="text-sm font-normal leading-[15px] outline-0 p-2.5 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
 														id="existential_deposit"
 													/>
 													<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
@@ -214,8 +212,8 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 								</section>
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
-									<CancelBtn loading={loading} className='w-[300px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>
