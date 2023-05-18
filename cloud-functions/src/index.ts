@@ -1371,7 +1371,7 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 	});
 });
 
-export const registerDiscordCommands = functions.https.onRequest(async (req, res) => {
+export const registerDiscordBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const apiKey = req.get('x-api-key');
 
