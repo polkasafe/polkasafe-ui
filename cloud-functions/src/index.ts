@@ -26,7 +26,7 @@ import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
 import { IPSUser } from './notification-engine/polkasafe/_utils/types';
 import getSourceFirebaseAdmin from './notification-engine/global-utils/getSourceFirebaseAdmin';
-import { Client as DiscordClient, GatewayIntentBits, InteractionResponseType, InteractionType } from 'discord.js';
+import { InteractionResponseType, InteractionType } from 'discord.js';
 
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
@@ -41,7 +41,6 @@ const corsHandler = cors({ origin: true });
 
 // Notification Engine
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN || '', { polling: false });
-const discordClient = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages] });
 
 const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
@@ -1378,7 +1377,6 @@ export const registerDiscordCommands = functions.https.onRequest(async (req, res
 
 		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY || !DISCORD_CLIENT_ID || !DISCORD_BOT_TOKEN) return res.status(401).json({ error: responseMessages.unauthorised });
 
-		await discordClient.login(DISCORD_BOT_TOKEN);
 		if (!DISCORD_BOT_TOKEN) return res.status(500).send('DISCORD_BOT_TOKEN is not set.');
 
 		const commands = [
