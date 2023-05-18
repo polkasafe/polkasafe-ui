@@ -15,7 +15,7 @@ const Settings = () => {
 	const [tab, setTab] = useState(ETab.SIGNATORIES);
 
 	return (
-		<div>
+		<div className='scale-[80%] h-[125%] w-[125%] origin-top-left'>
 			<div
 				className='flex items-center mb-5'
 			>

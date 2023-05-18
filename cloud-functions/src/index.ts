@@ -1291,3 +1291,25 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 		return res.sendStatus(200);
 	});
 });
+
+export const getVerifyTelegramToken = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
+		const { channel } = req.body as { channel: CHANNEL };
+		if (!channel) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const token = uuidv4();
+
+			const substrateAddress = getSubstrateAddress(String(address));
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ [`notificationPreferences.channelPreferences[${channel}].verification_token`]: token });
+			return res.status(200).json({ data: token });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getVerifyTelegramToken :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});

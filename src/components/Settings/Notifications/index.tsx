@@ -1,17 +1,20 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Form, Input, MenuProps } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
+import { Button, Form, Input, MenuProps, Modal } from 'antd';
 import { Checkbox, Dropdown } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL,ITriggerPreferences, NotificationStatus } from 'src/types';
-import { BellIcon, CircleArrowDownIcon, MailIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CircleArrowDownIcon, MailIcon, OutlineCloseIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
+
+import TelegramInfoModal from './TelegramInfoModal';
 
 const Notifications = () => {
 
@@ -25,6 +28,7 @@ const Notifications = () => {
 	const [pendingTxn, setPendingTxn] = useState(true);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
+	const [openTelegramModal, setOpenTelegramModal] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -139,7 +143,7 @@ const Notifications = () => {
 			else{
 				setVerificationLoading(true);
 
-				const verifyEmailRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
+				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
 					body: JSON.stringify({
 						args:{
 							email: email
@@ -150,12 +154,12 @@ const Notifications = () => {
 					method: 'POST'
 				});
 
-				const { data: verifyEmailUpdate, error: verifyEmailError } = await verifyEmailRes.json() as { data: string, error: string };
+				const { data: verifyEmailUpdate, error: verifyTokenError } = await verifyTokenRes.json() as { data: string, error: string };
 
-				if(verifyEmailError) {
+				if(verifyTokenError) {
 					queueNotification({
 						header: 'Failed!',
-						message: verifyEmailError,
+						message: verifyTokenError,
 						status: NotificationStatus.ERROR
 					});
 					setVerificationLoading(false);
@@ -194,6 +198,85 @@ const Notifications = () => {
 			setVerificationLoading(false);
 		}
 	};
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const getVerifyToken = async (channel: CHANNEL) => {
+
+		try{
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+
+				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getVerifyToken`, {
+					body: JSON.stringify({
+						channel
+					}),
+					headers: { ...firebaseFunctionsHeader(network), 'x-api-key': process.env.NOTIFICATION_ENGINE_API_KEY || '', 'x-source': 'polkasafe' },
+					method: 'POST'
+				});
+
+				const { data: verifyToken, error: verifyTokenError } = await verifyTokenRes.json() as { data: string, error: string };
+
+				if(verifyTokenError) {
+					queueNotification({
+						header: 'Failed!',
+						message: verifyTokenError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
+
+				if(verifyToken){
+					setUserDetailsContextState(prev => ({
+						...prev,
+						notificationPreferences: { ...prev.notificationPreferences, channelPreferences: {
+							...prev.notificationPreferences.channelPreferences,
+							[`${channel}`]: {
+								...prev.notificationPreferences.channelPreferences[`${channel}`],
+								verification_token: verifyToken
+							}
+						} }
+					}));
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			queueNotification({
+				header: 'Failed!',
+				message: 'Error in generating token.',
+				status: NotificationStatus.ERROR
+			});
+		}
+	};
+
+	const TelegramModal: FC = () => {
+		return (
+			<>
+				<Button onClick={() => setOpenTelegramModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE PSAFE BOT</Button>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenTelegramModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Den to Telegram</h3>}
+					open={openTelegramModal}
+					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
+				>
+					<TelegramInfoModal getVerifyToken={getVerifyToken} />
+				</Modal>
+			</>
+		);
+	};
 
 	return (
 		<div className='flex flex-col gap-y-4'>
@@ -213,8 +296,8 @@ const Notifications = () => {
 					</div>
 				</div>
 			</div>
-			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-text_secondary'>
-				<div className='col-span-3'><span className='flex items-center gap-x-2'><MailIcon /> Email Notifications</span></div>
+			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4'>
+				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><MailIcon /> Email Notifications</span></div>
 				<Form className='col-span-5 flex items-start gap-x-3'>
 					<Form.Item
 						name='email'
@@ -234,6 +317,13 @@ const Notifications = () => {
 						<p className='font-normal text-sm'>Verify</p>
 					</PrimaryButton>
 				</Form>
+			</div>
+			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
+				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span></div>
+				<div className='col-span-5 flex items-center'>
+					<TelegramModal/>
+					<span>to a Telegram chat to get Telegram notifications</span>
+				</div>
 			</div>
 		</div>
 	);
