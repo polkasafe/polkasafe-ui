@@ -119,9 +119,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
 
 			//gas fee
-			const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-			const gasInfo = await txn.paymentInfo(address);
-			setTotalGas(new BN(gasInfo.partialFee.toString()));
+			if(network !== 'westend'){
+				const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
+				const gasInfo = await txn.paymentInfo(address);
+				setTotalGas(new BN(gasInfo.partialFee.toString()));
+			}
 
 			//initiator balance
 			const initiatorBalance = await api.query.system.account(address);
@@ -129,7 +131,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setFetchBalancesLoading(false);
 		};
 		fetchBalanceInfos();
-	}, [address, amount, api, apiReady, recipientAddress]);
+	}, [address, amount, api, apiReady, network, recipientAddress]);
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || !address){
