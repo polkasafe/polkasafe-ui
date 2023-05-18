@@ -31,6 +31,7 @@ import { Client as DiscordClient, GatewayIntentBits, InteractionResponseType, In
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { verifyKey } from 'discord-interactions';
+import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1060,7 +1061,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 
 				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 
-				// check if address exists
+				// check if address exists TODO: use getPSUser
 				const addressRef = await firestore_db.collection('addresses').doc(web3Address).get();
 				if (!addressRef.exists) {
 					await bot.sendMessage(
@@ -1203,7 +1204,6 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 export const discordBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		try {
-			functions.logger.info('req. received', { req });
 			if (!DISCORD_PUBLIC_KEY) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
 
 			const signature = req.headers['x-signature-ed25519'];
@@ -1219,80 +1219,167 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 			);
 			if (!isValidRequest) return res.status(401).send('Invalid request signature.');
 
-			if (req.body.type === InteractionType.Ping) {
+			const interactionReq = req.body;
+			if (!interactionReq || !interactionReq.type || !interactionReq.data) return res.status(400).send('Invalid request body.');
+			const interaction = interactionReq.data;
+
+			functions.logger.info('Interaction received', { interactionReq });
+
+			if (interactionReq.type === InteractionType.Ping) {
 				return res.status(200).send({
 					type: InteractionResponseType.Pong
 				});
 			}
 
-			await discordClient.login(DISCORD_BOT_TOKEN);
+			const { name, options } = interaction;
 
-			discordClient.on('interactionCreate', async (interaction) => {
-				functions.logger.info('Interaction received', { interaction });
-				if (!interaction.isCommand()) return;
+			if (name === 'polkasafe') {
+				const subCommand = options?.[0];
+				const subCommandOptions = subCommand?.options;
+				if (!subCommand || !subCommand.name || !subCommandOptions) return res.status(400).send('Invalid request body.');
 
-				const { commandName, options } = interaction;
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 
-				if (commandName === 'polkasafe') {
-					const subCommandOption = options.get('sub-command');
-					const subCommand = subCommandOption?.value;
+				// TODO: Extract to modular functions
+				if (subCommand.name === 'remove-address') {
+					const web3Address = subCommandOptions?.[0]?.value;
+					const verificationToken = subCommandOptions?.[1]?.value;
+					if (!web3Address || !verificationToken) return res.status(400).send('Invalid request body.');
 
-					if (subCommand === 'remove-address') {
-						const web3AddressOption = options.get('web3-address');
-						const verificationTokenOption = options.get('verification-token');
-
-						const web3Address = web3AddressOption?.value;
-						const verificationToken = verificationTokenOption?.value;
-
-						// TODO: Implement the logic to remove the web3 address from Polkasafe
-
-						await interaction.reply(
-							`Web3 address ${web3Address} removed from Polkasafe. Verification token: ${verificationToken}`
-						);
-					} else if (subCommand === 'add-address') {
-						const web3AddressOption = options.get('web3-address');
-						const verificationTokenOption = options.get('verification-token');
-
-						const web3Address = web3AddressOption?.value;
-						const verificationToken = verificationTokenOption?.value;
-
-						// TODO: Implement the logic to add the web3 address to Polkasafe
-
-						await interaction.reply(
-							`Web3 address ${web3Address} added to Polkasafe. Verification token: ${verificationToken}`
-						);
+					if (!isValidWeb3Address(web3Address)) {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Web3 address ${web3Address} is invalid.`
+							}
+						});
 					}
-				} else if (commandName === 'polkassembly') {
-					const subCommandOption = options.get('sub-command');
-					const subCommand = subCommandOption?.value;
 
-					if (subCommand === 'remove-address') {
-						const web3AddressOption = options.get('web3-address');
-						const verificationTokenOption = options.get('verification-token');
+					const addressData = await getPSUser(firestore_db, web3Address).catch(() => {
+						res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`
+							}
+						});
+						return null;
+					});
+					if (!addressData) return;
 
-						const web3Address = web3AddressOption?.value;
-						const verificationToken = verificationTokenOption?.value;
+					if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `No verification token found for address: ${web3Address}.`
+							}
+						});
+					} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
+						const newNotificationPreferences = {
+							...(addressData.notification_preferences || {}),
+							channelPreferences: {
+								...(addressData.notification_preferences?.channelPreferences || {}),
+								[CHANNEL.DISCORD]: {
+									name: CHANNEL.DISCORD,
+									enabled: false,
+									verified: false,
+									handle: '',
+									verification_token: ''
+								}
+							}
+						};
 
-						// TODO: Implement the logic to remove the web3 address from Polkassembly
+						await firestore_db.collection('addresses').doc(web3Address).update({
+							notification_preferences: newNotificationPreferences
+						});
 
-						await interaction.reply(
-							`Web3 address ${web3Address} removed from Polkassembly. Verification token: ${verificationToken}`
-						);
-					} else if (subCommand === 'add-address') {
-						const web3AddressOption = options.get('web3-address');
-						const verificationTokenOption = options.get('verification-token');
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Web3 address ${web3Address} removed. You will not receive notifications on this channel anymore.`
+							}
+						});
+					} else {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Invalid verification token for address: ${web3Address}.`
+							}
+						});
+					}
+				} else if (subCommand.name === 'add-address') {
+					const web3Address = subCommandOptions?.[0]?.value;
+					const verificationToken = subCommandOptions?.[1]?.value;
+					if (!web3Address || !verificationToken) return res.status(400).send('Invalid request body.');
 
-						const web3Address = web3AddressOption?.value;
-						const verificationToken = verificationTokenOption?.value;
+					if (!isValidWeb3Address(web3Address)) {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Web3 address ${web3Address} is invalid.`
+							}
+						});
+					}
 
-						// TODO: Implement the logic to add the web3 address to Polkassembly
+					const addressData = await getPSUser(firestore_db, web3Address).catch(() => {
+						res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`
+							}
+						});
+						return null;
+					});
+					if (!addressData) return;
 
-						await interaction.reply(
-							`Web3 address ${web3Address} added to Polkassembly. Verification token: ${verificationToken}`
-						);
+					if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `No verification token found for address: ${web3Address}.`
+							}
+						});
+					} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
+						const newNotificationPreferences = {
+							...(addressData.notification_preferences || {}),
+							channelPreferences: {
+								...(addressData.notification_preferences?.channelPreferences || {}),
+								[CHANNEL.DISCORD]: {
+									name: CHANNEL.DISCORD,
+									enabled: true,
+									verified: true,
+									handle: interactionReq.channel_id,
+									verification_token: ''
+								}
+							}
+						};
+
+						await firestore_db.collection('addresses').doc(web3Address).update({
+							notification_preferences: newNotificationPreferences
+						});
+
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Web3 address ${web3Address} added. You will now receive notifications on this channel.`
+							}
+						});
+					} else {
+						return res.status(200).send({
+							type: InteractionResponseType.ChannelMessageWithSource,
+							data: {
+								content: `Invalid verification token for address: ${web3Address}.`
+							}
+						});
 					}
 				}
-			});
+			} else if (name === 'polkassembly') {
+				return res.status(200).send({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: {
+						content: 'Polkassembly notifications support is coming soon.'
+					}
+				});
+			}
 
 			return res.status(200).end();
 		} catch (err:unknown) {
