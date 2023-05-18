@@ -1,12 +1,12 @@
 import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
 import { WebClient as SlackWebClient } from '@slack/web-api';
-import { Client as DiscordClient, GatewayIntentBits, TextChannel } from 'discord.js';
 import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
 import { IPSNotification } from './polkasafe/_utils/types';
 import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
 import { IPANotification } from './polkassembly/_utils/types';
+import sendDiscordMessage from './global-utils/sendDiscordMessage';
 
 export class NotificationService {
 	constructor(
@@ -76,18 +76,10 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
 		) return;
 
-		const client = new DiscordClient({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages] });
-		await client.login(DISCORD_BOT_TOKEN).catch((error) => {
-			console.error('Error in logging in discord client : ', error);
-			return;
-		});
-
-		const channelId = userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle;
-		const channel = client.channels.cache.get(channelId) as TextChannel;
-		if (!channel) return console.error(`Failed to find channel with id ${channelId}`);
-
-		await channel.send(this.message).catch((error) => console.error('Error in sending Discord message : ', error));
-		client.destroy();
+		await sendDiscordMessage(
+			userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
+			this.message
+		).catch((error) => console.error('Error in sending Discord message : ', error));
 	}
 
 	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
