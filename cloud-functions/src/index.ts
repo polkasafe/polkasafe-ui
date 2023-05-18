@@ -32,6 +32,7 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { verifyKey } from 'discord-interactions';
 import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
+import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1255,24 +1256,23 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 						});
 					}
 
-					const addressData = await getPSUser(firestore_db, web3Address).catch(() => {
-						res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`
-							}
-						});
+					// Discord needs a response within 3 seconds
+					res.status(200).send({
+						type: InteractionResponseType.ChannelMessageWithSource,
+						data: {
+							content: `Removing address: ${web3Address}.`
+						}
+					});
+
+					const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
+						await sendDiscordMessage(interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 						return null;
 					});
 					if (!addressData) return;
 
 					if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `No verification token found for address: ${web3Address}.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
+						return;
 					} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
 						const newNotificationPreferences = {
 							...(addressData.notification_preferences || {}),
@@ -1292,19 +1292,11 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 							notification_preferences: newNotificationPreferences
 						});
 
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Web3 address ${web3Address} removed. You will not receive notifications on this channel anymore.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `Web3 address ${web3Address} removed. You will not receive notifications on this channel anymore.`);
+						return;
 					} else {
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Invalid verification token for address: ${web3Address}.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
+						return;
 					}
 				} else if (subCommand.name === 'add-address') {
 					const web3Address = subCommandOptions?.[0]?.value;
@@ -1320,24 +1312,23 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 						});
 					}
 
-					const addressData = await getPSUser(firestore_db, web3Address).catch(() => {
-						res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`
-							}
-						});
+					// Discord needs a response within 3 seconds
+					res.status(200).send({
+						type: InteractionResponseType.ChannelMessageWithSource,
+						data: {
+							content: `Adding address: ${web3Address}.`
+						}
+					});
+
+					const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
+						await sendDiscordMessage(interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 						return null;
 					});
 					if (!addressData) return;
 
 					if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `No verification token found for address: ${web3Address}.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
+						return;
 					} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
 						const newNotificationPreferences = {
 							...(addressData.notification_preferences || {}),
@@ -1357,19 +1348,11 @@ export const discordBotCommands = functions.https.onRequest(async (req, res) => 
 							notification_preferences: newNotificationPreferences
 						});
 
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Web3 address ${web3Address} added. You will now receive notifications on this channel.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `Web3 address ${web3Address} added. You will now receive notifications on this channel.`);
+						return;
 					} else {
-						return res.status(200).send({
-							type: InteractionResponseType.ChannelMessageWithSource,
-							data: {
-								content: `Invalid verification token for address: ${web3Address}.`
-							}
-						});
+						await sendDiscordMessage(interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
+						return;
 					}
 				}
 			} else if (name === 'polkassembly') {
