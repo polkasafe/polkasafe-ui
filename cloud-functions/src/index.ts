@@ -1495,9 +1495,9 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		try {
 			const web = new WebClient(SLACK_BOT_TOKEN);
-			const { command, text, user_id } = req.body;
+			const { text, user_id } = req.body;
 			const [web3Address, verificationToken] = text.split(' ');
-			functions.logger.info('command :', command);
+			functions.logger.info('req.body :', req.body);
 
 			// slack needs a response within 3 seconds
 			res.status(200).end();
