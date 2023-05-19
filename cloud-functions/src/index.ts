@@ -1495,13 +1495,12 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		try {
 			const web = new WebClient(SLACK_BOT_TOKEN);
-
-			functions.logger.info('slackBotCommands req :', { req });
-
-			// Extract the slash command parameters from the request
 			const { command, text, user_id } = req.body;
 			const [web3Address, verificationToken] = text.split(' ');
 			functions.logger.info('command :', command);
+
+			// slack needs a response within 3 seconds
+			res.status(200).end();
 
 			// Send a response back to Slack
 			await web.chat.postMessage({
@@ -1509,9 +1508,9 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 				text: `Polkasafe address "${web3Address}" and verification token "${verificationToken}" received.`
 			});
 
-			return res.status(200).end();
+			return;
 		} catch (err:unknown) {
-			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in slackBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
