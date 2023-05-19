@@ -1,12 +1,12 @@
 import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
-import { WebClient as SlackWebClient } from '@slack/web-api';
 import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
 import { IPSNotification } from './polkasafe/_utils/types';
 import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
 import { IPANotification } from './polkassembly/_utils/types';
 import sendDiscordMessage from './global-utils/sendDiscordMessage';
+import sendSlackMessage from './global-utils/sendSlackMessage';
 
 export class NotificationService {
 	constructor(
@@ -113,13 +113,8 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
-
-		const client = new SlackWebClient(SLACK_BOT_TOKEN);
 		try {
-			await client.chat.postMessage({
-				channel: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
-				text: this.message
-			});
+			await sendSlackMessage(String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
 		}
