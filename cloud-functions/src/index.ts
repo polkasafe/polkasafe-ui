@@ -1507,11 +1507,11 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 				channel: user_id,
 				text: `Polkasafe address "${web3Address}" and verification token "${verificationToken}" received.`
 			});
-
-			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in slackBotCommands :', { err, stack: (err as any).stack });
-			return res.status(500).json({ error: responseMessages.internal });
+			if (!res.headersSent) res.status(500).json({ error: responseMessages.internal });
 		}
+
+		return;
 	});
 });
