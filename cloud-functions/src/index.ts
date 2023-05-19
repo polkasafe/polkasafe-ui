@@ -20,7 +20,7 @@ import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
@@ -33,7 +33,7 @@ import { Routes } from 'discord-api-types/v9';
 import { verifyKey } from 'discord-interactions';
 import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
-import { WebClient } from '@slack/web-api';
+import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1496,29 +1496,23 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 		try {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
-
-			const web = new WebClient(SLACK_BOT_TOKEN);
 			const { command, text, user_id } = req.body;
-			functions.logger.info('{ command, text, user_id } :', { command, text, user_id });
+			functions.logger.info('req.body :', req.body);
 
 			if (command == '/polkasafe-add') {
+				await sendSlackMessage(String(user_id), 'Adding address...');
+
 				const [web3Address, verificationToken] = text.split(' ');
 
 				if (!web3Address || !verificationToken) {
 					// Send a response back to Slack
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid command. Please use the following format: /polkasafe-add <web3Address> <verificationToken>'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid command. Please use the following format: /polkasafe-add <web3Address> <verificationToken>');
 					return;
 				}
 
 				// check if the address is valid
 				if (!isValidWeb3Address(web3Address)) {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid web3 address.'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid web3 address.');
 					return;
 				}
 
@@ -1526,10 +1520,7 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 
 				// check if address exists
 				const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`
-					});
+					await sendSlackMessage(String(user_id), `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 					return null;
 				});
 				if (!addressData) return;
@@ -1537,10 +1528,7 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 				// check if the verification token is valid
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token) {
 				// Sending a reply to the user
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'No verification token found. Please generate a new token from Polkasafe and try again.'
-					});
+					await sendSlackMessage(String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1563,37 +1551,26 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 					});
 
 					// Sending a reply to the user
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Address added successfully. You will now receive notifications on this chat.'
-					});
+					await sendSlackMessage(String(user_id), 'Address added successfully. You will now receive notifications on this chat.');
 					return;
 				} else {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid verification token.'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid verification token.');
 					return;
 				}
 			}
 
 			if (command === '/polkasafe-remove') {
+				await sendSlackMessage(String(user_id), 'Removing address...');
 				const [web3Address, verificationToken] = text.split(' ');
 
 				if (!web3Address || !verificationToken) {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid command. Please use the following format: /polkasafe-remove <web3Address> <verificationToken>'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid command. Please use the following format: /polkasafe-remove <web3Address> <verificationToken>');
 					return;
 				}
 
 				// check if the address is valid
 				if (!isValidWeb3Address(web3Address)) {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid web3 address.'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid web3 address.');
 					return;
 				}
 
@@ -1602,21 +1579,15 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 				// check if address exists
 				const addressRef = await firestore_db.collection('addresses').doc(web3Address).get();
 				if (!addressRef.exists) {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Address not found. Please sign up on Polkasafe to receive notifications.'
-					});
+					await sendSlackMessage(String(user_id), 'Address not found. Please sign up on Polkasafe to receive notifications.');
 					return;
 				}
 
 				// check if the verification token is valid
 				const addressData = addressRef.data() as IPSUser;
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token) {
-				// Sending a reply to the user
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'No verification token found. Please generate a new token from Polkasafe and try again.'
-					});
+					// Sending a reply to the user
+					await sendSlackMessage(String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1639,16 +1610,10 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 					});
 
 					// Sending a reply to the user
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Address removed successfully. You will not receive notifications on this chat anymore.'
-					});
+					await sendSlackMessage(String(user_id), 'Address removed successfully. You will not receive notifications on this chat anymore.');
 					return;
 				} else {
-					await web.chat.postMessage({
-						channel: user_id,
-						text: 'Invalid verification token.'
-					});
+					await sendSlackMessage(String(user_id), 'Invalid verification token.');
 					return;
 				}
 			}
