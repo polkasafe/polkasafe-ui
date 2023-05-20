@@ -11,8 +11,6 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
@@ -69,31 +67,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 		};
 		getDepositor();
 	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
-
-	const sendNotification = async () => {
-		const slackBotCommandsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/slackBotCommands`, {
-			headers: firebaseFunctionsHeader(network),
-			method: 'POST'
-		});
-
-		console.log('slackBotCommandsRes', slackBotCommandsRes);
-
-		const notificationRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
-			body: JSON.stringify({
-				args: {
-					address,
-					callHash,
-					multisigAddress: activeMultisigObject?.address,
-					network
-				},
-				trigger: 'approvalReminder'
-			}),
-			headers: firebaseFunctionsHeader(network),
-			method: 'POST'
-		});
-
-		console.log('notificationRes', notificationRes);
-	};
 
 	const CancelTransaction: FC = () => {
 		return (
@@ -406,7 +379,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 													<div
 														className='flex flex-col gap-y-[6px]'
 													>
-														<button className='text-red-700' onClick={() => sendNotification()}>NOTIFY</button>
 														<p
 															className='font-medium text-sm leading-[15px] text-white'
 														>
@@ -453,7 +425,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 													<div
 														className='flex flex-col gap-y-[6px]'
 													>
-														<button className='text-red-700' onClick={() => sendNotification()}>NOTIFY</button>
 														<p
 															className='font-medium text-sm leading-[15px] text-white'
 														>
