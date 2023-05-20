@@ -33,7 +33,7 @@ export default async function approvalReminder(args: Args) {
 
 	const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
 	const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, substrateAddress);
-	const { deleted, name: userMultisigName } = multisigSettings[multisigAddress] as IPSMultisigSettings;
+	const { deleted, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
 
 	if (deleted) throw Error(`User has deleted multisig: ${multisigAddress}`);
 	if (!notification_preferences) throw Error(`User has no notification preferences: ${substrateAddress}`);

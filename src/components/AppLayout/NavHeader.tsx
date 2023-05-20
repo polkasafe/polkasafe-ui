@@ -11,6 +11,7 @@ import DonateBtn from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DocsIcon } from 'src/ui-components/CustomIcons';
 
 const { Header } = Layout;
 
@@ -45,6 +46,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 					<NetworksDropdown />
 					<AddressDropdown/>
 					<DonateBtn />
+					<a href='https://docs.polkasafe.xyz/' target='_blank' rel="noreferrer" className='flex items-center justify-center gap-x-2 outline-none border-none text-waiting bg-waiting bg-opacity-10 rounded-lg p-2.5 shadow-none text-xs' ><DocsIcon/> Docs</a>
 				</article>
 			</section>
 		</Header>
