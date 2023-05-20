@@ -9,7 +9,7 @@ import getMultisigData from '../_utils/getMultisigData';
 import getPSUser from '../_utils/getPSUser';
 import { IPSMultisigSettings } from '../_utils/types';
 
-const TRIGGER_NAME = 'cancelledTransfer';
+const TRIGGER_NAME = 'cancelledTransaction';
 const SOURCE = NOTIFICATION_SOURCE.POLKASAFE;
 
 interface Args {
@@ -20,7 +20,7 @@ interface Args {
 	multisigAddress: string;
 }
 
-export default async function cancelledTransfer(args: Args) {
+export default async function cancelledTransaction(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { address, network, addresses, callHash, multisigAddress } = args;
@@ -44,8 +44,8 @@ export default async function cancelledTransfer(args: Args) {
 
 		if (addressData) {
 			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
-			const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, substrateAddress);
-			const { deleted, name: userMultisigName } = multisigSettings[multisigAddress] as IPSMultisigSettings;
+			const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, address);
+			const { deleted, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
 
 			if (deleted || !notification_preferences) continue; // skip if multisig is deleted or user has no notification preferences
 
