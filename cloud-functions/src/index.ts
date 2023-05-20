@@ -139,7 +139,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
 						multisigSettings: addressDoc.multisigSettings,
-						notificationPreferences: addressDoc.notificationPreferences
+						notification_preferences: addressDoc.notification_preferences
 					};
 
 					return res.status(200).json({ data: resUser });
@@ -1010,7 +1010,7 @@ export const updateNotificationTriggerPreferences = functions.https.onRequest(as
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			addressRef.update({ ['notificationPreferences.triggerPreferences']: triggerPreferences });
+			addressRef.update({ ['notification_preferences.triggerPreferences']: triggerPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
@@ -1036,7 +1036,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 			const substrateAddress = getSubstrateAddress(String(address));
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			addressRef.update({ ['notificationPreferences.channelPreferences']: channelPreferences });
+			addressRef.update({ ['notification_preferences.channelPreferences']: channelPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
@@ -1086,10 +1086,10 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const data = await addressRef.get();
-			const verifyEmail = data.data()?.notificationPreferences?.channelPreferences?.email?.handle;
-			const verifyToken = data.data()?.notificationPreferences?.channelPreferences?.email?.verification_token;
+			const verifyEmail = data.data()?.notification_preferences?.channelPreferences?.email?.handle;
+			const verifyToken = data.data()?.notification_preferences?.channelPreferences?.email?.verification_token;
 			if (token === verifyToken && email === verifyEmail) {
-				addressRef.update({ ['notificationPreferences.channelPreferences.email.verified']: true });
+				addressRef.update({ ['notification_preferences.channelPreferences.email.verified']: true });
 				return res.status(200).json({ data: responseMessages.success });
 			} else {
 				return res.status(400).json({ error: responseMessages.invalid_params });
@@ -1292,11 +1292,18 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 	});
 });
 
-export const getVerifyTelegramToken = functions.https.onRequest(async (req, res) => {
+export const getChannelVerifyToken = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
 		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		const apiKey = req.get('x-api-key');
+		const source = req.get('x-source');
+
+		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY) return res.status(401).json({ error: responseMessages.unauthorised });
+		if (!source || !Object.values(NOTIFICATION_SOURCE).includes(source as any)) return res.status(400).json({ error: responseMessages.invalid_headers });
+
 		const { channel } = req.body as { channel: CHANNEL };
 		if (!channel) return res.status(400).json({ error: responseMessages.missing_params });
 
@@ -1305,10 +1312,10 @@ export const getVerifyTelegramToken = functions.https.onRequest(async (req, res)
 
 			const substrateAddress = getSubstrateAddress(String(address));
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			addressRef.update({ [`notificationPreferences.channelPreferences[${channel}].verification_token`]: token });
+			addressRef.update({ [`notification_preferences.channelPreferences.${channel}.verification_token`]: token });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
-			functions.logger.error('Error in getVerifyTelegramToken :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in getChannelVerifyToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

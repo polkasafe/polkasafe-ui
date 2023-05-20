@@ -42,7 +42,7 @@ export interface UserDetailsContextType {
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
-	notificationPreferences: IUserNotificationPreferences;
+	notification_preferences: IUserNotificationPreferences;
     addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
@@ -100,7 +100,7 @@ export interface IUser {
 	created_at: Date;
 	multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
-	notificationPreferences: IUserNotificationPreferences;
+	notification_preferences: IUserNotificationPreferences;
 }
 
 export interface IMultisigAddress {

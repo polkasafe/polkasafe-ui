@@ -22,7 +22,7 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	loggedInWallet: Wallet.POLKADOT,
 	multisigAddresses: [],
 	multisigSettings: {},
-	notificationPreferences: {
+	notification_preferences: {
 		channelPreferences: {},
 		triggerPreferences:{
 			newTransaction: true,
@@ -61,7 +61,6 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 		const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
 		if(!connectAddressErr && userData){
-			console.log('notifications', userData?.notificationPreferences);
 			setUserDetailsContextState((prevState) => {
 				return {
 					...prevState,
@@ -72,7 +71,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
 					multisigAddresses: userData?.multisigAddresses,
 					multisigSettings: userData?.multisigSettings || {},
-					notificationPreferences: userData?.notificationPreferences || initialUserDetailsContext.notificationPreferences
+					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences
 				};
 			});
 		}else {

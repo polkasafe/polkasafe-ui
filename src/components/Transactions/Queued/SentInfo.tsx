@@ -13,10 +13,11 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, NotificationIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
+import { notify } from 'src/utils/notify';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -49,7 +50,7 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
-	const { address, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
+	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
 	const { openModal } = useModalContext();
 	const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
@@ -67,6 +68,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 		};
 		getDepositor();
 	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
+
+	const approvalReminder = async () => {
+		notify({
+			args: {
+				address: userAddress,
+				callHash,
+				multisigAddress: activeMultisigObject?.address || activeMultisig,
+				network
+			},
+			network,
+			triggerName: 'approvalReminder'
+		});
+	};
 
 	const CancelTransaction: FC = () => {
 		return (
@@ -220,12 +234,12 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 								<p className='whitespace-pre'>
 									{updatedNote}
 								</p>
-								{depositor === address &&
+								{depositor === userAddress &&
 								<button onClick={() => openModal('Edit Note', <EditNote note={updatedNote} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 									<EditIcon className='text-primary cursor-pointer' />
 								</button>}
 							</span> :
-							depositor === address &&
+							depositor === userAddress &&
 							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
 								<EditIcon className='text-primary cursor-pointer' />
 							</button>}
@@ -371,35 +385,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 												<div
 													className='mb-3 flex items-center gap-x-4'
 												>
-													<Identicon
-														value={address}
-														size={30}
-														theme='polkadot'
-													/>
-													<div
-														className='flex flex-col gap-y-[6px]'
-													>
-														<p
-															className='font-medium text-sm leading-[15px] text-white'
-														>
-															{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
-														</p>
-														<p
-															className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-														>
-															<span>
-																{shortenAddress(getEncodedAddress(address, network) || '')}
-															</span>
-															<span
-																className='flex items-center gap-x-2 text-sm'
-															>
-																<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-																<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
-																	<ExternalLinkIcon  />
-																</a>
-															</span>
-														</p>
-													</div>
+													<AddressComponent address={address} />
 												</div>
 											</Timeline.Item>
 										))}
@@ -415,9 +401,15 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 												className='warning bg-transaparent'
 											>
 												<div
-													className='mb-3 flex items-center gap-x-4'
+													className='mb-3 flex items-center gap-x-4 relative'
 												>
-													<Identicon
+													<AddressComponent address={address} />
+													{depositor === userAddress &&
+														<Button onClick={approvalReminder} className='flex absolute right-[-3.5rem] items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-sm'>
+															<NotificationIcon />
+														</Button>
+													}
+													{/* <Identicon
 														value={address}
 														size={30}
 														theme='polkadot'
@@ -445,7 +437,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 																</a>
 															</span>
 														</p>
-													</div>
+													</div> */}
 												</div>
 											</Timeline.Item>
 										))}
@@ -475,10 +467,10 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</Timeline.Item>
 					</Timeline>
 					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
-						{!approvals.includes(address) && <Button disabled={approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(address) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
+						{!approvals.includes(userAddress) && <Button disabled={approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
 								Approve Transaction
 						</Button>}
-						{depositor === address &&
+						{depositor === userAddress &&
 							<Button loading={loading} onClick={() => setOpenCancelModal(true)} className='w-full border-none text-white text-sm font-normal bg-failure'>
 								Cancel Transaction
 							</Button>

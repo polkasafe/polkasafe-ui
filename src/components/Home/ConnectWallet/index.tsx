@@ -112,7 +112,7 @@ const ConnectWallet = () => {
 							loggedInWallet: selectedWallet,
 							multisigAddresses: userData?.multisigAddresses,
 							multisigSettings: userData?.multisigSettings || {},
-							notificationPreferences: userData?.notificationPreferences || {
+							notification_preferences: userData?.notification_preferences || {
 								channelPreferences: {},
 								triggerPreferences: {
 									newTransaction: true,

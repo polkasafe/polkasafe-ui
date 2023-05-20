@@ -10,16 +10,17 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL,ITriggerPreferences, NotificationStatus } from 'src/types';
-import { BellIcon, CircleArrowDownIcon, MailIcon, OutlineCloseIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CircleArrowDownIcon, DiscordIcon, MailIcon, OutlineCloseIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import DiscordInfoModal from './DiscordInfoModal';
 import TelegramInfoModal from './TelegramInfoModal';
 
 const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
-	const { notificationPreferences, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { notification_preferences, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(2);
 	const [email, setEmail] = useState<string>('');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
@@ -28,7 +29,9 @@ const Notifications = () => {
 	const [pendingTxn, setPendingTxn] = useState(true);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
+
 	const [openTelegramModal, setOpenTelegramModal] = useState<boolean>(false);
+	const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -46,14 +49,14 @@ const Notifications = () => {
 	}, [email]);
 
 	useEffect(() => {
-		const triggerPreferences = notificationPreferences?.triggerPreferences;
+		const triggerPreferences = notification_preferences?.triggerPreferences;
 		if(triggerPreferences){
 			setNewTxn(triggerPreferences?.newTransaction);
 			setTxnExecuted(triggerPreferences?.transactionExecuted);
 			setPendingTxn(triggerPreferences?.pendingTransaction === 0 ? false : true);
 			setNotifyAfter(triggerPreferences?.pendingTransaction || 2);
 		}
-	}, [notificationPreferences]);
+	}, [notification_preferences]);
 
 	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
 		return {
@@ -113,7 +116,7 @@ const Notifications = () => {
 					});
 					setUserDetailsContextState(prev => ({
 						...prev,
-						notificationPreferences: { ...prev.notificationPreferences, triggerPreferences: newPreferences }
+						notification_preferences: { ...prev.notification_preferences, triggerPreferences: newPreferences }
 					}));
 					setLoading(false);
 				}
@@ -174,8 +177,8 @@ const Notifications = () => {
 					});
 					setUserDetailsContextState(prev => ({
 						...prev,
-						notificationPreferences: { ...prev.notificationPreferences, channelPreferences: {
-							...prev.notificationPreferences.channelPreferences,
+						notification_preferences: { ...prev.notification_preferences, channelPreferences: {
+							...prev.notification_preferences.channelPreferences,
 							['email']: {
 								enabled: false,
 								handle: email,
@@ -198,7 +201,7 @@ const Notifications = () => {
 			setVerificationLoading(false);
 		}
 	};
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 	const getVerifyToken = async (channel: CHANNEL) => {
 
 		try{
@@ -211,11 +214,11 @@ const Notifications = () => {
 			}
 			else{
 
-				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getVerifyToken`, {
+				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getChannelVerifyToken`, {
 					body: JSON.stringify({
 						channel
 					}),
-					headers: { ...firebaseFunctionsHeader(network), 'x-api-key': process.env.NOTIFICATION_ENGINE_API_KEY || '', 'x-source': 'polkasafe' },
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
@@ -231,16 +234,7 @@ const Notifications = () => {
 				}
 
 				if(verifyToken){
-					setUserDetailsContextState(prev => ({
-						...prev,
-						notificationPreferences: { ...prev.notificationPreferences, channelPreferences: {
-							...prev.notificationPreferences.channelPreferences,
-							[`${channel}`]: {
-								...prev.notificationPreferences.channelPreferences[`${channel}`],
-								verification_token: verifyToken
-							}
-						} }
-					}));
+					return verifyToken;
 				}
 
 			}
@@ -278,8 +272,32 @@ const Notifications = () => {
 		);
 	};
 
+	const DiscordModal: FC = () => {
+		return (
+			<>
+				<Button onClick={() => setOpenDiscordModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE PSAFE BOT</Button>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenDiscordModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><DiscordIcon className='text-text_secondary'/> How to add Discord Bot</h3>}
+					open={openDiscordModal}
+					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
+				>
+					<DiscordInfoModal getVerifyToken={getVerifyToken} />
+				</Modal>
+			</>
+		);
+	};
+
 	return (
-		<div className='flex flex-col gap-y-4'>
+		<div className='flex flex-col gap-y-4 scale-[80%] h-[125%] w-[125%] origin-top-left'>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-text_secondary'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2'><BellIcon /> General</span></div>
 				<div className='col-span-7'>
@@ -323,6 +341,13 @@ const Notifications = () => {
 				<div className='col-span-5 flex items-center'>
 					<TelegramModal/>
 					<span>to a Telegram chat to get Telegram notifications</span>
+				</div>
+			</div>
+			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
+				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span></div>
+				<div className='col-span-5 flex items-center'>
+					<DiscordModal/>
+					<span>to a Discord channel to get Discord notifications</span>
 				</div>
 			</div>
 		</div>
