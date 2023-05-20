@@ -1018,7 +1018,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 			if (text.startsWith('/start')) {
 				await bot.sendMessage(
 					chat.id,
-					`Welcome to the Polkasafe & Polkassembly Bot!
+					`Welcome to the Polkassembly & Polkasafe Notifications Bot!
 
 				To interact with this bot, you can use the following commands:
 
@@ -1038,7 +1038,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				return res.sendStatus(200);
 			}
 
-			if (text.startsWith('/polkasafe-add')) {
+			if (text.startsWith('/polkasafe/add')) {
 				const commandParts = text.split(' ');
 				const web3Address = commandParts[1];
 				const verificationToken = commandParts[2];
@@ -1116,7 +1116,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				}
 			}
 
-			if (text.startsWith('/polkasafe-remove')) {
+			if (text.startsWith('/polkasafe/remove')) {
 				const commandParts = text.split(' ');
 				const web3Address = commandParts[1];
 				const verificationToken = commandParts[2];
