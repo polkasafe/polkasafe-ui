@@ -1,9 +1,50 @@
-this is a simple docs to help you testing SDK
+This is a simple docs to help you testing SDK
 
 ```
 Note: This branch and this code is only for test SDK functionality, this code will never be on production or merged
 ```
-After creating an instance need to setSignature
+
+## Link polkasafe 
+STEP 1
+```
+<!-- clone this repo https://github.com/AleemAlam/sdk-test.git -->
+git clone https://github.com/AleemAlam/sdk-test.git
+
+<!-- go to directory -->
+cd sdk-test
+
+<!-- use this command to set-up link -->
+npm link
+```
+
+NOTE: Make sure you this repo and polkasafe-ui repo folder should be in a single folder
+
+```
+Main Folder
+    - polkasafe-ui
+        - ....
+    - sdk-test
+        - ....
+
+```
+
+STEP 2
+```
+<!-- Go to polkasafe-UI repo -->
+npm link polkasafe
+
+<!-- if you got an error  -->
+npm link --force polkasafe
+
+```
+# Polkasafe Usage 
+You need to create an instance to use polkasafe SDK
+
+current I created a context TestContext ( Just for testing propose )
+
+Search TestContext in context folder
+
+creating an instance is important to use polkasafe after that we need to setSignature
 
 if want to check all the places where I use SDK you can search ::BySDK::
 
