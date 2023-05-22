@@ -1057,6 +1057,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 
 export const notify = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
+		functions.logger.info('notify called with body', req.body);
 		const apiKey = req.get('x-api-key');
 		const source = req.get('x-source');
 
