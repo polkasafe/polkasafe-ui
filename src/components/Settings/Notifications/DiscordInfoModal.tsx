@@ -41,7 +41,7 @@ const DiscordInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNE
 					<span onClick={() => copyText('Polkassembly#5315')} className='p-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 						<CopyIcon/> Polkassembly#5315
 					</span>
-                    to your Telegram Chat as a member
+                    to your Discord Chat as a member
 				</li>
 				<li className='list-inside leading-[35px] mb-5'>
                     Send this command to the chat with the bot:
@@ -52,7 +52,8 @@ const DiscordInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNE
 						<PrimaryButton loading={loading} onClick={handleGenerateToken} className='bg-primary text-white font-normal'>Generate Token</PrimaryButton>
 					</div>
 					{notification_preferences?.channelPreferences?.[`${CHANNEL.DISCORD}`]?.verification_token &&
-					<div className='flex items-center justify-between'>
+					<div className='flex items-center justify-between mt-3'>
+						<span>Verification Token: </span>
 						<span onClick={() => copyText(notification_preferences?.channelPreferences?.[`${CHANNEL.DISCORD}`]?.verification_token || '')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 							<CopyIcon/> {notification_preferences?.channelPreferences?.[`${CHANNEL.DISCORD}`]?.verification_token}
 						</span>
