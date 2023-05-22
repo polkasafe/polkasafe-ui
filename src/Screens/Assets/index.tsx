@@ -79,7 +79,7 @@ const Assets = () => {
 					<div className="col-start-1 col-end-13">
 						<div className="flex items-center justify-between">
 							<div className='flex items-end gap-x-4'>
-								<h2 className="text-lg font-bold text-white mt-3 ml-5">Tokens</h2>
+								<h2 className="text-base font-bold text-white mt-3 ml-5">Tokens</h2>
 								{multisig && multisig?.proxy && <MultisigDropdown activeAddress={activeAddress} setActiveAddress={setActiveAddress} />}
 							</div>
 							{/* <div className='flex items-center justify-center mr-5 mt-3'>

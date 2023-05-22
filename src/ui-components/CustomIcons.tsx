@@ -31,6 +31,7 @@ import { ReactComponent as DashDotSVG } from 'src/assets/icons/dash-dot.svg';
 import { ReactComponent as DatePickerSVG } from 'src/assets/icons/date-picker-icon.svg';
 import { ReactComponent as DeleteSVG } from 'src/assets/icons/delete.svg';
 import { ReactComponent as DiscSVG } from 'src/assets/icons/disc.svg';
+import { ReactComponent as DocsSVG } from 'src/assets/icons/document.svg';
 import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
@@ -354,4 +355,8 @@ export const PolkadotWalletIcon = (props: Partial<CustomIconComponentProps>) => 
 
 export const SubWalletIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SubWalletSVG} {...props} />
+);
+
+export const DocsIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={DocsSVG} {...props} />
 );

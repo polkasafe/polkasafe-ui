@@ -72,104 +72,106 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 	};
 
 	return (
-		<Collapse
-			className='bg-bg-secondary rounded-lg p-3'
-			bordered={false}
-			defaultActiveKey={[`${hash}`]}
-		>
-			<Collapse.Panel showArrow={false} key={`${callHash}`} header={
-				<div
-					onClick={() => {
-						if(!transactionInfoVisible){
-							handleGetHistoryNote();
-						}
-						toggleTransactionVisible(!transactionInfoVisible);
-					}}
-					className={classNames(
-						'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
-					)}
-				>
-					<p className='col-span-3 flex items-center gap-x-3'>
-						{
-							type === 'Sent'?
-								<span
-									className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
-								>
-									<ArrowUpRightIcon />
-								</span>
-								:
-								<span
-									className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
-								>
-									<ArrowDownLeftIcon />
-								</span>
-						}
-						<span>
-							{type}
-						</span>
-					</p>
-					<p className='col-span-2 flex items-center gap-x-[6px]'>
-						<ParachainIcon src={chainProperties[network].logo} />
-						<span
-							className={classNames(
-								'font-normal text-xs leading-[13px] text-failure',
-								{
-									'text-success': type === 'Received'
-								}
-							)}
-						>
-							{type === 'Sent'? '-': '+'}{amount_token} {token}
-						</span>
-					</p>
-					<p className='col-span-2'>
-						{dayjs(created_at).format('lll')}
-					</p>
-					<p className='col-span-2 flex items-center justify-end gap-x-4'>
-						<span className='text-success'>
-							Success
-						</span>
-						<span className='text-white text-sm'>
-							{
-								transactionInfoVisible?
-									<CircleArrowUpIcon />:
-									<CircleArrowDownIcon />
+		<>
+			<Collapse
+				className='bg-bg-secondary rounded-lg p-2.5 scale-90 h-[111%] w-[111%] origin-top-left'
+				bordered={false}
+				defaultActiveKey={[`${hash}`]}
+			>
+				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
+					<div
+						onClick={() => {
+							if(!transactionInfoVisible){
+								handleGetHistoryNote();
 							}
-						</span>
-					</p>
-				</div>
-			}>
+							toggleTransactionVisible(!transactionInfoVisible);
+						}}
+						className={classNames(
+							'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
+						)}
+					>
+						<p className='col-span-3 flex items-center gap-x-3'>
+							{
+								type === 'Sent'?
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+									>
+										<ArrowUpRightIcon />
+									</span>
+									:
+									<span
+										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-green-500'
+									>
+										<ArrowDownLeftIcon />
+									</span>
+							}
+							<span>
+								{type}
+							</span>
+						</p>
+						<p className='col-span-2 flex items-center gap-x-[6px]'>
+							<ParachainIcon src={chainProperties[network].logo} />
+							<span
+								className={classNames(
+									'font-normal text-xs leading-[13px] text-failure',
+									{
+										'text-success': type === 'Received'
+									}
+								)}
+							>
+								{type === 'Sent'? '-': '+'}{amount_token} {token}
+							</span>
+						</p>
+						<p className='col-span-2'>
+							{dayjs(created_at).format('lll')}
+						</p>
+						<p className='col-span-2 flex items-center justify-end gap-x-4'>
+							<span className='text-success'>
+								Success
+							</span>
+							<span className='text-white text-sm'>
+								{
+									transactionInfoVisible?
+										<CircleArrowUpIcon />:
+										<CircleArrowDownIcon />
+								}
+							</span>
+						</p>
+					</div>
+				}>
 
-				<div>
-					<Divider className='bg-text_secondary my-5' />
-					{
-						type === 'Received'?
-							<ReceivedInfo
-								amount={String(amount_token)}
-								amountType={token}
-								date={dayjs(created_at).format('llll')}
-								from={from}
-								callHash={callHash}
-								note={note}
-								loading={loading}
-								amount_usd={amount_usd}
-								to={to}
-							/>
-							:
-							<SentInfo
-								amount={String(amount_token)}
-								amountType={token}
-								date={dayjs(created_at).format('llll')}
-								recipient={to}
-								callHash={callHash}
-								note={note}
-								from={from}
-								loading={loading}
-								amount_usd={amount_usd}
-							/>
-					}
-				</div>
-			</Collapse.Panel>
-		</Collapse>
+					<div>
+						<Divider className='bg-text_secondary my-5' />
+						{
+							type === 'Received'?
+								<ReceivedInfo
+									amount={String(amount_token)}
+									amountType={token}
+									date={dayjs(created_at).format('llll')}
+									from={from}
+									callHash={callHash}
+									note={note}
+									loading={loading}
+									amount_usd={amount_usd}
+									to={to}
+								/>
+								:
+								<SentInfo
+									amount={String(amount_token)}
+									amountType={token}
+									date={dayjs(created_at).format('llll')}
+									recipient={to}
+									callHash={callHash}
+									note={note}
+									from={from}
+									loading={loading}
+									amount_usd={amount_usd}
+								/>
+						}
+					</div>
+				</Collapse.Panel>
+			</Collapse>
+		</>
 	);
 };
 

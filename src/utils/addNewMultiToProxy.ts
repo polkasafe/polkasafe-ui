@@ -4,8 +4,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { encodeAddress } from '@polkadot/util-crypto';
-import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { NotificationStatus } from 'src/types';
@@ -14,6 +12,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from './_createMultisig';
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import { IMultiTransferResponse } from './initMultisigTransfer';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
@@ -38,10 +37,16 @@ export async function addNewMultiToProxy({ proxyAddress, setTxnHash, api, networ
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const otherSignatories = sortAddresses(oldSignatories.filter((sig) => sig !== senderAddress));
+	const encodedSignatories = oldSignatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+
+	const otherSignatories = encodedSignatories.filter((sig) => sig !== senderAddress);
 	const multisigResponse = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
-	const newMultisigAddress = encodeAddress(multisigResponse?.multisigAddress || '');
-	const addProxyTx = api.tx.proxy.addProxy(newMultisigAddress, 'Any', 0);
+	const newMultisigAddress = getEncodedAddress(multisigResponse?.multisigAddress || '', network);
+	const addProxyTx = api.tx.proxy.addProxy(newMultisigAddress || '', 'Any', 0);
 	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, addProxyTx);
 
 	const callData = api.createType('Call', proxyTx.method.toHex());

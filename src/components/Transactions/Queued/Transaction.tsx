@@ -281,7 +281,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			{ contextHolder }
 
 			<Collapse
-				className='bg-bg-secondary rounded-lg p-3'
+				className='bg-bg-secondary rounded-lg p-2.5 scale-90 h-[111%] w-[111%] origin-top-left'
 				bordered={false}
 				defaultActiveKey={[`${hash}`]}
 			>

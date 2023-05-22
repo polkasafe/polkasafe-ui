@@ -4,8 +4,9 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AutoComplete, Checkbox, Divider, Form, Input, Modal, Spin, Switch } from 'antd';
+import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -17,17 +18,17 @@ import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, QRIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer from 'src/utils/initMultisigTransfer';
@@ -44,38 +45,22 @@ interface ISendFundsFormProps {
 	defaultSelectedAddress?: string
 }
 
-const addRecipientHeading = () => {
-	const elm = document.getElementById('recipient_list');
-	if (elm) {
-		const parentElm = elm.parentElement;
-		if (parentElm) {
-			const isElmPresent = document.getElementById('recipient_heading');
-			if (!isElmPresent) {
-				const recipientHeading = document.createElement('p');
-				recipientHeading.textContent = 'Recent Addresses';
-				recipientHeading.id = 'recipient_heading';
-				recipientHeading.classList.add('recipient_heading');
-				parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
-			}
-		}
-	}
-};
-
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-	const { api, apiReady } = useGlobalApiContext();
+	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
+	const { api, apiReady, network } = useGlobalApiContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || addressBook[0]?.address, network) || '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
-	const autocompleteAddresses: DefaultOptionType[] = addressBook?.map((account) => ({
-		label: account.name || DEFAULT_ADDRESS_NAME,
-		value: account.address
-	}));
+	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
+		addressBook?.map((account) => ({
+			label: <AddressComponent address={account.address} />,
+			value: account.address
+		}))
+	);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
 
@@ -88,8 +73,15 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [transactionData, setTransactionData] = useState<any>({});
 
-	const [recipientNotInAddressBook, setRecipientNotInAddressBook] = useState<boolean>(false);
-	const [addAddressCheck, setAddAddressCheck] = useState<boolean>(true);
+	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
+
+	const [totalDeposit, setTotalDeposit] = useState<BN>(new BN(0));
+
+	const [totalGas, setTotalGas] = useState<BN>(new BN(0));
+
+	const [initiatorBalance, setInitiatorBalance] = useState<BN>(new BN(0));
+
+	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
@@ -99,12 +91,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			return;
 		} else {
 			setValidRecipient(true);
-		}
-
-		if(addressBook.some((item) => getSubstrateAddress(item.address) === getSubstrateAddress(recipientAddress))){
-			setRecipientNotInAddressBook(false);
-		} else {
-			setRecipientNotInAddressBook(true);
 		}
 
 		if(api && apiReady && recipientAddress && amount){
@@ -120,6 +106,32 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
+
+	useEffect(() => {
+		const fetchBalanceInfos = async () => {
+			if(!api || !apiReady || !address || !recipientAddress){
+				return;
+			}
+			setFetchBalancesLoading(true);
+			//deposit balance
+			const depositBase = api.consts.multisig.depositBase.toString();
+			const depositFactor = api.consts.multisig.depositFactor.toString();
+			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
+
+			//gas fee
+			if(network !== 'westend'){
+				const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
+				const gasInfo = await txn.paymentInfo(address);
+				setTotalGas(new BN(gasInfo.partialFee.toString()));
+			}
+
+			//initiator balance
+			const initiatorBalance = await api.query.system.account(address);
+			setInitiatorBalance(new BN(initiatorBalance.data.free.toString()));
+			setFetchBalancesLoading(false);
+		};
+		fetchBalanceInfos();
+	}, [address, amount, api, apiReady, network, recipientAddress]);
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || !address){
@@ -160,28 +172,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTimeout(() => {
 				setFailure(false);
 			}, 5000);
-		} finally {
-			if(addAddressCheck && validRecipient && recipientNotInAddressBook){
-				const newAddressBook = await addToAddressBook({
-					address: recipientAddress,
-					addressBook,
-					name: DEFAULT_ADDRESS_NAME,
-					network
-				});
-				if(newAddressBook){
-					setUserDetailsContextState(prev => {
-						return {
-							...prev,
-							addressBook: newAddressBook
-						};
-					});
-				}
-			}
 		}
-	};
-
-	const onClick = () => {
-		addRecipientHeading();
 	};
 
 	const QrModal: FC = () => {
@@ -192,6 +183,104 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					<AddressQr address={recipientAddress} />
 				</Modal>
 			</>
+		);
+	};
+
+	const AddAddressModal: FC = () => {
+		const [addAddressName, setAddAddressName] = useState('');
+		const [addAddressLoading, setAddAddressLoading] = useState(false);
+
+		const handleAddAddress = async () => {
+			setAddAddressLoading(true);
+			const newAddresses = await addToAddressBook({
+				address: recipientAddress,
+				addressBook,
+				name: addAddressName,
+				network
+			});
+			setAddAddressLoading(false);
+			if(newAddresses){
+				setAutoCompleteAddresses(newAddresses.map((item) => ({
+					label: <AddressComponent name={item.name} address={item.address} />,
+					value: item.address
+				})));
+			}
+			setShowAddressModal(false);
+			queueNotification({
+				header: 'Successful!',
+				message: 'Your Address has been Added.',
+				status: NotificationStatus.SUCCESS
+			});
+		};
+		return (
+			<Modal
+				centered
+				title={<h3 className='text-white mb-8 text-lg font-semibold'>Add Address</h3>}
+				closeIcon={<button
+					className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+					onClick={() => setShowAddressModal(false)}
+				>
+					<OutlineCloseIcon className='text-primary w-2 h-2' />
+				</button>}
+				footer={null}
+				open={showAddressModal}
+				className='w-auto min-w-[500px] scale-90 origin-center'
+			>
+				<Form
+					className='my-0 w-[560px]'
+				>
+					<div className="flex flex-col gap-y-3">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="name"
+						>
+							Name
+						</label>
+						<Form.Item
+							name="name"
+							rules={[
+								{
+									message: 'Required',
+									required: true
+								}
+							]}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Give the address a name"
+								className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="name"
+								onChange={(e) => setAddAddressName(e.target.value)}
+								value={addAddressName}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="address"
+						>
+							Address
+						</label>
+						<Form.Item
+							name="address"
+							rules={[]}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								className="text-sm font-normal leading-[15px] outline-0 p-2.5 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
+								id="address"
+								defaultValue={recipientAddress}
+								disabled={true}
+							/>
+						</Form.Item>
+					</div>
+					<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+						<CancelBtn onClick={() => setShowAddressModal(false)}/>
+						<ModalBtn loading={addAddressLoading} disabled={!addAddressName || !recipientAddress} title='Add' onClick={handleAddAddress} />
+					</div>
+				</Form>
+			</Modal>
 		);
 	};
 
@@ -220,6 +309,12 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								{ required: "Please add the '${name}'" }
 							}
 						>
+							<AddAddressModal/>
+							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(totalGas)) &&
+							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+								<WarningCircleIcon />
+								<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+							</section>}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
@@ -254,12 +349,15 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										>
 											<div className="flex items-center">
 												<AutoComplete
-													onClick={onClick}
+													filterOption={(inputValue, options) => {
+														return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
+													}}
+													notFoundContent={validRecipient && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
 													options={autocompleteAddresses}
 													id='recipient'
 													placeholder="Send to Address.."
 													onChange={(value) => setRecipientAddress(value)}
-													defaultValue={getEncodedAddress(defaultSelectedAddress || addressBook[0].address, network)}
+													defaultValue={defaultSelectedAddress || addressBook[0].address}
 												/>
 												<div className='absolute right-2'>
 													<button onClick={() => copyText(recipientAddress, true, network)}>
@@ -269,11 +367,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												</div>
 											</div>
 										</Form.Item>
-										{recipientNotInAddressBook &&
-											<Checkbox className='text-white mt-2 [&>span>span]:border-primary' checked={addAddressCheck} onChange={(e) => setAddAddressCheck(e.target.checked)} >
-												Add Address to Address Book
-											</Checkbox>
-										}
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>
@@ -398,8 +491,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					</section> */}
 
 							<section className='flex items-center gap-x-5 justify-center mt-10'>
-								<CancelBtn className='w-[300px]' onClick={onCancel} />
-								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance))} loading={loading} onClick={handleSubmit} className='w-[300px]' title='Make Transaction' />
+								<CancelBtn className='w-[250px]' onClick={onCancel} />
+								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 							</section>
 						</Form>
 					</Spin>

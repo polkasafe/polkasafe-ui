@@ -11,6 +11,7 @@ import DonateBtn from 'src/components/Donate/DonateBtn';
 import NetworksDropdown from 'src/components/NetworksDropdown';
 import Notification from 'src/components/Notification';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DocsIcon } from 'src/ui-components/CustomIcons';
 
 const { Header } = Layout;
 
@@ -24,18 +25,18 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 	const location = useLocation();
 	const { address } = useGlobalUserDetailsContext();
 	return (
-		<Header className='bg-bg-main flex flex-row items-center p-0 h-[90px]'>
-			<section className='hidden lg:block w-[240px]'></section>
-			<section className='px-4 lg:px-8 flex-1 flex items-center gap-x-2'>
-				<article className='lg:hidden'>
-					<button className='flex items-center justify-center outline-none border-none bg-bg-secondary text-primary rounded-xl px-[18px] py-[12px] md:px-[20px] md:py-[14px] font-bold text-xl md:text-2xl' onClick={() => {
+		<Header className='bg-bg-main flex flex-row items-center p-0 h-[70px]'>
+			<section className='hidden lg:block w-[180px]'></section>
+			<section className='pr-4 lg:pr-8 pl-0 flex-1 flex items-center gap-x-2'>
+				<article className='lg:hidden ml-4'>
+					<button className='flex items-center justify-center outline-none border-none bg-bg-secondary text-primary rounded-lg px-[18px] py-[8px] font-bold text-xl' onClick={() => {
 						setSideDrawer(!sideDrawer);
 					}}>
 						<MenuOutlined />
 					</button>
 				</article>
-				<article className='hidden sm:block'>
-					<p className='bg-bg-secondary text-primary rounded-xl px-[18px] py-[8px] md:px-[20px] md:py-[10px] font-bold text-xl md:text-2xl capitalize'>
+				<article className='hidden lg:block ml-4'>
+					<p className='bg-bg-secondary text-primary rounded-xl px-[16px] py-[6px] font-bold text-xl capitalize'>
 						{location.pathname === '/' ? 'Home' :
 							location.pathname.slice(1).split('-').join(' ')}
 					</p>
@@ -45,6 +46,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 					<NetworksDropdown />
 					<AddressDropdown/>
 					<DonateBtn />
+					<a href='https://docs.polkasafe.xyz/' target='_blank' rel="noreferrer" className='flex items-center justify-center gap-x-2 outline-none border-none text-waiting bg-waiting bg-opacity-10 rounded-lg p-2.5 shadow-none text-xs' ><DocsIcon/> Docs</a>
 				</article>
 			</section>
 		</Header>

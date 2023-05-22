@@ -18,9 +18,10 @@ interface IAddressComponent{
     address: string
     iconSize?: number
 	withBadge?: boolean
+	name?: string
 }
 
-const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComponent) => {
+const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -47,7 +48,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 						theme='polkadot'
 					/>
 				:
-				multisig?.address === getSubstrateAddress(address) ?
+				multisig?.address === address ?
 					withBadge ?
 						<Badge count='Multisig' offset={[-45, 0]} className='border-none' color='#1573FE'>
 							<Identicon
@@ -74,7 +75,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 				<div
 					className='font-medium text-sm flex text-white'
 				>
-					{addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
+					{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
 				</div>
 				<div
 					className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'
@@ -83,7 +84,7 @@ const AddressComponent = ({ address, withBadge=true, iconSize=30 }: IAddressComp
 						{shortenAddress(getEncodedAddress(address, network) || '')}
 					</span>
 					<span
-						className='flex items-center gap-x-2 text-sm'
+						className='flex items-center gap-x-2'
 					>
 						<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
 						<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
