@@ -14,6 +14,7 @@ import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
 import { getMultisigInfo } from './getMultisigInfo';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
 
@@ -160,6 +161,18 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 									header: 'Success!',
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
+								});
+
+								notify({
+									args: {
+										address: approvingAddress,
+										addresses: otherSignatories,
+										callHash,
+										multisigAddress: multisig.address,
+										network
+									},
+									network,
+									triggerName: 'executedTransaction'
 								});
 
 								resolve();

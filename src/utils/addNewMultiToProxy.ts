@@ -14,6 +14,7 @@ import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
 import { IMultiTransferResponse } from './initMultisigTransfer';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Props {
@@ -28,9 +29,10 @@ interface Props {
     newThreshold: number;
     proxyAddress: string;
 	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
+	oldMultisigAddress: string;
 }
 
-export async function addNewMultiToProxy({ proxyAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
+export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -86,6 +88,19 @@ export async function addNewMultiToProxy({ proxyAddress, setTxnHash, api, networ
 								message: 'Transaction Successful.',
 								status: NotificationStatus.SUCCESS
 							});
+
+							notify({
+								args: {
+									address: senderAddress,
+									addresses: otherSignatories,
+									callHash: proxyTx.method.hash.toHex(),
+									multisigAddress: oldMultisigAddress,
+									network
+								},
+								network,
+								triggerName: 'editMultisigUsersStart'
+							});
+
 							resolve({
 								callData: proxyTx.method.toHex(),
 								callHash: proxyTx.method.hash.toHex(),

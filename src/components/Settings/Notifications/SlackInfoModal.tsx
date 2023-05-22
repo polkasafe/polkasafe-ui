@@ -33,15 +33,10 @@ const SlackInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL)
 		<div className='text-white'>
 			<ol>
 				<li className='list-inside leading-[40px]'>
-                    Click this invite link
-					<span className='p-2 mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
+                    Click this invite link:
+					<div className='px-2 mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 						<a href='https://premiurly.slack.com/apps/A057XPP28G4-polkassembly' target='_blank' rel="noreferrer">https://premiurly.slack.com/apps/A057XPP28G4-polkassembly</a>
-					</span><br/>
-                    or Add
-					<span onClick={() => copyText('Polkassembly#5315')} className='p-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
-						<CopyIcon/> Polkassembly#5315
-					</span>
-                    to your Slack Chat as a member
+					</div>
 				</li>
 				<li className='list-inside leading-[35px] mb-5'>
                     Send this command to the chat with the bot:

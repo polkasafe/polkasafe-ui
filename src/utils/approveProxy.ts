@@ -17,6 +17,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
 import { getMultisigInfo } from './getMultisigInfo';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import updateTransactionNote from './updateTransactionNote';
 
@@ -246,6 +247,18 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
 								await fetchProxyData();
+
+								notify({
+									args: {
+										address: approvingAddress,
+										addresses: otherSignatories,
+										callHash,
+										multisigAddress: multisig.address,
+										network
+									},
+									network,
+									triggerName: 'executedProxy'
+								});
 
 								resolve();
 

@@ -10,7 +10,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL,ITriggerPreferences, NotificationStatus } from 'src/types';
-import { BellIcon, CircleArrowDownIcon, DiscordIcon, MailIcon, OutlineCloseIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CircleArrowDownIcon, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -312,7 +312,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><DiscordIcon className='text-text_secondary'/> How to add Discord Bot</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><SlackIcon className='text-text_secondary'/> How to add Slack Bot</h3>}
 					open={openSlackModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
@@ -377,7 +377,7 @@ const Notifications = () => {
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
-				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span></div>
+				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon /> Slack Notifications</span></div>
 				<div className='col-span-5 flex items-center'>
 					<SlackModal/>
 					<span>to a Slack channel to get Slack notifications</span>
