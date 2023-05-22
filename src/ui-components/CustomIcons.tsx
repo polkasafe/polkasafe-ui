@@ -385,6 +385,8 @@ export const ElementIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const SlackIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SlackIconSVG} {...props} />
+);
+
 export const DocsIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={DocsSVG} {...props} />
 );

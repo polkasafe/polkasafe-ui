@@ -18,7 +18,7 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 		}
 		else{
 
-			const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
+			const notifyRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
 				body: JSON.stringify({
 					args,
 					trigger: triggerName
@@ -27,14 +27,14 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 				method: 'POST'
 			});
 
-			const { data: verifyEmailUpdate, error: verifyTokenError } = await verifyTokenRes.json() as { data: string, error: string };
+			const { data: notifyData, error: notifyError } = await  notifyRes.json() as { data: string, error: string };
 
-			if(verifyTokenError) {
-				console.log(verifyEmailUpdate);
+			if(notifyError) {
+				console.log(notifyData);
 				return;
 			}
 
-			if(verifyEmailUpdate){
+			if(notifyData){
 				queueNotification({
 					header: 'Notification Sent',
 					message: '',
