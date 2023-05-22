@@ -16,6 +16,7 @@ import PrivacyPolicy from 'src/Screens/PrivacyPolicy';
 import Settings from 'src/Screens/Settings';
 import TermsAndCondition from 'src/Screens/TermsAndCondition';
 import Transaction from 'src/Screens/Transactions';
+import VerifyEmailToken from 'src/Screens/VerifyEmailToken';
 
 import Notifications from '../Settings/Notifications';
 
@@ -35,6 +36,7 @@ const SwitchRoutes = () => {
 			<Route path='/contact-us' element={<ContactUs/>} />
 			<Route path='/privacy-policy' element={<PrivacyPolicy/>} />
 			<Route path='/terms-and-conditions' element={<TermsAndCondition/>} />
+			<Route path='/verify-email' element={<VerifyEmailToken/>} />
 		</Routes>
 	);
 };

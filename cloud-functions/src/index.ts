@@ -1080,25 +1080,18 @@ export const notify = functions.https.onRequest(async (req, res) => {
 
 export const verifyEmail = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		const signature = req.get('x-signature');
-		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
-
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
-
 		const { email, token } = req.body;
 		if (!email || !token) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
-			const substrateAddress = getSubstrateAddress(String(address));
-
-			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			const data = await addressRef.get();
-			const verifyEmail = data.data()?.notification_preferences?.channelPreferences?.email?.handle;
-			const verifyToken = data.data()?.notification_preferences?.channelPreferences?.email?.verification_token;
+			const addressSnapshot = await firestoreDB.collection('addresses').where('notification_preferences.channelPreferences.email.handle', '==', email).limit(1).get();
+			if (addressSnapshot.empty) return res.status(400).json({ error: responseMessages.invalid_params });
+			const addressDoc = addressSnapshot.docs[0];
+			const addressDocData = addressDoc.data();
+			const verifyEmail = addressDocData?.notification_preferences?.channelPreferences?.email?.handle;
+			const verifyToken = addressDocData?.notification_preferences?.channelPreferences?.email?.verification_token;
 			if (token === verifyToken && email === verifyEmail) {
-				addressRef.update({ ['notification_preferences.channelPreferences.email.verified']: true });
+				addressDoc.ref.update({ ['notification_preferences.channelPreferences.email.verified']: true });
 				return res.status(200).json({ data: responseMessages.success });
 			} else {
 				return res.status(400).json({ error: responseMessages.invalid_params });
