@@ -119,9 +119,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
 
 			//gas fee
-			const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-			const gasInfo = await txn.paymentInfo(address);
-			setTotalGas(new BN(gasInfo.partialFee.toString()));
+			if(network !== 'westend'){
+				const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
+				const gasInfo = await txn.paymentInfo(address);
+				setTotalGas(new BN(gasInfo.partialFee.toString()));
+			}
 
 			//initiator balance
 			const initiatorBalance = await api.query.system.account(address);
@@ -129,7 +131,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setFetchBalancesLoading(false);
 		};
 		fetchBalanceInfos();
-	}, [address, amount, api, apiReady, recipientAddress]);
+	}, [address, amount, api, apiReady, network, recipientAddress]);
 
 	const handleSubmit = async () => {
 		if(!api || !apiReady || !address){
@@ -311,7 +313,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(totalGas)) &&
 							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 								<WarningCircleIcon />
-								<p>Your balance is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+								<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
 							</section>}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>

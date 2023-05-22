@@ -13,6 +13,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import { IMultiTransferResponse } from './initMultisigTransfer';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Props {
@@ -24,10 +25,11 @@ interface Props {
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
     signatories: string[];
     threshold: number;
-	setTxnHash: React.Dispatch<React.SetStateAction<string>>
+	setTxnHash: React.Dispatch<React.SetStateAction<string>>;
+	multisigAddress: string
 }
 
-export async function transferAndProxyBatchAll({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
+export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
 
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -77,6 +79,19 @@ export async function transferAndProxyBatchAll({ api, setTxnHash, network, recep
 					for (const { event } of events) {
 						if (event.method === 'ExtrinsicSuccess') {
 							setTxnHash(proxyTx.method.hash.toHex());
+
+							notify({
+								args: {
+									address: senderAddress,
+									addresses: otherSignatories,
+									callHash: proxyTx.method.hash.toHex(),
+									multisigAddress,
+									network
+								},
+								network,
+								triggerName: 'createdProxy'
+							});
+
 							queueNotification({
 								header: 'Success!',
 								message: 'Transaction Successful.',

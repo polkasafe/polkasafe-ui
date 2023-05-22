@@ -65,6 +65,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 			await transferAndProxyBatchAll({
 				amount: reservedProxyDeposit,
 				api,
+				multisigAddress: multisig?.address || activeMultisig,
 				network,
 				recepientAddress: activeMultisig,
 				senderAddress: getSubstrateAddress(userAddress) || userAddress,

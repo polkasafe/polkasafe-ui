@@ -22,6 +22,14 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	loggedInWallet: Wallet.POLKADOT,
 	multisigAddresses: [],
 	multisigSettings: {},
+	notification_preferences: {
+		channelPreferences: {},
+		triggerPreferences:{
+			newTransaction: true,
+			pendingTransaction: 2,
+			transactionExecuted: true
+		}
+	},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
@@ -62,7 +70,8 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					createdAt: userData?.created_at,
 					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
 					multisigAddresses: userData?.multisigAddresses,
-					multisigSettings: userData?.multisigSettings || {}
+					multisigSettings: userData?.multisigSettings || {},
+					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences
 				};
 			});
 		}else {

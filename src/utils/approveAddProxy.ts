@@ -18,6 +18,7 @@ import getEncodedAddress from './getEncodedAddress';
 import { getMultisigInfo } from './getMultisigInfo';
 import getSubstrateAddress from './getSubstrateAddress';
 import { inputToBn } from './inputToBn';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 import { transferFunds } from './transferFunds';
 import updateTransactionNote from './updateTransactionNote';
@@ -259,6 +260,18 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 									header: 'Success!',
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
+								});
+
+								notify({
+									args: {
+										address: approvingAddress,
+										addresses: otherSignatories,
+										callHash,
+										multisigAddress: multisig.address,
+										network
+									},
+									network,
+									triggerName: 'editMultisigUsersExecuted'
 								});
 
 								await handleMultisigCreate();

@@ -110,6 +110,10 @@ export const GlobalStyle = createGlobalStyle`
 		background-color: #1573FE !important;
 	}
 
+	.ant-checkbox-disabled+span{
+		color: #8B8B8B !important;
+	}
+
 	.ant-segmented-item-selected .ant-segmented-item-label {
 		color: blue_primary !important;
 	}
