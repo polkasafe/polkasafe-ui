@@ -3,14 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Form, Input, MenuProps, Modal } from 'antd';
-import { Checkbox, Dropdown } from 'antd';
+import { Checkbox } from 'antd';
 import React, { FC, useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL,ITriggerPreferences, NotificationStatus } from 'src/types';
-import { BellIcon, CircleArrowDownIcon, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -21,13 +21,13 @@ import TelegramInfoModal from './TelegramInfoModal';
 const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
-	const { notification_preferences, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(2);
 	const [email, setEmail] = useState<string>('');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(true);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(true);
-	const [pendingTxn, setPendingTxn] = useState(true);
+	const [pendingTxn, setPendingTxn] = useState(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
@@ -60,6 +60,7 @@ const Notifications = () => {
 		}
 	}, [notification_preferences]);
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
 		return {
 			key: hr,
@@ -67,6 +68,7 @@ const Notifications = () => {
 		};
 	});
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const onNotifyHoursChange: MenuProps['onClick'] = ({ key }) => {
 		setNotifyAfter(Number(key));
 		updateNotificationPreferences({ executed: txnExecuted, newT: newTxn, notifyHr: Number(key), pending: true });
@@ -151,11 +153,12 @@ const Notifications = () => {
 				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
 					body: JSON.stringify({
 						args:{
-							email: email
+							address,
+							email
 						},
 						trigger: 'verifyEmail'
 					}),
-					headers: { ...firebaseFunctionsHeader(network), 'x-api-key': process.env.NOTIFICATION_ENGINE_API_KEY || '', 'x-source': 'polkasafe' },
+					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
@@ -329,14 +332,18 @@ const Notifications = () => {
 				<div className='col-span-7'>
 					<p className='mb-4'>Configure the notifications you want Polkasafe to send in your linked channels</p>
 					<div className='flex flex-col gap-y-3'>
-						<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: e.target.checked, notifyHr: notifyAfter, pending: pendingTxn });}}>New Transaction needs to be signed</Checkbox>
-						<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ executed: e.target.checked, newT: newTxn, notifyHr: notifyAfter, pending: pendingTxn });}}>Transaction has been signed and executed</Checkbox>
-						<div className='flex items-center gap-x-3'>
+						<div className='flex'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: e.target.checked, notifyHr: notifyAfter, pending: pendingTxn });}}>New Transaction needs to be signed</Checkbox>
+						</div>
+						<div className='flex'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ executed: e.target.checked, newT: newTxn, notifyHr: notifyAfter, pending: pendingTxn });}}>Transaction has been signed and executed</Checkbox>
+						</div>
+						{/* <div className='flex items-center gap-x-3'>
 							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={pendingTxn} onChange={(e) => { setPendingTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: newTxn, notifyHr: notifyAfter, pending: e.target.checked });}}>For Pending Transactions remind signers every:</Checkbox>
 							<Dropdown disabled={!pendingTxn || loading} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
 								<button className={`'flex items-center gap-x-2 border ${!pendingTxn || loading ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/></button>
 							</Dropdown>
-						</div>
+						</div> */}
 					</div>
 				</div>
 			</div>

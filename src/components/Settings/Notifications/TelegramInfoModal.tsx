@@ -4,7 +4,7 @@
 import React from 'react';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CHANNEL } from 'src/types';
-import { CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 
@@ -66,10 +66,10 @@ const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANN
 					</span>
 				</li>
 			</ol>
-			<section className='my-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+			{/* <section className='my-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 				<WarningCircleIcon />
 				<p>Need help? Get support in the <span className='text-primary mx-1'><a>Den Discord Server</a></span> #support channel.</p>
-			</section>
+			</section> */}
 		</div>
 	);
 };
