@@ -16,6 +16,7 @@ const SlackInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL)
 	const handleGenerateToken = async () => {
 		setLoading(true);
 		const verifyToken = await getVerifyToken(CHANNEL.SLACK);
+		copyText(verifyToken || '');
 		setUserDetailsContextState(prev => ({
 			...prev,
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
@@ -47,7 +48,8 @@ const SlackInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL)
 						<PrimaryButton loading={loading} onClick={handleGenerateToken} className='bg-primary text-white font-normal'>Generate Token</PrimaryButton>
 					</div>
 					{notification_preferences?.channelPreferences?.[`${CHANNEL.SLACK}`]?.verification_token &&
-					<div className='flex items-center justify-between'>
+					<div className='flex items-center justify-between mt-3'>
+						<span>Verification Token: </span>
 						<span onClick={() => copyText(notification_preferences?.channelPreferences?.[`${CHANNEL.SLACK}`]?.verification_token || '')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 							<CopyIcon/> {notification_preferences?.channelPreferences?.[`${CHANNEL.SLACK}`]?.verification_token}
 						</span>

@@ -9,7 +9,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { CHANNEL,ITriggerPreferences, NotificationStatus } from 'src/types';
+import { CHANNEL, IUserNotificationTriggerPreferences, NotificationStatus, Triggers } from 'src/types';
 import { BellIcon, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -27,7 +27,7 @@ const Notifications = () => {
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(true);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(true);
-	const [pendingTxn, setPendingTxn] = useState(false);
+	const [cancelledTxn, setCancelledTxn] = useState<boolean>(true);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
@@ -53,10 +53,9 @@ const Notifications = () => {
 	useEffect(() => {
 		const triggerPreferences = notification_preferences?.triggerPreferences;
 		if(triggerPreferences){
-			setNewTxn(triggerPreferences?.newTransaction);
-			setTxnExecuted(triggerPreferences?.transactionExecuted);
-			setPendingTxn(triggerPreferences?.pendingTransaction === 0 ? false : true);
-			setNotifyAfter(triggerPreferences?.pendingTransaction || 2);
+			setNewTxn(triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false);
+			setTxnExecuted(triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false);
+			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
 		}
 	}, [notification_preferences]);
 
@@ -71,10 +70,10 @@ const Notifications = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const onNotifyHoursChange: MenuProps['onClick'] = ({ key }) => {
 		setNotifyAfter(Number(key));
-		updateNotificationPreferences({ executed: txnExecuted, newT: newTxn, notifyHr: Number(key), pending: true });
+		updateNotificationPreferences({ cancelled: true, executed: txnExecuted, newT: newTxn });
 	};
 
-	const updateNotificationPreferences = async ({ executed, newT, notifyHr, pending }: { newT: boolean, executed: boolean, pending: boolean, notifyHr: number }) => {
+	const updateNotificationPreferences = async ({ executed, newT, cancelled }: { newT: boolean, executed: boolean, cancelled: boolean }) => {
 
 		try{
 			const userAddress = localStorage.getItem('address');
@@ -85,10 +84,35 @@ const Notifications = () => {
 				return;
 			}
 			else{
-				const newPreferences: ITriggerPreferences = {
-					newTransaction: newT,
-					pendingTransaction: pending ? notifyHr : 0,
-					transactionExecuted: executed
+				const newPreferences: {[index: string]: IUserNotificationTriggerPreferences} = {
+					[Triggers.CANCELLED_TRANSACTION]: {
+						enabled: cancelled,
+						name: Triggers.CANCELLED_TRANSACTION
+					},
+					[Triggers.EXECUTED_TRANSACTION]: {
+						enabled: executed,
+						name: Triggers.EXECUTED_TRANSACTION
+					},
+					[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
+						enabled: executed,
+						name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
+					},
+					[Triggers.EXECUTED_PROXY]:{
+						enabled: executed,
+						name: Triggers.EXECUTED_PROXY
+					},
+					[Triggers.INIT_MULTISIG_TRANSFER]:{
+						enabled: newT,
+						name: Triggers.INIT_MULTISIG_TRANSFER
+					},
+					[Triggers.CREATED_PROXY]:{
+						enabled: newT,
+						name: Triggers.CREATED_PROXY
+					},
+					[Triggers.EDIT_MULTISIG_USERS_START]:{
+						enabled: newT,
+						name: Triggers.EDIT_MULTISIG_USERS_START
+					}
 				};
 				setLoading(true);
 
@@ -333,10 +357,13 @@ const Notifications = () => {
 					<p className='mb-4'>Configure the notifications you want Polkasafe to send in your linked channels</p>
 					<div className='flex flex-col gap-y-3'>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: e.target.checked, notifyHr: notifyAfter, pending: pendingTxn });}}>New Transaction needs to be signed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: txnExecuted, newT: e.target.checked });}}>New Transaction needs to be signed</Checkbox>
 						</div>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ executed: e.target.checked, newT: newTxn, notifyHr: notifyAfter, pending: pendingTxn });}}>Transaction has been signed and executed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: e.target.checked, newT: newTxn });}}>Transaction has been signed and executed</Checkbox>
+						</div>
+						<div className='flex'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: e.target.checked, executed: txnExecuted, newT: newTxn });}}>Transaction has been cancelled</Checkbox>
 						</div>
 						{/* <div className='flex items-center gap-x-3'>
 							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={pendingTxn} onChange={(e) => { setPendingTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: newTxn, notifyHr: notifyAfter, pending: e.target.checked });}}>For Pending Transactions remind signers every:</Checkbox>

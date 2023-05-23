@@ -14,7 +14,7 @@ import {
 	ITransaction,
 	IUser,
 	IUserResponse,
-	ITriggerPreferences,
+	IUserNotificationTriggerPreferences,
 	IUserNotificationChannelPreferences } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
@@ -1007,13 +1007,9 @@ export const updateNotificationTriggerPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { triggerPreferences } = req.body as { triggerPreferences: ITriggerPreferences };
+		const { triggerPreferences } = req.body as { triggerPreferences: {[index: string]: IUserNotificationTriggerPreferences} };
 		if (!triggerPreferences ||
-			typeof triggerPreferences !== 'object' ||
-			!('newTransaction' in triggerPreferences && 'transactionExecuted' in triggerPreferences && 'pendingTransaction' in triggerPreferences) ||
-			typeof triggerPreferences.newTransaction !== 'boolean' ||
-			typeof triggerPreferences.transactionExecuted !== 'boolean' ||
-			typeof triggerPreferences.pendingTransaction !== 'number') return res.status(400).json({ error: responseMessages.missing_params });
+			typeof triggerPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
