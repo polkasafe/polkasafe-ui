@@ -11,12 +11,11 @@ import copyText from 'src/utils/copyText';
 const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL) => Promise<string | undefined>}) => {
 
 	const [loading, setLoading] = React.useState(false);
-	const { notification_preferences, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleGenerateToken = async () => {
 		setLoading(true);
 		const verifyToken = await getVerifyToken(CHANNEL.TELEGRAM);
-		copyText(verifyToken || '');
 		setUserDetailsContextState(prev => ({
 			...prev,
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
@@ -36,19 +35,19 @@ const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANN
 				<li className='list-inside leading-[40px]'>
                     Click this invite link
 					<span className='p-2 mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
-						<a href='https://t.me/PolkassemblyNotificationsBot' target='_blank' rel="noreferrer">t.me/PolkassemblyNotificationsBot</a>
+						<a href='https://t.me/PolkasafeBot' target='_blank' rel="noreferrer">t.me/PolkasafeBot</a>
 					</span><br/>
                     or Add
-					<span onClick={() => copyText('@PolkassemblyNotificationsBot')} className='p-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
-						<CopyIcon/> @PolkassemblyNotificationsBot
+					<span onClick={() => copyText('@PolkasafeBot')} className='p-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
+						<CopyIcon/> @PolkasafeBot
 					</span>
                     to your Telegram Chat as a member
 				</li>
 				<li className='list-inside leading-[35px] mb-5'>
                     Send this command to the chat with the bot:
 					<div className='flex items-center justify-between'>
-						<span onClick={() => copyText('/polkasafe/add <web3Address> <verificationToken>')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
-							<CopyIcon/> /polkasafe/add {'<web3Address>'} {'<verificationToken>'}
+						<span onClick={() => copyText(`/add ${address} ${notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verification_token || ''}`)} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
+							<CopyIcon/> /add {'<web3Address>'} {'<verificationToken>'}
 						</span>
 						<PrimaryButton loading={loading} onClick={handleGenerateToken} className='bg-primary text-white font-normal'>Generate Token</PrimaryButton>
 					</div>
