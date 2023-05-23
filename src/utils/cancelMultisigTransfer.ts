@@ -10,6 +10,7 @@ import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 import getEncodedAddress from './getEncodedAddress';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 interface Props {
@@ -69,6 +70,18 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 								header: 'Success!',
 								message: 'Transaction Cancelled.',
 								status: NotificationStatus.SUCCESS
+							});
+
+							notify({
+								args: {
+									address: approvingAddress,
+									addresses: otherSignatories,
+									callHash,
+									multisigAddress: multisig.address,
+									network
+								},
+								network,
+								triggerName: 'cancelledTransaction'
 							});
 
 							await sendNotificationToAddresses({

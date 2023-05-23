@@ -6,6 +6,43 @@ import { Dispatch, SetStateAction } from 'react';
 
 import { networks, tokenSymbol } from './global/networkConstants';
 
+export enum CHANNEL {
+	EMAIL = 'email',
+	TELEGRAM = 'telegram',
+	DISCORD = 'discord',
+	ELEMENT = 'element',
+	SLACK = 'slack',
+	IN_APP = 'in_app'
+  }
+
+export interface IUserNotificationChannelPreferences {
+	name: CHANNEL;
+	enabled: boolean;
+	handle: string;
+	verified: boolean;
+	verification_token?: string;
+}
+
+export interface IUserNotificationTriggerPreferences {
+	name: string;
+	enabled: boolean;
+}
+
+export interface IUserNotificationPreferences {
+	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
+	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
+}
+
+export enum Triggers {
+	CANCELLED_TRANSACTION = 'cancelledTransaction',
+	CREATED_PROXY = 'createdProxy',
+	EDIT_MULTISIG_USERS_EXECUTED = 'editMultisigUsersExecuted',
+	EDIT_MULTISIG_USERS_START = 'editMultisigUsersStart',
+	EXECUTED_PROXY = 'executedProxy',
+	EXECUTED_TRANSACTION = 'executedTransaction',
+	INIT_MULTISIG_TRANSFER = 'initMultisigTransfer',
+}
+
 export interface UserDetailsContextType {
 	loggedInWallet: Wallet;
     activeMultisig: string;
@@ -14,6 +51,7 @@ export interface UserDetailsContextType {
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notification_preferences: IUserNotificationPreferences;
     addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
@@ -71,6 +109,7 @@ export interface IUser {
 	created_at: Date;
 	multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notification_preferences: IUserNotificationPreferences;
 }
 
 export interface IMultisigAddress {

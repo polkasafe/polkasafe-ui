@@ -170,6 +170,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 				network,
 				newSignatories,
 				newThreshold,
+				oldMultisigAddress: multisig?.address || activeMultisig,
 				oldSignatories: multisig?.signatories || [],
 				oldThreshold: multisig?.threshold || 2,
 				proxyAddress: multisig?.proxy || '',

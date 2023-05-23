@@ -16,6 +16,9 @@ import PrivacyPolicy from 'src/Screens/PrivacyPolicy';
 import Settings from 'src/Screens/Settings';
 import TermsAndCondition from 'src/Screens/TermsAndCondition';
 import Transaction from 'src/Screens/Transactions';
+import VerifyEmailToken from 'src/Screens/VerifyEmailToken';
+
+import Notifications from '../Settings/Notifications';
 
 const SwitchRoutes = () => {
 	return (
@@ -26,12 +29,14 @@ const SwitchRoutes = () => {
 			<Route path='*' element={<Error404/>}/>
 			<Route path="/error/500" element={<Error500/>} />
 			<Route path='/settings' element={<Settings />} />
+			<Route path='/notifications' element={<Notifications />} />
 			<Route path='/transactions' element={<Transaction />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
 			<Route path='/contact-us' element={<ContactUs/>} />
 			<Route path='/privacy-policy' element={<PrivacyPolicy/>} />
 			<Route path='/terms-and-conditions' element={<TermsAndCondition/>} />
+			<Route path='/verify-email' element={<VerifyEmailToken/>} />
 		</Routes>
 	);
 };

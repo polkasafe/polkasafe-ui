@@ -16,6 +16,7 @@ export interface IUser {
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	notification_preferences?: IUserNotificationPreferences;
 }
 
 export interface IUserResponse extends IUser {
@@ -98,4 +99,31 @@ export interface INotification {
 	link?: string,
 	type: 'sent' | 'recieved' | 'cancelled' | 'info'
 	network: string
+}
+
+export enum CHANNEL {
+	EMAIL = 'email',
+	TELEGRAM = 'telegram',
+	DISCORD = 'discord',
+	ELEMENT = 'element',
+	SLACK = 'slack',
+	IN_APP = 'in_app'
+  }
+
+export interface IUserNotificationChannelPreferences {
+	name: CHANNEL;
+	enabled: boolean;
+	handle: string;
+	verified: boolean;
+	verification_token?: string;
+}
+
+export interface IUserNotificationTriggerPreferences {
+	name: string;
+	enabled: boolean;
+}
+
+export interface IUserNotificationPreferences {
+	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
+	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
 }
