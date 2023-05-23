@@ -6,6 +6,7 @@ export default async function callNotificationTrigger(source: NOTIFICATION_SOURC
 	try {
 		const { default: defaultExport } = await import(triggerModulePath);
 		if (typeof defaultExport === 'function') {
+			console.log('calling trigger ', trigger, 'with args ', args);
 			await defaultExport(args);
 		} else {
 			throw new Error(`${trigger} is not a trigger module function`);

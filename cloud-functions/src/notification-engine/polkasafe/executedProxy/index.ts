@@ -52,16 +52,18 @@ export default async function executedProxy(args: Args) {
 			const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 			if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
-			if (triggerTemplate.args.length > 0 && !isValidTemplateArgs(args, triggerTemplate.args)) throw Error(`Invalid arguments for trigger template : ${TRIGGER_NAME}`);
-
 			const link = `/transactions?tab=Queue#${callHash}&network=${network}&multisigAddress=${multisigAddress}`;
 
 			const subject = triggerTemplate.subject;
-			const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+			const templateArgValues = {
 				...args,
 				multisigName: userMultisigName || defaultMultisigName,
 				link: `https://app.polkasafe.xyz${link}`
-			});
+			};
+
+			if (triggerTemplate.args.length > 0 && !isValidTemplateArgs(templateArgValues, triggerTemplate.args)) throw Error(`Invalid arguments for trigger template : ${TRIGGER_NAME}`);
+
+			const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, templateArgValues);
 
 			const notificationServiceInstance = new NotificationService(
 				SOURCE,

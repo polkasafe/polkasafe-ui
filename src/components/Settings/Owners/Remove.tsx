@@ -114,6 +114,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 				network,
 				newSignatories,
 				newThreshold,
+				oldMultisigAddress: multisig?.address || activeMultisig,
 				oldSignatories: multisig?.signatories || [],
 				oldThreshold: multisig?.threshold || 2,
 				proxyAddress: multisig?.proxy || '',

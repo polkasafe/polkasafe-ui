@@ -13,6 +13,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
+import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
 
 export interface IMultiTransferResponse {
@@ -127,6 +128,18 @@ export default async function initMultisigTransfer({
 									status: NotificationStatus.SUCCESS
 								});
 
+								notify({
+									args: {
+										address: initiatorAddress,
+										addresses: otherSignatories,
+										callHash: tx.method.hash.toHex(),
+										multisigAddress: multisig.address,
+										network
+									},
+									network,
+									triggerName: 'initMultisigTransfer'
+								});
+
 								resolve({
 									callData: tx.method.toHex(),
 									callHash: tx.method.hash.toHex(),
@@ -227,6 +240,18 @@ export default async function initMultisigTransfer({
 									header: 'Success!',
 									message: 'Transaction Successful.',
 									status: NotificationStatus.SUCCESS
+								});
+
+								notify({
+									args: {
+										address: initiatorAddress,
+										addresses: otherSignatories,
+										callHash: call.method.hash.toHex(),
+										multisigAddress: multisig.address,
+										network
+									},
+									network,
+									triggerName: 'initMultisigTransfer'
 								});
 
 								resolve({
