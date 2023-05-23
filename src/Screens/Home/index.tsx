@@ -20,7 +20,7 @@ import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { NotificationStatus } from 'src/types';
+import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -28,7 +28,7 @@ import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
 const Home = ({ className }: { className?: string }) => {
-	const { address, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
+	const { address, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
@@ -189,7 +189,9 @@ const Home = ({ className }: { className?: string }) => {
 												:
 												<></>
 								}
-								<EmailBadge/>
+								{!notification_preferences.channelPreferences[CHANNEL.EMAIL]?.verified &&
+									<EmailBadge/>
+								}
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
 										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal}  hasProxy={hasProxy} setNewTxn={setNewTxn}/>
