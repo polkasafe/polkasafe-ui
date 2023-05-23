@@ -58,7 +58,7 @@ const Menu: FC<Props> = ({ className }) => {
 		menuItems.push(
 			{
 				icon: <NotificationIcon />,
-				key: '/notifications',
+				key: '/notification-settings',
 				title: 'Notifications'
 			},
 			{

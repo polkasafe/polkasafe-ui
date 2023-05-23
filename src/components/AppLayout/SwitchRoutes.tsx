@@ -29,7 +29,7 @@ const SwitchRoutes = () => {
 			<Route path='*' element={<Error404/>}/>
 			<Route path="/error/500" element={<Error500/>} />
 			<Route path='/settings' element={<Settings />} />
-			<Route path='/notifications' element={<Notifications />} />
+			<Route path='/notification-settings' element={<Notifications />} />
 			<Route path='/transactions' element={<Transaction />} />
 			<Route path='/assets' element={<Assets />} />
 			<Route path='/address-book' element={<AddressBook />} />
