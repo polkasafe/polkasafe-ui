@@ -1105,7 +1105,7 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 // store last updated at
 export const telegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		functions.logger.info('telegramBotCommands called with body', req.body);
+		functions.logger.info('telegramBotCommands called with body', { req } );
 
 		try {
 			const message = req.body;
