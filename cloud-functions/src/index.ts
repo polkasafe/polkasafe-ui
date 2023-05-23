@@ -1108,7 +1108,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 		functions.logger.info('telegramBotCommands called with body', req.body);
 
 		try {
-			const { message } = req.body;
+			const message = req.body;
 			const { text, chat } = message;
 
 			if (text.startsWith('/start')) {
