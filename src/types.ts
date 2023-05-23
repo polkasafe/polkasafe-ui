@@ -23,15 +23,24 @@ export interface IUserNotificationChannelPreferences {
 	verification_token?: string;
 }
 
-export interface ITriggerPreferences{
-	newTransaction: boolean;
-	transactionExecuted: boolean;
-	pendingTransaction: number;
+export interface IUserNotificationTriggerPreferences {
+	name: string;
+	enabled: boolean;
 }
 
 export interface IUserNotificationPreferences {
 	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
-	triggerPreferences: ITriggerPreferences;
+	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
+}
+
+export enum Triggers {
+	CANCELLED_TRANSACTION = 'cancelledTransaction',
+	CREATED_PROXY = 'createdProxy',
+	EDIT_MULTISIG_USERS_EXECUTED = 'editMultisigUsersExecuted',
+	EDIT_MULTISIG_USERS_START = 'editMultisigUsersStart',
+	EXECUTED_PROXY = 'executedProxy',
+	EXECUTED_TRANSACTION = 'executedTransaction',
+	INIT_MULTISIG_TRANSFER = 'initMultisigTransfer',
 }
 
 export interface UserDetailsContextType {

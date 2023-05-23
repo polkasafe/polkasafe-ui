@@ -118,13 +118,12 @@ export interface IUserNotificationChannelPreferences {
 	verification_token?: string;
 }
 
-export interface ITriggerPreferences{
-	newTransaction: boolean;
-	transactionExecuted: boolean;
-	pendingTransaction: number;
+export interface IUserNotificationTriggerPreferences {
+	name: string;
+	enabled: boolean;
 }
 
 export interface IUserNotificationPreferences {
 	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
-	triggerPreferences: ITriggerPreferences;
+	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
 }

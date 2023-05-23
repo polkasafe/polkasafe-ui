@@ -7,7 +7,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, UserDetailsContextType, Wallet } from 'src/types';
+import { IUser, Triggers, UserDetailsContextType, Wallet } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
@@ -25,9 +25,34 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	notification_preferences: {
 		channelPreferences: {},
 		triggerPreferences:{
-			newTransaction: true,
-			pendingTransaction: 2,
-			transactionExecuted: true
+			[Triggers.CANCELLED_TRANSACTION]: {
+				enabled: true,
+				name: Triggers.CANCELLED_TRANSACTION
+			},
+			[Triggers.EXECUTED_TRANSACTION]: {
+				enabled: true,
+				name: Triggers.EXECUTED_TRANSACTION
+			},
+			[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
+				enabled: true,
+				name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
+			},
+			[Triggers.EXECUTED_PROXY]:{
+				enabled: true,
+				name: Triggers.EXECUTED_PROXY
+			},
+			[Triggers.INIT_MULTISIG_TRANSFER]:{
+				enabled: true,
+				name: Triggers.INIT_MULTISIG_TRANSFER
+			},
+			[Triggers.CREATED_PROXY]:{
+				enabled: true,
+				name: Triggers.CREATED_PROXY
+			},
+			[Triggers.EDIT_MULTISIG_USERS_START]:{
+				enabled: true,
+				name: Triggers.EDIT_MULTISIG_USERS_START
+			}
 		}
 	},
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,

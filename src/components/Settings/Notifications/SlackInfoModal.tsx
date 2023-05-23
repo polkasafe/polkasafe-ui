@@ -16,6 +16,7 @@ const SlackInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL)
 	const handleGenerateToken = async () => {
 		setLoading(true);
 		const verifyToken = await getVerifyToken(CHANNEL.SLACK);
+		copyText(verifyToken || '');
 		setUserDetailsContextState(prev => ({
 			...prev,
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
