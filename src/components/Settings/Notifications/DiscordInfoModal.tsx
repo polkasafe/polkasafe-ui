@@ -47,8 +47,8 @@ const DiscordInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNE
 				<li className='list-inside leading-[35px] mb-5'>
                     Send this command to the chat with the bot:
 					<div className='flex items-center justify-between'>
-						<span onClick={() => copyText('/polkasafeadd <web3Address> <verificationToken>')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
-							<CopyIcon/> /polkasafeadd {'<web3-address>'} {'<verification-token>'}
+						<span onClick={() => copyText('/polkasafe add <web3Address> <verificationToken>')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
+							<CopyIcon/> /polkasafe add {'<web3-address>'} {'<verification-token>'}
 						</span>
 						<PrimaryButton loading={loading} onClick={handleGenerateToken} className='bg-primary text-white font-normal'>Generate Token</PrimaryButton>
 					</div>
