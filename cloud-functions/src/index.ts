@@ -1103,9 +1103,9 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 // set
 // TODO: return BE data first and then save data to BE and return data from BE;
 // store last updated at
-export const telegramBotCommands = functions.https.onRequest(async (req, res) => {
+export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		functions.logger.info('telegramBotCommands req', { req } );
+		functions.logger.info('polkasafeTelegramBotCommands req', { req } );
 
 		try {
 			const { message } = req.body;
@@ -1124,17 +1124,13 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 			if (text.startsWith('/start')) {
 				await bot.sendMessage(
 					chat.id,
-					`Welcome to the Polkassembly & Polkasafe Notifications Bot!
+					`Welcome to the Polkasafe Bot!
 
 				To interact with this bot, you can use the following commands:
 
-				- '/polkasafe/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkasafe. Replace '<web3Address>' with the actual address you want to remove and '<verificationToken>' with the verification token provided.
+				- '/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkasafe.
 
-				- '/polkasafe/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkasafe. Replace '<web3Address>' with the address you want to add and '<verificationToken>' with the verification token provided.
-
-				- '/polkassembly/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkassembly. Replace '<web3Address>' with the actual address you want to remove and '<verificationToken>' with the verification token provided.
-
-				- '/polkassembly/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkassembly. Replace '<web3Address>' with the address you want to add and '<verificationToken>' with the verification token provided.
+				- '/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkasafe.
 
 				Please note that you need to replace '<web3Address>' with the actual web3 address you want to add or remove, and '<verificationToken>' with the token provided for verification.
 
@@ -1144,7 +1140,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				return res.sendStatus(200);
 			}
 
-			if (text.startsWith('/polkasafe/add')) {
+			if (text.startsWith('/add')) {
 				const commandParts = text.split(' ');
 				const web3Address = commandParts[1];
 				const verificationToken = commandParts[2];
@@ -1152,7 +1148,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				if (!web3Address || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /polkasafe/add <web3Address> <verificationToken>'
+						'Invalid command. Please use the following format: /add <web3Address> <verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -1222,7 +1218,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				}
 			}
 
-			if (text.startsWith('/polkasafe/remove')) {
+			if (text.startsWith('/remove')) {
 				const commandParts = text.split(' ');
 				const web3Address = commandParts[1];
 				const verificationToken = commandParts[2];
@@ -1230,7 +1226,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 				if (!web3Address || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /polkasafe/remove <web3Address> <verificationToken>'
+						'Invalid command. Please use the following format: /remove <web3Address> <verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -1302,7 +1298,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 
 			return res.sendStatus(200);
 		} catch (err:unknown) {
-			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
