@@ -1105,11 +1105,20 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 // store last updated at
 export const telegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		functions.logger.info('telegramBotCommands called with body', { req } );
+		functions.logger.info('telegramBotCommands req', { req } );
 
 		try {
 			const message = req.body;
-			const { text, chat } = message;
+			let { text, chat } = message;
+
+			if (!text || !chat) {
+				text = message.edited_message.text;
+				chat = message.edited_message.chat;
+			}
+
+			if (!text || !chat) {
+				return res.status(400).json({ error: responseMessages.missing_params });
+			}
 
 			if (text.startsWith('/start')) {
 				await bot.sendMessage(
@@ -1594,7 +1603,7 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
 			const { command, text, user_id } = req.body;
-			functions.logger.info('slackBotCommands req.body :', req.body);
+			functions.logger.info('slackBotCommands req :', { req });
 
 			if (command == '/polkasafe-add') {
 				await sendSlackMessage(String(user_id), 'Adding address...');
