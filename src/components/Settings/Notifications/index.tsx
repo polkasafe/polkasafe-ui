@@ -10,7 +10,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL, IUserNotificationTriggerPreferences, NotificationStatus, Triggers } from 'src/types';
-import { BellIcon, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CheckOutlined, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -23,11 +23,11 @@ const Notifications = () => {
 	const { network } = useGlobalApiContext();
 	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(2);
-	const [email, setEmail] = useState<string>('');
+	const [email, setEmail] = useState<string>(notification_preferences.channelPreferences['email']?.handle || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
-	const [newTxn, setNewTxn] = useState<boolean>(true);
-	const [txnExecuted, setTxnExecuted] = useState<boolean>(true);
-	const [cancelledTxn, setCancelledTxn] = useState<boolean>(true);
+	const [newTxn, setNewTxn] = useState<boolean>(false);
+	const [txnExecuted, setTxnExecuted] = useState<boolean>(false);
+	const [cancelledTxn, setCancelledTxn] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
@@ -386,15 +386,22 @@ const Notifications = () => {
 					>
 						<Input
 							id='email'
+							defaultValue={notification_preferences.channelPreferences['email']?.handle || ''}
 							onChange={(a) => setEmail(a.target.value)}
 							placeholder={'Enter email'}
 							className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-2 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						/>
 					</Form.Item>
-					<PrimaryButton loading={verificationLoading} className={`text-white ${!email || !emailValid ? 'bg-highlight' : 'bg-primary'}`} onClick={verifyEmail} disabled={!email || !emailValid}>
+					<PrimaryButton loading={verificationLoading} className={`text-white ${!email || !emailValid || notification_preferences.channelPreferences['email']?.verified ? 'bg-highlight' : 'bg-primary'}`} onClick={verifyEmail} disabled={!email || !emailValid || notification_preferences.channelPreferences['email']?.verified}>
 						<p className='font-normal text-sm'>Verify</p>
 					</PrimaryButton>
 				</Form>
+				{notification_preferences.channelPreferences['email']?.verified &&
+					<div className='flex items-center col-span-2 ml-5 gap-x-2'>
+						<CheckOutlined className='text-success'/>
+						<div className='text-white'>Email Verified!</div>
+					</div>
+				}
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span></div>
