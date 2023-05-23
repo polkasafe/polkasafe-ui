@@ -1108,12 +1108,13 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 		functions.logger.info('telegramBotCommands req', { req } );
 
 		try {
-			const message = req.body;
+			const { message } = req.body;
 			let { text, chat } = message;
 
 			if (!text || !chat) {
-				text = message.edited_message.text;
-				chat = message.edited_message.chat;
+				const { edited_message } = req.body;
+				text = edited_message.text;
+				chat = edited_message.chat;
 			}
 
 			if (!text || !chat) {
