@@ -1105,6 +1105,8 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 // store last updated at
 export const telegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
+		functions.logger.info('telegramBotCommands called with body', req.body);
+
 		try {
 			const { message } = req.body;
 			const { text, chat } = message;
@@ -1298,6 +1300,7 @@ export const telegramBotCommands = functions.https.onRequest(async (req, res) =>
 
 export const discordBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
+		functions.logger.info('discordBotCommands called', { req });
 		try {
 			if (!DISCORD_PUBLIC_KEY) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
 
@@ -1591,7 +1594,7 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
 			const { command, text, user_id } = req.body;
-			functions.logger.info('req.body :', req.body);
+			functions.logger.info('slackBotCommands req.body :', req.body);
 
 			if (command == '/polkasafe-add') {
 				await sendSlackMessage(String(user_id), 'Adding address...');

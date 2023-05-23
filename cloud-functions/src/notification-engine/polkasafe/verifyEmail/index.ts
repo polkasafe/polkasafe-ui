@@ -52,6 +52,10 @@ export default async function verifyEmail(args: Args) {
 			token
 		});
 
+		await addressDoc.ref.update({
+			notification_preferences: updatedNotificationPreferences
+		});
+
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
@@ -60,9 +64,5 @@ export default async function verifyEmail(args: Args) {
 			subject
 		);
 		await notificationServiceInstance.sendEmailNotification(updatedNotificationPreferences, true);
-
-		await addressDoc.ref.update({
-			notification_preferences: updatedNotificationPreferences
-		});
 	}
 }
