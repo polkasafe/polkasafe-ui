@@ -59,6 +59,10 @@ export default async function verifyEmail(args: Args) {
 			textMessage,
 			subject
 		);
-		notificationServiceInstance.sendEmailNotification(updatedNotificationPreferences, true);
+		await notificationServiceInstance.sendEmailNotification(updatedNotificationPreferences, true);
+
+		await addressDoc.ref.update({
+			notification_preferences: updatedNotificationPreferences
+		});
 	}
 }
