@@ -10,7 +10,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL, IUserNotificationTriggerPreferences, NotificationStatus, Triggers } from 'src/types';
-import { BellIcon, CheckOutlined, DiscordIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CheckOutlined, DiscordIcon, ElementIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -412,7 +412,7 @@ const Notifications = () => {
 					</div>
 				}
 				<div className='col-span-3'></div>
-				{notification_preferences.channelPreferences['email']?.handle && !notification_preferences.channelPreferences['email']?.verified &&
+				{notification_preferences.channelPreferences['email']?.handle === email && !notification_preferences.channelPreferences['email']?.verified &&
 					<section className='mt-2 col-span-5 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 						<WarningCircleIcon />
 						<p>An email has been sent to your email address. Click on the sent link to Verify your email address</p>
@@ -439,6 +439,10 @@ const Notifications = () => {
 					<SlackModal/>
 					<span>to a Slack channel to get Slack notifications</span>
 				</div>
+			</div>
+			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
+				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><ElementIcon /> Element Notifications</span></div>
+				<div className='col-span-5 text-primary'>COMING SOON...</div>
 			</div>
 		</div>
 	);

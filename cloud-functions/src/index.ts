@@ -1531,13 +1531,13 @@ export const registerPolkasafeDiscordBotCommands = functions.https.onRequest(asy
 	});
 });
 
-export const slackBotCommands = functions.https.onRequest(async (req, res) => {
+export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		try {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
 			const { command, text, user_id } = req.body;
-			functions.logger.info('slackBotCommands req :', { req });
+			functions.logger.info('polkasafeSlackBotCommands req :', { req });
 
 			if (command == '/polkasafe-add') {
 				await sendSlackMessage(String(user_id), 'Adding address...');
@@ -1658,7 +1658,7 @@ export const slackBotCommands = functions.https.onRequest(async (req, res) => {
 				}
 			}
 		} catch (err:unknown) {
-			functions.logger.error('Error in slackBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in polkasafeSlackBotCommands :', { err, stack: (err as any).stack });
 			if (!res.headersSent) res.status(500).json({ error: responseMessages.internal });
 		}
 
