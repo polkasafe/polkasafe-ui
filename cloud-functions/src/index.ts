@@ -1100,9 +1100,6 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 	});
 });
 
-// set
-// TODO: return BE data first and then save data to BE and return data from BE;
-// store last updated at
 export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		functions.logger.info('polkasafeTelegramBotCommands req', { req } );
@@ -1324,10 +1321,9 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 			if (!isValidRequest) return res.status(401).send('Invalid request signature.');
 
 			const interactionReq = req.body;
-			if (!interactionReq || !interactionReq.type || !interactionReq.data) return res.status(400).send('Invalid request body.');
-			const interaction = interactionReq.data;
+			if (!interactionReq || !interactionReq.type) return res.status(400).send('Invalid request body.');
 
-			functions.logger.info('Interaction received', { interactionReq });
+			functions.logger.info('Interaction received');
 
 			if (interactionReq.type === InteractionType.Ping) {
 				return res.status(200).send({
@@ -1335,8 +1331,9 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 				});
 			}
 
-			const { name, options } = interaction;
+			if (!interactionReq.data) return res.status(400).send('Invalid request body.');
 
+			const { name, options } = interactionReq.data;
 			if (!name || !options) return res.status(400).send('Invalid request body.');
 
 			if (name === 'remove') {
