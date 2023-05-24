@@ -183,7 +183,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
 				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
-					<AddAddress setSignatories={setSignatories} onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
+					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
 				</Modal>
 			</>
 		);
