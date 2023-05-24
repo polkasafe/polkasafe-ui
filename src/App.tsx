@@ -20,14 +20,14 @@ function App() {
 		<BrowserRouter>
 			<ConfigProvider theme={antdTheme}>
 				<ThemeProvider theme={styledTheme}>
-					<UserDetailsProvider>
-						<GlobalStyle/>
-						<ApiContextProvider>
+					<ApiContextProvider>
+						<UserDetailsProvider>
+							<GlobalStyle/>
 							<ModalContextProvider>
 								<AppLayout />
 							</ModalContextProvider>
-						</ApiContextProvider>
-					</UserDetailsProvider>
+						</UserDetailsProvider>
+					</ApiContextProvider>
 				</ThemeProvider>
 			</ConfigProvider>
 		</BrowserRouter>
