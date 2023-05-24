@@ -354,7 +354,7 @@ const Notifications = () => {
 	};
 
 	return (
-		<div className='flex flex-col gap-y-4 scale-[80%] h-[125%] w-[125%] origin-top-left'>
+		<div className='flex flex-col gap-y-4'>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-text_secondary'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2'><BellIcon /> General</span></div>
 				<div className='col-span-7'>
