@@ -21,10 +21,9 @@ interface IMultisigProps {
 	addAddress?: string
 	onCancel?: () => void
 	setAddAddress?: React.Dispatch<React.SetStateAction<string>>
-	setSignatories?: React.Dispatch<React.SetStateAction<string[]>>
 }
 
-const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress, setSignatories }) => {
+const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
 
@@ -86,19 +85,13 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 				}
 
 				if(addAddressData){
-					if(setSignatories){
-						setSignatories((prevState) => {
-							return [...prevState, address];
-						});
-					}
-					else{
-						setUserDetailsContextState((prevState) => {
-							return {
-								...prevState,
-								addressBook: addAddressData
-							};
-						});
-					}
+
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							addressBook: addAddressData
+						};
+					});
 
 					queueNotification({
 						header: 'Success!',
