@@ -5,6 +5,7 @@
 import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
 import { Button, Modal, Tooltip } from 'antd';
+import { Spin } from 'antd';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -24,7 +25,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
-import { Spin } from 'antd';
+
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -46,8 +47,8 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
-	const [signatureLoader, setsignatureLoader] = useState(true);
-	const [assetDataLoader, setassetDataLoader] = useState(true);
+	const [signatureLoader, setsignatureLoader] = useState<boolean>(true);
+	const [assetDataLoader, setassetDataLoader] = useState<boolean>(true);
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleGetAssets = useCallback(async () => {
@@ -76,14 +77,14 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 			}
 
 			if (data) {
-				setAssetsData(data);
 				setassetDataLoader(false);
+				setAssetsData(data);
 			}
 
 		} catch (error) {
 			console.log('ERROR', error);
 		}
-	}, [activeMultisig, network]);
+	}, [activeMultisig, currentMultisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
@@ -206,17 +207,17 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					<div>
 						<div className='text-white'>Signatories</div>
 						<div className='font-bold text-lg text-primary'>
-							{signatureLoader ? <Spin size="small" /> : currentMultisig?.signatories.length || 0}
+							{signatureLoader ? <Spin size='default' /> : currentMultisig?.signatories.length || 0}
 						</div>
 					</div>
 					<div>
 						<div className='text-white'>Tokens</div>
-						<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size="small" /> : assetsData.length}</div>
+						<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size='default' /> : assetsData.length}</div>
 					</div>
 					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-lg text-primary'>
-							{assetDataLoader ? <Spin size="small" /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
+							{assetDataLoader ? <Spin size='default' /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
 						</div>
 					</div>
 				</div>
@@ -235,7 +236,6 @@ export default styled(DashboardCard)`
 	}
 	.ant-spin-nested-loading .ant-spin-blur::after{
 		opacity: 1 !important;
-	}import { Spin } from 'antd';
-
+	}
 `;
 
