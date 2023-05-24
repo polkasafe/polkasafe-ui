@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { bnToBn } from '@polkadot/util';
 import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -182,7 +183,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			}
 			else{
 				await approveMultisigTransfer({
-					amount: new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
+					amount: network === 'astar' ? bnToBn(decodedCallData.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
 					api,
 					approvingAddress: address,
 					callDataHex: callDataString,

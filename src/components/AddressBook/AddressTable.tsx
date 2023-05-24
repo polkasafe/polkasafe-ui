@@ -11,7 +11,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
+// import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -87,7 +87,7 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 										size={30}
 										theme={'polkadot'}
 									/>
-									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{getEncodedAddress(address, network)}</span>
+									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
 										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
 										<a href={`https://${network}.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >

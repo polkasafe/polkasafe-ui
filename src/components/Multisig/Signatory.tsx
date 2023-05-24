@@ -86,17 +86,16 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
 
-		const substrateAddress = getSubstrateAddress(address);
-		if(!substrateAddress) return; //is invalid
+		if(!address) return; //is invalid
 
 		setSignatories((prevState) => {
-			if(prevState.includes(substrateAddress)){
+			if(prevState.includes(address)){
 				return prevState;
 			}
 			else{
 				return [
 					...prevState,
-					substrateAddress
+					address
 				];
 			}
 		});
@@ -111,13 +110,12 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
 
-		const substrateAddress = getSubstrateAddress(address);
-		if(!substrateAddress) return; //is invalid
+		if(!address) return; //is invalid
 
-		if(signatories.includes(substrateAddress)){
+		if(signatories.includes(address)){
 			setSignatories((prevState) => {
 				const copyState = [...prevState];
-				const index = copyState.indexOf(substrateAddress);
+				const index = copyState.indexOf(address);
 				copyState.splice(index, 1);
 				return copyState;
 			});
@@ -131,13 +129,12 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		const data = event.target.id;
 		const address = `${data}`.split('-')[1];
 
-		const substrateAddress = getSubstrateAddress(address);
-		if(!substrateAddress) return; //is invalid
+		if(!address) return; //is invalid
 
-		if(signatories.includes(substrateAddress)){
+		if(signatories.includes(address)){
 			setSignatories((prevState) => {
 				const copyState = [...prevState];
-				const index = copyState.indexOf(substrateAddress);
+				const index = copyState.indexOf(address);
 				copyState.splice(index, 1);
 				return copyState;
 			});
@@ -151,17 +148,16 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		const data = event.target.id;
 		const address = `${data}`.split('-')[1];
 
-		const substrateAddress = getSubstrateAddress(address);
-		if(!substrateAddress || !api || !apiReady) return; //is invalid
+		if(!address || !api || !apiReady) return; //is invalid
 
 		setSignatories((prevState) => {
-			if(prevState.includes(substrateAddress)){
+			if(prevState.includes(address)){
 				return prevState;
 			}
 			else{
 				return [
 					...prevState,
-					substrateAddress
+					address
 				];
 			}
 		});
