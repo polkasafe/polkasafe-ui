@@ -26,31 +26,31 @@ const initialUserDetailsContext : UserDetailsContextType = {
 		channelPreferences: {},
 		triggerPreferences:{
 			[Triggers.CANCELLED_TRANSACTION]: {
-				enabled: false,
+				enabled: true,
 				name: Triggers.CANCELLED_TRANSACTION
 			},
 			[Triggers.EXECUTED_TRANSACTION]: {
-				enabled: false,
+				enabled: true,
 				name: Triggers.EXECUTED_TRANSACTION
 			},
 			[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
-				enabled: false,
+				enabled: true,
 				name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
 			},
 			[Triggers.EXECUTED_PROXY]:{
-				enabled: false,
+				enabled: true,
 				name: Triggers.EXECUTED_PROXY
 			},
 			[Triggers.INIT_MULTISIG_TRANSFER]:{
-				enabled: false,
+				enabled: true,
 				name: Triggers.INIT_MULTISIG_TRANSFER
 			},
 			[Triggers.CREATED_PROXY]:{
-				enabled: false,
+				enabled: true,
 				name: Triggers.CREATED_PROXY
 			},
 			[Triggers.EDIT_MULTISIG_USERS_START]:{
-				enabled: false,
+				enabled: true,
 				name: Triggers.EDIT_MULTISIG_USERS_START
 			}
 		}
@@ -116,7 +116,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 		}
 		setLoading(false);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [network]);
+	}, []);
 
 	useEffect(() => {
 		if(localStorage.getItem('signature')){
@@ -127,7 +127,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			navigate('/');
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [connectAddress]);
+	}, []);
 
 	return (
 		<UserDetailsContext.Provider value={{ ...userDetailsContextState, setUserDetailsContextState }}>

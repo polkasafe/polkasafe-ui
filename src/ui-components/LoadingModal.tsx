@@ -31,7 +31,7 @@ const LoadingModal = ({ loading, success, open, onCancel, message }: ILoadingMod
 					<OutlineCloseIcon className='text-primary w-2 h-2' />
 				</button>}
 			open={open}
-			className={'w-auto text-primary md:min-w-[500px] scale-90'}
+			className={'w-auto text-primary md:min-w-[500px]'}
 		>
 			{loading ? <LoadingLottie message={message} /> : success ? <SuccessTransactionLottie message='Successful!'/> : <FailedTransactionLottie message='Failed!' />}
 		</Modal>

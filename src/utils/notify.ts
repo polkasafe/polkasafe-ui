@@ -30,7 +30,7 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 			const { data: notifyData, error: notifyError } = await  notifyRes.json() as { data: string, error: string };
 
 			if(notifyError) {
-				console.log(notifyError);
+				console.log(notifyData);
 				return;
 			}
 

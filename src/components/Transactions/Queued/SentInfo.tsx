@@ -96,7 +96,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Cancel Transaction</h3>}
 				open={openCancelModal}
-				className={' w-auto md:min-w-[500px] scale-90'}
+				className={' w-auto md:min-w-[500px]'}
 			>
 				<div className='flex flex-col h-full'>
 					<div className='text-white'>Are you sure you want to cancel the Transaction?</div>
