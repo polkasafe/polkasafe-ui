@@ -52,7 +52,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || addressBook[0]?.address, network) || '');
+	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || '', network) || '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
@@ -357,7 +357,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 													id='recipient'
 													placeholder="Send to Address.."
 													onChange={(value) => setRecipientAddress(value)}
-													defaultValue={defaultSelectedAddress || addressBook[0].address}
+													defaultValue={defaultSelectedAddress || ''}
 												/>
 												<div className='absolute right-2'>
 													<button onClick={() => copyText(recipientAddress, true, network)}>

@@ -109,7 +109,7 @@ const Feedback = () => {
 						</span>;
 					})}
 				</div>
-				<Button onClick={handleSubmitFeedback} size='large' loading={loading} className='bg-highlight text-primary w-full border-none outline-none'>Share Feedback</Button>
+				<Button disabled={!rating} onClick={handleSubmitFeedback} size='large' loading={loading} className={`bg-highlight ${!rating ? 'text-text_secondary' : 'text-primary'} w-full border-none outline-none`}>Share Feedback</Button>
 			</article>
 		</>
 	);
