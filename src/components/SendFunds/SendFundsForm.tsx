@@ -52,7 +52,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || addressBook[0]?.address, network) || '');
+	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || '', network) || '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
@@ -357,7 +357,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 													id='recipient'
 													placeholder="Send to Address.."
 													onChange={(value) => setRecipientAddress(value)}
-													defaultValue={defaultSelectedAddress || addressBook[0].address}
+													defaultValue={defaultSelectedAddress || ''}
 												/>
 												<div className='absolute right-2'>
 													<button onClick={() => copyText(recipientAddress, true, network)}>
@@ -381,7 +381,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Amount</label>
 								<div className='flex items-start gap-x-[10px]'>
 									<article className='w-[500px]'>
-										<BalanceInput multisigBalance={multisigBalance} onChange={(balance) => setAmount(balance)} />
+										<BalanceInput fromBalance={multisigBalance} onChange={(balance) => setAmount(balance)} />
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>

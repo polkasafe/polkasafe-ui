@@ -5,6 +5,7 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Form, Input, MenuProps, Modal } from 'antd';
 import { Checkbox } from 'antd';
 import React, { FC, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -21,6 +22,7 @@ import TelegramInfoModal from './TelegramInfoModal';
 const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
+	const { pathname } = useLocation();
 	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(2);
 	const [email, setEmail] = useState<string>(notification_preferences.channelPreferences['email']?.handle || '');
@@ -354,7 +356,7 @@ const Notifications = () => {
 	};
 
 	return (
-		<div className='flex flex-col gap-y-4 scale-[80%] h-[125%] w-[125%] origin-top-left'>
+		<div className={`flex flex-col gap-y-4 ${pathname === '/notification-settings' && 'scale-[80%] h-[125%] w-[125%] origin-top-left'}`}>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-text_secondary'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2'><BellIcon /> General</span></div>
 				<div className='col-span-7'>

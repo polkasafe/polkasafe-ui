@@ -45,9 +45,10 @@ interface ISentInfoProps {
 	isProxyAddApproval: boolean
 	delegate_id?: string
 	isProxyRemovalApproval?: boolean
+	getMultiDataLoading?: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -96,7 +97,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Cancel Transaction</h3>}
 				open={openCancelModal}
-				className={' w-auto md:min-w-[500px]'}
+				className={' w-auto md:min-w-[500px] scale-90'}
 			>
 				<div className='flex flex-col h-full'>
 					<div className='text-white'>Are you sure you want to cancel the Transaction?</div>
@@ -175,7 +176,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 						</p>}
 							</div>
 						</div>
-					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? <></>
+					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading ? <></>
 						: <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
 							<span>
 								<WarningCircleIcon className='text-base' />

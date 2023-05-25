@@ -41,7 +41,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 2. Set relevant vars
 	const ZERO_WEIGHT = new Uint8Array(0);
 	let WEIGHT: any = ZERO_WEIGHT;
-	let AMOUNT_TO_SEND: number;
+	let AMOUNT_TO_SEND: string;
 	let displayAmount: string;
 
 	// remove approving address address from signatories
@@ -54,7 +54,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	if(!callDataHex) return;
 
 	if(callDataHex && amount && recipientAddress) {
-		AMOUNT_TO_SEND = amount.toNumber();
+		AMOUNT_TO_SEND = amount.toString();
 		displayAmount = formatBalance(AMOUNT_TO_SEND);
 
 		const callData = api.createType('Call', callDataHex);
