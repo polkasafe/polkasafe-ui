@@ -14,7 +14,7 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 
 		if(!userAddress || !signature) {
 			console.log('ERROR');
-			return;
+			return { error: 'Invalid User' };
 		}
 		else{
 
@@ -35,7 +35,7 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 					message: notifyError,
 					status: NotificationStatus.ERROR
 				});
-				return { error:notifyError };
+				return { error: notifyError };
 			}
 
 			if(notifyData){
