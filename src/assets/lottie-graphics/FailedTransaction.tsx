@@ -11,12 +11,13 @@ interface Props {
 	message?: string
 	width?: number
 	waitMessage?: string
+	className?: string
 }
 
-function FailedTransactionLottie({ message, width = 350 }: Props): ReactElement {
+function FailedTransactionLottie({ message, width = 350, waitMessage, className }: Props): ReactElement {
 
 	return (
-		<div className='w-full flex flex-col justify-center items-center'>
+		<div className={`w-full flex flex-col justify-center items-center ${className}`}>
 			<Lottie
 				animationData={FailedScreen}
 				style={{
@@ -24,7 +25,8 @@ function FailedTransactionLottie({ message, width = 350 }: Props): ReactElement 
 				}}
 				play={true}
 			/>
-			<div className='font-medium text-lg text-failure' >{message}</div>
+			<div className='font-medium text-lg mb-1 text-failure' >{message}</div>
+			<div className='text-text_secondary max-w-[452px] text-center' >{waitMessage}</div>
 		</div>
 	);
 }

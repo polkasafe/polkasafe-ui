@@ -11,7 +11,6 @@ import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { FC, useEffect, useState } from 'react';
-import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -36,6 +35,7 @@ import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
+import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 interface ISendFundsFormProps {
@@ -167,11 +167,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setSuccess(true);
 		} catch (error) {
 			console.log(error);
+			setTransactionData(error);
 			setLoading(false);
 			setFailure(true);
-			setTimeout(() => {
-				setFailure(false);
-			}, 5000);
 		}
 	};
 
@@ -300,7 +298,18 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						onCancel?.();
 					}}
 				/>
-				: failure ? <FailedTransactionLottie message='Failed!' /> :
+				: failure ?
+					<TransactionFailedScreen
+						onDone={() => {
+							setNewTxn?.(prev => !prev);
+							onCancel?.();
+						}}
+						txnHash={transactionData?.callHash || ''}
+						sender={address}
+						failedMessage='Oh no! Something went wrong.'
+						waitMessage='Your transaction has failed due to some technical error. Please try again...Details of the transaction are included below'
+						created_at={new Date()}
+					/> :
 					<Spin wrapperClassName={className} spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}

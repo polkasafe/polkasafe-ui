@@ -176,7 +176,12 @@ export default async function initMultisigTransfer({
 										message: 'Transaction Failed',
 										status: NotificationStatus.ERROR
 									});
-									reject('Transaction Failed');
+									reject({
+										callData: tx.method.toHex(),
+										callHash: tx.method.hash.toHex(),
+										created_at: new Date(),
+										error: 'Transaction Failed'
+									});
 									return;
 								}
 
@@ -189,14 +194,23 @@ export default async function initMultisigTransfer({
 									status: NotificationStatus.ERROR
 								});
 
-								reject(`Error: ${section}.${method}\n${docs.join(' ')}`);
+								reject({
+									callData: tx.method.toHex(),
+									callHash: tx.method.hash.toHex(),
+									created_at: new Date(),
+									error: `Error: ${section}.${method}\n${docs.join(' ')}`
+								});
 							}
 						}
 					}
 				}).catch((error) => {
 					console.log(':( transaction failed');
 					console.error('ERROR:', error);
-					reject();
+					reject({
+						callData: tx.method.toHex(),
+						callHash: tx.method.hash.toHex(),
+						created_at: new Date()
+					});
 					queueNotification({
 						header: 'Failed!',
 						message: error.message,
@@ -290,7 +304,12 @@ export default async function initMultisigTransfer({
 										message: 'Transaction Failed',
 										status: NotificationStatus.ERROR
 									});
-									reject('Transaction Failed');
+									reject({
+										callData: call.method.toHex(),
+										callHash: call.method.hash.toHex(),
+										created_at: new Date(),
+										error: 'Transaction Failed'
+									});
 									return;
 								}
 
@@ -303,14 +322,23 @@ export default async function initMultisigTransfer({
 									status: NotificationStatus.ERROR
 								});
 
-								reject(`Error: ${section}.${method}\n${docs.join(' ')}`);
+								reject({
+									callData: call.method.toHex(),
+									callHash: call.method.hash.toHex(),
+									created_at: new Date(),
+									error: `Error: ${section}.${method}\n${docs.join(' ')}`
+								});
 							}
 						}
 					}
 				}).catch((error) => {
 					console.log(':( transaction failed');
 					console.error('ERROR:', error);
-					reject();
+					reject({
+						callData: call.method.toHex(),
+						callHash: call.method.hash.toHex(),
+						created_at: new Date()
+					});
 					queueNotification({
 						header: 'Failed!',
 						message: error.message,
