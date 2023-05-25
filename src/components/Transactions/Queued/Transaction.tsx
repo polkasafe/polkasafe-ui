@@ -364,6 +364,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							approvals={approvals}
 							threshold={threshold}
 							loading={loading}
+							getMultiDataLoading={getMultiDataLoading}
 							recipientAddress={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id}
 							setCallDataString={setCallDataString}
 							handleApproveTransaction={handleApproveTransaction}
