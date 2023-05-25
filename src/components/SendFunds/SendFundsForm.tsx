@@ -381,7 +381,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Amount</label>
 								<div className='flex items-start gap-x-[10px]'>
 									<article className='w-[500px]'>
-										<BalanceInput multisigBalance={multisigBalance} onChange={(balance) => setAmount(balance)} />
+										<BalanceInput fromBalance={multisigBalance} onChange={(balance) => setAmount(balance)} />
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>

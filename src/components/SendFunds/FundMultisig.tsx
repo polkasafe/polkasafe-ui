@@ -41,6 +41,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const [isValidSender, setIsValidSender] = useState(true);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [txnHash, setTxnHash] = useState<string>('');
+	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
 
 	useEffect(() => {
 		if(!getSubstrateAddress(selectedSender)){
@@ -140,7 +141,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 								<section className='mt-6'>
 									<div className='flex items-center justify-between mb-2'>
 										<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
-										<Balance address={selectedSender} />
+										<Balance address={selectedSender} onChange={setSelectedAccountBalance} />
 									</div>
 									<div className='flex items-center gap-x-[10px]'>
 										<div className='w-full'>
@@ -173,7 +174,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 									</div>
 								</section>
 
-								<BalanceInput className='mt-6' placeholder={'5'} onChange={(balance) => setAmount(balance)} />
+								<BalanceInput fromBalance={selectedAccountBalance} className='mt-6' placeholder={'5'} onChange={(balance) => setAmount(balance)} />
 
 								{/* <section className='mt-6'>
 						<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
@@ -203,7 +204,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>
