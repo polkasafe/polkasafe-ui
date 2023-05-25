@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+// import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IQueueItem } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
@@ -61,8 +61,8 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 				return;
 			}
 			else{
-
-				const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
+				// TODO: Aleem: only for testing, after approval need to change back original
+				const getQueueTransactions = await fetch('http://127.0.0.1:5001/polkasafe-a8042/us-central1/getMultisigQueue', {
 					body: JSON.stringify({
 						limit: 10,
 						multisigAddress: multisig?.address,
@@ -119,6 +119,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							refetch={() => setRefetch(prev => !prev)}
 							amountUSD={amountUSD}
 							numberOfTransactions={queuedTransactions.length || 0}
+							notifications={transaction.notifications}
 						/>
 					</section>;
 				})}

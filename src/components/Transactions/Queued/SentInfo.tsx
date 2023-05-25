@@ -11,9 +11,11 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { chainProperties } from 'src/global/networkConstants';
+import { ITxNotification } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, NotificationIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import { getMultisigInfo } from 'src/utils/getMultisigInfo';
@@ -23,6 +25,7 @@ import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import EditNote from './EditNote';
+import LoadingButton from './LoadingButton';
 
 interface ISentInfoProps {
 	amount: string;
@@ -45,9 +48,10 @@ interface ISentInfoProps {
 	isProxyAddApproval: boolean
 	delegate_id?: string
 	isProxyRemovalApproval?: boolean
+	notifications?:ITxNotification;
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -69,8 +73,8 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 		getDepositor();
 	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
 
-	const approvalReminder = async () => {
-		notify({
+	const approvalReminder = async (address:string) => {
+		const res = await notify({
 			args: {
 				address: userAddress,
 				callHash,
@@ -79,6 +83,20 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 			},
 			network,
 			triggerName: 'approvalReminder'
+		});
+		if(res?.error){
+			throw new Error(res.error);
+		}
+		await fetch('http://127.0.0.1:5001/polkasafe-a8042/us-central1/updateTransactionNotifications', {
+			body: JSON.stringify({
+				callHash,
+				from:depositor,
+				multisigAddress : activeMultisigObject?.address || '',
+				sentAt: Date.now(),
+				signatory: address
+			}),
+			headers: firebaseFunctionsHeader(network),
+			method: 'POST'
 		});
 	};
 
@@ -390,57 +408,66 @@ const SentInfo: FC<ISentInfoProps> = ({ note, delegate_id, isProxyAddApproval, i
 											</Timeline.Item>
 										))}
 
-										{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => (
-											<Timeline.Item
-												key={i}
-												dot={
-													<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
-														<CircleWatchIcon className='text-waiting text-sm' />
-													</span>
-												}
-												className='warning bg-transaparent'
-											>
-												<div
-													className='mb-3 flex items-center gap-x-4 relative'
-												>
-													<AddressComponent address={address} />
-													{depositor === userAddress &&
-														<Button onClick={approvalReminder} className='flex absolute right-[-3.5rem] items-center justify-center outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-sm'>
-															<NotificationIcon />
-														</Button>
+										{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => {
+											let hoursDifference = undefined;
+											if(notifications?.[address]?.sent_at){
+												const olderDate = new Date(notifications?.[address].sent_at);
+												const currentDate = new Date();
+												const timeDifference = currentDate.getTime() - olderDate.getTime();
+												hoursDifference = timeDifference / (1000 * 60 * 60);
+											}
+											return (
+												<Timeline.Item
+													key={i}
+													dot={
+														<span className='bg-waiting bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+															<CircleWatchIcon className='text-waiting text-sm' />
+														</span>
 													}
-													{/* <Identicon
-														value={address}
-														size={30}
-														theme='polkadot'
-													/>
+													className='warning bg-transaparent'
+												>
 													<div
-														className='flex flex-col gap-y-[6px]'
+														className='mb-3 flex items-center gap-x-4 relative'
 													>
-														<p
-															className='font-medium text-sm leading-[15px] text-white'
+														<AddressComponent address={address} />
+														{depositor === userAddress && (
+															(hoursDifference === undefined || hoursDifference > 8) &&
+															<LoadingButton address={address} onClick={approvalReminder} timeDifferent={hoursDifference}/>
+														)
+														}
+														{/* <Identicon
+															value={address}
+															size={30}
+															theme='polkadot'
+														/>
+														<div
+															className='flex flex-col gap-y-[6px]'
 														>
-															{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
-														</p>
-														<p
-															className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-														>
-															<span>
-																{shortenAddress(getEncodedAddress(address, network) || '')}
-															</span>
-															<span
-																className='flex items-center gap-x-2 text-sm'
+															<p
+																className='font-medium text-sm leading-[15px] text-white'
 															>
-																<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-																<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
-																	<ExternalLinkIcon  />
-																</a>
-															</span>
-														</p>
-													</div> */}
-												</div>
-											</Timeline.Item>
-										))}
+																{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+															</p>
+															<p
+																className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+															>
+																<span>
+																	{shortenAddress(getEncodedAddress(address, network) || '')}
+																</span>
+																<span
+																	className='flex items-center gap-x-2 text-sm'
+																>
+																	<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
+																	<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
+																		<ExternalLinkIcon  />
+																	</a>
+																</span>
+															</p>
+														</div> */}
+													</div>
+												</Timeline.Item>
+											);
+										})}
 
 									</Timeline>
 								</Collapse.Panel>

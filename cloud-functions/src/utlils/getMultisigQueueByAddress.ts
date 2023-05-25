@@ -58,7 +58,8 @@ export default async function getMultisigQueueByAddress(
 					}, Number.MAX_SAFE_INTEGER) * 1000).toDate(),
 					threshold: multisigQueueItem.threshold,
 					approvals: multisigData?.data?.process?.filter((item: any) => item.status === 'Approval').map((item: any) => item.account_display.address),
-					note: transactionDoc.exists && transaction?.note ? transaction?.note : ''
+					notifications: transactionDoc.exists && transaction?.notification ? transaction?.notification : undefined,
+					note: transactionDoc.exists && transaction?.note ? transaction?.note : '',
 				};
 
 				queueItems.push(newQueueItem);

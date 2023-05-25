@@ -46,6 +46,11 @@ export interface ChainProperties {
 	};
 }
 
+export interface ITxNotification {
+	[address:string]:{
+		sent_at:Date;
+	}
+}
 export interface ITransaction {
 	callData?: string;
 	callHash: string;
@@ -57,6 +62,7 @@ export interface ITransaction {
 	amount_usd: string;
 	amount_token: string;
 	network: string;
+	notification?: ITxNotification;
 	note?: string;
 }
 
@@ -88,6 +94,7 @@ export interface IQueueItem {
 	created_at: Date;
 	approvals: string[];
 	threshold: number;
+	notifications?:ITxNotification;
 	note?: string;
 }
 

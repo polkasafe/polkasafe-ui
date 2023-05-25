@@ -30,8 +30,12 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 			const { data: notifyData, error: notifyError } = await  notifyRes.json() as { data: string, error: string };
 
 			if(notifyError) {
-				console.log(notifyData);
-				return;
+				queueNotification({
+					header: 'Error',
+					message: notifyError,
+					status: NotificationStatus.ERROR
+				});
+				return { error:notifyError };
 			}
 
 			if(notifyData){
@@ -40,10 +44,12 @@ export const notify = async ({ network, triggerName, args }: { network: string, 
 					message: '',
 					status: NotificationStatus.SUCCESS
 				});
+				return { message:'success' };
 			}
 
 		}
 	} catch (error){
 		console.log('ERROR', error);
+		return { error };
 	}
 };

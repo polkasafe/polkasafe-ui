@@ -15,7 +15,8 @@ import {
 	IUser,
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
-	IUserNotificationChannelPreferences } from './types';
+	IUserNotificationChannelPreferences, 
+	ITxNotification} from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -45,6 +46,7 @@ import { verifyKey } from 'discord-interactions';
 import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
+import { getMultisigInfo } from './utlils/getMultisigInfo';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -894,6 +896,46 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
 				txRef.set({ callHash, note: String(note) }, { merge: true });
+				return res.status(200).json({ data: responseMessages.success });
+			}
+
+			return res.status(400).json({ error: responseMessages.invalid_params });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateTransactionNote :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const updateTransactionNotifications = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { callHash, multisigAddress, signatory, sentAt, from } = req.body;
+		if (!callHash || !signatory || !sentAt || !from) return res.status(400).json({ error: responseMessages.missing_params });
+		
+		try {
+			
+			const substrateAddress = getSubstrateAddress(String(address));
+			const signatoryAddress = getSubstrateAddress(String(signatory));
+			const txRef = firestoreDB.collection('transactions').doc(callHash);
+			const txDoc = await txRef.get();
+			
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
+			if (!encodedMultisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
+
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress).get();
+
+			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
+				const notification:ITxNotification = {}
+				notification[signatoryAddress] = {sent_at:sentAt}
+				txRef.set({ callHash, notification}, { merge: true });
 				return res.status(200).json({ data: responseMessages.success });
 			}
 
