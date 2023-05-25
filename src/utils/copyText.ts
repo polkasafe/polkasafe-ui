@@ -14,9 +14,22 @@ import getEncodedAddress from './getEncodedAddress';
  * @param network network to encode the address string for
  *
  */
+const showMessage = (): void => {
+	message.config({
+		top: 550
+	});
+	message.open({
+		content: 'Copied!',
+		duration: 3,
+		style: {
+			position: 'fixed',
+			right:0
+		},
+		type: 'success'
+	});
+};
 
 export default function copyText(text: string, isAddress?: boolean, network?: string) {
-
 	let textToCopy = text;
 
 	if (isAddress && network) {
@@ -24,5 +37,5 @@ export default function copyText(text: string, isAddress?: boolean, network?: st
 	}
 
 	navigator.clipboard.writeText(`${textToCopy}`);
-	message.success('Copied!');
+	showMessage();
 }
