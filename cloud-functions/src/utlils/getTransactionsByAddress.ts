@@ -49,7 +49,11 @@ export default async function getTransactionsByAddress(
 					amount_token: String(transfer.amount),
 					block_number: Number(transfer.block_num),
 					network: network,
-					note: transactionDoc.exists && storedTransaction?.note ? storedTransaction?.note : ''
+					note: transactionDoc.exists && storedTransaction?.note ? storedTransaction?.note : '',
+					notifications: Object.fromEntries(
+						Object.entries(storedTransaction.notifications || {}).map(([address, notification]) =>
+							[address, { ...notification, lastNotified: (notification.lastNotified as any)?.toDate?.() }])
+					)
 				};
 
 				transactions.push(newTransaction);

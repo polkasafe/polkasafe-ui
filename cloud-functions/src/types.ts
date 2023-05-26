@@ -58,6 +58,11 @@ export interface ITransaction {
 	amount_token: string;
 	network: string;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface IAsset {
