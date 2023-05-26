@@ -189,7 +189,7 @@ const Home = ({ className }: { className?: string }) => {
 												:
 												<></>
 								}
-								{!notification_preferences.channelPreferences[CHANNEL.EMAIL]?.verified &&
+								{!notification_preferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified &&
 									<EmailBadge/>
 								}
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
