@@ -24,7 +24,7 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
-
+import { Spin } from 'antd';
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
 import SendFundsForm from '../SendFunds/SendFundsForm';
@@ -46,7 +46,8 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
-
+	const [signatureLoader, setsignatureLoader] = useState<boolean>(true);
+	const [assetDataLoader, setassetDataLoader] = useState<boolean>(true);
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleGetAssets = useCallback(async () => {
@@ -67,18 +68,23 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 
 			const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
 
-			if(error) {
+			if (currentMultisig) {
+				setsignatureLoader(false);
+			}
+			if (error) {
+				setassetDataLoader(false);
 				return;
 			}
 
 			if(data){
+				setassetDataLoader(false);
 				setAssetsData(data);
 			}
 
 		} catch (error){
 			console.log('ERROR', error);
 		}
-	}, [activeMultisig, network]);
+	}, [activeMultisig,currentMultisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
@@ -201,17 +207,17 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					<div>
 						<div className='text-white'>Signatories</div>
 						<div className='font-bold text-lg text-primary'>
-							{currentMultisig?.signatories.length || 0}
+						{signatureLoader ? <Spin size='default' /> : currentMultisig?.signatories.length || 0}
 						</div>
 					</div>
 					<div>
 						<div className='text-white'>Tokens</div>
-						<div className='font-bold text-lg text-primary'>{assetsData.length}</div>
+						<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size='default' /> : assetsData.length}</div>
 					</div>
 					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-lg text-primary'>
-							{assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
+						{assetDataLoader ? <Spin size='default' /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
 						</div>
 					</div>
 				</div>
