@@ -44,8 +44,8 @@ export default async function editMultisigUsersStart(args: Args) {
 
 		if (addressData) {
 			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
-			const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, address);
-			const { deleted, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
+			const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, address);
+			const { deleted = false, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
 
 			if (deleted || !notification_preferences) continue; // skip if multisig is deleted or user has no notification preferences
 
