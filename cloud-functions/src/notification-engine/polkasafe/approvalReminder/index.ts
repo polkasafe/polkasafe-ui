@@ -62,5 +62,20 @@ export default async function approvalReminder(args: Args) {
 			link
 		}
 	);
-	notificationServiceInstance.notifyAllChannels(notification_preferences);
+	await notificationServiceInstance.notifyAllChannels(notification_preferences);
+
+	// update last notified time
+	const txDoc = await firestore_db.collection('transactions').doc(callHash).get();
+	let { notifications } = txDoc.data() || {};
+
+	notifications = {
+		...notifications,
+		[substrateAddress]: {
+			lastNotified: new Date()
+		}
+	};
+
+	await firestore_db.collection('transactions').doc(callHash).set({
+		notifications
+	}, { merge: true });
 }

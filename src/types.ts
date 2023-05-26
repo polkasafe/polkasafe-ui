@@ -145,6 +145,11 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface ITransaction {
@@ -160,6 +165,11 @@ export interface ITransaction {
 	amount_token: number;
 	network: string;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface INotification {

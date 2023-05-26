@@ -58,6 +58,11 @@ export interface ITransaction {
 	amount_token: string;
 	network: string;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface IAsset {
@@ -89,6 +94,11 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface INotification {
