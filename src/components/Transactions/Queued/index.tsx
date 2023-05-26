@@ -119,6 +119,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							refetch={() => setRefetch(prev => !prev)}
 							amountUSD={amountUSD}
 							numberOfTransactions={queuedTransactions.length || 0}
+							notifications={transaction?.notifications}
 						/>
 					</section>;
 				})}

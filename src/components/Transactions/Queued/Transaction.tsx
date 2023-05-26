@@ -16,7 +16,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress, IQueueItem } from 'src/types';
+import { IMultisigAddress, IQueueItem, ITxNotification } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
 import { approveAddProxy } from 'src/utils/approveAddProxy';
@@ -41,10 +41,11 @@ interface ITransactionProps {
 	amountUSD: string;
 	refetch?: () => void;
 	setQueuedTransactions?: React.Dispatch<React.SetStateAction<IQueueItem[]>>
-	numberOfTransactions: number
+	numberOfTransactions: number;
+	notifications?:ITxNotification;
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold }) => {
+const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold, notifications }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
@@ -374,6 +375,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							isProxyAddApproval={isProxyAddApproval}
 							delegate_id={decodedCallData?.args?.call?.args?.delegate?.id}
 							isProxyRemovalApproval={isProxyRemovalApproval}
+							notifications={notifications}
 						/>
 
 					</div>
