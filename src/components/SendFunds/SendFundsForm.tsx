@@ -52,7 +52,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : '');
+	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
@@ -175,6 +175,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const QrModal: FC = () => {
 		return (
 			<>
@@ -321,11 +322,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							}
 						>
 							<AddAddressModal/>
-							{fetchBalancesLoading ? <Skeleton active paragraph={{ rows: 0 }}/> : initiatorBalance.lt(totalDeposit.add(totalGas)) &&
-							<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+							{initiatorBalance.lt(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 								<WarningCircleIcon />
 								<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
-							</section>}
+							</section>
+								:
+								<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
+							}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
@@ -358,24 +361,34 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 											className='border-0 outline-0 my-0 p-0'
 											validateStatus={recipientAddress && validRecipient ? 'success' : 'error'}
 										>
-											<div className="flex items-center">
-												<AutoComplete
-													filterOption={(inputValue, options) => {
-														return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
-													}}
-													notFoundContent={validRecipient && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
-													options={autocompleteAddresses}
-													id='recipient'
-													placeholder="Send to Address.."
-													onChange={(value) => setRecipientAddress(value)}
-													defaultValue={defaultSelectedAddress || ''}
-												/>
-												<div className='absolute right-2'>
-													<button onClick={() => copyText(recipientAddress, true, network)}>
-														<CopyIcon className='mr-2 text-primary' />
-													</button>
-													<QrModal />
-												</div>
+											<div>
+												{recipientAddress && autocompleteAddresses.some((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipientAddress)) ?
+													<div className='border border-solid border-primary rounded-lg p-2 flex justify-between items-center'>
+														{autocompleteAddresses.find((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipientAddress))?.label}
+														<button
+															className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
+															onClick={() => {
+																setRecipientAddress('');
+															}}
+														>
+															<OutlineCloseIcon className='text-primary w-2 h-2' />
+														</button>
+													</div>
+													:
+													<AutoComplete
+														autoFocus
+														defaultOpen
+														filterOption={(inputValue, options) => {
+															return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
+														}}
+														notFoundContent={validRecipient && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
+														options={autocompleteAddresses}
+														id='recipient'
+														placeholder="Send to Address.."
+														onChange={(value) => setRecipientAddress(value)}
+														defaultValue={defaultSelectedAddress || ''}
+													/>
+												}
 											</div>
 										</Form.Item>
 									</article>
@@ -543,5 +556,9 @@ export default styled(SendFundsForm)`
 		z-index: 100;
 		display: flex !important;
 		align-items: center !important;
+	}
+
+	.ant-skeleton .ant-skeleton-content .ant-skeleton-title +.ant-skeleton-paragraph{
+		margin-block-start: 8px !important;
 	}
 `;
