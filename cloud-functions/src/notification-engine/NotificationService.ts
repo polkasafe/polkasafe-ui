@@ -148,7 +148,7 @@ export class NotificationService {
 
 		case NOTIFICATION_SOURCE.POLKASSEMBLY:
 			if (!this.sourceArgs?.network) return;
-			newNotificationRef = firestore_db.collection('networks').doc(this.sourceArgs.network).collection('notifications').doc();
+			newNotificationRef = firestore_db.collection('users').doc(String(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle)).collection('notifications').doc();
 			newNotification = {
 				id: newNotificationRef.id,
 				userId: Number(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle),
