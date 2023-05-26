@@ -75,6 +75,9 @@ export interface IPAUser {
 	salt: string;
 	username: string;
 	web3_signup: boolean;
+	notification_settings?: {
+		[network: string]: IUserNotificationPreferences
+	}
 }
 
 export interface IPANotification {
@@ -83,6 +86,6 @@ export interface IPANotification {
 	created_at: Date,
 	title: string,
 	message: string,
-	link?: string,
+	url?: string,
 	network: string
 }

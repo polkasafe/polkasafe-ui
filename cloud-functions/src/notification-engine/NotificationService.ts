@@ -155,7 +155,8 @@ export class NotificationService {
 				created_at: new Date(),
 				message: this.message,
 				network: String(this.sourceArgs.network),
-				title: this.subject
+				title: this.subject,
+				url: this.sourceArgs.link || ''
 			} as IPANotification;
 		}
 
