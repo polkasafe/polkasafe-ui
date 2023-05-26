@@ -52,7 +52,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
-	const [recipientAddress, setRecipientAddress] = useState(getEncodedAddress(defaultSelectedAddress || '', network) || '');
+	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : '');
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [callData, setCallData] = useState<string>('');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
@@ -86,6 +86,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
+		if(!recipientAddress) return;
+
 		if(!getSubstrateAddress(recipientAddress)){
 			setValidRecipient(false);
 			return;
@@ -352,7 +354,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										<Form.Item
 											name="recipient"
 											rules={[{ required: true }]}
-											help={!validRecipient && 'Please add a valid Address.'}
+											help={(!recipientAddress && 'Recipient Address is Required') || (!validRecipient && 'Please add a valid Address')}
 											className='border-0 outline-0 my-0 p-0'
 											validateStatus={recipientAddress && validRecipient ? 'success' : 'error'}
 										>

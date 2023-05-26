@@ -25,7 +25,8 @@ const Notifications = () => {
 	const { pathname } = useLocation();
 	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(2);
-	const [email, setEmail] = useState<string>(notification_preferences.channelPreferences['email']?.handle || '');
+	const emailPreference = notification_preferences?.channelPreferences?.[CHANNEL.EMAIL];
+	const [email, setEmail] = useState<string>(emailPreference?.handle || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(false);
@@ -37,7 +38,7 @@ const Notifications = () => {
 	const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
 	const [openSlackModal, setOpenSlackModal] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [resendEmail, setResendEmail] = useState<boolean>(notification_preferences.channelPreferences['email']?.verified || false);
+	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -214,7 +215,7 @@ const Notifications = () => {
 						...prev,
 						notification_preferences: { ...prev.notification_preferences, channelPreferences: {
 							...prev.notification_preferences.channelPreferences,
-							['email']: {
+							[CHANNEL.EMAIL]: {
 								enabled: false,
 								handle: email,
 								name: CHANNEL.EMAIL,
@@ -392,7 +393,7 @@ const Notifications = () => {
 					>
 						<Input
 							id='email'
-							defaultValue={notification_preferences.channelPreferences['email']?.handle || ''}
+							defaultValue={emailPreference?.handle || ''}
 							onChange={(a) => setEmail(a.target.value)}
 							placeholder={'Enter email'}
 							className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-2 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
@@ -400,21 +401,21 @@ const Notifications = () => {
 					</Form.Item>
 					<PrimaryButton
 						loading={verificationLoading}
-						className={`text-white ${!email || !emailValid || (notification_preferences.channelPreferences['email']?.handle === email) ? 'bg-highlight' : 'bg-primary'}`}
+						className={`text-white ${!email || !emailValid || (emailPreference?.handle === email) ? 'bg-highlight' : 'bg-primary'}`}
 						onClick={verifyEmail}
-						disabled={!email || !emailValid || notification_preferences.channelPreferences['email']?.handle === email}
+						disabled={!email || !emailValid || emailPreference?.handle === email}
 					>
 						<p className='font-normal text-sm'>Verify</p>
 					</PrimaryButton>
 				</Form>
-				{notification_preferences.channelPreferences['email']?.verified && notification_preferences.channelPreferences['email']?.handle === email &&
+				{emailPreference?.verified && emailPreference?.handle === email &&
 					<div className='flex items-center col-span-2 ml-5 gap-x-2'>
 						<CheckOutlined className='text-success'/>
 						<div className='text-white'>Email Verified!</div>
 					</div>
 				}
 				<div className='col-span-3'></div>
-				{notification_preferences.channelPreferences['email']?.handle === email && !notification_preferences.channelPreferences['email']?.verified &&
+				{emailPreference?.handle === email && !emailPreference?.verified &&
 					<section className='mt-2 col-span-5 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 						<WarningCircleIcon />
 						<p>An email has been sent to your email address. Click on the sent link to Verify your email address</p>

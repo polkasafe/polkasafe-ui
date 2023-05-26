@@ -111,7 +111,15 @@ export const GlobalStyle = createGlobalStyle`
 	}
 
 	.ant-checkbox-disabled+span{
-		color: #8B8B8B !important;
+		color: white !important;
+	}
+
+	.ant-checkbox-disabled .ant-checkbox-inner{
+		background: #1A2A42 !important;
+	}
+
+	.ant-checkbox-disabled .ant-checkbox-inner:after{
+		border-color: #8B8B8B !important;
 	}
 
 	.ant-segmented-item-selected .ant-segmented-item-label {

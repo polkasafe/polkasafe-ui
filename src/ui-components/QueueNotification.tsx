@@ -19,7 +19,7 @@ interface Props {
 }
 const queueNotification = ({ header, closeIcon, className, message, durationInSeconds = 4.5, status, placement }: Props) => {
 	const args = {
-		className,
+		className: `scale-90 ${className}`,
 		closeIcon,
 		message: header,
 		description: message,
