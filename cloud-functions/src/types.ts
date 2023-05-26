@@ -94,6 +94,11 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
+	notifications?: {
+		[address: string]: {
+			lastNotified: Date;
+		}
+	}
 }
 
 export interface INotification {
