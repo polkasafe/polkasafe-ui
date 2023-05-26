@@ -217,6 +217,7 @@ const Home = ({ className }: { className?: string }) => {
 					</>
 					:
 					<ConnectWalletWrapper>
+						<p>Hello wordl!</p>
 						<ConnectWallet />
 					</ConnectWalletWrapper>
 			}
