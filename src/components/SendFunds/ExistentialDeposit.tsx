@@ -42,7 +42,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const [isValidSender, setIsValidSender] = useState(true);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [txnHash, setTxnHash] = useState<string>('');
-
+	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
@@ -150,7 +150,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 								<section className='mt-6'>
 									<div className='flex items-center justify-between mb-2'>
 										<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
-										<Balance address={selectedSender} />
+										<Balance address={selectedSender} onChange={setSelectedAccountBalance}/>
 									</div>
 									<div className='flex items-center gap-x-[10px]'>
 										<div className='w-full'>
@@ -183,7 +183,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 									</div>
 								</section>
 
-								<BalanceInput defaultValue={String(chainProperties[network]?.existentialDeposit)} className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance)} />
+								<BalanceInput fromBalance={selectedAccountBalance} defaultValue={String(chainProperties[network]?.existentialDeposit)} className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance) } />
 
 								<section className='mt-6'>
 									<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
@@ -213,7 +213,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero()} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero() ||  amount.gte(new BN(selectedAccountBalance))}  loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>
