@@ -7,8 +7,8 @@ Note: This branch and this code is only for test SDK functionality, this code wi
 ## Link polkasafe 
 STEP 1
 ```
-<!-- clone this repo https://github.com/AleemAlam/sdk-test.git -->
-git clone https://github.com/AleemAlam/sdk-test.git
+<!-- clone this repo https://github.com/AleemAlam/serer-api -->
+git clone https://github.com/AleemAlam/serer-api
 
 <!-- go to directory -->
 cd sdk-test
