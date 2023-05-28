@@ -169,7 +169,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
 
 			// Edit Multisig needs multisig address, new signatories, new threshold, injector, and an event grabber function ::BySDK::
-			const data = await client.editMultisig(multisig?.address, newSignatories, newThreshold, injector, setLoadingMessages);
+			const data = await client.editMultisig(multisig?.address, newSignatories, newThreshold, setLoadingMessages);
 
 			console.log(data);
 
@@ -200,7 +200,24 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 			// });
 			setSuccess(true);
 			setLoading(false);
-			await handleMultisigCreate(newSignatories, newThreshold);
+			if(!data.newMulti)
+				await handleMultisigCreate(newSignatories, newThreshold);
+			else{
+				const multisigData = data.newMulti.data;
+				setUserDetailsContextState((prevState) => {
+					return {
+						...prevState,
+						multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
+						multisigSettings: {
+							...prevState.multisigSettings,
+							[multisigData.address]: {
+								deleted: false,
+								name: multisigData.name
+							}
+						}
+					};
+				});
+			}
 		} catch (error) {
 			console.log(error);
 			setFailure(true);

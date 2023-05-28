@@ -56,14 +56,14 @@ const ConnectWallet = () => {
 
 			setLoading(true);
 
-			const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressToken`, {
-				headers: {
-					'x-address': substrateAddress
-				},
-				method: 'POST'
-			});
+			// const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressToken`, {
+			// 	headers: {
+			// 		'x-address': substrateAddress
+			// 	},
+			// 	method: 'POST'
+			// });
 
-			const { data: token, error: tokenError } = await tokenResponse.json();
+			const { data: token, error: tokenError } = { data:'1234', error:undefined };
 
 			if(tokenError) {
 				// TODO extension
@@ -85,13 +85,21 @@ const ConnectWallet = () => {
 				if (!signRaw) console.error('Signer not available');
 				setSigning(true);
 				// @ts-ignore
-				const { signature } = await signRaw({
-					address: substrateAddress,
-					data: stringToHex(token),
-					type: 'bytes'
-				});
+				// const { signature } = await signRaw({
+				// 	address: substrateAddress,
+				// 	data: stringToHex(token),
+				// 	type: 'bytes'
+				// });
 				// Setting the signature, needs signature, network, and address ::BySDK::
-				await client.setSignature(signature, network, substrateAddress);
+				let signature;
+				try{
+					console.log(address);
+					const data = await client.connect(network, address, injected);
+					signature = data.signature;
+					console.log(data);
+				}catch(e){
+					console.log(e);
+				}
 				// connect address needs an address ::BySDK::
 				const { data:userData, error } = await client.connectAddress(substrateAddress);
 				console.log(userData);

@@ -68,7 +68,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 		setLoadingMessages(`A Base Amount (${formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.`);
 		try {
 			// Create proxy accepts multisig address, injector, and an event grabber function ::BySDK::
-			const data = await client.createProxy(activeMultisig, injector, setLoadingMessages);
+			const data = await client.createProxy(activeMultisig, setLoadingMessages);
 			console.log(data);
 			// await transferAndProxyBatchAll({
 			// 	amount: reservedProxyDeposit,

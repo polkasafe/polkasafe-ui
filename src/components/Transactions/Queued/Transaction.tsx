@@ -157,7 +157,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			}
 			if(decodedCallData?.args?.proxy_type){
 				// Approve transaction needs address, callHash, calldata, injector, requestType (can be 'proxy' | 'wallet' | 'edit_proxy'), and an event grabber function ::BySDK::
-				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'proxy', setLoadingMessages);
+				const data = await client.approveTransaction(multisig.address, callHash, callData, 'proxy', setLoadingMessages);
 				console.log(data);
 				// await approveProxy({
 				// 	api,
@@ -173,7 +173,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 				// });
 			}
 			else if(decodedCallData?.args?.call?.args?.delegate){
-				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'edit_proxy', setLoadingMessages);
+				const data = await client.approveTransaction(multisig.address, callHash, callData, 'edit_proxy', setLoadingMessages);
 				console.log(data);
 				// await approveAddProxy({
 				// 	api,
@@ -190,7 +190,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 				// });
 			}
 			else{
-				const data = await client.approveTransaction(multisig.address, callHash, callData, injector, 'wallet', setLoadingMessages);
+				const data = await client.approveTransaction(multisig.address, callHash, callData, 'wallet', setLoadingMessages);
 				console.log(data);
 				// await approveMultisigTransfer({
 				// 	amount: new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
@@ -243,7 +243,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 				return;
 			}
 			// Cancel transaction needs address, callHash, injector, and an event grabber function ::BySDK::
-			const data = await client.cancelTransaction(multisig.address, callHash, injector, setLoadingMessages);
+			const data = await client.cancelTransaction(multisig.address, callHash, setLoadingMessages);
 			console.log( data );
 			// if(decodedCallData?.args?.proxy_type){
 			// 	await cancelProxy({

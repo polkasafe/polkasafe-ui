@@ -18,22 +18,23 @@ import { GlobalStyle } from './ui-components/GlobalStyle';
 
 function App() {
 	return (
-		<TestContextProvider>
-			<BrowserRouter>
-				<ConfigProvider theme={antdTheme}>
-					<ThemeProvider theme={styledTheme}>
-						<UserDetailsProvider>
-							<GlobalStyle/>
-							<ApiContextProvider>
+
+		<BrowserRouter>
+			<ConfigProvider theme={antdTheme}>
+				<ThemeProvider theme={styledTheme}>
+					<UserDetailsProvider>
+						<GlobalStyle/>
+						<ApiContextProvider>
+							<TestContextProvider>
 								<ModalContextProvider>
 									<AppLayout />
 								</ModalContextProvider>
-							</ApiContextProvider>
-						</UserDetailsProvider>
-					</ThemeProvider>
-				</ConfigProvider>
-			</BrowserRouter>
-		</TestContextProvider>
+							</TestContextProvider>
+						</ApiContextProvider>
+					</UserDetailsProvider>
+				</ThemeProvider>
+			</ConfigProvider>
+		</BrowserRouter>
 	);
 }
 

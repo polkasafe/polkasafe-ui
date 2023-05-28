@@ -55,9 +55,9 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 		try{
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
+			// const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature || !activeMultisig) {
+			if(!userAddress || !activeMultisig) {
 				console.log('ERROR');
 				setLoading(false);
 				return;

@@ -142,7 +142,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		setLoading(true);
 		try {
 			// Transfer funds need an recipient address, amount, senderAddress, injector, multisig, isProxy, and an event grabber function ::BySDK::
-			const queueItemData = await client.transferFunds(recipientAddress, amount, address, injected, multisig, isProxy, setLoadingMessages);
+			const queueItemData = await client.transferFunds(recipientAddress, amount, address, multisig, isProxy, setLoadingMessages);
 			console.log(queueItemData);
 			// const queueItemData = await initMultisigTransfer({
 			// 	amount,
