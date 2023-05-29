@@ -32,11 +32,10 @@ export default async function approvalReminder(args: Args) {
 	if (from === address || from === substrateAddress) return; // no need to send notification to creator
 
 	const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
-	const { multisigSettings, notification_preferences } = await getPSUser(firestore_db, substrateAddress);
+	const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, substrateAddress);
+	const { deleted = false, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
 
-	const multisigAddressSettings = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
-
-	if (multisigAddressSettings?.deleted) throw Error(`User has deleted multisig: ${multisigAddress}`);
+	if (deleted) throw Error(`User has deleted multisig: ${multisigAddress}`);
 	if (!notification_preferences) throw Error(`User has no notification preferences: ${substrateAddress}`);
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
@@ -47,7 +46,7 @@ export default async function approvalReminder(args: Args) {
 	const subject = triggerTemplate.subject;
 	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		network,
-		multisigName: multisigAddressSettings?.name || defaultMultisigName,
+		multisigName: userMultisigName || defaultMultisigName,
 		multisigAddress: multisigAddress,
 		link: `https://app.polkasafe.xyz${link}`
 	});
