@@ -31,7 +31,7 @@ import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { CHANNEL, DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DISCORD_PUBLIC_KEY, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_SECRETS, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
@@ -45,14 +45,12 @@ import { verifyKey } from 'discord-interactions';
 import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
+import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
 
 const corsHandler = cors({ origin: true });
-
-// Notification Engine
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN || '', { polling: false });
 
 const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
@@ -1051,6 +1049,8 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 	});
 });
 
+// Notification Engine
+
 export const notify = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		functions.logger.info('notify called with body', req.body);
@@ -1074,6 +1074,8 @@ export const notify = functions.https.onRequest(async (req, res) => {
 		}
 	});
 });
+
+// Polkasafe
 
 export const verifyEmail = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
@@ -1118,6 +1120,13 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 				return res.status(400).json({ error: responseMessages.missing_params });
 			}
 
+			if (!TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASAFE]) {
+				functions.logger.error('TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASAFE] not found');
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+
+			const bot = new TelegramBot(TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASAFE], { polling: false });
+
 			if (text.startsWith('/start')) {
 				await bot.sendMessage(
 					chat.id,
@@ -1125,13 +1134,11 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 
 				To interact with this bot, you can use the following commands:
 
-				- '/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkasafe.
-
-				- '/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkasafe.
+				- '/add <web3Address> <verificationToken>': Use this command to add a web3 address to Polkasafe bot.
+				
+				- '/remove <web3Address> <verificationToken>': Use this command to remove a web3 address from Polkasafe bot.
 
 				Please note that you need to replace '<web3Address>' with the actual web3 address you want to add or remove, and '<verificationToken>' with the token provided for verification.
-
-				If you have any questions or need further assistance, feel free to ask!
 				`
 				);
 				return res.sendStatus(200);
@@ -1304,8 +1311,10 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		functions.logger.info('polkasafeDiscordBotCommands called', { req });
+
+		const POLKASAFE_DISCORD_BOT_SECRETS = DISCORD_BOT_SECRETS[NOTIFICATION_SOURCE.POLKASAFE];
 		try {
-			if (!DISCORD_PUBLIC_KEY) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
+			if (!POLKASAFE_DISCORD_BOT_SECRETS.publicKey) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
 
 			const signature = req.headers['x-signature-ed25519'];
 			const timestamp = req.headers['x-signature-timestamp'];
@@ -1316,7 +1325,7 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 				req.rawBody,
 				String(signature),
 				String(timestamp),
-				DISCORD_PUBLIC_KEY
+				POLKASAFE_DISCORD_BOT_SECRETS.publicKey
 			);
 			if (!isValidRequest) return res.status(401).send('Invalid request signature.');
 
@@ -1361,13 +1370,13 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 
 				const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
-					await sendDiscordMessage(interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 					return null;
 				});
 				if (!addressData) return;
 
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
-					await sendDiscordMessage(interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1388,10 +1397,10 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 						notification_preferences: newNotificationPreferences
 					});
 
-					await sendDiscordMessage(interactionReq.channel_id, `Web3 address ${web3Address} removed. You will not receive notifications on this channel anymore.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Web3 address ${web3Address} removed. You will not receive notifications on this channel anymore.`);
 					return;
 				} else {
-					await sendDiscordMessage(interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
 					return;
 				}
 			} else if (name === 'add') {
@@ -1419,13 +1428,13 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
 
 				const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
-					await sendDiscordMessage(interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 					return null;
 				});
 				if (!addressData) return;
 
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token) {
-					await sendDiscordMessage(interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `No verification token found for address: ${web3Address}.`);
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1446,10 +1455,10 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 						notification_preferences: newNotificationPreferences
 					});
 
-					await sendDiscordMessage(interactionReq.channel_id, `Web3 address ${web3Address} added. You will now receive notifications on this channel.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Web3 address ${web3Address} added. You will now receive notifications on this channel.`);
 					return;
 				} else {
-					await sendDiscordMessage(interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASAFE, interactionReq.channel_id, `Invalid verification token for address: ${web3Address}.`);
 					return;
 				}
 			}
@@ -1466,9 +1475,11 @@ export const registerPolkasafeDiscordBotCommands = functions.https.onRequest(asy
 	corsHandler(req, res, async () => {
 		const apiKey = req.get('x-api-key');
 
-		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY || !DISCORD_CLIENT_ID || !DISCORD_BOT_TOKEN) return res.status(401).json({ error: responseMessages.unauthorised });
+		const POLKASAFE_DISCORD_BOT_SECRETS = DISCORD_BOT_SECRETS[NOTIFICATION_SOURCE.POLKASAFE];
 
-		if (!DISCORD_BOT_TOKEN) return res.status(500).send('DISCORD_BOT_TOKEN is not set.');
+		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY || !POLKASAFE_DISCORD_BOT_SECRETS.clientId || !POLKASAFE_DISCORD_BOT_SECRETS.token) return res.status(401).json({ error: responseMessages.unauthorised });
+
+		if (!POLKASAFE_DISCORD_BOT_SECRETS.token) return res.status(500).send('DISCORD_BOT_TOKEN is not set.');
 
 		const commands = [
 			{
@@ -1514,10 +1525,10 @@ export const registerPolkasafeDiscordBotCommands = functions.https.onRequest(asy
 		try {
 			console.log('Started refreshing application (/) commands.');
 
-			const rest = new REST({ version: '9' }).setToken(DISCORD_BOT_TOKEN);
+			const rest = new REST({ version: '9' }).setToken(POLKASAFE_DISCORD_BOT_SECRETS.token);
 
 			await rest.put(
-				Routes.applicationCommands(DISCORD_CLIENT_ID),
+				Routes.applicationCommands(POLKASAFE_DISCORD_BOT_SECRETS.clientId),
 				{ body: commands },
 			);
 
@@ -1540,19 +1551,19 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 			functions.logger.info('polkasafeSlackBotCommands req :', { req });
 
 			if (command == '/polkasafe-add') {
-				await sendSlackMessage(String(user_id), 'Adding address...');
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Adding address...');
 
 				const [web3Address, verificationToken] = text.split(' ');
 
 				if (!web3Address || !verificationToken) {
 					// Send a response back to Slack
-					await sendSlackMessage(String(user_id), 'Invalid command. Please use the following format: /polkasafe-add <web3Address> <verificationToken>');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid command. Please use the following format: /polkasafe-add <web3Address> <verificationToken>');
 					return;
 				}
 
 				// check if the address is valid
 				if (!isValidWeb3Address(web3Address)) {
-					await sendSlackMessage(String(user_id), 'Invalid web3 address.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid web3 address.');
 					return;
 				}
 
@@ -1560,7 +1571,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 
 				// check if address exists
 				const addressData = await getPSUser(firestore_db, web3Address).catch(async () => {
-					await sendSlackMessage(String(user_id), `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), `Address: ${web3Address} not found. Please sign up on Polkasafe to receive notifications.`);
 					return null;
 				});
 				if (!addressData) return;
@@ -1568,7 +1579,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 				// check if the verification token is valid
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token) {
 				// Sending a reply to the user
-					await sendSlackMessage(String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1591,26 +1602,26 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 					});
 
 					// Sending a reply to the user
-					await sendSlackMessage(String(user_id), 'Address added successfully. You will now receive notifications on this chat.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Address added successfully. You will now receive notifications on this chat.');
 					return;
 				} else {
-					await sendSlackMessage(String(user_id), 'Invalid verification token.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid verification token.');
 					return;
 				}
 			}
 
 			if (command === '/polkasafe-remove') {
-				await sendSlackMessage(String(user_id), 'Removing address...');
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Removing address...');
 				const [web3Address, verificationToken] = text.split(' ');
 
 				if (!web3Address || !verificationToken) {
-					await sendSlackMessage(String(user_id), 'Invalid command. Please use the following format: /polkasafe-remove <web3Address> <verificationToken>');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid command. Please use the following format: /polkasafe-remove <web3Address> <verificationToken>');
 					return;
 				}
 
 				// check if the address is valid
 				if (!isValidWeb3Address(web3Address)) {
-					await sendSlackMessage(String(user_id), 'Invalid web3 address.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid web3 address.');
 					return;
 				}
 
@@ -1619,7 +1630,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 				// check if address exists
 				const addressRef = await firestore_db.collection('addresses').doc(web3Address).get();
 				if (!addressRef.exists) {
-					await sendSlackMessage(String(user_id), 'Address not found. Please sign up on Polkasafe to receive notifications.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Address not found. Please sign up on Polkasafe to receive notifications.');
 					return;
 				}
 
@@ -1627,7 +1638,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 				const addressData = addressRef.data() as IPSUser;
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token) {
 					// Sending a reply to the user
-					await sendSlackMessage(String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token === verificationToken) {
 					const newNotificationPreferences = {
@@ -1650,10 +1661,10 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 					});
 
 					// Sending a reply to the user
-					await sendSlackMessage(String(user_id), 'Address removed successfully. You will not receive notifications on this chat anymore.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Address removed successfully. You will not receive notifications on this chat anymore.');
 					return;
 				} else {
-					await sendSlackMessage(String(user_id), 'Invalid verification token.');
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Invalid verification token.');
 					return;
 				}
 			}
@@ -1669,28 +1680,578 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 export const getChannelVerifyToken = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
-		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
-		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
-
 		const apiKey = req.get('x-api-key');
 		const source = req.get('x-source');
+
+		if (source === NOTIFICATION_SOURCE.POLKASAFE && !address) return res.status(400).json({ error: responseMessages.missing_params });
+		if (source === NOTIFICATION_SOURCE.POLKASAFE && !isValidSubstrateAddress(address || '')) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY) return res.status(401).json({ error: responseMessages.unauthorised });
 		if (!source || !Object.values(NOTIFICATION_SOURCE).includes(source as any)) return res.status(400).json({ error: responseMessages.invalid_headers });
 
-		const { channel } = req.body as { channel: CHANNEL };
+		const { channel, userId = null } = req.body as { channel: CHANNEL, userId: number | string | null };
 		if (!channel) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const token = uuidv4();
 
-			const substrateAddress = getSubstrateAddress(String(address));
-			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			addressRef.update({ [`notification_preferences.channelPreferences.${channel}.verification_token`]: token });
+			if (source === NOTIFICATION_SOURCE.POLKASAFE) {
+				const substrateAddress = getSubstrateAddress(String(address));
+				const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+				await addressRef.update({ [`notification_preferences.channelPreferences.${channel}.verification_token`]: token });
+			} else if (source === NOTIFICATION_SOURCE.POLKASSEMBLY) {
+				if (isNaN(Number(userId))) return res.status(400).json({ error: responseMessages.missing_params });
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				const paUserDoc = await firestore_db.collection('users').doc(String(userId)).get();
+				if (!paUserDoc.exists) return res.status(400).json({ error: responseMessages.invalid_params });
+
+				const token_expires_at = new Date();
+				token_expires_at.setDate(token_expires_at.getDate() + 3);
+
+				await paUserDoc.ref.update({
+					[`notification_preferences.channelPreferences.${channel}.verification_token`]: token,
+					[`notification_preferences.channelPreferences.${channel}.verification_token_expires`]: token_expires_at
+				});
+			}
+
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getChannelVerifyToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
+	});
+});
+
+// Polkassembly
+
+export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		functions.logger.info('polkassemblyTelegramBotCommands req', { req } );
+
+		try {
+			const { message } = req.body;
+			let { text, chat } = message;
+
+			if (!text || !chat) {
+				const { edited_message } = req.body;
+				text = edited_message.text;
+				chat = edited_message.chat;
+			}
+
+			if (!text || !chat) {
+				return res.status(400).json({ error: responseMessages.missing_params });
+			}
+
+			if (!TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASSEMBLY]) {
+				functions.logger.error('TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASSEMBLY] not found');
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+
+			const bot = new TelegramBot(TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.POLKASSEMBLY], { polling: false });
+
+			if (text.startsWith('/start')) {
+				await bot.sendMessage(
+					chat.id,
+					`Welcome to the Polkassembly Bot!
+
+				To interact with this bot, you can use the following commands:
+
+				- '/add <username> <verificationToken>': Use this command to add a username to Polkassembly Bot.
+
+				- '/remove <username> <verificationToken>': Use this command to remove a username from Polkassembly Bot
+
+				Please note that you need to replace '<username>' with the actual username you want to add or remove, and '<verificationToken>' with the token provided for verification.
+				`
+				);
+				return res.sendStatus(200);
+			}
+
+			if (text.startsWith('/add')) {
+				const commandParts = text.split(' ');
+				const username = commandParts[1];
+				const verificationToken = commandParts[2];
+
+				if (!username || !verificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid command. Please use the following format: /add <username> <verificationToken>'
+					);
+					return res.sendStatus(200);
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				// check if the username is valid
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await bot.sendMessage(
+						chat.id,
+						`User with username ${username} not found.`
+					);
+					return res.sendStatus(200);
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid verification token.'
+					);
+					return res.sendStatus(200);
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: true,
+							verified: true,
+							handle: String(chat.id),
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Address added successfully. You will now receive notifications on this chat.'
+				);
+				return res.sendStatus(200);
+			}
+
+			if (text.startsWith('/remove')) {
+				const commandParts = text.split(' ');
+				const username = commandParts[1];
+				const verificationToken = commandParts[2];
+
+				if (!username || !verificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid command. Please use the following format: /remove <web3Address> <verificationToken>'
+					);
+					return res.sendStatus(200);
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				// check if the username is valid
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await bot.sendMessage(
+						chat.id,
+						`User with username ${username} not found.`
+					);
+					return res.sendStatus(200);
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid verification token.'
+					);
+					return res.sendStatus(200);
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: false,
+							verified: false,
+							handle: '',
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Address removed successfully. You will not receive notifications on this chat anymore.'
+				);
+				return res.sendStatus(200);
+			}
+
+			return res.sendStatus(200);
+		} catch (err:unknown) {
+			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const polkassemblyDiscordBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		functions.logger.info('polkassemblyDiscordBotCommands called', { req });
+
+		const POLKASSEMBLY_DISCORD_BOT_SECRETS = DISCORD_BOT_SECRETS[NOTIFICATION_SOURCE.POLKASSEMBLY];
+		try {
+			if (!POLKASSEMBLY_DISCORD_BOT_SECRETS.publicKey) return res.status(500).send('DISCORD_PUBLIC_KEY is not set.');
+
+			const signature = req.headers['x-signature-ed25519'];
+			const timestamp = req.headers['x-signature-timestamp'];
+
+			if (!signature || !timestamp) return res.status(401).send('Invalid request signature.');
+
+			const isValidRequest = verifyKey(
+				req.rawBody,
+				String(signature),
+				String(timestamp),
+				POLKASSEMBLY_DISCORD_BOT_SECRETS.publicKey
+			);
+			if (!isValidRequest) return res.status(401).send('Invalid request signature.');
+
+			const interactionReq = req.body;
+			if (!interactionReq || !interactionReq.type) return res.status(400).send('Invalid request body.');
+
+			functions.logger.info('Interaction received');
+
+			if (interactionReq.type === InteractionType.Ping) {
+				return res.status(200).send({
+					type: InteractionResponseType.Pong
+				});
+			}
+
+			if (!interactionReq.data) return res.status(400).send('Invalid request body.');
+
+			const { name, options } = interactionReq.data;
+			if (!name || !options) return res.status(400).send('Invalid request body.');
+
+			if (name === 'remove') {
+				const username = options[0]?.value;
+				const verificationToken = options[1]?.value;
+				if (!username || !verificationToken) return res.status(400).send('Invalid request body.');
+
+				// Discord needs a response within 3 seconds
+				res.status(200).send({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: {
+						content: `Removing username: ${username}.`
+					}
+				});
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				// check if the username is valid
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, `Username: ${username} not found. Please use your polkassembly username to interact with the bot.`);
+					return;
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, 'Invalid verification token.');
+					return;
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.DISCORD]: {
+							name: CHANNEL.DISCORD,
+							enabled: false,
+							verified: false,
+							handle: '',
+							verification_token: ''
+						}
+					}
+				};
+
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, `${username} removed successfully. You will not receive notifications on this channel anymore.`);
+				return;
+			} else if (name === 'add') {
+				const username = options[0]?.value;
+				const verificationToken = options[1]?.value;
+				if (!username || !verificationToken) return res.status(400).send('Invalid request body.');
+
+				// Discord needs a response within 3 seconds
+				res.status(200).send({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: {
+						content: `Adding username: ${username}.`
+					}
+				});
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, `Username: ${username} not found. Please use your polkassembly username to interact with the bot.`);
+					return;
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.DISCORD]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, 'Invalid verification token.');
+					return;
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.DISCORD]: {
+							name: CHANNEL.DISCORD,
+							enabled: true,
+							verified: true,
+							handle: interactionReq.channel_id,
+							verification_token: ''
+						}
+					}
+				};
+
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				await sendDiscordMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, interactionReq.channel_id, `${username} added successfully. You will receive notifications on this channel.`);
+				return;
+			}
+
+			return res.status(200).end();
+		} catch (err:unknown) {
+			functions.logger.error('Error in polkassemblyDiscordBotCommands :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const registerPolkassemblyDiscordBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const apiKey = req.get('x-api-key');
+
+		const POLKASSEMBLY_DISCORD_BOT_SECRETS = DISCORD_BOT_SECRETS[NOTIFICATION_SOURCE.POLKASSEMBLY];
+
+		if (!apiKey || !NOTIFICATION_ENGINE_API_KEY || apiKey !== NOTIFICATION_ENGINE_API_KEY || !POLKASSEMBLY_DISCORD_BOT_SECRETS.clientId || !POLKASSEMBLY_DISCORD_BOT_SECRETS.token) return res.status(401).json({ error: responseMessages.unauthorised });
+
+		if (!POLKASSEMBLY_DISCORD_BOT_SECRETS.token) return res.status(500).send('DISCORD_BOT_TOKEN is not set.');
+
+		const commands = [
+			{
+				name: 'remove',
+				description: 'Remove a username from Polkassembly bot.',
+				type: 1,
+				options: [
+					{
+						name: 'username',
+						description: 'The username to stop recieving notifications for',
+						type: 3,
+						required: true
+					},
+					{
+						name: 'verification-token',
+						description: 'The verification token',
+						type: 3,
+						required: true
+					}
+				]
+			},
+			{
+				name: 'add',
+				description: 'Add a username to Polkassembly bot.',
+				type: 1,
+				options: [
+					{
+						name: 'username',
+						description: 'The username to start recieving notifications for',
+						type: 3,
+						required: true
+					},
+					{
+						name: 'verification-token',
+						description: 'The verification token',
+						type: 3,
+						required: true
+					}
+				]
+			}
+		];
+
+		try {
+			console.log('Started refreshing application (/) commands.');
+
+			const rest = new REST({ version: '9' }).setToken(POLKASSEMBLY_DISCORD_BOT_SECRETS.token);
+
+			await rest.put(
+				Routes.applicationCommands(POLKASSEMBLY_DISCORD_BOT_SECRETS.clientId),
+				{ body: commands },
+			);
+
+			console.log('Successfully registered application (/) commands.');
+
+			return res.status(200).send('Commands registered successfully.');
+		} catch (err:unknown) {
+			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const polkassemblySlackBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		try {
+			// slack needs an acknowledgement response within 3 seconds
+			res.status(200).end();
+			const { command, text, user_id } = req.body;
+			functions.logger.info('polkassemblySlackBotCommands req :', { req });
+
+			if (command == '/polkassembly-add') {
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Adding username...');
+
+				const [username, verificationToken] = text.split(' ');
+
+				if (!username || !verificationToken) {
+					// Send a response back to Slack
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Invalid command. Please use the following format: /polkassembly-add <username> <verificationToken>');
+					return;
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), `Username: ${username} not found. Please use your polkassembly username to interact with the bot.`);
+					return;
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token || null;
+
+				// check if the verification token is valid
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Invalid verification token.');
+					return;
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.SLACK]: {
+							name: CHANNEL.SLACK,
+							enabled: true,
+							verified: true,
+							handle: String(user_id),
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the slack chat id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Username added successfully. You will now receive notifications on this chat.');
+				return;
+			}
+
+			if (command === '/polkassembly-remove') {
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Removing username...');
+				const [username, verificationToken] = text.split(' ');
+
+				if (!username || !verificationToken) {
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Invalid command. Please use the following format: /polkassembly-remove <username> <verificationToken>');
+					return;
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASSEMBLY);
+
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), `Username: ${username} not found. Please use your polkassembly username to interact with the bot.`);
+					return;
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as IPAUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token || null;
+
+				// check if the verification token is valid
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Invalid verification token.');
+					return;
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.SLACK]: {
+							name: CHANNEL.SLACK,
+							enabled: false,
+							verified: false,
+							handle: '',
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the username with the slack user id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Username removed successfully. You will not receive notifications on this chat anymore.');
+				return;
+			}
+		} catch (err:unknown) {
+			functions.logger.error('Error in polkassemblySlackBotCommands :', { err, stack: (err as any).stack });
+			if (!res.headersSent) res.status(500).json({ error: responseMessages.internal });
+		}
+
+		return;
 	});
 });

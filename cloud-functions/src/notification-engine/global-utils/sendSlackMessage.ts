@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { SLACK_BOT_TOKEN } from '../notification_engine_constants';
+import { NOTIFICATION_SOURCE, SLACK_BOT_TOKEN } from '../notification_engine_constants';
 
-export default async function sendSlackMessage(userId: string, message: string) {
+export default async function sendSlackMessage(source: NOTIFICATION_SOURCE, userId: string, message: string) {
 	try {
 		const response = await axios.post('https://slack.com/api/chat.postMessage', {
 			channel: userId,
 			text: message
 		}, {
 			headers: {
-				'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+				'Authorization': `Bearer ${SLACK_BOT_TOKEN[source]}`,
 				'Content-Type': 'application/json'
 			}
 		});
