@@ -7,6 +7,7 @@ import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFr
 import { EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
+import ownProposalCreated from '../ownProposalCreated';
 
 const TRIGGER_NAME = 'newProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -14,13 +15,14 @@ const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 interface Args {
 	network: string;
 	postType: string;
-	postId: string | number;
+	postId: string;
+	proposerAddress: string;
 }
 
 export default async function newProposalCreated(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId } = args;
-	if (!network || !postType || !postId) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	const { network, postType, postId, proposerAddress } = args;
+	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
@@ -64,4 +66,12 @@ export default async function newProposalCreated(args: Args) {
 		);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
+
+	// trigger ownProposalCreated
+	await ownProposalCreated({
+		network,
+		postType,
+		postId: String(postId),
+		proposerAddress
+	});
 }

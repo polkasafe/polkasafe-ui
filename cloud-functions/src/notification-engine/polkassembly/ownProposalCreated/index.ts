@@ -16,7 +16,7 @@ const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 interface Args {
 	network: string;
 	postType: string;
-	postId: string | number;
+	postId: string;
 	proposerAddress: string;
 }
 
@@ -24,7 +24,7 @@ export default async function ownProposalCreated(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 	const { network, postType, postId, proposerAddress } = args;
 	const proposerSubstrateAddress = getSubstrateAddress(proposerAddress || '');
-	if (!network || !postType || !postId || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
