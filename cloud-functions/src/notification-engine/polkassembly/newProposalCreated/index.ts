@@ -1,11 +1,12 @@
 import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
-import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
+import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
 import { EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
+import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 
 const TRIGGER_NAME = 'newProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -31,8 +32,9 @@ export default async function newProposalCreated(args: Args) {
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {
 		const subscriberData = subscriberDoc.data() as IPAUser;
-		const subscriberNotificationPreferences = subscriberData.notification_settings?.[network] || {} as IUserNotificationPreferences;
-		if (!subscriberNotificationPreferences) throw Error(`Notification preferences not found for user: ${subscriberData.id}`);
+		if (!subscriberData.notification_preferences) continue;
+		const subscriberNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(subscriberData.notification_preferences, network);
+		if (!subscriberNotificationPreferences) continue;
 
 		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}`;
 

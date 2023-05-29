@@ -1,6 +1,6 @@
 import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
-import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
+import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
@@ -8,6 +8,7 @@ import { EPAProposalType, IPAUser } from '../_utils/types';
 import { paUserRef } from '../_utils/paFirestoreRefs';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
+import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 
 const TRIGGER_NAME = 'ownProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -37,7 +38,8 @@ export default async function ownProposalCreated(args: Args) {
 	if (!proposerUserDoc.exists) throw Error(`User not found for address : ${proposerSubstrateAddress}`);
 
 	const proposerUserData = proposerUserDoc.data() as IPAUser;
-	const proposerNotificationPreferences = proposerUserData.notification_settings?.[network] || {} as IUserNotificationPreferences;
+	if (!proposerUserData.notification_preferences) throw Error(`Notification preferences not found for user: ${addressDocData.user_id}`);
+	const proposerNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(proposerUserData.notification_preferences, network);
 	if (!proposerNotificationPreferences) throw Error(`Notification preferences not found for user: ${addressDocData.user_id}`);
 
 	const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}`;

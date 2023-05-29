@@ -1,4 +1,4 @@
-import { IUserNotificationPreferences } from '../../notification_engine_constants';
+import { IUserNotificationChannelPreferences, IUserNotificationPreferences, IUserNotificationTriggerPreferences } from '../../notification_engine_constants';
 
 export enum EPAProposalType {
 	DEMOCRACY_PROPOSALS = 'democracy_proposals',
@@ -66,6 +66,13 @@ export interface IPAProfileDetails {
 	social_links?: IPASocial[]
 }
 
+export interface IPAUserNotificationPreferences {
+	channelPreferences: {[channel:string]: IUserNotificationChannelPreferences},
+	triggerPreferences: {
+		[network:string] : {[index:string] : IUserNotificationTriggerPreferences}
+	}
+}
+
 export interface IPAUser {
 	email: string;
 	email_verified: boolean;
@@ -75,9 +82,7 @@ export interface IPAUser {
 	salt: string;
 	username: string;
 	web3_signup: boolean;
-	notification_settings?: {
-		[network: string]: IUserNotificationPreferences
-	}
+	notification_preferences?: IPAUserNotificationPreferences
 }
 
 export interface IPANotification {

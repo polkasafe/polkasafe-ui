@@ -3,7 +3,7 @@ import axios from 'axios';
 import sgMail from '@sendgrid/mail';
 import getSourceFirebaseAdmin from './global-utils/getSourceFirebaseAdmin';
 import { IPSNotification } from './polkasafe/_utils/types';
-import { CHANNEL, DISCORD_BOT_TOKEN, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN } from './notification_engine_constants';
+import { CHANNEL, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SOURCE, NOTIFICATION_SOURCE_EMAIL, SENDGRID_API_KEY, SLACK_BOT_TOKEN, TELEGRAM_BOT_TOKEN, DISCORD_BOT_SECRETS } from './notification_engine_constants';
 import { IPANotification } from './polkassembly/_utils/types';
 import sendDiscordMessage from './global-utils/sendDiscordMessage';
 import sendSlackMessage from './global-utils/sendSlackMessage';
@@ -57,12 +57,14 @@ export class NotificationService {
 	}
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!TELEGRAM_BOT_TOKEN ||
+		const SOURCE_TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN[this.source];
+
+		if (!SOURCE_TELEGRAM_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled
 		) return;
 
-		const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
+		const bot = new TelegramBot(SOURCE_TELEGRAM_BOT_TOKEN, { polling: false });
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
@@ -70,13 +72,16 @@ export class NotificationService {
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!DISCORD_BOT_TOKEN ||
+		const SOURCE_DISCORD_BOT_TOKEN = DISCORD_BOT_SECRETS[this.source].token;
+
+		if (!SOURCE_DISCORD_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
 		) return;
 
 		await sendDiscordMessage(
+			this.source,
 			userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
 			this.message
 		).catch((error) => console.error('Error in sending Discord message : ', error));
@@ -108,13 +113,15 @@ export class NotificationService {
 	}
 
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
-		if (!SLACK_BOT_TOKEN ||
+		const SOURCE_SLACK_BOT_TOKEN = SLACK_BOT_TOKEN[this.source];
+
+		if (!SOURCE_SLACK_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
 		try {
-			await sendSlackMessage(String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
+			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
 		}
