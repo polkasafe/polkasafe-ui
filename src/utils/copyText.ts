@@ -16,7 +16,7 @@ import getEncodedAddress from './getEncodedAddress';
  */
 const showMessage = (): void => {
 	message.config({
-		top: 550
+		top: window.innerHeight - 100
 	});
 	message.open({
 		content: 'Copied!',
