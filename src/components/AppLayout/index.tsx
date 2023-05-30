@@ -4,6 +4,7 @@
 
 import { Drawer, Layout } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
 import styled from 'styled-components';
@@ -24,12 +25,14 @@ const AppLayout = ({ className }: { className?: string }) => {
 	const [sideDrawer, setSideDrawer] = useState(false);
 	const [multisigChanged, setMultisigChanged] = useState(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
-
+	const { iframeVisibility } = useGlobalApiContext();
+	const [IframeUrl,setIframeUrl]=useState('');
 	useEffect(() => {
 		setMultisigChanged(true);
 		setTimeout(() => {
 			setMultisigChanged(false);
 		}, 500);
+		setIframeUrl(`https://sub.id/${activeMultisig}`);
 	}, [activeMultisig]);
 
 	return (
@@ -56,9 +59,11 @@ const AppLayout = ({ className }: { className?: string }) => {
 				</Drawer>
 				<Layout className='min-h flex flex-row p-0 bg-bg-main'>
 					<div className='hidden lg:block w-full max-w-[180px]'></div>
-					<Content className='bg-bg-secondary p-[30px] rounded-lg'>
-						{ multisigChanged ? <Loader size='large' /> :  <SwitchRoutes />}
-					</Content>
+					{
+						iframeVisibility && IframeUrl && window.location.pathname.split('/').pop() == 'apps' ? <iframe src={IframeUrl} width={window.innerWidth} height={window.innerHeight}/>:<><Content className='bg-bg-secondary p-[30px] rounded-lg'>
+							{multisigChanged ? <Loader size='large' /> : <SwitchRoutes />}
+						</Content></>
+					}
 				</Layout>
 			</Layout>
 			<Footer />

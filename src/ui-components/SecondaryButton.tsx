@@ -11,12 +11,12 @@ interface Props {
 }
 
 const SecondaryButton = ({ className, children, onClick }: Props) => {
-    return (
-        // TODO: Implement transition for bg and text color
-        <button className={`${className} text-md font-bold bg-purple_secondary rounded-lg bg-tertiary hover:bg-primary text-primary hover:text-white shadow-secondary px-2 py-3`} onClick={onClick}>
-            {children}
-        </button>
-    );
+	return (
+	// TODO: Implement transition for bg and text color
+		<button className={`${className} text-md font-bold bg-purple_secondary rounded-lg bg-tertiary hover:bg-primary text-primary hover:text-white shadow-secondary px-2 py-3`} onClick={onClick}>
+			{children}
+		</button>
+	);
 };
 
 export default SecondaryButton;
