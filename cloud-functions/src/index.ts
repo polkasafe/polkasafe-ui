@@ -46,6 +46,7 @@ import getPSUser from './notification-engine/polkasafe/_utils/getPSUser';
 import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMessage';
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
 import { IPAUser } from './notification-engine/polkassembly/_utils/types';
+import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1076,6 +1077,12 @@ export const notify = functions.https.onRequest(async (req, res) => {
 });
 
 // Polkasafe
+
+exports.scheduledPolkasafeApprovalReminder = functions.pubsub.schedule('every 1 hours').onRun(async () => {
+	functions.logger.info('scheduledPolkasafeApprovalReminder ran at : ', new Date());
+	await scheduledApprovalReminder();
+	return;
+});
 
 export const verifyEmail = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
