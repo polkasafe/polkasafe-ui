@@ -58,12 +58,10 @@ export default async function scheduledApprovalReminder() {
 		const multisigAddressesToNotifyForUser: IPSMultisigAddress[] = [];
 		for (const multisigAddressDoc of multisigAddressSnapshot.docs) {
 			const { multisigSettings = null } = userAddressDoc;
-			const { deleted = false } = multisigSettings?.[multisigAddressDoc.id] as IPSMultisigSettings;
-			if (deleted) continue;
+			if ((multisigSettings?.[multisigAddressDoc.id] as IPSMultisigSettings)?.deleted) continue;
 
 			const multisigAddressData = multisigAddressDoc.data() as IPSMultisigAddress;
-			const { disabled = false } = multisigAddressData;
-			if (disabled) continue;
+			if (multisigAddressData?.disabled) continue;
 
 			multisigAddressesToNotifyForUser.push(multisigAddressData);
 		}
