@@ -297,7 +297,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Den to Telegram</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Telegram Bot</h3>}
 					open={openTelegramModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
