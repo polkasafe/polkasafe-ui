@@ -24,6 +24,7 @@ export interface IUserNotificationChannelPreferences {
 export interface IUserNotificationTriggerPreferences {
 	name: string;
 	enabled: boolean;
+	[additionalProperties: string]: any; // trigger specific properties
 }
 
 export interface IUserNotificationPreferences {
