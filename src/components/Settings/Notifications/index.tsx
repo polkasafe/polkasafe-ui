@@ -99,7 +99,7 @@ const Notifications = () => {
 	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, notification_preferences]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
+	const notifyAfterHours: MenuProps['items'] = [8, 12, 24, 48].map((hr) => {
 		return {
 			key: hr,
 			label: <span className={`${hr === notifyAfter ? 'text-primary' : 'text-white'}`}>{hr === 1 ? `${hr} hr` : `${hr} hrs`}</span>
