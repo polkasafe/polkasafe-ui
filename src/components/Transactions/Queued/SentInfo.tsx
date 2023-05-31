@@ -404,7 +404,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 											if(notifications?.[address]?.lastNotified){
 												const olderDate = new Date(notifications?.[address].lastNotified);
 												const currentDate = new Date();
-												console.log();
 												const timeDifference = currentDate.getTime() - olderDate.getTime();
 												hoursDifference = timeDifference / (1000 * 60 * 60);
 											}
