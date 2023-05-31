@@ -41,6 +41,12 @@ module.exports = {
 		'object-curly-spacing': ['error', 'always'],
 		'quotes': ['error', 'single', { 'avoidEscape': true }],
 		'semi': [2, 'always'],
-		'switch-colon-spacing': ['error', { 'after': true, 'before': false }]
+		'switch-colon-spacing': ['error', { 'after': true, 'before': false }],
+		'import/no-unresolved': [
+			'error',
+			{
+				ignore: ['^firebase-admin/.+']
+			}
+		]
 	}
 };

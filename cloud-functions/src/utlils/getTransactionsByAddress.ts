@@ -50,10 +50,10 @@ export default async function getTransactionsByAddress(
 					block_number: Number(transfer.block_num),
 					network: network,
 					note: transactionDoc.exists && storedTransaction?.note ? storedTransaction?.note : '',
-					notifications: Object.fromEntries(
+					notifications: transactionDoc.exists && storedTransaction.notifications ? Object.fromEntries(
 						Object.entries(storedTransaction.notifications || {}).map(([address, notification]) =>
 							[address, { ...notification, lastNotified: (notification.lastNotified as any)?.toDate?.() }])
-					)
+					) : {}
 				};
 
 				transactions.push(newTransaction);
