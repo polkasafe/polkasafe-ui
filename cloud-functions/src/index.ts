@@ -31,7 +31,7 @@ import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { CHANNEL, DISCORD_BOT_SECRETS, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
+import { CHANNEL, DISCORD_BOT_SECRETS, IUserNotificationPreferences, NOTIFICATION_ENGINE_API_KEY, NOTIFICATION_SOURCE, TELEGRAM_BOT_TOKEN } from './notification-engine/notification_engine_constants';
 import callNotificationTrigger from './notification-engine/global-utils/callNotificationTrigger';
 import TelegramBot = require('node-telegram-bot-api');
 import isValidWeb3Address from './notification-engine/global-utils/isValidWeb3Address';
@@ -124,6 +124,18 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
+			const DEFAULT_NOTIFICATION_PREFERENCES : IUserNotificationPreferences = {
+				channelPreferences: {
+					[CHANNEL.IN_APP]: {
+						name: CHANNEL.IN_APP,
+						enabled: true,
+						handle: String(substrateAddress),
+						verified: true
+					}
+				},
+				triggerPreferences: {}
+			};
+
 			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
 			// check if address doc already exists
@@ -147,10 +159,15 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
 						multisigSettings: addressDoc.multisigSettings,
-						notification_preferences: addressDoc.notification_preferences
+						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
 					};
 
-					return res.status(200).json({ data: resUser });
+					res.status(200).json({ data: resUser });
+					if (addressDoc.notification_preferences) return;
+
+					// set default notification preferences if not set
+					await doc.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+					return;
 				}
 			}
 
@@ -165,7 +182,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				email: null,
 				addressBook: [newAddress],
-				multisigSettings: {}
+				multisigSettings: {},
+				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
 			};
 
 			const newUserResponse: IUserResponse = {
