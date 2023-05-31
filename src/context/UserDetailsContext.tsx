@@ -52,6 +52,10 @@ const initialUserDetailsContext : UserDetailsContextType = {
 			[Triggers.EDIT_MULTISIG_USERS_START]:{
 				enabled: false,
 				name: Triggers.EDIT_MULTISIG_USERS_START
+			},
+			[Triggers.APPROVAL_REMINDER]:{
+				enabled: false,
+				name: Triggers.APPROVAL_REMINDER
 			}
 		}
 	},

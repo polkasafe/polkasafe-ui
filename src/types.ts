@@ -42,7 +42,8 @@ export enum Triggers {
 	EXECUTED_PROXY = 'executedProxy',
 	EXECUTED_TRANSACTION = 'executedTransaction',
 	INIT_MULTISIG_TRANSFER = 'initMultisigTransfer',
-	SCHEDULED_APPROVAL_REMINDER = 'scheduledApprovalReminder'
+	SCHEDULED_APPROVAL_REMINDER = 'scheduledApprovalReminder',
+	APPROVAL_REMINDER = 'approvalReminder'
 }
 
 export interface UserDetailsContextType {

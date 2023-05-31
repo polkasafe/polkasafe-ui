@@ -38,6 +38,7 @@ const Notifications = () => {
 	const [openTelegramModal, setOpenTelegramModal] = useState<boolean>(false);
 	const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
 	const [openSlackModal, setOpenSlackModal] = useState<boolean>(false);
+	const [remindersFromOthers, setReminderFromOthers] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
 	const [enabledUpdate, setEnableUpdate] = useState<boolean>(false);
@@ -65,6 +66,7 @@ const Notifications = () => {
 			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
 			setScheduleTxn(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false);
 			setNotifyAfter(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8);
+			setReminderFromOthers(triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false);
 		}
 	}, [notification_preferences]);
 
@@ -75,6 +77,7 @@ const Notifications = () => {
 				cancelledTxn:triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false,
 				newTxn:triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false,
 				notifyAfter: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8,
+				remindersFromOthers: triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false,
 				scheduleTxn:triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false,
 				txnExecuted:triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false
 			};
@@ -82,6 +85,7 @@ const Notifications = () => {
 				cancelledTxn,
 				newTxn,
 				notifyAfter,
+				remindersFromOthers,
 				scheduleTxn,
 				txnExecuted
 			};
@@ -96,7 +100,7 @@ const Notifications = () => {
 	useEffect(() => {
 		handleEnableUpdate();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, notification_preferences]);
+	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers, notification_preferences]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const notifyAfterHours: MenuProps['items'] = [8, 12, 24, 48].map((hr) => {
@@ -151,6 +155,14 @@ const Notifications = () => {
 						enabled: scheduleTxn,
 						hoursToRemindIn: notifyAfter,
 						name: Triggers.SCHEDULED_APPROVAL_REMINDER
+					},
+					[Triggers.EDIT_MULTISIG_USERS_START]:{
+						enabled: newTxn,
+						name: Triggers.EDIT_MULTISIG_USERS_START
+					},
+					[Triggers.APPROVAL_REMINDER]:{
+						enabled: remindersFromOthers,
+						name: Triggers.APPROVAL_REMINDER
 					}
 				};
 				setLoading(true);
@@ -405,6 +417,9 @@ const Notifications = () => {
 						</div>
 						<div className='flex'>
 							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => setCancelledTxn(e.target.checked)}>Transaction has been cancelled</Checkbox>
+						</div>
+						<div className='flex'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={remindersFromOthers} onChange={(e) => setReminderFromOthers(e.target.checked)}>Get reminders from other signatories</Checkbox>
 						</div>
 						<div className='flex items-center gap-x-3'>
 							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={scheduleTxn} onChange={(e) => setScheduleTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
