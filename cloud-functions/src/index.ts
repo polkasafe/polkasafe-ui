@@ -878,6 +878,31 @@ export const getNotifications = functions.https.onRequest(async (req, res) => {
 	});
 });
 
+export const getNotificationPreferencesForAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { address: addressToFetch = '' } = req.body;
+		if (!addressToFetch) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(addressToFetch));
+			const addressDoc = await firestoreDB.collection('addresses').doc(substrateAddress).get();
+			const addressData = addressDoc.data() as IUser;
+
+			return res.status(200).json({ data: addressData.notification_preferences || null });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getNotificationPreferencesForAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
 export const updateTransactionNote = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
