@@ -26,7 +26,7 @@ export interface IUserNotificationChannelPreferences {
 export interface IUserNotificationTriggerPreferences {
 	name: string;
 	enabled: boolean;
-	hoursToRemindIn?: number;
+	[index: string]: any;
 }
 
 export interface IUserNotificationPreferences {

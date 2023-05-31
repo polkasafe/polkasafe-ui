@@ -40,6 +40,7 @@ const Notifications = () => {
 	const [openSlackModal, setOpenSlackModal] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
+	const [enabledUpdate, setEnableUpdate] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -63,15 +64,39 @@ const Notifications = () => {
 			setTxnExecuted(triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false);
 			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
 			setScheduleTxn(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false);
+			setNotifyAfter(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8);
 		}
 	}, [notification_preferences]);
 
-	useEffect(() => {
-		if(scheduleTxn){
-			updateNotificationPreferences({ cancelled: cancelledTxn, executed: txnExecuted, newT: newTxn, scheduleTxn: scheduleTxn });
+	const handleEnableUpdate = () => {
+		if(notification_preferences){
+			const triggerPreferences = notification_preferences.triggerPreferences;
+			const oldPreferences = {
+				cancelledTxn:triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false,
+				newTxn:triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false,
+				notifyAfter: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8,
+				scheduleTxn:triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false,
+				txnExecuted:triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false
+			};
+			const newPreferences = {
+				cancelledTxn,
+				newTxn,
+				notifyAfter,
+				scheduleTxn,
+				txnExecuted
+			};
+			if(JSON.stringify(oldPreferences) === JSON.stringify(newPreferences)){
+				setEnableUpdate(false);
+				return;
+			}
+			setEnableUpdate(true);
 		}
+	};
+
+	useEffect(() => {
+		handleEnableUpdate();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [notifyAfter]);
+	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, notification_preferences]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
@@ -86,7 +111,7 @@ const Notifications = () => {
 		setNotifyAfter(Number(key));
 	};
 
-	const updateNotificationPreferences = async ({ executed, newT, cancelled, scheduleTxn }: { newT: boolean, executed: boolean, cancelled: boolean, scheduleTxn:boolean}) => {
+	const updateNotificationPreferences = async () => {
 
 		try{
 			const userAddress = localStorage.getItem('address');
@@ -99,27 +124,27 @@ const Notifications = () => {
 			else{
 				const newPreferences: {[index: string]: IUserNotificationTriggerPreferences} = {
 					[Triggers.CANCELLED_TRANSACTION]: {
-						enabled: cancelled,
+						enabled: cancelledTxn,
 						name: Triggers.CANCELLED_TRANSACTION
 					},
 					[Triggers.EXECUTED_TRANSACTION]: {
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EXECUTED_TRANSACTION
 					},
 					[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
 					},
 					[Triggers.EXECUTED_PROXY]:{
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EXECUTED_PROXY
 					},
 					[Triggers.INIT_MULTISIG_TRANSFER]:{
-						enabled: newT,
+						enabled: newTxn,
 						name: Triggers.INIT_MULTISIG_TRANSFER
 					},
 					[Triggers.CREATED_PROXY]:{
-						enabled: newT,
+						enabled: newTxn,
 						name: Triggers.CREATED_PROXY
 					},
 					[Triggers.SCHEDULED_APPROVAL_REMINDER]:{
@@ -373,20 +398,23 @@ const Notifications = () => {
 					<p className='mb-4'>Configure the notifications you want Polkasafe to send in your linked channels</p>
 					<div className='flex flex-col gap-y-3'>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: txnExecuted, newT: e.target.checked, scheduleTxn: scheduleTxn });}}>New Transaction needs to be signed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => setNewTxn(e.target.checked)}>New Transaction needs to be signed</Checkbox>
 						</div>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: e.target.checked, newT: newTxn, scheduleTxn: scheduleTxn });}}>Transaction has been signed and executed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => setTxnExecuted(e.target.checked)}>Transaction has been signed and executed</Checkbox>
 						</div>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: e.target.checked, executed: txnExecuted, newT: newTxn, scheduleTxn: scheduleTxn });}}>Transaction has been cancelled</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => setCancelledTxn(e.target.checked)}>Transaction has been cancelled</Checkbox>
 						</div>
 						<div className='flex items-center gap-x-3'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={scheduleTxn} onChange={(e) => { setScheduleTxn(e.target.checked); updateNotificationPreferences({ cancelled:cancelledTxn, executed: txnExecuted, newT: newTxn, scheduleTxn: e.target.checked });}}>For Pending Transactions remind signers every:</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={scheduleTxn} onChange={(e) => setScheduleTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
 							<Dropdown disabled={!scheduleTxn || loading} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
 								<button className={`'flex items-center gap-x-2 border ${!scheduleTxn || loading ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className={`hidden md:inline-flex text-base ${!scheduleTxn || loading ? 'text-text_secondary': 'text-primary'}`}/></button>
 							</Dropdown>
 						</div>
+					</div>
+					<div className='mt-4'>
+						<Button disabled={!enabledUpdate} onClick={updateNotificationPreferences} className={`text-white bg-primary rounded-lg cursor-pointer ${!enabledUpdate && 'opacity-50 cursor-default'}`}>Save</Button>
 					</div>
 				</div>
 			</div>
