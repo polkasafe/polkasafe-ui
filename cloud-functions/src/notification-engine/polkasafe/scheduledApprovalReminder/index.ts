@@ -79,14 +79,14 @@ export default async function scheduledApprovalReminder() {
 		const multisigQueueResults = await Promise.allSettled(multisigQueuePromises);
 		for (const [index, multisigAddressResult] of multisigQueueResults.entries()) {
 			// if there are any multisig transactions, send a single notification for all of them
-			if (multisigAddressResult.status !== 'fulfilled' || ! multisigAddressResult.value) continue;
+			if (multisigAddressResult.status !== 'fulfilled' || !multisigAddressResult.value) continue;
 			const { data, error } = multisigAddressResult.value as IMultisigQueueResponse;
 			if (error || !data || !data.length) continue;
 
 			const multisigAddressData = multisigAddressesToNotifyForUser[index];
 
 			pendingTxMultisigs.push({
-				multisigName: userAddressDoc.multisigSettings[multisigAddressData.address].name || multisigAddressData.name,
+				multisigName: userAddressDoc.multisigSettings?.[multisigAddressData.address]?.name || multisigAddressData?.name || 'Untitled Multisig',
 				multisigAddress: multisigAddressData.address,
 				network: multisigAddressData.network
 			});
