@@ -314,6 +314,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						created_at={new Date()}
 					/> :
 					<Spin wrapperClassName={className} spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
+						{initiatorBalance.lt(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+							<WarningCircleIcon />
+							<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+						</section>
+							:
+							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
+						}
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 							form={form}
@@ -322,13 +329,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							}
 						>
 							<AddAddressModal/>
-							{initiatorBalance.lt(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
-								<WarningCircleIcon />
-								<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
-							</section>
-								:
-								<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
-							}
 							<section>
 								<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
 								<div className='flex items-center gap-x-[10px] mt-[14px]'>
@@ -475,7 +475,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 											<div className='flex items-center h-[40px]'>
 												<Input.TextArea
 													placeholder='Note'
-													className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
+													className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
 													id="note"
 													rows={4}
 													value={note}
@@ -514,11 +514,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</p>
 					</section> */}
 
-							<section className='flex items-center gap-x-5 justify-center mt-10'>
-								<CancelBtn className='w-[250px]' onClick={onCancel} />
-								<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
-							</section>
 						</Form>
+						<section className='flex items-center gap-x-5 justify-center mt-10'>
+							<CancelBtn className='w-[250px]' onClick={onCancel} />
+							<ModalBtn disabled={!recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+						</section>
 					</Spin>
 			}
 		</>
