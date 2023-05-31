@@ -897,7 +897,7 @@ export const getNotificationPreferencesForAddress = functions.https.onRequest(as
 
 			return res.status(200).json({ data: addressData.notification_preferences || null });
 		} catch (err:unknown) {
-			functions.logger.error('Error in getNotifications :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in getNotificationPreferencesForAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
