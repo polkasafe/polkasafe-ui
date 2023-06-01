@@ -26,6 +26,7 @@ export interface IUserNotificationChannelPreferences {
 export interface IUserNotificationTriggerPreferences {
 	name: string;
 	enabled: boolean;
+	[index: string]: any;
 }
 
 export interface IUserNotificationPreferences {
@@ -41,6 +42,8 @@ export enum Triggers {
 	EXECUTED_PROXY = 'executedProxy',
 	EXECUTED_TRANSACTION = 'executedTransaction',
 	INIT_MULTISIG_TRANSFER = 'initMultisigTransfer',
+	SCHEDULED_APPROVAL_REMINDER = 'scheduledApprovalReminder',
+	APPROVAL_REMINDER = 'approvalReminder'
 }
 
 export interface UserDetailsContextType {
