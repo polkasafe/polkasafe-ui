@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longiframe from 'src/assets/longiframe.svg';
 import shortiframe from 'src/assets/shortiframe.svg';
-import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
 import styled from 'styled-components';
@@ -29,15 +29,14 @@ const AppLayout = ({ className }: { className?: string }) => {
 	const [sideDrawer, setSideDrawer] = useState(false);
 	const [multisigChanged, setMultisigChanged] = useState(false);
 	const { activeMultisig } = useGlobalUserDetailsContext();
-	const { iframeVisibility } = useGlobalApiContext();
-	const [IframeUrl, setIframeUrl] = useState('');
+	const { iframeVisibility } = useGlobalDAppContext();
 	const [iframestate, setiframestate] = useState(false);
+	const IframeUrl = `https://sub.id/${activeMultisig}`;
 	useEffect(() => {
 		setMultisigChanged(true);
 		setTimeout(() => {
 			setMultisigChanged(false);
 		}, 500);
-		setIframeUrl(`https://sub.id/${activeMultisig}`);
 	}, [activeMultisig]);
 
 	return (

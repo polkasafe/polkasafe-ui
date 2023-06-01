@@ -3,11 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
 import subid from 'src/assets/subid.svg';
-import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { ArrowRightIcon } from 'src/ui-components/CustomIcons';
 const AppModal = () => {
-	const { setiframeVisibility } = useGlobalApiContext();
+	const { setIframeVisibility } = useGlobalDAppContext();
 	const { closeModal } = useModalContext();
 	return (
 		<>
@@ -26,7 +26,10 @@ const AppModal = () => {
 						Polkadot
 					</button>
 					<button className='mt-auto text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
-						onClick={() => {closeModal();setiframeVisibility(true);}}
+						onClick={() => {
+							closeModal();
+							setIframeVisibility(true);
+						}}
 					>
 						<span className='font-medium text-xs'>Open app</span>
 						<ArrowRightIcon className='text-sm' />

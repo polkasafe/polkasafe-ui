@@ -13,8 +13,6 @@ export interface ApiContextType {
 	api: ApiPromise | undefined;
 	apiReady: boolean;
 	network: string;
-	iframeVisibility:boolean;
-	setiframeVisibility : React.Dispatch<React.SetStateAction<boolean>>;
 	setNetwork: React.Dispatch<React.SetStateAction<string>>
 }
 
@@ -29,7 +27,6 @@ export interface ApiContextProviderProps {
 export function ApiContextProvider({ children }: ApiContextProviderProps): React.ReactElement {
 	const [api, setApi] = useState<ApiPromise>();
 	const [apiReady, setApiReady] = useState(false);
-	const [iframeVisibility,setiframeVisibility]=useState(false);
 	const [network, setNetwork] = useState(getNetwork());
 
 	useEffect(() => {
@@ -51,7 +48,7 @@ export function ApiContextProvider({ children }: ApiContextProviderProps): React
 	}, [api]);
 
 	return (
-		<ApiContext.Provider value={{ api, apiReady, iframeVisibility, network, setNetwork , setiframeVisibility }}>
+		<ApiContext.Provider value={{ api, apiReady, network, setNetwork }}>
 			{children}
 		</ApiContext.Provider>
 	);
