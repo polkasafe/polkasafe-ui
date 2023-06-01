@@ -2,7 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Drawer, Layout } from 'antd';
+import { Badge } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longiframe from 'src/assets/longiframe.svg';
 import shortiframe from 'src/assets/shortiframe.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -43,7 +46,14 @@ const AppLayout = ({ className }: { className?: string }) => {
 			<Layout hasSider>
 				{
 
-					iframeVisibility && iframestate ? <div className='w-full bg-bg-main'><img src={shortiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 transform left-4 -translate-y-1/2 z-10 ' onClick={() => setiframestate(false)} /><iframe src={IframeUrl} className='w-full h-full relative ml-8' ></iframe></div> : <>
+					iframeVisibility && iframestate ? <div className='w-full bg-bg-main'><section className='flex -mt-12 absolute z-10 justify-start ml-5 w-full'>
+						<Link className='text-white' to='/'>
+							<Badge offset={[-15, 35]} size='small' count='Beta' color='#1573FE'>
+								<img src={polkasafeLogo} alt="polkasafe logo" className='h-[25px]' />
+							</Badge>
+						</Link>
+					</section><img src={shortiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 transform left-4 -translate-y-1/2 z-10 ' onClick={() => setiframestate(false)} /><iframe src={IframeUrl} className='w-full relative h-[calc(100%)] ml-8' >
+					</iframe></div> : <>
 						<Sider
 							trigger={null}
 							collapsible={false}
@@ -67,7 +77,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 				<Layout className='min-h flex flex-row p-0 bg-bg-main '>
 					<div className='hidden lg:block w-full max-w-[180px]'></div>
 					{
-						iframeVisibility && IframeUrl && !iframestate && window.location.pathname.split('/').pop() == 'apps' ? <div className='w-full '><iframe src={IframeUrl} className='w-full' height={window.innerHeight}></iframe><img src={longiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 left-auto -ml-4 transform -translate-y-1/2 z-9999' onClick={() => setiframestate(true)} /></div> : <><Content className='bg-bg-secondary p-[30px] rounded-lg'>
+						iframeVisibility && IframeUrl && !iframestate && window.location.pathname.split('/').pop() == 'apps' ? <div className='w-full '><iframe src={IframeUrl} className='w-full h-[calc(100%)]' ></iframe><img src={longiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 left-auto -ml-4 transform -translate-y-1/2 z-9999' onClick={() => setiframestate(true)} /></div> : <><Content className='bg-bg-secondary p-[30px] rounded-lg'>
 							{multisigChanged ? <Loader size='large' /> : <SwitchRoutes />}
 						</Content></>
 					}
