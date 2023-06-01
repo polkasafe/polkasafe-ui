@@ -43,7 +43,7 @@ const AppLayout = ({ className }: { className?: string }) => {
 			<Layout hasSider>
 				{
 
-					iframeVisibility && iframestate ? <div className='w-full '><img src={shortiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 transform -translate-y-1/2 z-10 ' onClick={() => setiframestate(false)} /><iframe src={IframeUrl} className='w-full relative ml-8' height={window.innerHeight}></iframe></div> : <>
+					iframeVisibility && iframestate ? <div className='w-full bg-bg-main'><img src={shortiframe} alt="" width="30" height="30" className='cursor-pointer absolute top-1/2 transform left-4 -translate-y-1/2 z-10 ' onClick={() => setiframestate(false)} /><iframe src={IframeUrl} className='w-full h-full relative ml-8' ></iframe></div> : <>
 						<Sider
 							trigger={null}
 							collapsible={false}
