@@ -9,12 +9,12 @@ import { styledTheme } from 'src/themes/styledTheme';
 import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
+import { Web3AuthProvider } from './context';
 import { ApiContextProvider } from './context/ApiContext';
 import ModalContextProvider from './context/ModalContext';
 import { UserDetailsProvider } from './context/UserDetailsContext';
 import { antdTheme } from './themes/antdTheme';
 import { GlobalStyle } from './ui-components/GlobalStyle';
-import { Web3AuthProvider } from './context';
 
 function App() {
 	return (
@@ -22,14 +22,14 @@ function App() {
 			<ConfigProvider theme={antdTheme}>
 				<ThemeProvider theme={styledTheme}>
 					<Web3AuthProvider>
-					<ApiContextProvider>
-						<UserDetailsProvider>
-							<GlobalStyle/>
-							<ModalContextProvider>
-								<AppLayout />
-							</ModalContextProvider>
-						</UserDetailsProvider>
-					</ApiContextProvider>
+						<ApiContextProvider>
+							<UserDetailsProvider>
+								<GlobalStyle/>
+								<ModalContextProvider>
+									<AppLayout />
+								</ModalContextProvider>
+							</UserDetailsProvider>
+						</ApiContextProvider>
 					</Web3AuthProvider>
 				</ThemeProvider>
 			</ConfigProvider>

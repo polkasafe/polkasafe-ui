@@ -5,14 +5,14 @@
 import '@polkadot/api-augment';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { SafeEventEmitterProvider } from '@web3auth/base';
+import { Web3Auth } from '@web3auth/modal';
+import { getWalletConnectV2Settings,WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
 import React, { useContext, useEffect, useState } from 'react';
 import { chainProperties } from 'src/global/networkConstants';
 import getNetwork from 'src/utils/getNetwork';
 
-import {metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth} from '../global'
-import { WalletConnectV2Adapter, getWalletConnectV2Settings } from '@web3auth/wallet-connect-v2-adapter';
-import { Web3Auth } from '@web3auth/modal';
-import { SafeEventEmitterProvider } from '@web3auth/base';
+import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
 
 // export interface ApiContextType {
 // 	api: ApiPromise | undefined;
@@ -36,13 +36,13 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	useEffect(() => {
 		const init = async () => {
 			try {
-                webAuth.configureAdapter(openloginAdapter);
+				webAuth.configureAdapter(openloginAdapter);
 				await webAuth.addPlugin(torusPlugin);
 
-				const defaultWcSettings = await getWalletConnectV2Settings("eip155", [1, 137, 5], "04309ed1007e77d1f119b85205bb779d")
+				const defaultWcSettings = await getWalletConnectV2Settings('eip155', [1, 137, 5], '04309ed1007e77d1f119b85205bb779d');
 				const walletConnectV2Adapter = new WalletConnectV2Adapter({
 				  adapterSettings: { ...defaultWcSettings.adapterSettings },
-				  loginSettings: { ...defaultWcSettings.loginSettings },
+				  loginSettings: { ...defaultWcSettings.loginSettings }
 				});
 
 				webAuth.configureAdapter(metamaskAdapter);
@@ -50,10 +50,10 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 				webAuth.configureAdapter(walletConnectV2Adapter);
 
 				if(webAuth.provider) {
-					setProvider(webAuth.provider)
+					setProvider(webAuth.provider);
 				}
 
-				setWeb3Auth(webAuth)
+				setWeb3Auth(webAuth);
 
 				await webAuth.initModal();
 			} catch (err) {
@@ -65,7 +65,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	},[]);
 
 	return (
-		<Web3AuthContext.Provider value={{web3Auth}}>
+		<Web3AuthContext.Provider value={{ web3Auth }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

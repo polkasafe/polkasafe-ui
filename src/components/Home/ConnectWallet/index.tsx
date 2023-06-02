@@ -6,6 +6,7 @@ import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
 import ConnectWalletImg from 'src/assets/connect-wallet.svg';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
@@ -22,6 +23,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const {web3Auth} = useGlobalWeb3Context()
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
@@ -162,6 +164,7 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
+							<button onClick={() => web3Auth.login()}>Web3</button>
 							<Button
 								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
 								icon={<WalletIcon/>}
