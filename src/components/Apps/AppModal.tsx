@@ -5,37 +5,40 @@ import React from 'react';
 import subid from 'src/assets/subid.svg';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useModalContext } from 'src/context/ModalContext';
+import { networks } from 'src/global/networkConstants';
 import { ArrowRightIcon } from 'src/ui-components/CustomIcons';
 const AppModal = () => {
 	const { setIframeVisibility } = useGlobalDAppContext();
 	const { closeModal } = useModalContext();
 	return (
 		<>
-			<div className={'flex flex-col cursor-pointer justify-around rounded-lg scale-90 w-[100%] h-[100%] origin-top-left'} >
-				<div className='flex flex-col h-[18rem] overflow-auto w-[110%]'>
-					<img src={subid} alt="" height='60' width='60' />
-					<div className='mt-4'>
-						<div className="text-xl text-white font-semibold">Sub ID</div>
-						<div className='mt-2 text-[#8B8B8B] font-medium text-14 leading-tight font-archivo'>One Stop Shop For All Substrate Addresses And Balances</div>
+			<div className={'flex flex-col cursor-pointer rounded-lg scale-90 origin-top-left w-[100%] h-[100%] my-[-25px] justify-between gap-[40px]'} >
+				<div className='flex flex-col overflow-auto w-[100%] gap-[20px] '>
+					<img src={subid} alt="" height='70' width='60' />
+					<div className='flex flex-col gap-3'>
+						<div className="text-3xl text-white font-bold">Sub ID</div>
+						<div className='text-[#8B8B8B] font-medium text-14 leading-tight font-archivo'>One Stop Shop For All Substrate Addresses And Balances</div>
 					</div>
-					<div className='mt-5 text-[#8B8B8B] font-medium text-base leading-tight font-archivo'>Available networks</div>
-					<button
-						className={
-							'rounded-lg p-2 my-2 text-sm leading-[15px] w-[100px] text-white text-primary bg-highlight'
-						}>
-						Polkadot
-					</button>
-					<button className='mt-auto text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
-						onClick={() => {
-							closeModal();
-							setIframeVisibility(true);
-						}}
-					>
-						<span className='font-medium text-xs'>Open app</span>
-						<ArrowRightIcon className='text-sm' />
-					</button>
+					<div className='flex flex-col gap-3'>
+						<div className='text-[#8B8B8B] font-medium text-base text-14 leading-tight font-archivo'>Available networks</div>
+						<div className='flex gap-2 flex-wrap max-w-[400px]'>
+							{Object.values(networks).map((net) =>
+								<button key={net} className='rounded-lg py-2 px-[10px] text-sm leading-[15px] text-white text-primary bg-highlight'> {net} </button>
+							)}
+						</div>
+					</div>
 				</div>
-			</div></>
+				<button className='mt-auto text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
+					onClick={() => {
+						closeModal();
+						setIframeVisibility(true);
+					}}
+				>
+					<span className='font-medium text-xs'>Open app</span>
+					<ArrowRightIcon className='text-sm' />
+				</button>
+			</div>
+		</>
 	);
 };
 export default AppModal;

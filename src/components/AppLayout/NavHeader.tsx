@@ -16,12 +16,15 @@ import { DocsIcon } from 'src/ui-components/CustomIcons';
 const { Header } = Layout;
 
 interface Props {
-	className?: string
-	sideDrawer: boolean
-	setSideDrawer: React.Dispatch<React.SetStateAction<boolean>>
+	className?: string;
+	sideDrawer: boolean;
+	setSideDrawer: React.Dispatch<React.SetStateAction<boolean>>;
+	showSubmenu?:boolean;
+	onClick?: VoidFunction;
+
 }
 
-const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
+const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer, showSubmenu, onClick }) => {
 	const location = useLocation();
 	const { address } = useGlobalUserDetailsContext();
 	return (
@@ -37,9 +40,16 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer }) => {
 				</article>
 				<article className='hidden lg:block ml-4'>
 					<p className='bg-bg-secondary text-primary rounded-xl px-[16px] py-[6px] font-bold text-xl capitalize'>
-						{location.pathname === '/' ? 'Home' :
-							location.pathname.slice(1).split('-').join(' ')}
+						{ showSubmenu && onClick ?
+							<>
+								<span onClick={onClick} className='hover:underline cursor-pointer'>
+									{location.pathname === '/' ? 'Home' : location.pathname.slice(1).split('-').join(' ')}
+								</span>
+								{' '} / SubId
+							</>
+							:  location.pathname === '/' ? 'Home' : location.pathname.slice(1).split('-').join(' ')}
 					</p>
+
 				</article>
 				<article className='ml-auto flex items-center gap-x-3'>
 					{address && <Notification />}
