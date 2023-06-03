@@ -11,6 +11,7 @@ import shortIframe from 'src/assets/short-iframe.svg';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
 
 import Footer from './Footer';
@@ -34,7 +35,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
 
-	const IframeUrl= `https://sub.id/${activeMultisig}`;
+	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
 	const hideSlider = iframeState && isAppsPage;
 
