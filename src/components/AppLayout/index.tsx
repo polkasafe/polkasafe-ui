@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longIframe from 'src/assets/long-iframe.svg';
-import shortIframe from 'src/assets/shortIframe.svg';
+import shortIframe from 'src/assets/short-iframe.svg';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
