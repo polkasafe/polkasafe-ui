@@ -12,14 +12,15 @@ const AppModal = () => {
 	const { closeModal } = useModalContext();
 	return (
 		<>
-			<div className={'flex flex-col cursor-pointer rounded-lg scale-90 origin-top-left w-[100%] h-[100%] my-[-25px] justify-between gap-[40px]'} >
-				<div className='flex flex-col overflow-auto w-[100%] gap-[20px] '>
-					<img src={subid} alt="" height='70' width='60' />
-					<div className='flex flex-col gap-3'>
-						<div className="text-3xl text-white font-bold">Sub ID</div>
-						<div className='text-[#8B8B8B] font-medium text-14 leading-tight font-archivo'>One Stop Shop For All Substrate Addresses And Balances</div>
+
+			<div className={'flex flex-col cursor-pointer justify-around rounded-lg scale-90 w-[100%] -mt-[25px] -mb-[25px] origin-top-left'} >
+				<div className='flex flex-col overflow-auto w-[110%]'>
+					<img src={subid} alt="" height='70' width='70' />
+					<div className='mt-3'>
+						<div className="text-3xl text-white font-semibold">Sub ID</div>
+						<div className='mt-2 text-[#8B8B8B] font-medium text-14 leading-tight font-archivo'>One Stop Shop For All Substrate Addresses And Balances</div>
 					</div>
-					<div className='flex flex-col gap-3'>
+					<div className='mt-5 flex flex-col gap-3'>
 						<div className='text-[#8B8B8B] font-medium text-base text-14 leading-tight font-archivo'>Available networks</div>
 						<div className='flex gap-2 flex-wrap max-w-[400px]'>
 							{Object.values(networks).map((net) =>
@@ -27,16 +28,16 @@ const AppModal = () => {
 							)}
 						</div>
 					</div>
+					<button className='mt-10 text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
+						onClick={() => {
+							closeModal();
+							setIframeVisibility(true);
+						}}
+					>
+						<span className='font-medium text-xs'>Open app</span>
+						<ArrowRightIcon className='text-sm' />
+					</button>
 				</div>
-				<button className='mt-auto text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
-					onClick={() => {
-						closeModal();
-						setIframeVisibility(true);
-					}}
-				>
-					<span className='font-medium text-xs'>Open app</span>
-					<ArrowRightIcon className='text-sm' />
-				</button>
 			</div>
 		</>
 	);
