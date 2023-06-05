@@ -24,7 +24,7 @@ import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import EditNote from './EditNote';
-import LoadingButton from './LoadingButton';
+import NotifyButton from './NotifyButton';
 
 interface ISentInfoProps {
 	amount: string;
@@ -74,7 +74,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
 
 	const approvalReminder = async (address:string) => {
-		console.log(address);
 		const res = await notify({
 			args: {
 				address: address,
@@ -422,7 +421,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 													>
 														<AddressComponent address={address} />
 														{depositor === userAddress && (
-															<LoadingButton address={address} onClick={approvalReminder} canNotificationSend={hoursDifference === undefined || hoursDifference > 8 }/>
+															<NotifyButton address={address} onClick={approvalReminder} canNotificationSend={hoursDifference === undefined || hoursDifference > 8 }/>
 														)
 														}
 														{/* <Identicon

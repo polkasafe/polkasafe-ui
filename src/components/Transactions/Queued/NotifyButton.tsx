@@ -21,7 +21,7 @@ const Tooltip = styled(AntDTooltip)`
     }
 `;
 
-export default function LoadingButton({
+export default function NotifyButton({
 	address,
 	onClick,
 	canNotificationSend

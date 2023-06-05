@@ -151,11 +151,7 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
-	notifications?: {
-		[address: string]: {
-			lastNotified: Date;
-		}
-	}
+	notifications?: ITxNotification
 }
 
 export interface ITransaction {
