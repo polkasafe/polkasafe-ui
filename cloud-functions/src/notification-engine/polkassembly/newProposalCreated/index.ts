@@ -26,10 +26,13 @@ export default async function newProposalCreated(args: Args) {
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
+	const SUB_TRIGGER = ([EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType)) ? 'openGovReferendumSubmitted' : 'gov1ProposalSubmitted';
+
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_settings.${network}.triggerPreferences.${TRIGGER_NAME}.enabled`, '==', true)
+		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.post_types`, 'array-contains', postType)
 		.get();
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {
