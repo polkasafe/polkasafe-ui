@@ -23,7 +23,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const {web3Auth} = useGlobalWeb3Context()
+	const {web3Auth, login, web3AuthUser, logout, signMessage} = useGlobalWeb3Context()
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
@@ -135,6 +135,40 @@ const ConnectWallet = () => {
 		}
 	};
 
+	const handleWeb3AuthConnection = async () => {
+		const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressTokenEth`, {
+			headers: {
+				'x-address': web3AuthUser!.accounts[0],
+			},
+			method: 'POST'
+		});
+
+		setLoading(true);
+
+		const { data: token, error: tokenError } = await tokenResponse.json();
+
+		if (!tokenError) {
+			const signature = await signMessage()
+
+			const {data: userData, error: connectAddressErr} = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+				headers: firebaseFunctionsHeader(network, web3AuthUser?.accounts[0], signature),
+				method: 'POST'
+			}).then(res => res.json());
+
+			localStorage.setItem('address', web3AuthUser!.accounts[0]);
+			localStorage.setItem('signature', signature);
+			//localStorage.setItem('logged_in_wallet', selectedWallet); @TODO
+		}
+
+		
+	}
+
+	useEffect(() => {
+		if (web3AuthUser) {
+			handleWeb3AuthConnection()
+		}
+	}, [web3AuthUser])
+
 	return (
 		<>
 			<div className='rounded-xl flex flex-col items-center justify-center min-h-[400px] bg-bg-main'>
@@ -164,7 +198,7 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
-							<button onClick={() => web3Auth.login()}>Web3</button>
+							<button onClick={async () => {await login()}}>Web3</button>
 							<Button
 								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
 								icon={<WalletIcon/>}

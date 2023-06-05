@@ -112,6 +112,25 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 	});
 });
 
+export const getConnectAddressTokenEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const token = `<Bytes>polkasafe-login-${uuidv4()}</Bytes>`;
+
+			const addressRef = firestoreDB.collection('addresses').doc(address);
+			await addressRef.set({ address, token }, { merge: true });
+			return res.status(200).json({ data: token });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getConnectAddressToken :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
 export const connectAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
