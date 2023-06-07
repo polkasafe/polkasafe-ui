@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Form, Input, MenuProps, Modal } from 'antd';
+import { Button, Dropdown, Form, Input, MenuProps, Modal } from 'antd';
 import { Checkbox } from 'antd';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { CHANNEL, IUserNotificationTriggerPreferences, NotificationStatus, Triggers } from 'src/types';
-import { BellIcon, CheckOutlined, DiscordIcon, ElementIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { BellIcon, CheckOutlined, CircleArrowDownIcon, DiscordIcon, ElementIcon, MailIcon, OutlineCloseIcon, SlackIcon, TelegramIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -24,21 +24,24 @@ const Notifications = () => {
 	const { network } = useGlobalApiContext();
 	const { pathname } = useLocation();
 	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const [notifyAfter, setNotifyAfter] = useState<number>(2);
+	const [notifyAfter, setNotifyAfter] = useState<number>(8);
 	const emailPreference = notification_preferences?.channelPreferences?.[CHANNEL.EMAIL];
 	const [email, setEmail] = useState<string>(emailPreference?.handle || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(false);
 	const [cancelledTxn, setCancelledTxn] = useState<boolean>(false);
+	const [scheduleTxn, setScheduleTxn]=useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
 	const [openTelegramModal, setOpenTelegramModal] = useState<boolean>(false);
 	const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
 	const [openSlackModal, setOpenSlackModal] = useState<boolean>(false);
+	const [remindersFromOthers, setReminderFromOthers] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
+	const [enabledUpdate, setEnableUpdate] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -61,11 +64,46 @@ const Notifications = () => {
 			setNewTxn(triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false);
 			setTxnExecuted(triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false);
 			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
+			setScheduleTxn(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false);
+			setNotifyAfter(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8);
+			setReminderFromOthers(triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false);
 		}
 	}, [notification_preferences]);
 
+	const handleEnableUpdate = () => {
+		if(notification_preferences){
+			const triggerPreferences = notification_preferences.triggerPreferences;
+			const oldPreferences = {
+				cancelledTxn:triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false,
+				newTxn:triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false,
+				notifyAfter: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8,
+				remindersFromOthers: triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false,
+				scheduleTxn:triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false,
+				txnExecuted:triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false
+			};
+			const newPreferences = {
+				cancelledTxn,
+				newTxn,
+				notifyAfter,
+				remindersFromOthers,
+				scheduleTxn,
+				txnExecuted
+			};
+			if(JSON.stringify(oldPreferences) === JSON.stringify(newPreferences)){
+				setEnableUpdate(false);
+				return;
+			}
+			setEnableUpdate(true);
+		}
+	};
+
+	useEffect(() => {
+		handleEnableUpdate();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers, notification_preferences]);
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const notifyAfterHours: MenuProps['items'] = [1, 2, 4, 6, 8, 12, 24, 48].map((hr) => {
+	const notifyAfterHours: MenuProps['items'] = [8, 12, 24, 48].map((hr) => {
 		return {
 			key: hr,
 			label: <span className={`${hr === notifyAfter ? 'text-primary' : 'text-white'}`}>{hr === 1 ? `${hr} hr` : `${hr} hrs`}</span>
@@ -75,10 +113,9 @@ const Notifications = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const onNotifyHoursChange: MenuProps['onClick'] = ({ key }) => {
 		setNotifyAfter(Number(key));
-		updateNotificationPreferences({ cancelled: true, executed: txnExecuted, newT: newTxn });
 	};
 
-	const updateNotificationPreferences = async ({ executed, newT, cancelled }: { newT: boolean, executed: boolean, cancelled: boolean }) => {
+	const updateNotificationPreferences = async () => {
 
 		try{
 			const userAddress = localStorage.getItem('address');
@@ -91,32 +128,41 @@ const Notifications = () => {
 			else{
 				const newPreferences: {[index: string]: IUserNotificationTriggerPreferences} = {
 					[Triggers.CANCELLED_TRANSACTION]: {
-						enabled: cancelled,
+						enabled: cancelledTxn,
 						name: Triggers.CANCELLED_TRANSACTION
 					},
 					[Triggers.EXECUTED_TRANSACTION]: {
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EXECUTED_TRANSACTION
 					},
 					[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
 					},
 					[Triggers.EXECUTED_PROXY]:{
-						enabled: executed,
+						enabled: txnExecuted,
 						name: Triggers.EXECUTED_PROXY
 					},
 					[Triggers.INIT_MULTISIG_TRANSFER]:{
-						enabled: newT,
+						enabled: newTxn,
 						name: Triggers.INIT_MULTISIG_TRANSFER
 					},
 					[Triggers.CREATED_PROXY]:{
-						enabled: newT,
+						enabled: newTxn,
 						name: Triggers.CREATED_PROXY
 					},
+					[Triggers.SCHEDULED_APPROVAL_REMINDER]:{
+						enabled: scheduleTxn,
+						hoursToRemindIn: notifyAfter,
+						name: Triggers.SCHEDULED_APPROVAL_REMINDER
+					},
 					[Triggers.EDIT_MULTISIG_USERS_START]:{
-						enabled: newT,
+						enabled: newTxn,
 						name: Triggers.EDIT_MULTISIG_USERS_START
+					},
+					[Triggers.APPROVAL_REMINDER]:{
+						enabled: remindersFromOthers,
+						name: Triggers.APPROVAL_REMINDER
 					}
 				};
 				setLoading(true);
@@ -298,7 +344,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Den to Telegram</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Telegram Bot</h3>}
 					open={openTelegramModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
@@ -364,20 +410,26 @@ const Notifications = () => {
 					<p className='mb-4'>Configure the notifications you want Polkasafe to send in your linked channels</p>
 					<div className='flex flex-col gap-y-3'>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => { setNewTxn(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: txnExecuted, newT: e.target.checked });}}>New Transaction needs to be signed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={newTxn} onChange={(e) => setNewTxn(e.target.checked)}>New Transaction needs to be signed</Checkbox>
 						</div>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: cancelledTxn, executed: e.target.checked, newT: newTxn });}}>Transaction has been signed and executed</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={txnExecuted} onChange={(e) => setTxnExecuted(e.target.checked)}>Transaction has been signed and executed</Checkbox>
 						</div>
 						<div className='flex'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => { setTxnExecuted(e.target.checked); updateNotificationPreferences({ cancelled: e.target.checked, executed: txnExecuted, newT: newTxn });}}>Transaction has been cancelled</Checkbox>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={cancelledTxn} onChange={(e) => setCancelledTxn(e.target.checked)}>Transaction has been cancelled</Checkbox>
 						</div>
-						{/* <div className='flex items-center gap-x-3'>
-							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={pendingTxn} onChange={(e) => { setPendingTxn(e.target.checked); updateNotificationPreferences({ executed: txnExecuted, newT: newTxn, notifyHr: notifyAfter, pending: e.target.checked });}}>For Pending Transactions remind signers every:</Checkbox>
-							<Dropdown disabled={!pendingTxn || loading} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
-								<button className={`'flex items-center gap-x-2 border ${!pendingTxn || loading ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className='hidden md:inline-flex text-base text-primary'/></button>
+						<div className='flex'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={remindersFromOthers} onChange={(e) => setReminderFromOthers(e.target.checked)}>Get reminders from other signatories</Checkbox>
+						</div>
+						<div className='flex items-center gap-x-3'>
+							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={scheduleTxn} onChange={(e) => setScheduleTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
+							<Dropdown disabled={!scheduleTxn || loading} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
+								<button className={`'flex items-center gap-x-2 border ${!scheduleTxn || loading ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className={`hidden md:inline-flex text-base ${!scheduleTxn || loading ? 'text-text_secondary': 'text-primary'}`}/></button>
 							</Dropdown>
-						</div> */}
+						</div>
+					</div>
+					<div className='mt-4'>
+						<Button disabled={!enabledUpdate} onClick={updateNotificationPreferences} className={`text-white bg-primary rounded-lg cursor-pointer ${!enabledUpdate && 'opacity-50 cursor-default'}`}>Save</Button>
 					</div>
 				</div>
 			</div>

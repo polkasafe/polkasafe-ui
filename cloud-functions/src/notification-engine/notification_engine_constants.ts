@@ -24,6 +24,7 @@ export interface IUserNotificationChannelPreferences {
 export interface IUserNotificationTriggerPreferences {
 	name: string;
 	enabled: boolean;
+	[additionalProperties: string]: any; // trigger specific properties
 }
 
 export interface IUserNotificationPreferences {
@@ -44,11 +45,42 @@ export const NOTIFICATION_SOURCE_EMAIL: {[index in NOTIFICATION_SOURCE] : string
 	[NOTIFICATION_SOURCE.TOWNHALL]: 'noreply@townhall.io'
 };
 
+export const TELEGRAM_BOT_TOKEN: {[index in NOTIFICATION_SOURCE] : string | undefined} = {
+	[NOTIFICATION_SOURCE.POLKASAFE]: process.env.POLKASAFE_TELEGRAM_BOT_TOKEN,
+	[NOTIFICATION_SOURCE.POLKASSEMBLY]: process.env.POLKASSEMBLY_TELEGRAM_BOT_TOKEN,
+	[NOTIFICATION_SOURCE.TOWNHALL]: process.env.TOWNHALL_TELEGRAM_BOT_TOKEN
+};
+
+interface IDiscordBotSecrets {
+	token: string | undefined;
+	publicKey: string | undefined;
+	clientId: string | undefined;
+}
+
+export const DISCORD_BOT_SECRETS: {[index in NOTIFICATION_SOURCE]: IDiscordBotSecrets} = {
+	[NOTIFICATION_SOURCE.POLKASAFE]: {
+		token: process.env.POLKASAFE_DISCORD_BOT_TOKEN,
+		publicKey: process.env.POLKASAFE_DISCORD_PUBLIC_KEY,
+		clientId: process.env.POLKASAFE_DISCORD_CLIENT_ID
+	},
+	[NOTIFICATION_SOURCE.POLKASSEMBLY]: {
+		token: process.env.POLKASSEMBLY_DISCORD_BOT_TOKEN,
+		publicKey: process.env.POLKASSEMBLY_DISCORD_PUBLIC_KEY,
+		clientId: process.env.POLKASSEMBLY_DISCORD_CLIENT_ID
+	},
+	[NOTIFICATION_SOURCE.TOWNHALL]: {
+		token: process.env.TOWNHALL_DISCORD_BOT_TOKEN,
+		publicKey: process.env.TOWNHALL_DISCORD_PUBLIC_KEY,
+		clientId: process.env.TOWNHALL_DISCORD_CLIENT_ID
+	}
+};
+
+export const SLACK_BOT_TOKEN: {[index in NOTIFICATION_SOURCE] : string | undefined} = {
+	[NOTIFICATION_SOURCE.POLKASAFE]: process.env.POLKASAFE_SLACK_BOT_TOKEN,
+	[NOTIFICATION_SOURCE.POLKASSEMBLY]: process.env.POLKASSEMBLY_SLACK_BOT_TOKEN,
+	[NOTIFICATION_SOURCE.TOWNHALL]: process.env.TOWNHALL_SLACK_BOT_TOKEN
+};
+
 export const NOTIFICATION_ENGINE_API_KEY = process.env.NOTIFICATION_ENGINE_API_KEY;
 export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-export const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-export const DISCORD_PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY;
-export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-export const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 export const ELEMENT_API_KEY = process.env.ELEMENT_API_KEY;

@@ -10,6 +10,7 @@ interface IModalContext {
 	toggleOnSwitch: () => void;
 	openModal: (title: string, children: ReactNode, CloseBtnNode?: ReactNode) => void;
 	toggleSwitch: boolean;
+	closeModal:()=> void;
 }
 
 const ModalContext: Context<IModalContext> = createContext({} as IModalContext);
@@ -24,6 +25,9 @@ const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		isVisible: false,
 		title: ''
 	});
+	const closeModal = () => {
+		setModal((prev) => ({ ...prev, isVisible: false }));
+	};
 	const toggleVisibility = () => {
 		setModal((prev) => ({ ...prev, isVisible: !prev.isVisible }));
 	};
@@ -40,6 +44,7 @@ const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	};
 	return (
 		<ModalContext.Provider value={{
+			closeModal,
 			openModal,
 			toggleOnSwitch,
 			toggleSwitch,

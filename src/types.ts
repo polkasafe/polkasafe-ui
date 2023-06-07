@@ -26,6 +26,7 @@ export interface IUserNotificationChannelPreferences {
 export interface IUserNotificationTriggerPreferences {
 	name: string;
 	enabled: boolean;
+	[index: string]: any;
 }
 
 export interface IUserNotificationPreferences {
@@ -41,6 +42,8 @@ export enum Triggers {
 	EXECUTED_PROXY = 'executedProxy',
 	EXECUTED_TRANSACTION = 'executedTransaction',
 	INIT_MULTISIG_TRANSFER = 'initMultisigTransfer',
+	SCHEDULED_APPROVAL_REMINDER = 'scheduledApprovalReminder',
+	APPROVAL_REMINDER = 'approvalReminder'
 }
 
 export interface UserDetailsContextType {
@@ -136,6 +139,12 @@ export interface IAsset {
 	balance_token: string;
 }
 
+export interface ITxNotification {
+	[address: string]: {
+		lastNotified: Date;
+	}
+}
+
 export interface IQueueItem {
 	callData: string;
 	callHash: string;
@@ -145,11 +154,7 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
-	notifications?: {
-		[address: string]: {
-			lastNotified: Date;
-		}
-	}
+	notifications?: ITxNotification
 }
 
 export interface ITransaction {
