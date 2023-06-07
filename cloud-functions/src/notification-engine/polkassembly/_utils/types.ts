@@ -16,6 +16,12 @@ export enum EPAProposalType {
 	GRANTS = 'grants'
 }
 
+export enum EPAPostStatus {
+	SUBMITTED= 'submitted',
+	VOTING= 'voting',
+	CLOSED= 'closed'
+}
+
 export interface IPAUserPreference {
 	user_id: number;
 	notification_settings: IUserNotificationPreferences;

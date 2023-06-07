@@ -11,6 +11,7 @@ import { ThemeProvider } from 'styled-components';
 import AppLayout from './components/AppLayout';
 import { Web3AuthProvider } from './context';
 import { ApiContextProvider } from './context/ApiContext';
+import { DAppContextProvider } from './context/DAppContext';
 import ModalContextProvider from './context/ModalContext';
 import { UserDetailsProvider } from './context/UserDetailsContext';
 import { antdTheme } from './themes/antdTheme';

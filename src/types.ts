@@ -139,6 +139,12 @@ export interface IAsset {
 	balance_token: string;
 }
 
+export interface ITxNotification {
+	[address: string]: {
+		lastNotified: Date;
+	}
+}
+
 export interface IQueueItem {
 	callData: string;
 	callHash: string;
@@ -148,11 +154,7 @@ export interface IQueueItem {
 	approvals: string[];
 	threshold: number;
 	note?: string;
-	notifications?: {
-		[address: string]: {
-			lastNotified: Date;
-		}
-	}
+	notifications?: ITxNotification
 }
 
 export interface ITransaction {
