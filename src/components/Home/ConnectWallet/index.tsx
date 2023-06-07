@@ -23,7 +23,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const { web3Auth, login, web3AuthUser, logout, signMessage } = useGlobalWeb3Context()
+	const { login, web3AuthUser, signMessage } = useGlobalWeb3Context();
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
@@ -105,8 +105,6 @@ const ConnectWallet = () => {
 					localStorage.setItem('signature', signature);
 					localStorage.setItem('logged_in_wallet', selectedWallet);
 
-					
-
 					setUserDetailsContextState((prevState) => {
 						return {
 							...prevState,
@@ -140,7 +138,7 @@ const ConnectWallet = () => {
 	const handleWeb3AuthConnection = async () => {
 		const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressTokenEth`, {
 			headers: {
-				'x-address': web3AuthUser!.accounts[0],
+				'x-address': web3AuthUser!.accounts[0]
 			},
 			method: 'POST'
 		});
@@ -150,25 +148,26 @@ const ConnectWallet = () => {
 		const { data: token, error: tokenError } = await tokenResponse.json();
 
 		if (!tokenError) {
-			const signature = await signMessage(token)
+			const signature = await signMessage(token);
 
-			console.log({"x-address": web3AuthUser!.accounts[0],
-			"x-signature": signature}, "yash header")
+			console.log({ 'x-address': web3AuthUser!.accounts[0],
+				'x-signature': signature }, 'yash header');
 
-			const { data: userData, error: connectAddressErr } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+			const { data: userData, error: _connectAddressErr } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
 				headers: {
-					"x-address": web3AuthUser!.accounts[0],
-					"x-signature": signature,
 					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-signature': signature,
 					'Content-Type': 'application/json',
-					'x-api-key': "47c058d8-2ddc-421e-aeb5-e2aa99001949",
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
 					'x-source': 'polkasafe',
-					"Acess-Control-Allow-Origin": "*"
+					
 				},
 				method: 'POST'
 			}).then(res => res.json());
 
-			console.log("yash data", userData)
+			console.log('yash data', userData);
 
 			localStorage.setItem('address', web3AuthUser!.accounts[0]);
 			localStorage.setItem('signature', signature);
@@ -194,15 +193,14 @@ const ConnectWallet = () => {
 			});
 		}
 
-
-	}
+	};
 
 	useEffect(() => {
 		if (web3AuthUser) {
-			console.log("yash web3AUthUser exists")
-			handleWeb3AuthConnection()
+			console.log('yash web3AUthUser exists');
+			handleWeb3AuthConnection();
 		}
-	}, [web3AuthUser])
+	}, [web3AuthUser]);
 
 	return (
 		<>
@@ -233,7 +231,7 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
-							<button onClick={async () => { await login() }}>Web3</button>
+							<button onClick={async () => { await login(); }}>Web3</button>
 							<Button
 								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
 								icon={<WalletIcon />}
