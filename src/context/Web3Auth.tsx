@@ -6,18 +6,18 @@ import '@polkadot/api-augment';
 
 import { SafeEventEmitterProvider, UserInfo } from '@web3auth/base';
 import { Web3Auth } from '@web3auth/modal';
-import { getWalletConnectV2Settings,WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
+import { getWalletConnectV2Settings, WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
-const ethers = require('ethers');
+const { ethers} = require('ethers');
 
 export interface ApiContextType {
 	web3Auth: Web3Auth | null,
 	login: any,
 	logout: any,
 	authenticateUser: any,
-	getUserInfo:any,
+	getUserInfo: any,
 	web3AuthUser: Web3AuthUser | null,
 	signMessage: any
 }
@@ -46,15 +46,15 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 
 				const defaultWcSettings = await getWalletConnectV2Settings('eip155', [1, 137, 5], '04309ed1007e77d1f119b85205bb779d');
 				const walletConnectV2Adapter = new WalletConnectV2Adapter({
-				  adapterSettings: { ...defaultWcSettings.adapterSettings },
-				  loginSettings: { ...defaultWcSettings.loginSettings }
+					adapterSettings: { ...defaultWcSettings.adapterSettings },
+					loginSettings: { ...defaultWcSettings.loginSettings }
 				});
 
 				webAuth.configureAdapter(metamaskAdapter);
 				webAuth.configureAdapter(torusWalletAdapter);
 				webAuth.configureAdapter(walletConnectV2Adapter);
 
-				if(webAuth.provider) {
+				if (webAuth.provider) {
 					setProvider(webAuth.provider);
 				}
 
@@ -67,58 +67,60 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		};
 
 		init();
-	},[]);
+	}, []);
 
 	const login = async () => {
 		if (!web3Auth) {
-		  console.log("Web3 Auth not installed")
-		  return;
+			console.log("Web3 Auth not installed")
+			return;
 		}
-		
+
 		const web3authProvider = await web3Auth.connect();
-		await getUserInfo();
 		setProvider(web3authProvider);
+		await getUserInfo(web3authProvider!);
 	};
 
-	const logout = async () : Promise<any | null> => {
+	const logout = async (): Promise<any | null> => {
 		if (!web3Auth) {
 			console.log("Web3 Auth not installed")
-		  return;
+			return;
 		}
 		await web3Auth.logout();
 		setProvider(null);
-	  };
+	};
 
 	const authenticateUser = async (): Promise<any | undefined> => { //@TODO
 		if (!web3Auth) {
 			console.log("Web3 Auth not installed")
-		  return;
+			return;
 		}
 		const idToken = await web3Auth.authenticateUser();
 		return idToken
 	};
 
-	const getUserInfo = async () : Promise<any | null> => {
+	const getUserInfo = async (givenProvider?: SafeEventEmitterProvider): Promise<any | null> => {
 		if (!web3Auth) {
-		  console.log("Web3 Auth not installed")
-		  return;
+			console.log("Web3 Auth not installed")
+			return;
 		}
 		const user = await web3Auth.getUserInfo();
 
-		try{
-		const ethersProvider = new ethers.provider.Web3Provider(provider);
-		setEthProvider(ethersProvider);
+		console.log(provider, "yash provider")
 
-      	const signer = ethersProvider.getSigner();
-		const address = await signer.getAddress();
+		try {
+			const ethersProvider = new ethers.providers.Web3Provider(givenProvider || provider);
+			setEthProvider(ethersProvider);
 
-		setWeb3AuthUser({
-			name: user.name,
-			email: user.email,
-			accounts: [address],
-		})
-		return user
-	}catch(err) {
+			const signer = ethersProvider.getSigner();
+			const address = await signer.getAddress();
+
+			setWeb3AuthUser({
+				name: user.name || "",
+				email: user.email || "",
+				accounts: [address],
+			})
+			return user
+		} catch (err) {
 			console.log(err, "err from getUserInfo")
 		}
 	};
@@ -126,16 +128,15 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const signMessage = async (message: string): Promise<string> => {
 		try {
 			const signer = ethProvider.getSigner();
-	
+
 			return await signer.signMessage(message);
-		  } catch (error) {
+		} catch (error) {
 			return error as string;
-		  }
-	  
+		}
 	}
 
 	return (
-		<Web3AuthContext.Provider value={{ web3Auth, login, logout, authenticateUser, getUserInfo, web3AuthUser, signMessage}}>
+		<Web3AuthContext.Provider value={{ web3Auth, login, logout, authenticateUser, getUserInfo, web3AuthUser, signMessage }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

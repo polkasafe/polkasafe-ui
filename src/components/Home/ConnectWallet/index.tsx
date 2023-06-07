@@ -1,7 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { InjectedAccount,InjectedWindow } from '@polkadot/extension-inject/types';
+import { InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -23,7 +23,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 const ConnectWallet = () => {
 
 	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const {web3Auth, login, web3AuthUser, logout, signMessage} = useGlobalWeb3Context()
+	const { web3Auth, login, web3AuthUser, logout, signMessage } = useGlobalWeb3Context()
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
 	const [showAccountsDropdown, setShowAccountsDropdown] = useState(false);
@@ -49,7 +49,7 @@ const ConnectWallet = () => {
 			const substrateAddress = getSubstrateAddress(address);
 
 			// TODO - error state
-			if(!substrateAddress){
+			if (!substrateAddress) {
 				console.log('INVALID SUBSTRATE ADDRESS');
 				return;
 			}
@@ -65,7 +65,7 @@ const ConnectWallet = () => {
 
 			const { data: token, error: tokenError } = await tokenResponse.json();
 
-			if(tokenError) {
+			if (tokenError) {
 				// TODO extension
 				console.log('ERROR', tokenError);
 				setLoading(false);
@@ -100,10 +100,12 @@ const ConnectWallet = () => {
 
 				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
-				if(!connectAddressErr && userData){
+				if (!connectAddressErr && userData) {
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
 					localStorage.setItem('logged_in_wallet', selectedWallet);
+
+					
 
 					setUserDetailsContextState((prevState) => {
 						return {
@@ -112,7 +114,7 @@ const ConnectWallet = () => {
 							addressBook: userData?.addressBook || [],
 							createdAt: userData?.created_at,
 							loggedInWallet: selectedWallet,
-							multisigAddresses: userData?.multisigAddresses,
+							multisigAddresses: userData?.multisigAddresses || [],
 							multisigSettings: userData?.multisigSettings || {},
 							notification_preferences: userData?.notification_preferences || {
 								channelPreferences: {},
@@ -128,7 +130,7 @@ const ConnectWallet = () => {
 					setSigning(false);
 				}
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR OCCURED', error);
 			setLoading(false);
 			setSigning(false);
@@ -148,23 +150,56 @@ const ConnectWallet = () => {
 		const { data: token, error: tokenError } = await tokenResponse.json();
 
 		if (!tokenError) {
-			const signature = await signMessage()
+			const signature = await signMessage(token)
 
-			const {data: userData, error: connectAddressErr} = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
-				headers: firebaseFunctionsHeader(network, web3AuthUser?.accounts[0], signature),
+			console.log({"x-address": web3AuthUser!.accounts[0],
+			"x-signature": signature}, "yash header")
+
+			const { data: userData, error: connectAddressErr } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+				headers: {
+					"x-address": web3AuthUser!.accounts[0],
+					"x-signature": signature,
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'x-api-key': "47c058d8-2ddc-421e-aeb5-e2aa99001949",
+					'x-source': 'polkasafe',
+					"Acess-Control-Allow-Origin": "*"
+				},
 				method: 'POST'
 			}).then(res => res.json());
+
+			console.log("yash data", userData)
 
 			localStorage.setItem('address', web3AuthUser!.accounts[0]);
 			localStorage.setItem('signature', signature);
 			//localStorage.setItem('logged_in_wallet', selectedWallet); @TODO
+			setUserDetailsContextState((prevState) => {
+				return {
+					...prevState,
+					address: userData?.address,
+					addressBook: userData?.addressBook || [],
+					createdAt: userData?.created_at,
+					loggedInWallet: selectedWallet,
+					multisigAddresses: userData?.multisigAddresses,
+					multisigSettings: userData?.multisigSettings || {},
+					notification_preferences: userData?.notification_preferences || {
+						channelPreferences: {},
+						triggerPreferences: {
+							newTransaction: true,
+							pendingTransaction: 2,
+							transactionExecuted: true
+						}
+					}
+				};
+			});
 		}
 
-		
+
 	}
 
 	useEffect(() => {
 		if (web3AuthUser) {
+			console.log("yash web3AUthUser exists")
 			handleWeb3AuthConnection()
 		}
 	}, [web3AuthUser])
@@ -180,7 +215,7 @@ const ConnectWallet = () => {
 							<p className='mt-[10px]  text-normal text-sm text-white'>Connect your wallet</p>
 							<p className='text-text_secondary text-sm font-normal mt-[20px]'>Your first step towards creating a safe & secure MultiSig</p>
 							{
-								showAccountsDropdown?
+								showAccountsDropdown ?
 									<div className='mt-[20px]'>
 										<WalletButtons setNoAccounts={setNoAccounts} setNoExtenstion={setNoExtension} className='mb-4' setWallet={setSelectedWallet} setAccounts={setAccounts} />
 										{
@@ -198,12 +233,12 @@ const ConnectWallet = () => {
 									</div>
 									: null
 							}
-							<button onClick={async () => {await login()}}>Web3</button>
+							<button onClick={async () => { await login() }}>Web3</button>
 							<Button
 								disabled={(noExtension || noAccounts || !address) && showAccountsDropdown}
-								icon={<WalletIcon/>}
+								icon={<WalletIcon />}
 								loading={loading}
-								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true) }
+								onClick={async () => showAccountsDropdown ? await handleConnectWallet() : setShowAccountsDropdown(true)}
 								className={`mt-[25px] text-sm border-none outline-none flex items-center justify-center ${(noExtension || noAccounts || !address) && showAccountsDropdown ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'} max-w-[320px] w-full`}
 							>
 								Connect Wallet
