@@ -47,6 +47,7 @@ import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMe
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
 import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
+import {ethers} from 'ethers'
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -63,6 +64,16 @@ const isValidRequest = async (address?:string, signature?:string, network?:strin
 	return { isValid: true, error: '' };
 };
 
+const verifyEthSignature = async (address: string, signature: string, message: string): Promise<boolean> => {
+	const messageBytes = ethers.toUtf8Bytes(message)
+
+	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
+
+	console.log("address", address, recoveredAddress.toLowerCase())
+	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
+	return isValid
+}
+
 const isValidSignature = async (signature:string, address:string) => {
 	try {
 		await cryptoWaitReady();
@@ -75,7 +86,7 @@ const isValidSignature = async (signature:string, address:string) => {
 		return signatureVerify(addressData?.token, signature, hexPublicKey).isValid;
 	} catch (e) {
 		return false;
-	}
+	} 
 };
 
 const getMultisigAddressesByAddress = async (address:string) => {
@@ -125,7 +136,7 @@ export const getConnectAddressTokenEth = functions.https.onRequest(async (req, r
 			await addressRef.set({ address, token }, { merge: true });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
-			functions.logger.error('Error in getConnectAddressToken :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in getConnectAddressTokenEth :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -211,6 +222,96 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			};
 
 			await addressRef.set(newUser, { merge: true });
+			return res.status(200).json({ data: newUserResponse });
+		} catch (err:unknown) {
+			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const connectAddressEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+
+		
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+
+		if (!address || !signature) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressRef = await firestoreDB.collection('addresses').doc(address!).get()
+		// if(!addressRef!.exists) return res.status(400).json({ error: responseMessages.missing_params });
+		const addressDoc = addressRef!.data();
+		
+		const isValid = await verifyEthSignature(address!, signature!, addressDoc!.token);
+		console.log("isvalid", isValid)
+		if (!isValid) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const DEFAULT_NOTIFICATION_PREFERENCES : IUserNotificationPreferences = {
+				channelPreferences: {
+					[CHANNEL.IN_APP]: {
+						name: CHANNEL.IN_APP,
+						enabled: true,
+						handle: address!,
+						verified: true
+					}
+				},
+				triggerPreferences: {}
+			};
+
+			// const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress); @TODO
+
+				const data = addressDoc;
+				if (data && data.created_at) {
+					const addressDoc = {
+						...data,
+						created_at: data?.created_at.toDate()
+					} as IUser;
+
+					const resUser: IUserResponse = {
+						address: address!,
+						email: addressDoc.email,
+						created_at: addressDoc.created_at,
+						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: address! })),
+						// multisigAddresses: multisigAddresses.map((item) => (
+						// 	{ ...item,
+						// 		signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+						// 	})),
+						multisigAddresses: [],
+						multisigSettings: addressDoc.multisigSettings,
+						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+					};
+
+					res.status(200).json({ data: resUser });
+					if (addressDoc.notification_preferences) return;
+
+					// set default notification preferences if not set
+					await addressRef!.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+					return;
+				}
+
+			const newAddress: IAddressBookItem = {
+				name: DEFAULT_USER_ADDRESS_NAME,
+				address: address!
+			};
+
+			// else create a new user document
+			const newUser:IUser = {
+				address: address!,
+				created_at: new Date(),
+				email: null,
+				addressBook: [newAddress],
+				multisigSettings: {},
+				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
+			};
+
+			const newUserResponse: IUserResponse = {
+				...newUser,
+				multisigAddresses: []
+			};
+
+			await addressRef!.ref.set(newUser, { merge: true });
 			return res.status(200).json({ data: newUserResponse });
 		} catch (err:unknown) {
 			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });

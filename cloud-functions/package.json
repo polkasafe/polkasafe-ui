@@ -9,7 +9,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "api:bump": "npm i @polkadot/api @polkadot/api-augment @polkadot/util @polkadot/util-crypto",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "server": "npm run build -- --watch | firebase emulators:start --only functions"
   },
   "engines": {
     "node": "16"
@@ -27,6 +28,7 @@
     "discord-interactions": "^3.4.0",
     "discord.js": "^14.11.0",
     "ejs": "^3.1.9",
+    "ethers": "^6.4.2",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.1.1",
     "html-to-text": "^9.0.5",
