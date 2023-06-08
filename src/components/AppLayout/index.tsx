@@ -35,7 +35,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
 
-	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
+	//const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
 	const hideSlider = iframeState && isAppsPage;
 
@@ -125,12 +125,12 @@ const AppLayout = ({ className }: {className?: string}) => {
 					{iframeVisibility && isAppsPage ? (
 						<div className='w-full rounded-lg'>
 							{!!loading && <Loader size='large' />}
-							<iframe
+							{/* <iframe
 								id='Dapp'
 								onLoad={handleIframeLoad}
 								src={IframeUrl}
 								className={`w-full h-[calc(100%)] ${loading ? 'hidden':'block'}`}
-							></iframe>
+							></iframe> */}
 							{ !hideSlider &&  <img
 								src={longIframe}
 								alt=''

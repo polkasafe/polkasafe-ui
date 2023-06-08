@@ -4,22 +4,24 @@
 
 import '@polkadot/api-augment';
 
-import { SafeEventEmitterProvider } from '@web3auth/base';
+import { CHAIN_NAMESPACES, SafeEventEmitterProvider } from '@web3auth/base';
 import { Web3Auth } from '@web3auth/modal';
 import { getWalletConnectV2Settings, WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
+import { ethers } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
-const { ethers } = require('ethers');
 
 export interface ApiContextType {
 	web3Auth: Web3Auth | null,
 	login: any,
 	logout: any,
 	authenticateUser: any,
+	getChainId: any,
 	getUserInfo: any,
 	web3AuthUser: Web3AuthUser | null,
-	signMessage: any
+	signMessage: any,
+	switchChain: any
 }
 
 export interface Web3AuthUser {
@@ -69,6 +71,16 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		init();
 	}, []);
 
+	useEffect(() => {
+		const switchChainID = async () => {
+			await addChain();
+			await switchChain();
+			const chainId = await getChainId();
+			console.log('yash chainId from switchChainId', chainId);
+		};
+		if(web3AuthUser){switchChainID();}
+	}, [web3AuthUser]);
+
 	const login = async () => {
 		if (!web3Auth) {
 			console.log('Web3 Auth not installed');
@@ -105,10 +117,8 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		}
 		const user = await web3Auth.getUserInfo();
 
-		console.log(provider, 'yash provider');
-
 		try {
-			const ethersProvider = new ethers.providers.Web3Provider(givenProvider || provider);
+			const ethersProvider = new ethers.providers.Web3Provider(givenProvider!);
 			setEthProvider(ethersProvider);
 
 			const signer = ethersProvider.getSigner();
@@ -135,8 +145,44 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		}
 	};
 
+	const getChainId = async (): Promise<number> => {
+		const { chainId } = await (ethProvider.getNetwork());
+		console.log('yash chainId', chainId);
+		return chainId;
+	};
+
+	const switchChain = async (chainId?: number) => {
+		try {
+			if (!provider || !web3Auth) {
+				console.log('provider not initialized yet');
+				return;
+			}
+			await web3Auth.switchChain({ chainId: '0x5' });
+		} catch (err) {
+			console.log('error from switchChain', err);
+		}
+	};
+
+	const addChain = async () => {
+		if (!provider || !web3Auth) {
+			console.log('provider not initialized yet');
+			return;
+		}
+		const newChain = {
+			chainId: '0x5',
+			displayName: 'Goerli',
+			chainNamespace: CHAIN_NAMESPACES.EIP155,
+			tickerName: 'Goerli',
+			ticker: 'ETH',
+			decimals: 18,
+			rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
+			blockExplorer: 'https://goerli.etherscan.io'
+		};
+		await web3Auth.addChain(newChain);
+	};
+
 	return (
-		<Web3AuthContext.Provider value={{  authenticateUser, getUserInfo,login, logout, signMessage,  web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ authenticateUser, getChainId, getUserInfo, login, logout, signMessage, switchChain, web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);
