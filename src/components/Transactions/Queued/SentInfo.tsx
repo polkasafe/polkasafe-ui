@@ -398,7 +398,10 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 											</Timeline.Item>
 										))}
 
-										{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => {
+										{activeMultisigObject?.signatories.filter((item) => {
+											const encodedApprovals = approvals.map((a) => getEncodedAddress(a, network));
+											return !encodedApprovals.includes(getEncodedAddress(item, network));
+										}).map((address, i) => {
 											let hoursDifference = undefined;
 											if(notifications?.[address]?.lastNotified){
 												const olderDate = new Date(notifications?.[address].lastNotified);
