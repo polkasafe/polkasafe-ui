@@ -446,7 +446,7 @@ const Notifications = () => {
 						<Input
 							id='email'
 							defaultValue={emailPreference?.handle || ''}
-							onChange={(a) => setEmail(a.target.value)}
+							onChange={(a) => setEmail(a.target.value.toLowerCase())}
 							placeholder={'Enter email'}
 							className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-2 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 						/>
