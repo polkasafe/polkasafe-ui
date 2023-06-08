@@ -30,7 +30,7 @@ export default async function verifyEmail(args: Args) {
 		const token = uuidv4();
 
 		const updatedNotificationPreferences: IUserNotificationPreferences = {
-			triggerPreferences: { ...userNotificationPreferences.triggerPreferences },
+			triggerPreferences: { ...(userNotificationPreferences?.triggerPreferences || {}) },
 			channelPreferences: {
 				...userNotificationPreferences.channelPreferences,
 				[CHANNEL.EMAIL]: {

@@ -1133,7 +1133,7 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 		if (!email || !token) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
-			const addressSnapshot = await firestoreDB.collection('addresses').where('notification_preferences.channelPreferences.email.handle', '==', email).limit(1).get();
+			const addressSnapshot = await firestoreDB.collection('addresses').where('notification_preferences.channelPreferences.email.verification_token', '==', token).where('notification_preferences.channelPreferences.email.handle', '==', email).limit(1).get();
 			if (addressSnapshot.empty) return res.status(400).json({ error: responseMessages.invalid_params });
 			const addressDoc = addressSnapshot.docs[0];
 			const addressDocData = addressDoc.data();
