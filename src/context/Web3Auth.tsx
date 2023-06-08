@@ -115,9 +115,9 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 			const address = await signer.getAddress();
 
 			setWeb3AuthUser({
-				name: user.name || '',
+				accounts: [address],
 				email: user.email || '',
-				accounts: [address]
+				name: user.name || ''
 			});
 			return user;
 		} catch (err) {
@@ -136,7 +136,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ web3Auth, login, logout, authenticateUser, getUserInfo, web3AuthUser, signMessage }}>
+		<Web3AuthContext.Provider value={{  authenticateUser, getUserInfo,login, logout, signMessage,  web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

@@ -25,10 +25,12 @@ function App() {
 					<Web3AuthProvider>
 						<ApiContextProvider>
 							<UserDetailsProvider>
-								<GlobalStyle/>
-								<ModalContextProvider>
-									<AppLayout />
-								</ModalContextProvider>
+								<DAppContextProvider>
+									<GlobalStyle />
+									<ModalContextProvider>
+										<AppLayout />
+									</ModalContextProvider>
+								</DAppContextProvider>
 							</UserDetailsProvider>
 						</ApiContextProvider>
 					</Web3AuthProvider>

@@ -153,16 +153,15 @@ const ConnectWallet = () => {
 			console.log({ 'x-address': web3AuthUser!.accounts[0],
 				'x-signature': signature }, 'yash header');
 
-			const { data: userData, error: _connectAddressErr } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+			const { data: userData } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, { //@TODO error handling
 				headers: {
 					'Accept': 'application/json',
 					'Acess-Control-Allow-Origin': '*',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-signature': signature,
 					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
 					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-source': 'polkasafe',
-					
+					'x-signature': signature,
+					'x-source': 'polkasafe'
 				},
 				method: 'POST'
 			}).then(res => res.json());
@@ -197,7 +196,6 @@ const ConnectWallet = () => {
 
 	useEffect(() => {
 		if (web3AuthUser) {
-			console.log('yash web3AUthUser exists');
 			handleWeb3AuthConnection();
 		}
 	}, [web3AuthUser]);
