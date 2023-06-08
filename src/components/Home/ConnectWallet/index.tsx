@@ -198,6 +198,7 @@ const ConnectWallet = () => {
 		if (web3AuthUser) {
 			handleWeb3AuthConnection();
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [web3AuthUser]);
 
 	return (
