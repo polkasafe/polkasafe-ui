@@ -50,7 +50,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		if(!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
-	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== getEncodedAddress(approvingAddress, network));
 	if(!callDataHex) return;
 
 	if(callDataHex && amount && recipientAddress) {
