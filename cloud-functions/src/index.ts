@@ -47,7 +47,7 @@ import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMe
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
 import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
-import {ethers} from 'ethers'
+import { ethers } from 'ethers';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -65,14 +65,14 @@ const isValidRequest = async (address?:string, signature?:string, network?:strin
 };
 
 const verifyEthSignature = async (address: string, signature: string, message: string): Promise<boolean> => {
-	const messageBytes = ethers.toUtf8Bytes(message)
+	const messageBytes = ethers.toUtf8Bytes(message);
 
 	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
 
-	console.log("address", address, recoveredAddress.toLowerCase())
+	console.log('address', address, recoveredAddress.toLowerCase());
 	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
-	return isValid
-}
+	return isValid;
+};
 
 const isValidSignature = async (signature:string, address:string) => {
 	try {
@@ -86,7 +86,7 @@ const isValidSignature = async (signature:string, address:string) => {
 		return signatureVerify(addressData?.token, signature, hexPublicKey).isValid;
 	} catch (e) {
 		return false;
-	} 
+	}
 };
 
 const getMultisigAddressesByAddress = async (address:string) => {
@@ -232,19 +232,17 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-
-		
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
 
 		if (!address || !signature) return res.status(400).json({ error: responseMessages.missing_params });
 
-		const addressRef = await firestoreDB.collection('addresses').doc(address!).get()
+		const addressRef = await firestoreDB.collection('addresses').doc(address!).get();
 		// if(!addressRef!.exists) return res.status(400).json({ error: responseMessages.missing_params });
 		const addressDoc = addressRef!.data();
-		
+
 		const isValid = await verifyEthSignature(address!, signature!, addressDoc!.token);
-		console.log("isvalid", isValid)
+		console.log('isvalid', isValid);
 		if (!isValid) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -262,34 +260,34 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 
 			// const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress); @TODO
 
-				const data = addressDoc;
-				if (data && data.created_at) {
-					const addressDoc = {
-						...data,
-						created_at: data?.created_at.toDate()
-					} as IUser;
+			const data = addressDoc;
+			if (data && data.created_at) {
+				const addressDoc = {
+					...data,
+					created_at: data?.created_at.toDate()
+				} as IUser;
 
-					const resUser: IUserResponse = {
-						address: address!,
-						email: addressDoc.email,
-						created_at: addressDoc.created_at,
-						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: address! })),
-						// multisigAddresses: multisigAddresses.map((item) => (
-						// 	{ ...item,
-						// 		signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
-						// 	})),
-						multisigAddresses: [],
-						multisigSettings: addressDoc.multisigSettings,
-						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
-					};
+				const resUser: IUserResponse = {
+					address: address!,
+					email: addressDoc.email,
+					created_at: addressDoc.created_at,
+					addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: address! })),
+					// multisigAddresses: multisigAddresses.map((item) => (
+					// 	{ ...item,
+					// 		signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+					// 	})),
+					multisigAddresses: [],
+					multisigSettings: addressDoc.multisigSettings,
+					notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+				};
 
-					res.status(200).json({ data: resUser });
-					if (addressDoc.notification_preferences) return;
+				res.status(200).json({ data: resUser });
+				if (addressDoc.notification_preferences) return;
 
-					// set default notification preferences if not set
-					await addressRef!.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
-					return;
-				}
+				// set default notification preferences if not set
+				await addressRef!.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+				return;
+			}
 
 			const newAddress: IAddressBookItem = {
 				name: DEFAULT_USER_ADDRESS_NAME,
@@ -323,30 +321,54 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
 
-		try {
-			const substrateAddress = getSubstrateAddress(String(address));
+		const address: string = substrateAddress ? substrateAddress : req.get('x-address') || '';
 
-			const { name, address: addressToAdd } = req.body;
-			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
-			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
 
-			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			const doc = await addressRef.get();
-			if (doc.exists) {
-				const addressDoc = {
-					...doc.data(),
-					created_at: doc.data()?.created_at.toDate()
-				} as IUser;
-				const addressBook = addressDoc.addressBook || [];
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
 
-				// check if address already exists in address book
+		const { name, address: addressToAdd } = req.body;
+		if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressDoc = {
+			...doc.data(),
+			created_at: doc.data()?.created_at.toDate()
+		} as IUser;
+		const addressBook = addressDoc.addressBook || [];
+
+		if (signature?.startsWith('0x')) {
+			const isValid = await verifyEthSignature(address, signature, addressData?.token);
+			if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+			try {
+				const addressIndex = addressBook.findIndex((a) => a.address == addressToAdd);
+				if (addressIndex > -1) {
+					addressBook[addressIndex] = { name, address: addressToAdd };
+					await addressRef.set({ addressBook }, { merge: true });
+					return res.status(200).json({ data: addressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
+				}
+
+				const newAddressBook = [...addressBook, { name, address: addressToAdd }];
+				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
+				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: addressToAdd })) });
+			} catch (err) {
+				functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+		} else {
+			const { isValid, error } = await isValidRequest(address, signature, network);
+			if (!isValid) return res.status(400).json({ error });
+
+			try {
+				const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+				if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
+
 				const addressIndex = addressBook.findIndex((a) => a.address == substrateAddressToAdd);
 				if (addressIndex > -1) {
 					addressBook[addressIndex] = { name, address: substrateAddressToAdd };
@@ -357,11 +379,10 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
 				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
+			} catch (err) {
+				functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
 			}
-			return res.status(400).json({ error: responseMessages.invalid_params });
-		} catch (err:unknown) {
-			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
-			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
 });
