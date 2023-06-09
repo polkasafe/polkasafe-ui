@@ -21,7 +21,8 @@ export interface ApiContextType {
 	getUserInfo: any,
 	web3AuthUser: Web3AuthUser | null,
 	signMessage: any,
-	switchChain: any
+	switchChain: any,
+	ethProvider: any
 }
 
 export interface Web3AuthUser {
@@ -182,7 +183,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ authenticateUser, getChainId, getUserInfo, login, logout, signMessage, switchChain, web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, signMessage, switchChain, web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

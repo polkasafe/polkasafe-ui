@@ -16,6 +16,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 
 import NewUserModal from '../Home/ConnectWallet/NewUserModal';
+import { calcWeight } from 'src/utils/calcWeight';
 
 interface ISignature{
 	name: string
@@ -82,17 +83,25 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 	};
 
 	const drop = (event:any) => {
+
 		event.preventDefault();
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
+
+		
 
 		if(!address) return; //is invalid
 
 		setSignatories((prevState) => {
 			if(prevState.includes(address)){
+				console.log("yash prevState", prevState, address)
 				return prevState;
 			}
 			else{
+				console.log("yash prevState", prevState, address, [
+					...prevState,
+					address
+				])
 				return [
 					...prevState,
 					address

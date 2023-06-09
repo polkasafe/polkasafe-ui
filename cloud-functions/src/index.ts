@@ -68,8 +68,6 @@ const verifyEthSignature = async (address: string, signature: string, message: s
 	const messageBytes = ethers.toUtf8Bytes(message);
 
 	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
-
-	console.log('address', address, recoveredAddress.toLowerCase());
 	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
 	return isValid;
 };
@@ -242,7 +240,6 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 		const addressDoc = addressRef!.data();
 
 		const isValid = await verifyEthSignature(address!, signature!, addressDoc!.token);
-		console.log('isvalid', isValid);
 		if (!isValid) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -325,7 +322,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 
 		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
 
-		const address: string = substrateAddress ? substrateAddress : req.get('x-address') || '';
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
 
 		const addressRef = firestoreDB.collection('addresses').doc(address);
 		const doc = await addressRef.get();

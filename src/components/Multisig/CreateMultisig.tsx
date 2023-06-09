@@ -3,20 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Form, Input, InputNumber, Modal, Spin, Switch } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useState } from 'react';
+import { ethers } from 'ethers';
+import React, { FC, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
+import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
@@ -44,6 +48,7 @@ interface IMultisigProps {
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
 	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
+	const { web3AuthUser,  ethProvider } = useGlobalWeb3Context();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -84,6 +89,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			openModal('Create Proxy', <AddProxy onCancel={() => toggleVisibility()} />);
 		}
 	};
+
+	useEffect(() => {
+		setSignatories((prev) => {
+			return [...prev, '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE', '0x44468113c75e78e9937553A2834Fb4a3e261C71B'];
+		});
+	}, []);
 
 	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
 		if(!api || !apiReady ) return;
@@ -126,50 +137,61 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				return;
 			}
 			else{
-				setLoading(true);
-				setLoadingMessages('Creating Your Multisig.');
-				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-					body: JSON.stringify({
-						signatories,
-						threshold,
-						multisigName
-					}),
-					headers: firebaseFunctionsHeader(network, address, signature),
-					method: 'POST'
-				});
-
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
-
-				if(multisigError) {
-					queueNotification({
-						header: 'Error!',
-						message: multisigError,
-						status: NotificationStatus.ERROR
+				if(web3AuthUser) {
+					const signer = ethProvider.getSigner();
+					const ethAdapter = new EthersAdapter({
+						ethers,
+						signerOrProvider: signer
+					  });
+					  const txUrl = 'https://safe-transaction-goerli.safe.global';
+					const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+					await gnosisService.createSafe(signatories as any, threshold!);
+				} else {
+					setLoading(true);
+					setLoadingMessages('Creating Your Multisig.');
+					const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+						body: JSON.stringify({
+							signatories,
+							threshold,
+							multisigName
+						}),
+						headers: firebaseFunctionsHeader(network, address, signature),
+						method: 'POST'
 					});
-					setLoading(false);
-					setFailure(true);
-					return;
-				}
 
-				if(multisigData){
-					if(multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)){
+					const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+
+					if(multisigError) {
 						queueNotification({
-							header: 'Multisig Exist!',
-							message: 'Please try adding a different multisig.',
-							status: NotificationStatus.WARNING
+							header: 'Error!',
+							message: multisigError,
+							status: NotificationStatus.ERROR
 						});
 						setLoading(false);
+						setFailure(true);
 						return;
 					}
-					queueNotification({
-						header: 'Success!',
-						message: `Your Multisig ${multisigName} has been created successfully!`,
-						status: NotificationStatus.SUCCESS
-					});
-					setCreateMultisigData(multisigData);
-					await addExistentialDeposit(multisigData);
-				}
 
+					if(multisigData){
+						if(multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)){
+							queueNotification({
+								header: 'Multisig Exist!',
+								message: 'Please try adding a different multisig.',
+								status: NotificationStatus.WARNING
+							});
+							setLoading(false);
+							return;
+						}
+						queueNotification({
+							header: 'Success!',
+							message: `Your Multisig ${multisigName} has been created successfully!`,
+							status: NotificationStatus.SUCCESS
+						});
+						setCreateMultisigData(multisigData);
+						await addExistentialDeposit(multisigData);
+					}
+
+				}
 			}
 		} catch (error){
 			console.log('ERROR', error);

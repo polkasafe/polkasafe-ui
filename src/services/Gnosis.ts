@@ -17,7 +17,7 @@ export class GnosisSafeService {
 		this.ethAdapter = ethersProvider;
 		this.signer = signer;
 		this.safeService = new SafeApiKit({ txServiceUrl: txServiceURL, ethAdapter: this.ethAdapter });
-
+		SafeFactory.create({ ethAdapter: this.ethAdapter}).then(res => this.safeFactory = res);
 	}
 
 	createSafe = async (owners: [string], threshold: number, chainId?: number) => {
