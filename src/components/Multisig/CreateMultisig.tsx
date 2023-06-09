@@ -90,11 +90,11 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 		}
 	};
 
-	useEffect(() => {
-		setSignatories((prev) => {
-			return [...prev, '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE', '0x44468113c75e78e9937553A2834Fb4a3e261C71B'];
-		});
-	}, []);
+	// useEffect(() => {
+	// 	setSignatories((prev) => {
+	// 		return [...prev, '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE', '0x44468113c75e78e9937553A2834Fb4a3e261C71B'];
+	// 	});
+	// }, []);
 
 	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
 		if(!api || !apiReady ) return;
@@ -140,12 +140,14 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				if(web3AuthUser) {
 					const signer = ethProvider.getSigner();
 					const ethAdapter = new EthersAdapter({
-						ethers,
+						ethers: ethProvider,
 						signerOrProvider: signer
-					  });
-					  const txUrl = 'https://safe-transaction-goerli.safe.global';
+					});
+					const txUrl = 'https://safe-transaction-goerli.safe.global';
 					const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-					await gnosisService.createSafe(signatories as any, threshold!);
+					await gnosisService.createSafe(
+						["0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA", "0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE"],
+						threshold!);
 				} else {
 					setLoading(true);
 					setLoadingMessages('Creating Your Multisig.');
@@ -335,7 +337,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						</div>
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 							<CancelBtn onClick={onCancel}/>
-							<AddBtn disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName} loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
+							<AddBtn
+							 // disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName}
+							loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 						</div>
 					</div>
 				</Form>

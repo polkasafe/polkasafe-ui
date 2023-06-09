@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@craco/craco": "^7.1.0",
+    "@enzoferey/ethers-error-parser": "^0.2.3",
     "@polkadot/api": "^10.7.3",
     "@polkadot/api-augment": "^10.7.3",
     "@polkadot/extension-dapp": "^0.46.3",

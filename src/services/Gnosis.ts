@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 import SafeApiKit from '@safe-global/api-kit';
-import Safe, { EthersAdapter, SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
-import { ethers } from 'ethers';
+import  { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
 export class GnosisSafeService {
@@ -16,18 +16,29 @@ export class GnosisSafeService {
 	constructor(ethersProvider: any, signer: any, txServiceURL: any) {
 		this.ethAdapter = ethersProvider;
 		this.signer = signer;
-		this.safeService = new SafeApiKit({ txServiceUrl: txServiceURL, ethAdapter: this.ethAdapter });
-		SafeFactory.create({ ethAdapter: this.ethAdapter}).then(res => this.safeFactory = res);
+		this.safeService = new SafeApiKit({ ethAdapter: this.ethAdapter, txServiceUrl: txServiceURL });
+
 	}
 
-	createSafe = async (owners: [string], threshold: number, chainId?: number) => {
-		const safeAccountConfig: SafeAccountConfig = {
-			owners,
-			threshold
-		}
+	createSafe = async (owners: [string], threshold: number) => {
+		try {
+			const safeAccountConfig: SafeAccountConfig = {
+				owners,
+				threshold
+			};
 
-		const safe = await this.safeFactory.deploySafe({ safeAccountConfig })
-		const safeAddress = await safe.getAddress()
-		console.log("yash safeAddress", safeAddress)
+			const safeFactory = await SafeFactory.create({ ethAdapter: this.ethAdapter });
+
+			const safe = await safeFactory.deploySafe({ safeAccountConfig,
+			options: {
+				gasLimit: 500000
+			} });
+			const safeAddress = await safe.getAddress();
+			console.log('yash safeAddress', safeAddress);
+		} catch (err) {
+			console.log('error from createSafe', err);
+			const parsedEthersError = getParsedEthersError(err);
+			console.log('yash error from creation', parsedEthersError);
+		}
 	};
 }

@@ -61,9 +61,14 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 
 export const metamaskAdapter = new MetamaskAdapter({
 	chainConfig: {
-		chainId: '0x1',
+		chainId: '0x5',
+		displayName: 'Goerli',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		rpcTarget: 'https://rpc.ankr.com/eth' // This is the public RPC we have added, please pass on your own endpoint while creating an app
+		tickerName: 'Goerli',
+		ticker: 'ETH',
+		decimals: 18,
+		rpcTarget: 'https://eth-goerli.public.blastapi.io',
+		blockExplorer: 'https://goerli.etherscan.io' // This is the public RPC we have added, please pass on your own endpoint while creating an app
 	},
 	clientId: WEB3AUTH_CLIENT_ID,
 	sessionTime: 3600, // 1 hour in seconds

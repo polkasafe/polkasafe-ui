@@ -22,7 +22,8 @@ export interface ApiContextType {
 	web3AuthUser: Web3AuthUser | null,
 	signMessage: any,
 	switchChain: any,
-	ethProvider: any
+	ethProvider: any,
+	provider: any
 }
 
 export interface Web3AuthUser {
@@ -72,15 +73,6 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		init();
 	}, []);
 
-	useEffect(() => {
-		const switchChainID = async () => {
-			await addChain();
-			await switchChain();
-			const chainId = await getChainId();
-			console.log('yash chainId from switchChainId', chainId);
-		};
-		if(web3AuthUser){switchChainID();}
-	}, [web3AuthUser]);
 
 	const login = async () => {
 		if (!web3Auth) {
@@ -183,7 +175,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, signMessage, switchChain, web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, signMessage, switchChain, web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);
