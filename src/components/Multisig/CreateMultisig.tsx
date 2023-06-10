@@ -41,14 +41,14 @@ import Signatory from './Signatory';
 interface IMultisigProps {
 	className?: string
 	onCancel?: () => void
-	isModalPopup?:boolean
+	isModalPopup?: boolean
 	homepage?: boolean
 }
 
-const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
+const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }) => {
 	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
-	const { web3AuthUser,  ethProvider } = useGlobalWeb3Context();
+	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -85,19 +85,13 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			};
 		});
 		onCancel?.();
-		if(create){
+		if (create) {
 			openModal('Create Proxy', <AddProxy onCancel={() => toggleVisibility()} />);
 		}
 	};
 
-	// useEffect(() => {
-	// 	setSignatories((prev) => {
-	// 		return [...prev, '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE', '0x44468113c75e78e9937553A2834Fb4a3e261C71B'];
-	// 	});
-	// }, []);
-
 	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
-		if(!api || !apiReady ) return;
+		if (!api || !apiReady) return;
 
 		await setSigner(api, loggedInWallet);
 
@@ -112,10 +106,10 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				senderAddress: getSubstrateAddress(userAddress) || userAddress,
 				setLoadingMessages
 			});
-			if(network === 'astar'){
+			if (network === 'astar') {
 				createProxy(multisigData, false);
 			}
-			else{
+			else {
 				setSuccess(true);
 			}
 			setLoading(false);
@@ -128,16 +122,16 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	};
 
 	const handleMultisigCreate = async () => {
-		try{
+		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature) {
+			if (!address || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
-				if(web3AuthUser) {
+			else {
+				if (web3AuthUser) {
 					const signer = ethProvider.getSigner();
 					const ethAdapter = new EthersAdapter({
 						ethers: ethProvider,
@@ -145,9 +139,21 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					});
 					const txUrl = 'https://safe-transaction-goerli.safe.global';
 					const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-					await gnosisService.createSafe(
-						["0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA", "0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE"],
+					const safeAddress = await gnosisService.createSafe(
+						['0x44468113c75e78e9937553A2834Fb4a3e261C71B', '0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA', '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE'] as any,
 						threshold!);
+					if(safeAddress === '') return;
+					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+						body: JSON.stringify({
+							signatories: ['0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA', '0x44468113c75e78e9937553A2834Fb4a3e261C71B', '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE'],
+							threshold,
+							multisigName,
+							proxyAddress: safeAddress
+
+						}),
+						headers: firebaseFunctionsHeader('goerli', address, signature),
+						method: 'POST'
+					});
 				} else {
 					setLoading(true);
 					setLoadingMessages('Creating Your Multisig.');
@@ -161,9 +167,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						method: 'POST'
 					});
 
-					const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+					const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress };
 
-					if(multisigError) {
+					if (multisigError) {
 						queueNotification({
 							header: 'Error!',
 							message: multisigError,
@@ -174,8 +180,8 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						return;
 					}
 
-					if(multisigData){
-						if(multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)){
+					if (multisigData) {
+						if (multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)) {
 							queueNotification({
 								header: 'Multisig Exist!',
 								message: 'Please try adding a different multisig.',
@@ -195,7 +201,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 				}
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 		}
 	};
@@ -216,12 +222,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const CreateMultisigSuccessScreen: FC = () => {
 		return (
 			<div className='flex flex-col h-full'>
-				<SuccessTransactionLottie message='Multisig created successfully!'/>
+				<SuccessTransactionLottie message='Multisig created successfully!' />
 				<div className='w-full flex justify-center my-3 flex-1 text-left'>
 					<ProxyImpPoints />
 				</div>
 				<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-					<CancelBtn onClick={() => setCancelCreateProxy(true)}/>
+					<CancelBtn onClick={() => setCancelCreateProxy(true)} />
 					<AddBtn title='Create Proxy' onClick={() => createProxy(createMultisigData, true)} />
 				</div>
 			</div>
@@ -250,7 +256,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 					</div>
 					<div className='text-white'>Are you sure you don&apos;t want to create proxy right now?</div>
 					<div className='flex items-center justify-between mt-[40px]'>
-						<CancelBtn onClick={() => createProxy(createMultisigData, false)}/>
+						<CancelBtn onClick={() => createProxy(createMultisigData, false)} />
 						<AddBtn title='No, Create Proxy' onClick={() => setCancelCreateProxy(false)} />
 					</div>
 				</div>
@@ -260,8 +266,8 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 	return (
 		<>
-			<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <CreateMultisigSuccessScreen/> : <FailedTransactionLottie message='Failed!' />}>
-				<CancelProxyCreation/>
+			<Spin spinning={loading || success || failure} indicator={loading ? <LoadingLottie message={loadingMessages} /> : success ? <CreateMultisigSuccessScreen /> : <FailedTransactionLottie message='Failed!' />}>
+				<CancelProxyCreation />
 				<Form
 					form={form}
 					validateMessages={
@@ -272,15 +278,15 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						<div className={classNames(
 							`${homepage ? '' : 'w-[80vw]'}  flex justify-between items-end`,
 							{
-								'w-auto':onCancel
+								'w-auto': onCancel
 							}
 						)}>
 							<div className='relative'>
 								<div className='flex items-center justify-between'>
-									{!uploadSignatoriesJson?<div className="flex items-center justify-between w-[45vw] gap-x-4">
+									{!uploadSignatoriesJson ? <div className="flex items-center justify-between w-[45vw] gap-x-4">
 										<Search addAddress={addAddress} setAddAddress={setAddAddress} />
-										<AddAddressModal/>
-									</div>:null}
+										<AddAddressModal />
+									</div> : null}
 									<div className='flex flex-col items-end justify-center absolute top-1 right-1 z-50'>
 										<div className='flex items-center justify-center mb-2'>
 											<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size='small' onChange={(checked) => setUploadSignatoriesJson(checked)} />
@@ -295,12 +301,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 									validateStatus={signatories.length < 2 ? 'error' : 'success'}
 								>
 									<div className='w-full flex items-center justify-between'>
-										{!uploadSignatoriesJson? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories}/> : <DragDrop setSignatories={setSignatories} />}
-										<DashDotIcon className='mt-5'/>
+										{!uploadSignatoriesJson ? <Signatory homepage={homepage} filterAddress={addAddress} setSignatories={setSignatories} signatories={signatories} /> : <DragDrop setSignatories={setSignatories} />}
+										<DashDotIcon className='mt-5' />
 										<div className='w-[40%] overflow-auto'>
 											<br />
-											{!uploadSignatoriesJson? <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>The signatories has the ability to create transactions using the multisig and approve transactions sent by others. Once the threshold is reached with approvals, the multisig transaction is enacted on-chain.
-										Since the multisig function like any other account, once created it is available for selection anywhere accounts are used and needs to be funded before use.
+											{!uploadSignatoriesJson ? <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>The signatories has the ability to create transactions using the multisig and approve transactions sent by others. Once the threshold is reached with approvals, the multisig transaction is enacted on-chain.
+												Since the multisig function like any other account, once created it is available for selection anywhere accounts are used and needs to be funded before use.
 											</p> : <p className='bg-bg-secondary p-5 rounded-md mx-2 h-fit text-text_secondary'>Supply a JSON file with the list of signatories.</p>}
 										</div>
 									</div>
@@ -311,14 +317,14 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 										rules={[{ required: true }]}
 										help={(!threshold || threshold < 2) ? 'Threshold Must Be More Than 1.' : (threshold > signatories.length && signatories.length > 1) ? 'Threshold Must Be Less Than Or Equal To Selected Signatories.' : ''}
 										className='border-0 outline-0 my-0 p-0'
-										validateStatus={(!threshold || threshold < 2 || (threshold > signatories.length && signatories.length > 1) ) ? 'error' : 'success'}
+										validateStatus={(!threshold || threshold < 2 || (threshold > signatories.length && signatories.length > 1)) ? 'error' : 'success'}
 									>
 										<div className='w-[45vw]'>
 											<p className='text-primary'>Threshold</p>
-											<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className= 'bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='0' />
+											<InputNumber onChange={(val) => setThreshold(val)} value={threshold} className='bg-bg-secondary placeholder:text-[#505050] text-white outline-none border-none w-full mt-2 py-2' placeholder='0' />
 										</div>
 									</Form.Item>
-									<DashDotIcon className='mt-5'/>
+									<DashDotIcon className='mt-5' />
 									<div className='w-[40%] overflow-auto'>
 										<p className='bg-bg-secondary py-2 px-5 rounded-md mx-2 mt-5 text-text_secondary'>The threshold for approval should be less or equal to the number of signatories for this multisig.</p>
 									</div>
@@ -326,9 +332,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 								<div className='flex items-center justify-between'>
 									<div className='w-[45vw]'>
 										<p className='text-primary'>Name</p>
-										<Input onChange={(e) => setMultisigName(e.target.value)} value={multisigName}  className= 'bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name' />
+										<Input onChange={(e) => setMultisigName(e.target.value)} value={multisigName} className='bg-bg-secondary placeholder-text_placeholder text-white outline-none border-none w-full mt-2 py-2' placeholder='Give the MultiSig a unique name' />
 									</div>
-									<DashDotIcon className='mt-5'/>
+									<DashDotIcon className='mt-5' />
 									<div className='w-[40%] overflow-auto'>
 										<p className='bg-bg-secondary py-2 px-5 rounded-md mx-2 mt-5 text-text_secondary'>The name is for unique identification of the account in your owner lists.</p>
 									</div>
@@ -336,10 +342,10 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 							</div>
 						</div>
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-							<CancelBtn onClick={onCancel}/>
+							<CancelBtn onClick={onCancel} />
 							<AddBtn
-							 // disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName}
-							loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
+								// disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName}
+								loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 						</div>
 					</div>
 				</Form>

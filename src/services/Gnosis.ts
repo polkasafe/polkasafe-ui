@@ -20,25 +20,29 @@ export class GnosisSafeService {
 
 	}
 
-	createSafe = async (owners: [string], threshold: number) => {
+	createSafe = async (owners: [string], threshold: number): Promise<string> => {
 		try {
 			const safeAccountConfig: SafeAccountConfig = {
 				owners,
 				threshold
 			};
 
+			console.log('yash owner createSAfe', owners, threshold);
+
 			const safeFactory = await SafeFactory.create({ ethAdapter: this.ethAdapter });
 
 			const safe = await safeFactory.deploySafe({ safeAccountConfig,
-			options: {
-				gasLimit: 500000
-			} });
+				options: {
+					gasLimit: 1000000
+				} });
 			const safeAddress = await safe.getAddress();
 			console.log('yash safeAddress', safeAddress);
+			return safeAddress;
 		} catch (err) {
 			console.log('error from createSafe', err);
 			const parsedEthersError = getParsedEthersError(err);
 			console.log('yash error from creation', parsedEthersError);
+			return '';
 		}
 	};
 }

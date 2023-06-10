@@ -22,5 +22,6 @@ export const responseMessages = {
 	queue_fetch_error: 'Error while fetching queue.',
 	assets_fetch_error: 'Error while fetching assets.',
 	success: 'Success',
-	address_not_in_db: "no user with this address"
+	address_not_in_db: 'no user with this address',
+	address_already_exists: 'address already exists'
 };
