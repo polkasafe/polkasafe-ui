@@ -4,6 +4,7 @@
 /* eslint-disable sort-keys */
 
 import { PlusCircleOutlined } from '@ant-design/icons';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Button, Modal, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect,useState } from 'react';
@@ -17,9 +18,11 @@ import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
+import { GnosisSafeService } from 'src/services';
 import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -36,6 +39,8 @@ const Home = ({ className }: { className?: string }) => {
 	const [hasProxy, setHasProxy] = useState<boolean>(true);
 	const [proxyNotInDb, setProxyNotInDb] = useState<boolean>(false);
 	const [proxyInProcess, setProxyInProcess] = useState<boolean>(false);
+
+	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	const [transactionLoading, setTransactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(true);
@@ -92,6 +97,18 @@ const Home = ({ className }: { className?: string }) => {
 		const handleNewTransaction = async () => {
 			if(!api || !apiReady || !activeMultisig) return;
 
+			if(web3AuthUser){
+				const signer = ethProvider.getSigner();
+				const ethAdapter = new EthersAdapter({
+					ethers: ethProvider,
+					signerOrProvider: signer
+				});
+				const txUrl = 'https://safe-transaction-goerli.safe.global';
+				const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+
+				const safeData = await gnosisService.getSafeCreationInfo(activeMultisig);
+				console.log('safeData  yash', safeData);}
+
 			setTransactionLoading(true);
 			// check if wallet has existential deposit
 			const hasExistentialDepositRes = await hasExistentialDeposit(api, multisig?.address || activeMultisig, network);
@@ -106,7 +123,7 @@ const Home = ({ className }: { className?: string }) => {
 		};
 		handleNewTransaction();
 
-	}, [activeMultisig, api, apiReady, network, multisig, newTxn]);
+	}, [activeMultisig, api, apiReady, network, multisig, newTxn, web3AuthUser, ethProvider]);
 
 	useEffect(() => {
 		if(!isOnchain){

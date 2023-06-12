@@ -100,6 +100,9 @@ const ConnectWallet = () => {
 
 				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
+				console.log("yash data", userData, "error", connectAddressErr);
+
+
 				if (!connectAddressErr && userData) {
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
@@ -150,10 +153,7 @@ const ConnectWallet = () => {
 		if (!tokenError) {
 			const signature = await signMessage(token);
 
-			console.log({ 'x-address': web3AuthUser!.accounts[0],
-				'x-signature': signature }, 'yash header');
-
-			const { data: userData } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, { //@TODO error handling
+			const { data: userData } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, { //@TODO error handling
 				headers: {
 					'Accept': 'application/json',
 					'Acess-Control-Allow-Origin': '*',

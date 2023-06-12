@@ -77,7 +77,6 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 		);
 	};
 
-
 	return (
 		<div className={className}>
 			<CreateMultisigModal/>
