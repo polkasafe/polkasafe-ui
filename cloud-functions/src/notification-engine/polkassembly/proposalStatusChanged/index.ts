@@ -26,8 +26,10 @@ export default async function proposalStatusChanged(args: Args) {
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
+	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
+
 	let SUB_TRIGGER = '';
-	if ([EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType)) {
+	if (isOpenGovProposal) {
 		if (!track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
 
 		switch (newStatus) {
@@ -62,8 +64,8 @@ export default async function proposalStatusChanged(args: Args) {
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.${SUB_TRIGGER.startsWith('openGov') ? 'tracks' : 'post_types'}`, 'array-contains', SUB_TRIGGER.startsWith('openGov') ? track : postType)
+		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? track : postType)
 		.get();
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {

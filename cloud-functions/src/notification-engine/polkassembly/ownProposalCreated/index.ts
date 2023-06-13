@@ -68,5 +68,5 @@ export default async function ownProposalCreated(args: Args) {
 			link
 		}
 	);
-	notificationServiceInstance.notifyAllChannels(proposerNotificationPreferences);
+	await notificationServiceInstance.notifyAllChannels(proposerNotificationPreferences);
 }
