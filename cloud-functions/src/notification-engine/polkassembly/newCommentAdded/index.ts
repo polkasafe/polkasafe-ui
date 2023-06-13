@@ -68,7 +68,7 @@ export default async function newCommentAdded(args: Args) {
 		if (userId === postDocData.user_id) {
 			// only skip if user has explicitly disabled 'commentsOnMyPosts' sub-trigger
 			if (userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.enabled === false ||
-				!(userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.subTriggers || ['commentsOnMyPosts']).includes('commentsOnMyPosts')
+				!(userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.sub_triggers || ['commentsOnMyPosts']).includes('commentsOnMyPosts')
 			) continue;
 
 			// pseudo notification prefs with 'commentsOnMyPosts' sub-trigger enabled (to make default behaviour as enabled)
@@ -80,7 +80,7 @@ export default async function newCommentAdded(args: Args) {
 						...userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME],
 						enabled: true,
 						name: TRIGGER_NAME,
-						subTriggers: ['commentsOnMyPosts']
+						sub_triggers: ['commentsOnMyPosts']
 					}
 				}
 			};
