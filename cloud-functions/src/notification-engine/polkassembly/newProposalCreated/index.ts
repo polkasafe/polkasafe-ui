@@ -8,6 +8,7 @@ import { EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 import ownProposalCreated from '../ownProposalCreated';
+import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 
 const TRIGGER_NAME = 'newProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -22,7 +23,8 @@ interface Args {
 export default async function newProposalCreated(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 	const { network, postType, postId, proposerAddress } = args;
-	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	const proposerSubstrateAddress = getSubstrateAddress(proposerAddress || '');
+	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
@@ -75,6 +77,6 @@ export default async function newProposalCreated(args: Args) {
 		network,
 		postType,
 		postId: String(postId),
-		proposerAddress
+		proposerAddress: proposerSubstrateAddress
 	});
 }
