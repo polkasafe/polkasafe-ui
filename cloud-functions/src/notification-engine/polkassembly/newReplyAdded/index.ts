@@ -35,14 +35,14 @@ export default async function newReplyAdded(args: Args) {
 	const commentDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).get();
 	if (!commentDoc.exists) return;
 	const commentDocData = commentDoc.data() as IPAPostComment;
-	const commentAuthorDoc = await paUserRef(firestore_db, network, commentDocData.user_id).get();
+	const commentAuthorDoc = await paUserRef(firestore_db, commentDocData.user_id).get();
 	if (!commentAuthorDoc.exists) return;
 	const commentAuthorData = commentAuthorDoc.data() as IPAUser;
 
 	const replyDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).collection('replies').doc(String(replyId)).get();
 	if (!replyDoc.exists) return;
 	const replyDocData = replyDoc.data() as IPACommentReply;
-	const replyAuthorDoc = await paUserRef(firestore_db, network, replyDocData.user_id).get();
+	const replyAuthorDoc = await paUserRef(firestore_db, replyDocData.user_id).get();
 	if (!replyAuthorDoc.exists) return;
 	const replyAuthorData = replyAuthorDoc.data() as IPAUser;
 
