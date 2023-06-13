@@ -1,19 +1,20 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+/* eslint-disable sort-keys */
 
 import dayjs from 'dayjs';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, Triggers, UserDetailsContextType, Wallet } from 'src/types';
+import { EFieldType, IUser, Triggers, UserDetailsContextType, Wallet } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import logout from 'src/utils/logout';
 
 import { useGlobalApiContext } from './ApiContext';
 
-const initialUserDetailsContext : UserDetailsContextType = {
+export const initialUserDetailsContext : UserDetailsContextType = {
 	activeMultisig: localStorage.getItem('active_multisig') || '',
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
@@ -62,6 +63,59 @@ const initialUserDetailsContext : UserDetailsContextType = {
 	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
 	setUserDetailsContextState : (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
+	},
+	transactionFields: {
+		['category']: {
+			dropdownOptions:[
+				{
+					optionName: 'Contributor Compensation'
+				},
+				{
+					optionName: 'Expense Reimbursement'
+				},
+				{
+					optionName: 'Airdrop'
+				},
+				{
+					optionName: 'Grants'
+				},
+				{
+					optionName: 'Others'
+				}
+			],
+			fieldDesc: 'N/A',
+			fieldName: 'Category',
+			fieldType: EFieldType.SINGLE_SELECT,
+			required: true
+		},
+		['project']: {
+			dropdownOptions:[
+				{
+					optionName: 'Project A'
+				},
+				{
+					optionName: 'Project B'
+				}
+			],
+			fieldDesc: 'Select a Project',
+			fieldName: 'Project',
+			fieldType: EFieldType.SINGLE_SELECT,
+			required: true
+		},
+		['department']: {
+			dropdownOptions:[
+				{
+					optionName: 'Management'
+				},
+				{
+					optionName: 'Human Resources'
+				}
+			],
+			fieldDesc: 'Select a Department',
+			fieldName: 'Department',
+			fieldType: EFieldType.SINGLE_SELECT,
+			required: true
+		}
 	}
 };
 
@@ -100,7 +154,8 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
 					multisigAddresses: userData?.multisigAddresses,
 					multisigSettings: userData?.multisigSettings || {},
-					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences
+					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences,
+					transactionFields: userData?.transactionFields || initialUserDetailsContext.transactionFields
 				};
 			});
 		}else {

@@ -15,7 +15,8 @@ import {
 	IUser,
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
-	IUserNotificationChannelPreferences } from './types';
+	IUserNotificationChannelPreferences,
+	ITransactionFields } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -159,7 +160,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
 						multisigSettings: addressDoc.multisigSettings,
-						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
+						transactionFields: addressDoc.transactionFields
 					};
 
 					res.status(200).json({ data: resUser });
@@ -739,7 +741,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
+		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
 		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
@@ -755,7 +757,8 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
 				amount_token: String(amount_token),
 				network,
-				note: note || ''
+				note: note || '',
+				transactionFields: transactionFields || {}
 			};
 
 			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));
@@ -2303,5 +2306,31 @@ export const polkassemblySlackBotCommands = functions.https.onRequest(async (req
 		}
 
 		return;
+	});
+});
+
+export const updateTransactionFields = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { transactionFields } = req.body as { transactionFields: ITransactionFields };
+		if (!transactionFields || typeof transactionFields !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ ['transactionFields']: transactionFields });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateTransactionFields :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
 	});
 });

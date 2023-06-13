@@ -17,6 +17,7 @@ export interface IUser {
 	created_at: Date;
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
 	notification_preferences?: IUserNotificationPreferences;
+	transactionFields?: ITransactionFields
 }
 
 export interface IUserResponse extends IUser {
@@ -52,12 +53,13 @@ export interface ITransaction {
 	created_at: Date;
 	block_number: number;
 	from: string;
-	to: string;
+	to: string | string[];
 	token: string;
 	amount_usd: string;
 	amount_token: string;
 	network: string;
 	note?: string;
+	transactionFields?: {[key: string]: { name: string, value: string | number }}
 	notifications?: {
 		[address: string]: {
 			lastNotified: Date;
@@ -86,6 +88,8 @@ export interface IContactFormResponse {
 }
 
 export interface IQueueItem {
+	totalAmount?: string
+	transactionFields?: {[key: string]: { value: string | number }}
 	callData: string;
 	callHash: string;
 	network: string;
@@ -136,4 +140,30 @@ export interface IUserNotificationTriggerPreferences {
 export interface IUserNotificationPreferences {
 	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
 	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
+}
+
+export interface IDropdownOptions{
+	optionName: string,
+	archieved?: boolean
+}
+
+export enum EFieldType{
+	SINGLE_SELECT = 'Single-select',
+	// MULTI_SELECT = 'Multi-select',
+	TEXT = 'Text'
+	// NUMBER = 'Number',
+	// DATE = 'Date/Date-range',
+	// LINK = 'link',
+	// ATTACHMENT = 'Attachment'
+}
+
+export interface ITransactionFields{
+	[field: string]: {
+		fieldName: string,
+		fieldDesc: string,
+		fieldType: EFieldType,
+		required: boolean,
+		deleted?: boolean,
+		dropdownOptions?: IDropdownOptions[],
+	}
 }

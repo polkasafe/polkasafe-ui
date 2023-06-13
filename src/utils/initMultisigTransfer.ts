@@ -22,30 +22,35 @@ export interface IMultiTransferResponse {
 	created_at: Date;
 }
 
+export interface IRecipientAndAmount{
+	recipient: string;
+	amount: BN
+}
+
 interface Args {
 	api: ApiPromise,
-	recipientAddress: string,
+	recipientAndAmount: IRecipientAndAmount[],
 	initiatorAddress: string,
 	multisig: IMultisigAddress,
-	amount: BN,
 	network: string,
 	note: string,
 	transferKeepAlive: boolean,
 	isProxy?: boolean,
-	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>,
+	transactionFields?: {[key: string]: { name: string, value: string | number }}
 }
 
 export default async function initMultisigTransfer({
 	api,
-	recipientAddress,
+	recipientAndAmount,
 	initiatorAddress,
 	multisig,
-	amount,
 	isProxy,
 	network,
 	note,
 	transferKeepAlive,
-	setLoadingMessages
+	setLoadingMessages,
+	transactionFields
 }: Args) {
 	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
 	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
@@ -60,8 +65,10 @@ export default async function initMultisigTransfer({
 
 	// 2. Define relevant constants
 	// const MAX_WEIGHT = new Uint8Array([640000000]);
-	const AMOUNT_TO_SEND = amount.toString();
-	const displayAmount = formatBalance(AMOUNT_TO_SEND);
+	const amounts = recipientAndAmount.map((o) => o.amount);
+	const totalAmount = amounts.reduce((sum,item) => sum.add(item), new BN(0));
+	const displayAmount = formatBalance(totalAmount);
+	const recipientAddresses = recipientAndAmount.map((item) => item.recipient);
 
 	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
@@ -73,19 +80,26 @@ export default async function initMultisigTransfer({
 	const otherSignatories =  encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
-	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
-
-	let tx: SubmittableExtrinsic<'promise'>;
-	if(isProxy && multisig.proxy){
-		tx = api.tx.proxy.proxy(multisig.proxy, null, call);
+	const transferCalls: any[] = [];
+	for(const item of recipientAndAmount){
+		const AMOUNT_TO_SEND = item.amount.toString();
+		const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(item.recipient, AMOUNT_TO_SEND) : api.tx.balances.transfer(item.recipient, AMOUNT_TO_SEND);
+		transferCalls.push(call);
 	}
 
 	// 4. Set the timepoint
 	// null for transaction initiation
 	const TIME_POINT = null;
 
-	const callData = api.createType('Call', call.method.toHex());
+	const transferBatchCall = api.tx.utility.batch([...transferCalls]);
+
+	const callData = api.createType('Call', transferBatchCall.method.toHex());
 	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
+
+	let tx: SubmittableExtrinsic<'promise'>;
+	if(isProxy && multisig.proxy){
+		tx = api.tx.proxy.proxy(multisig.proxy, null, transferBatchCall);
+	}
 
 	let blockHash = '';
 
@@ -149,14 +163,15 @@ export default async function initMultisigTransfer({
 								// 6. store data to BE
 								// created_at should be set by BE for server time, amount_usd should be fetched by BE
 								addNewTransaction({
-									amount,
+									amount: totalAmount,
 									block_number: blockNumber,
 									callData: tx.method.toHex(),
 									callHash: tx.method.hash.toHex(),
 									from: multisig.proxy!,
 									network,
 									note,
-									to: recipientAddress
+									to: recipientAddresses,
+									transactionFields
 								});
 
 								sendNotificationToAddresses({
@@ -217,12 +232,11 @@ export default async function initMultisigTransfer({
 						status: NotificationStatus.ERROR
 					});
 				});
-			console.log(`Sending ${displayAmount} from multisig: ${multisig.proxy} to ${recipientAddress}, initiated by ${encodedInitiatorAddress}`);
+			console.log(`Sending ${displayAmount} from multisig: ${multisig.proxy} to ${recipientAddresses}, initiated by ${encodedInitiatorAddress}`);
 		}
 		else{
-			//for transaction from multisig address
-			api.tx.multisig
-				.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT as any)
+		//for transaction from multisig address
+			api.tx.multisig.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, transferBatchCall.method.hash, MAX_WEIGHT as any)
 				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
@@ -260,7 +274,7 @@ export default async function initMultisigTransfer({
 									args: {
 										address: initiatorAddress,
 										addresses: otherSignatories,
-										callHash: call.method.hash.toHex(),
+										callHash: txHash,
 										multisigAddress: multisig.address,
 										network
 									},
@@ -269,27 +283,28 @@ export default async function initMultisigTransfer({
 								});
 
 								resolve({
-									callData: call.method.toHex(),
-									callHash: call.method.hash.toHex(),
+									callData: transferBatchCall.method.toHex(),
+									callHash: transferBatchCall.method.hash.toHex(),
 									created_at: new Date()
 								});
 
 								// 6. store data to BE
 								// created_at should be set by BE for server time, amount_usd should be fetched by BE
 								addNewTransaction({
-									amount,
+									amount: totalAmount,
 									block_number: blockNumber,
-									callData: call.method.toHex(),
-									callHash: call.method.hash.toHex(),
+									callData: transferBatchCall.method.toHex(),
+									callHash: transferBatchCall.method.hash.toHex(),
 									from: multisig.address,
 									network,
 									note,
-									to: recipientAddress
+									to: recipientAddresses,
+									transactionFields
 								});
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,
-									link: `/transactions?tab=Queue#${call.method.hash.toHex()}`,
+									link: `/transactions?tab=Queue#${transferBatchCall.method.hash.toHex()}`,
 									message: 'New transaction to sign',
 									network,
 									type: 'sent'
@@ -305,8 +320,8 @@ export default async function initMultisigTransfer({
 										status: NotificationStatus.ERROR
 									});
 									reject({
-										callData: call.method.toHex(),
-										callHash: call.method.hash.toHex(),
+										callData: transferBatchCall.method.toHex(),
+										callHash: transferBatchCall.method.hash.toHex(),
 										created_at: new Date(),
 										error: 'Transaction Failed'
 									});
@@ -323,8 +338,8 @@ export default async function initMultisigTransfer({
 								});
 
 								reject({
-									callData: call.method.toHex(),
-									callHash: call.method.hash.toHex(),
+									callData: transferBatchCall.method.toHex(),
+									callHash: transferBatchCall.method.hash.toHex(),
 									created_at: new Date(),
 									error: `Error: ${section}.${method}\n${docs.join(' ')}`
 								});
@@ -335,8 +350,8 @@ export default async function initMultisigTransfer({
 					console.log(':( transaction failed');
 					console.error('ERROR:', error);
 					reject({
-						callData: call.method.toHex(),
-						callHash: call.method.hash.toHex(),
+						callData: transferBatchCall.method.toHex(),
+						callHash: transferBatchCall.method.hash.toHex(),
 						created_at: new Date()
 					});
 					queueNotification({
@@ -345,13 +360,13 @@ export default async function initMultisigTransfer({
 						status: NotificationStatus.ERROR
 					});
 				});
-			console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddress}, initiated by ${encodedInitiatorAddress}`);
-		}
-		console.log(`Submitted values : approveAsMulti(${multisig.threshold},
-		otherSignatories: ${JSON.stringify(otherSignatories)},
-		${TIME_POINT},
-		${call.method.hash},
-		${MAX_WEIGHT})\n`
-		);
-	});
+			console.log(`Sending ${displayAmount} from multisig: ${multisig.address} to ${recipientAddresses}, initiated by ${encodedInitiatorAddress}`);
+		// }
+		// console.log(`Submitted values : approveAsMulti(${multisig.threshold},
+		// otherSignatories: ${JSON.stringify(otherSignatories)},
+		// ${TIME_POINT},
+		// ${call.method.hash},
+		// ${MAX_WEIGHT})\n`
+		// );
+		}});
 }
