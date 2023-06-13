@@ -33,8 +33,8 @@ export default async function newProposalCreated(args: Args) {
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_settings.${network}.triggerPreferences.${SUB_TRIGGER}.post_types`, 'array-contains', postType)
+		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.post_types`, 'array-contains', postType)
 		.get();
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {

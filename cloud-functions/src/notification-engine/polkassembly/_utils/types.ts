@@ -100,3 +100,9 @@ export interface IPANotification {
 	url?: string,
 	network: string
 }
+
+export enum EMentionType {
+	COMMENT = 'comment',
+	REPLY = 'reply',
+	POST = 'post'
+}

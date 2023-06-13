@@ -4,7 +4,7 @@ import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
-import { EPAProposalType, IPAPostComment, IPAUser, IPAUserNotificationPreferences } from '../_utils/types';
+import { EMentionType, EPAProposalType, IPAPostComment, IPAUser, IPAUserNotificationPreferences } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
 import sendMentionNotifications from '../_utils/sendMentionNotifications';
@@ -18,8 +18,8 @@ const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 interface Args {
 	network: string;
 	postType: string;
-	postId: string | number;
-	commentId: string | number
+	postId: string;
+	commentId: string;
 }
 
 export default async function newCommentAdded(args: Args) {
@@ -119,7 +119,7 @@ export default async function newCommentAdded(args: Args) {
 		authorUsername: commentAuthorData.username,
 		htmlContent: commentHTML,
 		network,
-		type: 'comment',
+		type: EMentionType.COMMENT,
 		url: commentUrl
 	});
 }
