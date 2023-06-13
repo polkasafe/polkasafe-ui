@@ -182,7 +182,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						address: address,
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
-						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: address })),
+						addressBook: addressDoc.addressBook,
 						multisigAddresses: multisigAddresses.map((item) => (
 							{
 								...item,
@@ -347,7 +347,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 
 				const newAddressBook = [...addressBook, { name, address: addressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
-				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: addressToAdd })) });
+				return res.status(200).json({ data: newAddressBook });
 			} catch (err) {
 				functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
 				return res.status(500).json({ error: responseMessages.internal });

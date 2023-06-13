@@ -139,7 +139,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 					const txUrl = 'https://safe-transaction-goerli.safe.global';
 					const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
 					const safeAddress = await gnosisService.createSafe(
-						['0x44468113c75e78e9937553A2834Fb4a3e261C71B', '0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA', '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE'] as any,
+						signatories.reverse() as [string],
 						threshold!);
 					if(safeAddress === '') return;
 					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
@@ -343,7 +343,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 							<CancelBtn onClick={onCancel} />
 							<AddBtn
-								// disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName}
+								disabled={signatories.length < 2 || !threshold || threshold < 2 || threshold > signatories.length || !multisigName}
 								loading={loading} title='Create Multisig' onClick={handleMultisigCreate} />
 						</div>
 					</div>
