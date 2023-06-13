@@ -2,21 +2,21 @@ import { NOTIFICATION_SOURCE } from '../notification_engine_constants';
 
 export const emailTemplateContainer = (source: NOTIFICATION_SOURCE, content: string): string => {
 	let privacyPolicyLink = '';
-	let domain = '';
+	let notificationSettingsLink = '';
 
 	switch (source) {
 	case NOTIFICATION_SOURCE.POLKASSEMBLY:
 		privacyPolicyLink = 'https://polkadot.polkassembly.io/privacy';
-		domain = 'https://polkadot.polkassembly.io';
+		notificationSettingsLink = 'https://polkadot.polkassembly.io/settings?tab=notifications';
 		break;
 	case NOTIFICATION_SOURCE.POLKASAFE:
 		privacyPolicyLink = 'https://app.polkasafe.xyz/privacy-policy';
-		domain = 'https://app.polkasafe.xyz';
+		notificationSettingsLink = 'https://app.polkasafe.xyz/notification-settings';
 		break;
 		// TODO: fix townhall links
 	case NOTIFICATION_SOURCE.TOWNHALL:
-		privacyPolicyLink = 'https://premiurly.in/policy/privacy-policy/';
-		domain = 'https://premiurly.in';
+		privacyPolicyLink = 'https://townhallgov.com/policy/privacy-policy/';
+		notificationSettingsLink = 'https://townhallgov.com/notification-settings';
 		break;
 	}
 
@@ -53,7 +53,7 @@ export const emailTemplateContainer = (source: NOTIFICATION_SOURCE, content: str
 			<div class="polk-container">
 				${content}
 				<br/><br/>
-				You can deactivate this notification in your <a href="${domain}/notification-settings">notification settings</a>.<br /><br />
+				You can deactivate this notification in your <a href="${notificationSettingsLink}">notification settings</a>.<br /><br />
 				${source.charAt(0).toUpperCase()}${source.slice(1)} Team
 			</div>
 			<div class="footer">
