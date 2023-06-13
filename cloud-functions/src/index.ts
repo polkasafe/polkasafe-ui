@@ -309,93 +309,6 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 	});
 });
 
-export const connectAddressEth = functions.https.onRequest(async (req, res) => {
-	corsHandler(req, res, async () => {
-		const signature = req.get('x-signature');
-		const address = req.get('x-address');
-
-		if (!address || !signature) return res.status(400).json({ error: responseMessages.missing_params });
-
-		const addressRef = await firestoreDB.collection('addresses').doc(address!).get();
-		// if(!addressRef!.exists) return res.status(400).json({ error: responseMessages.missing_params });
-		const addressDoc = addressRef!.data();
-
-		const isValid = await verifyEthSignature(address!, signature!, addressDoc!.token);
-		if (!isValid) return res.status(400).json({ error: responseMessages.missing_params });
-
-		try {
-			const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
-				channelPreferences: {
-					[CHANNEL.IN_APP]: {
-						name: CHANNEL.IN_APP,
-						enabled: true,
-						handle: address!,
-						verified: true
-					}
-				},
-				triggerPreferences: {}
-			};
-
-			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
-
-			const data = addressDoc;
-			if (data && data.created_at) {
-				const addressDoc = {
-					...data,
-					created_at: data?.created_at.toDate()
-				} as IUser;
-
-				const resUser: IUserResponse = {
-					address: address!,
-					email: addressDoc.email,
-					created_at: addressDoc.created_at,
-					addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: address! })),
-					multisigAddresses: multisigAddresses.map((item) => (
-						{
-							...item,
-							signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
-						})),
-					multisigSettings: addressDoc.multisigSettings,
-					notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
-				};
-
-				res.status(200).json({ data: resUser });
-				if (addressDoc.notification_preferences) return;
-
-				// set default notification preferences if not set
-				await addressRef!.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
-				return;
-			}
-
-			const newAddress: IAddressBookItem = {
-				name: DEFAULT_USER_ADDRESS_NAME,
-				address: address!
-			};
-
-			// else create a new user document
-			const newUser: IUser = {
-				address: address!,
-				created_at: new Date(),
-				email: null,
-				addressBook: [newAddress],
-				multisigSettings: {},
-				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
-			};
-
-			const newUserResponse: IUserResponse = {
-				...newUser,
-				multisigAddresses: []
-			};
-
-			await addressRef!.ref.set(newUser, { merge: true });
-			return res.status(200).json({ data: newUserResponse });
-		} catch (err: unknown) {
-			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
-			return res.status(500).json({ error: responseMessages.internal });
-		}
-	});
-});
-
 export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
@@ -714,7 +627,6 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 		const multisigColl = firestoreDB.collection('multisigAddresses');
 
 		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
-		const addressData = doc.data();
 
 		const { multisigAddress } = req.body;
 		if (!multisigAddress || !network) {

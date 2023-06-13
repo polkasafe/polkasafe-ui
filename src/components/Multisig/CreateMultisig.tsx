@@ -6,8 +6,7 @@
 import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Form, Input, InputNumber, Modal, Spin, Switch } from 'antd';
 import classNames from 'classnames';
-import { ethers } from 'ethers';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';

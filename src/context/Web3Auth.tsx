@@ -23,7 +23,8 @@ export interface ApiContextType {
 	signMessage: any,
 	switchChain: any,
 	ethProvider: any,
-	provider: any
+	provider: any,
+	addChain: any,
 }
 
 export interface Web3AuthUser {
@@ -72,7 +73,6 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 
 		init();
 	}, []);
-
 
 	const login = async () => {
 		if (!web3Auth) {
@@ -144,13 +144,13 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		return chainId;
 	};
 
-	const switchChain = async (chainId?: number) => {
+	const switchChain = async (chainId?: string) => {
 		try {
 			if (!provider || !web3Auth) {
 				console.log('provider not initialized yet');
 				return;
 			}
-			await web3Auth.switchChain({ chainId: '0x5' });
+			await web3Auth.switchChain({ chainId: chainId || '0x5' });
 		} catch (err) {
 			console.log('error from switchChain', err);
 		}
@@ -162,20 +162,20 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 			return;
 		}
 		const newChain = {
+			blockExplorer: 'https://goerli.etherscan.io',
 			chainId: '0x5',
-			displayName: 'Goerli',
 			chainNamespace: CHAIN_NAMESPACES.EIP155,
-			tickerName: 'Goerli',
-			ticker: 'ETH',
 			decimals: 18,
+			displayName: 'Goerli',
 			rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
-			blockExplorer: 'https://goerli.etherscan.io'
+			ticker: 'ETH',
+			tickerName: 'Goerli'
 		};
 		await web3Auth.addChain(newChain);
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, signMessage, switchChain, web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, signMessage, switchChain, web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

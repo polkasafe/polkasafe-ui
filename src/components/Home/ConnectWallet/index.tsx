@@ -100,8 +100,7 @@ const ConnectWallet = () => {
 
 				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
-				console.log("yash data", userData, "error", connectAddressErr);
-
+				console.log('yash data', userData, 'error', connectAddressErr);
 
 				if (!connectAddressErr && userData) {
 					localStorage.setItem('address', substrateAddress);

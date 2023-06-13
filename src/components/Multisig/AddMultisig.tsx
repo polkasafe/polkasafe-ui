@@ -3,9 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Button, Modal } from 'antd';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import CreateMultisig from 'src/components/Multisig/CreateMultisig';
-import { useGlobalWeb3Context } from 'src/context';
 import { CreateMultisigIcon, LinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
@@ -22,7 +21,6 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 	const [ isMultisigVisible, setMultisigVisible] = useState(false);
 	const [openLinkMultisig, setOpenLinkMultisig] = useState(false);
 	const [openCreateMultisig, setOpenCreateMultisig] = useState(false);
-	const { getChainId, switchChain, web3AuthUser } = useGlobalWeb3Context();
 
 	const LinkMultisigModal: FC = () => {
 		return (
