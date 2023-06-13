@@ -1,13 +1,16 @@
 import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
-import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
+import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
-import { IPAUserPreference, EPAProposalType, IPAPostComment, IPAUser } from '../_utils/types';
+import { EMentionType, EPAProposalType, IPAPostComment, IPAUser, IPAUserNotificationPreferences } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
 import sendMentionNotifications from '../_utils/sendMentionNotifications';
+import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
+import { INIT_PA_USER_NOTIFICATION_PREFS } from '../_utils/defaults';
+import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 
 const TRIGGER_NAME = 'newCommentAdded';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -15,51 +18,73 @@ const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 interface Args {
 	network: string;
 	postType: string;
-	postId: string | number;
-	commentId: string | number
+	postId: string;
+	commentId: string;
 }
 
 export default async function newCommentAdded(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, commentId } = args;
+	const { network, postType, postId = null, commentId = null } = args;
 
-	const postIdNumber = Number(postId);
-	const commentIdNumber = Number(commentId);
-
-	if (!network || !postType || !postId || isNaN(postIdNumber) || !commentId || isNaN(commentIdNumber)) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	if (!network || !postType || !postId || !commentId) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 	const networkRef = firestore_db.collection('networks').doc(network);
 
-	const postSubcribersSnapshot = await networkRef.collection('user_preferences')
-		.where(`post_subscriptions.${postType}`, 'array-contains', String(postId))
-		.get();
+	const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
+	const postDocData = postDoc.data();
+	if (!postDoc.exists || !postDocData) return;
 
-	if (postSubcribersSnapshot.empty) return;
+	const subscribers: number[] = [...(postDocData?.subscribers || []), postDocData.user_id]; // add post author to subscribers
+	if (!subscribers || !subscribers?.length) return;
 
+	// get comment author
 	const commentDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).get();
 	if (!commentDoc.exists) return;
 	const commentDocData = commentDoc.data() as IPAPostComment;
-
-	const commentAuthorDoc = await paUserRef(firestore_db, network, commentDocData.user_id).get();
+	const commentAuthorDoc = await paUserRef(firestore_db, commentDocData.user_id).get();
 	if (!commentAuthorDoc.exists) return;
-
 	const commentAuthorData = commentAuthorDoc.data() as IPAUser;
+
 	const commentUrl = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}#${commentId}`;
 
 	const converter = new showdown.Converter();
 	const commentHTML = converter.makeHtml(commentDocData.content);
 
-	for (const doc of postSubcribersSnapshot.docs) {
-		const userPreferenceDocData = doc.data() as IPAUserPreference;
-		if (!userPreferenceDocData || Number(userPreferenceDocData.user_id) === Number(commentDocData.user_id)) continue; // skip if subscriber is comment author
+	for (const userId of subscribers) {
+		if (userId === commentAuthorData.id) continue;
 
-		const userDoc = await paUserRef(firestore_db, network, userPreferenceDocData.user_id).get();
+		const userDoc = await paUserRef(firestore_db, userId).get();
 		if (!userDoc.exists) continue;
 		const userData = userDoc.data() as IPAUser;
+		if (!userData) continue;
 
-		const userNotificationPreferences: IUserNotificationPreferences = userPreferenceDocData.notification_settings;
-		if (!userNotificationPreferences) continue;
+		const userPANotificationPreferences: IPAUserNotificationPreferences | null = userData.notification_preferences || null;
+		if (!userPANotificationPreferences && userId !== postDocData.user_id) continue; // only skip if user is not the post author
+
+		let userNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs((userPANotificationPreferences || INIT_PA_USER_NOTIFICATION_PREFS), network);
+
+		// send notification to post author even if he hasn't set any notification preferences (or for this trigger)
+		if (userId === postDocData.user_id) {
+			// only skip if user has explicitly disabled 'commentsOnMyPosts' sub-trigger
+			if (userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.enabled === false ||
+				!(userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.sub_triggers || ['commentsOnMyPosts']).includes('commentsOnMyPosts')
+			) continue;
+
+			// pseudo notification prefs with 'commentsOnMyPosts' sub-trigger enabled (to make default behaviour as enabled)
+			userNotificationPreferences = {
+				...userNotificationPreferences,
+				triggerPreferences: {
+					...userNotificationPreferences.triggerPreferences,
+					[TRIGGER_NAME]: {
+						...userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME],
+						enabled: true,
+						name: TRIGGER_NAME,
+						sub_triggers: ['commentsOnMyPosts']
+					}
+				}
+			};
+		}
 
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
@@ -67,6 +92,8 @@ export default async function newCommentAdded(args: Args) {
 		const subject = triggerTemplate.subject;
 		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
+			postType: getPostTypeNameFromPostType(postType as EPAProposalType),
+			isPostAuthor: userId === postDocData.user_id,
 			authorUsername: commentAuthorData.username,
 			commentUrl,
 			content: commentHTML,
@@ -84,7 +111,7 @@ export default async function newCommentAdded(args: Args) {
 				network
 			}
 		);
-		notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
+		await notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 	}
 
 	await sendMentionNotifications({
@@ -92,7 +119,7 @@ export default async function newCommentAdded(args: Args) {
 		authorUsername: commentAuthorData.username,
 		htmlContent: commentHTML,
 		network,
-		type: 'comment',
+		type: EMentionType.COMMENT,
 		url: commentUrl
 	});
 }

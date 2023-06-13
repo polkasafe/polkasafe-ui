@@ -34,7 +34,7 @@ export default async function ownProposalCreated(args: Args) {
 	const addressDocData = addressDoc.data() as { user_id: number };
 	if (!addressDocData.user_id) throw Error(`User not found for address : ${proposerSubstrateAddress}`);
 
-	const proposerUserDoc = await paUserRef(firestore_db, network, addressDocData.user_id).get();
+	const proposerUserDoc = await paUserRef(firestore_db, addressDocData.user_id).get();
 	if (!proposerUserDoc.exists) throw Error(`User not found for address : ${proposerSubstrateAddress}`);
 
 	const proposerUserData = proposerUserDoc.data() as IPAUser;
@@ -68,5 +68,5 @@ export default async function ownProposalCreated(args: Args) {
 			link
 		}
 	);
-	notificationServiceInstance.notifyAllChannels(proposerNotificationPreferences);
+	await notificationServiceInstance.notifyAllChannels(proposerNotificationPreferences);
 }

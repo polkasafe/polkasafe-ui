@@ -1,4 +1,4 @@
-import { IUserNotificationChannelPreferences, IUserNotificationPreferences, IUserNotificationTriggerPreferences } from '../../notification_engine_constants';
+import { IUserNotificationChannelPreferences, IUserNotificationTriggerPreferences } from '../../notification_engine_constants';
 
 export enum EPAProposalType {
 	DEMOCRACY_PROPOSALS = 'democracy_proposals',
@@ -20,14 +20,6 @@ export enum EPAPostStatus {
 	SUBMITTED= 'submitted',
 	VOTING= 'voting',
 	CLOSED= 'closed'
-}
-
-export interface IPAUserPreference {
-	user_id: number;
-	notification_settings: IUserNotificationPreferences;
-	post_subscriptions: {
-		[key in EPAProposalType]?: (number | string)[];
-	}
 }
 
 export interface IPAPostComment {
@@ -99,4 +91,10 @@ export interface IPANotification {
 	message: string,
 	url?: string,
 	network: string
+}
+
+export enum EMentionType {
+	COMMENT = 'comment',
+	REPLY = 'reply',
+	POST = 'post'
 }

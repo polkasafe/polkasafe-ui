@@ -6,7 +6,7 @@ import validator from 'validator';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 
 const TRIGGER_NAME = 'verifyEmail';
-const SOURCE = NOTIFICATION_SOURCE.POLKASAFE;
+const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 
 interface Args {
 	email: string;
@@ -37,7 +37,7 @@ export default async function verifyEmail(args: Args) {
 				name: CHANNEL.EMAIL,
 				enabled: true,
 				handle: email,
-				verified: false,
+				verified: true,
 				verification_token: ''
 			}
 		}
