@@ -1,8 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { PlusCircleOutlined } from '@ant-design/icons';
-import { AutoComplete, Button, Form, Spin, Switch } from 'antd';
+import { MoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { AutoComplete, Button, Form, Input, Modal, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import React, { useEffect,useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
@@ -13,6 +13,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { EFieldType, IDropdownOptions, NotificationStatus } from 'src/types';
+import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
@@ -23,17 +24,69 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 	const [requiredState, setRequiredState] = useState<boolean>(required);
 	const [newOption, setNewOption] = useState<string>('');
 	const [dropdownState, setDropdownState] = useState<IDropdownOptions[] | undefined>(dropdownOptions);
+	const [openEditOptionModal, setOpenEditOptionModal] = useState({ i: 0, open: false });
 
 	const [autocompleteOptions, setAutocompleteOptions] = useState<DefaultOptionType[]>([]);
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const EditOptionModal = () => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const [name, setName] = useState<string>(dropdownState?.[openEditOptionModal.i].optionName || '');
+		return (
+			<>
+				<Modal
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenEditOptionModal({ i: 0, open: false })}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					open={openEditOptionModal.open}
+					className={`${className} w-[500px] scale-90`}
+				>
+					<Input
+						autoFocus
+						id={`${openEditOptionModal.i}`}
+						className="w-full mt-10 z-100 text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
+						defaultValue={name}
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+					/>
+					<section className='flex items-center gap-x-5 justify-between mt-10'>
+						<CancelBtn className='w-[150px]' onClick={() => setOpenEditOptionModal({ i: 0, open: false })} />
+						<ModalBtn disabled={!name || name === dropdownState?.[openEditOptionModal.i].optionName}
+							onClick={() => {
+								setDropdownState(prev => {
+									if (!prev) return;
+									const copyArray = [...prev];
+									const copyObject = { ...prev[openEditOptionModal.i] };
+									copyObject.optionName = name;
+									copyArray[openEditOptionModal.i] = copyObject;
+									return copyArray;
+								});
+								setNewOption(name);
+								setOpenEditOptionModal({ i: 0, open: false });
+							}} className='w-[150px]' title='Save' />
+					</section>
+				</Modal>
+			</>
+		);
+	};
 
 	useEffect(() => {
 		setAutocompleteOptions(
 			dropdownState ?
-				dropdownState?.map((option) => ({
+				dropdownState?.map((option, i) => ({
 					label: (
 						<div className='text-white flex items-center justify-between'>
 							<span>{option.optionName}</span>
-						</div>),
+							<button onClick={() => {
+								setOpenEditOptionModal({ i, open: true });
+							}}><MoreOutlined/></button>
+						</div>
+					),
 					value: option.optionName
 				})) : []
 		);
@@ -116,6 +169,7 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 		<>
 			<Spin spinning={loading} indicator={<LoadingLottie width={300} message={`Updating your ${fieldName} field...`} /> }>
 				<div className={className}>
+					<EditOptionModal />
 
 					<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Field Name</p>
 					<div className=' p-[10px] mb-4 text-text_secondary border-2 border-dashed border-bg-secondary rounded-lg'>
