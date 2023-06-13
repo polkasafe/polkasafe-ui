@@ -18,7 +18,10 @@ interface Args {
 const TRIGGER_NAME = 'newMention';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 
-export default async function sendMentionNotifications({ firestore_db, authorUsername, htmlContent, network, type, url } : Args) {
+export default async function sendMentionNotifications(args : Args) {
+	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
+	const { firestore_db, authorUsername, htmlContent, network, type, url } = args;
+
 	const mentionedUsernames = getMentionedUsernames(htmlContent).filter((username) => username !== authorUsername);
 	if (!mentionedUsernames.length) return;
 
@@ -40,11 +43,13 @@ export default async function sendMentionNotifications({ firestore_db, authorUse
 
 		const subject = triggerTemplate.subject;
 		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+			...args,
 			authorUsername,
 			url,
 			content: htmlContent,
 			domain: `https://${network}.polkassembly.io`,
-			mentionedUsername
+			username: mentionedUsername,
+			mentionType: type
 		});
 
 		const notificationServiceInstance = new NotificationService(
