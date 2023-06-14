@@ -1959,7 +1959,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 			return res.sendStatus(200);
 		} catch (err:unknown) {
-			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in polkassemblyTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
