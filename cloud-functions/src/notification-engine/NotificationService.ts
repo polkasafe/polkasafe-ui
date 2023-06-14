@@ -84,7 +84,8 @@ export class NotificationService {
 		await sendDiscordMessage(
 			this.source,
 			userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
-			this.message
+			this.markdownMessage,
+			this.subject,
 		).catch((error) => console.error('Error in sending Discord message : ', error));
 	}
 
