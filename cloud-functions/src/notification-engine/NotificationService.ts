@@ -122,7 +122,7 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
 		try {
-			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
+			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.markdownMessage);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
 		}
