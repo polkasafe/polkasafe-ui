@@ -1157,11 +1157,14 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 		functions.logger.info('polkasafeTelegramBotCommands req', { req } );
 
 		try {
-			const { message } = req.body;
-			let { text, chat } = message;
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
 
-			if (!text || !chat) {
-				const { edited_message } = req.body;
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
 				text = edited_message.text;
 				chat = edited_message.chat;
 			}
