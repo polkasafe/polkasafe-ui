@@ -17,25 +17,31 @@ interface Args {
 	network: string;
 	postType: string;
 	postId: string;
+	trackId?: string
 	proposerAddress: string;
 }
 
 export default async function newProposalCreated(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, proposerAddress } = args;
+	const { network, postType, postId, proposerAddress, trackId = null } = args;
 	const proposerSubstrateAddress = getSubstrateAddress(proposerAddress || '');
 	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
-	const SUB_TRIGGER = ([EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType)) ? 'openGovReferendumSubmitted' : 'gov1ProposalSubmitted';
+	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
+	const SUB_TRIGGER = isOpenGovProposal ? 'openGovReferendumSubmitted' : 'gov1ProposalSubmitted';
+
+	if (!isOpenGovProposal && !trackId) throw Error(`Missing trackId for trigger: ${TRIGGER_NAME} and sub trigger ${SUB_TRIGGER}`);
 
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.post_types`, 'array-contains', postType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(trackId) : postType)
 		.get();
+
+	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {
 		const subscriberData = subscriberDoc.data() as IPAUser;
@@ -60,7 +66,7 @@ export default async function newProposalCreated(args: Args) {
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
-			TRIGGER_NAME,
+			SUB_TRIGGER,
 			htmlMessage,
 			textMessage,
 			subject,
@@ -69,6 +75,8 @@ export default async function newProposalCreated(args: Args) {
 				link
 			}
 		);
+
+		console.log(`Sending notification to user_id ${subscriberDoc.id} for trigger ${SUB_TRIGGER} on network ${network} for postType ${postType} and postId ${postId}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 
