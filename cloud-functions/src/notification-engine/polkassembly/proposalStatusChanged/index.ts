@@ -16,13 +16,14 @@ interface Args {
 	postType: string;
 	postId: string;
 	newStatus: EPAPostStatus;
-	track?: number
+	track?: string;
+	statusName: string;
 }
 
 export default async function proposalStatusChanged(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, newStatus, track = null } = args;
-	if (!network || !postType || !postId || typeof postId !== 'string' || !newStatus) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	const { network, postType, postId, newStatus, track = null, statusName } = args;
+	if (!network || !postType || !postId || typeof postId !== 'string' || !newStatus || !statusName) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
@@ -64,8 +65,8 @@ export default async function proposalStatusChanged(args: Args) {
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.${network}.triggerPreferences.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? track : postType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : postType)
 		.get();
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {
@@ -91,7 +92,7 @@ export default async function proposalStatusChanged(args: Args) {
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
-			TRIGGER_NAME,
+			SUB_TRIGGER,
 			htmlMessage,
 			textMessage,
 			subject,
@@ -100,6 +101,8 @@ export default async function proposalStatusChanged(args: Args) {
 				link
 			}
 		);
+
+		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER} post ${postId}, postType ${postType}, network ${network}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 }
