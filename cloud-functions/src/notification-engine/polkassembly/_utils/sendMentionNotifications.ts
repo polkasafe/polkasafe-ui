@@ -38,6 +38,8 @@ export default async function sendMentionNotifications(args : Args) {
 		const mentionedUserData = mentionedUserDocSnapshot.docs[0].data() as IPAUser;
 		if (!mentionedUserData || !mentionedUserData.notification_preferences) continue;
 
+		console.log('mentionedUserData', mentionedUserData.notification_preferences);
+
 		const mentionedUserNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(mentionedUserData.notification_preferences, network);
 		if (!mentionedUserNotificationPreferences) continue;
 
@@ -64,6 +66,8 @@ export default async function sendMentionNotifications(args : Args) {
 				network
 			}
 		);
+
+		console.log(`Sending notification for trigger: ${TRIGGER_NAME}, mention type: ${type} by user ${mentionedUserData.id}`);
 		await notificationServiceInstance.notifyAllChannels(mentionedUserNotificationPreferences);
 	}
 }
