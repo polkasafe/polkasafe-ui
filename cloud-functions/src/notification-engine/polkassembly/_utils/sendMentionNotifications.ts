@@ -19,12 +19,12 @@ const TRIGGER_NAME = 'newMention';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 
 export default async function sendMentionNotifications(args : Args) {
-	console.log(`Running trigger: ${TRIGGER_NAME}, with args: ${JSON.stringify(args)}`);
-
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 	const { firestore_db, authorUsername, htmlContent, network, type, url } = args;
+	console.log(`Running trigger: ${TRIGGER_NAME}, with args: ${JSON.stringify({ authorUsername, htmlContent, network, type, url })}`);
 
 	const mentionedUsernames = getMentionedUsernames(htmlContent).filter((username) => username !== authorUsername);
+	console.log(`Mentioned usernames: ${JSON.stringify(mentionedUsernames)}`);
 	if (!mentionedUsernames.length) return;
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
@@ -37,8 +37,6 @@ export default async function sendMentionNotifications(args : Args) {
 
 		const mentionedUserData = mentionedUserDocSnapshot.docs[0].data() as IPAUser;
 		if (!mentionedUserData || !mentionedUserData.notification_preferences) continue;
-
-		console.log('mentionedUserData', mentionedUserData.notification_preferences);
 
 		const mentionedUserNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(mentionedUserData.notification_preferences, network);
 		if (!mentionedUserNotificationPreferences) continue;
