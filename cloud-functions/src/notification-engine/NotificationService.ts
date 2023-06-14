@@ -68,7 +68,7 @@ export class NotificationService {
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
-		bot.sendMessage(chatId, this.message).catch((error) => console.error('Error in sending telegram : ', error));
+		bot.sendMessage(chatId, this.htmlMessage, { parse_mode: 'HTML' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {

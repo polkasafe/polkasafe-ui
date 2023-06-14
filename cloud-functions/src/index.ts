@@ -1814,9 +1814,9 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 				To interact with this bot, you can use the following commands:
 
-				- '/add <username> <verificationToken>': Use this command to add a username to Polkassembly Bot.
+				- '/add <username><space><verificationToken>': Use this command to add a username to Polkassembly Bot.
 
-				- '/remove <username> <verificationToken>': Use this command to remove a username from Polkassembly Bot
+				- '/remove <username><space><verificationToken>': Use this command to remove a username from Polkassembly Bot
 
 				Please note that you need to replace '<username>' with the actual username you want to add or remove, and '<verificationToken>' with the token provided for verification.
 				`
@@ -1832,7 +1832,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /add <username> <verificationToken>'
+						'Invalid command. Please use the following format: /add <username><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -1899,7 +1899,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /remove <web3Address> <verificationToken>'
+						'Invalid command. Please use the following format: /remove <web3Address><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
