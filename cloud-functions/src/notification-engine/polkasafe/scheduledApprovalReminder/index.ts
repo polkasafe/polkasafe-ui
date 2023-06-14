@@ -93,7 +93,7 @@ export default async function scheduledApprovalReminder() {
 		}
 
 		// 5. send notifications for all multisigs in a single notification
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			multisigDataArr: pendingTxMultisigs
 		});
 
@@ -101,6 +101,7 @@ export default async function scheduledApprovalReminder() {
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject
 		);

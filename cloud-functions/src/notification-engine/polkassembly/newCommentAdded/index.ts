@@ -93,7 +93,7 @@ export default async function newCommentAdded(args: Args) {
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
 			postType: getPostTypeNameFromPostType(postType as EPAProposalType),
 			isPostAuthor: userId === postDocData.user_id,
@@ -108,6 +108,7 @@ export default async function newCommentAdded(args: Args) {
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject,
 			{

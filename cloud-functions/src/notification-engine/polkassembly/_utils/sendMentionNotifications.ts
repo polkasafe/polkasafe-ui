@@ -44,7 +44,7 @@ export default async function sendMentionNotifications(args : Args) {
 		if (!(mentionedUserNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.mention_types || []).includes(type)) continue;
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
 			authorUsername,
 			url,
@@ -58,6 +58,7 @@ export default async function sendMentionNotifications(args : Args) {
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject,
 			{

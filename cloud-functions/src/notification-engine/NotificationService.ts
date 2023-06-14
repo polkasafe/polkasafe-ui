@@ -13,6 +13,7 @@ export class NotificationService {
 		protected readonly source: NOTIFICATION_SOURCE,
 		protected readonly trigger: string,
 		protected readonly htmlMessage: string,
+		protected readonly markdownMessage: string,
 		protected readonly message: string,
 		protected readonly subject: string,
 		protected readonly sourceArgs?: {[index: string]: any} // additional data a source might need
@@ -68,7 +69,7 @@ export class NotificationService {
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
-		bot.sendMessage(chatId, this.htmlMessage, { parse_mode: 'HTML' }).catch((error) => console.error('Error in sending telegram : ', error));
+		bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {

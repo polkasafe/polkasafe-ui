@@ -57,7 +57,7 @@ export default async function newProposalCreated(args: Args) {
 		const postTypeName = getPostTypeNameFromPostType(postType as EPAProposalType);
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
 			username: subscriberData.username,
 			link,
@@ -68,6 +68,7 @@ export default async function newProposalCreated(args: Args) {
 			SOURCE,
 			SUB_TRIGGER,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject,
 			{
