@@ -236,4 +236,11 @@ export const GlobalStyle = createGlobalStyle`
 	.overflow-auto:hover::-webkit-scrollbar-thumb{
 		background: linear-gradient(white,#AFCFFF) !important;
 	}
+
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
+	}
 `;
