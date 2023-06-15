@@ -27,11 +27,13 @@ import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
+import { useGlobalWeb3Context } from 'src/context';
 
 const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
+	const {web3AuthUser} = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
@@ -54,7 +56,10 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 		}
 	}, [selectedSender]);
 
-	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
+	const autocompleteAddresses: DefaultOptionType[] = web3AuthUser ? web3AuthUser.accounts.map(item => ({
+		label: <AddressComponent name={''} address={item} />,
+		value: item
+	})) : accounts?.map((account) => ({
 		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));

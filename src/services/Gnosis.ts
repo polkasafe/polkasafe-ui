@@ -4,8 +4,8 @@
 
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 import SafeApiKit, { OwnerResponse, ProposeTransactionProps, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
-import { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
-import { SafeTransactionData } from '@safe-global/safe-core-sdk-types';
+import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
+import { SafeTransactionData, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
 export class GnosisSafeService {
@@ -28,8 +28,6 @@ export class GnosisSafeService {
 				threshold
 			};
 
-			console.log('yash owner createSAfe', owners, threshold);
-
 			const safeFactory = await SafeFactory.create({ ethAdapter: this.ethAdapter });
 
 			const safe = await safeFactory.deploySafe({
@@ -39,7 +37,6 @@ export class GnosisSafeService {
 				safeAccountConfig
 			});
 			const safeAddress = await safe.getAddress();
-			console.log('yash safeAddress', safeAddress);
 			return safeAddress;
 		} catch (err) {
 			console.log('error from createSafe', err);
@@ -65,16 +62,34 @@ export class GnosisSafeService {
 		return await this.safeService.getSafeCreationInfo(safeAddress);
 	};
 
-	createSafeTx = async (safeAddress: string, safeTxHash: string, txData: SafeTransactionData, address: string, signature: string, origin: string) => {
-		const transactionConfig: ProposeTransactionProps = {
-			origin,
-			safeAddress,
-			safeTransactionData: txData,
-			safeTxHash,
-			senderAddress: address,
-			senderSignature: signature
+	createSafeTx = async (multisigAddress: string, to: string, value: string, senderAddress: string) => {
+
+		console.log(multisigAddress, to,value, senderAddress);
+
+		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, safeAddress: multisigAddress, isL1SafeMasterCopy: true });
+
+		const safeTransactionData: SafeTransactionDataPartial = {
+			to,
+			data: '0x00',
+			value
 		};
 
-		await this.safeService.proposeTransaction(transactionConfig);
+		const safeTransaction = await safeSdk.createTransaction({ safeTransactionData });
+
+		const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+		console.log(safeTxHash);
+		const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+
+		await this.safeService.proposeTransaction({
+			safeAddress: multisigAddress,
+			safeTransactionData: safeTransaction.data,
+			safeTxHash,
+			senderAddress,
+			senderSignature: senderSignature.data
+		});
+	};
+
+	getPendingTx = async (multisigAddress: string) => {
+		return (await this.safeService.getPendingTransactions(multisigAddress)).results;
 	};
 }
