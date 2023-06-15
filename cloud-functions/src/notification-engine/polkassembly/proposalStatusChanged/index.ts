@@ -28,11 +28,10 @@ export default async function proposalStatusChanged(args: Args) {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
 	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
+	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
 
 	let SUB_TRIGGER = '';
-	if (isOpenGovProposal) {
-		if (!track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
-
+	if (postType === EPAProposalType.REFERENDUM_V2) {
 		switch (newStatus) {
 		case EPAPostStatus.SUBMITTED:
 			SUB_TRIGGER = 'openGovReferendumSubmitted';
@@ -42,6 +41,20 @@ export default async function proposalStatusChanged(args: Args) {
 			break;
 		case EPAPostStatus.CLOSED:
 			SUB_TRIGGER = 'openGovReferendumClosed';
+			break;
+		default:
+			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
+		}
+	} else if (postType === EPAProposalType.FELLOWSHIP_REFERENDUMS) {
+		switch (newStatus) {
+		case EPAPostStatus.SUBMITTED:
+			SUB_TRIGGER = 'fellowshipReferendumSubmitted';
+			break;
+		case EPAPostStatus.VOTING:
+			SUB_TRIGGER = 'fellowshipReferendumInVoting';
+			break;
+		case EPAPostStatus.CLOSED:
+			SUB_TRIGGER = 'fellowshipReferendumClosed';
 			break;
 		default:
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);

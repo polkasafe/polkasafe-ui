@@ -30,7 +30,19 @@ export default async function newProposalCreated(args: Args) {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
 	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
-	const SUB_TRIGGER = isOpenGovProposal ? 'openGovReferendumSubmitted' : 'gov1ProposalSubmitted';
+
+	let SUB_TRIGGER = '';
+	switch (postType) {
+	case EPAProposalType.REFERENDUM_V2:
+		SUB_TRIGGER = 'openGovReferendumSubmitted';
+		break;
+	case EPAProposalType.FELLOWSHIP_REFERENDUMS:
+		SUB_TRIGGER = 'fellowshipReferendumSubmitted';
+		break;
+	default:
+		SUB_TRIGGER = 'gov1ProposalSubmitted';
+		break;
+	}
 
 	if (!isOpenGovProposal && !trackId) throw Error(`Missing trackId for trigger: ${TRIGGER_NAME} and sub trigger ${SUB_TRIGGER}`);
 
