@@ -530,7 +530,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														trigger={['click']}
 														className={'border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer'}
 														menu={{
-															items: transactionFields[key].dropdownOptions?.map((item) => ({
+															items: transactionFields[key].dropdownOptions?.filter((item) => !item.archieved).map((item) => ({
 																key: item.optionName,
 																label: <span className='text-white'>{item.optionName}</span>
 															})),

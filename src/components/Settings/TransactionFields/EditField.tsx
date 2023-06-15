@@ -31,10 +31,12 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const EditOptionModal = () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [name, setName] = useState<string>(dropdownState?.[openEditOptionModal.i].optionName || '');
+		const [name, setName] = useState<string>(dropdownState?.[openEditOptionModal.i]?.optionName || '');
+		const [archieved, setArchieved] = useState<boolean>(dropdownState?.[openEditOptionModal.i]?.archieved || false);
 		return (
 			<>
 				<Modal
+					centered
 					footer={false}
 					closeIcon={
 						<button
@@ -54,15 +56,20 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 					/>
+					<div className='flex items-center gap-x-3 mt-5'>
+						<span className='text-white'>Archive Category</span>
+						<Switch size='small' checked={archieved} onChange={(checked) => setArchieved(checked)} />
+					</div>
 					<section className='flex items-center gap-x-5 justify-between mt-10'>
 						<CancelBtn className='w-[150px]' onClick={() => setOpenEditOptionModal({ i: 0, open: false })} />
-						<ModalBtn disabled={!name || name === dropdownState?.[openEditOptionModal.i].optionName}
+						<ModalBtn disabled={!name || (name === dropdownState?.[openEditOptionModal.i].optionName && archieved === !!dropdownState?.[openEditOptionModal.i].archieved)}
 							onClick={() => {
 								setDropdownState(prev => {
 									if (!prev) return;
 									const copyArray = [...prev];
 									const copyObject = { ...prev[openEditOptionModal.i] };
 									copyObject.optionName = name;
+									copyObject.archieved = archieved;
 									copyArray[openEditOptionModal.i] = copyObject;
 									return copyArray;
 								});
@@ -81,7 +88,7 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 				dropdownState?.map((option, i) => ({
 					label: (
 						<div className='text-white flex items-center justify-between'>
-							<span>{option.optionName}</span>
+							<span className={`${option.archieved && 'text-text_secondary'}`} >{option.optionName}</span>
 							<button onClick={() => {
 								setOpenEditOptionModal({ i, open: true });
 							}}><MoreOutlined/></button>
@@ -150,6 +157,8 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 						}
 					}));
 					setLoading(false);
+					setNewOption('');
+					setDropdownState(transactionFields[field].dropdownOptions);
 					onCancel();
 				}
 
@@ -216,7 +225,11 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 						</div>
 
 						<section className='flex items-center gap-x-5 justify-between mt-10'>
-							<CancelBtn loading={loading} className='w-[200px]' onClick={onCancel} />
+							<CancelBtn loading={loading} className='w-[200px]' onClick={() => {
+								onCancel();
+								setNewOption('');
+								setDropdownState(transactionFields[field].dropdownOptions);
+							}} />
 							<ModalBtn disabled={(dropdownOptions && dropdownState === dropdownOptions) && requiredState === required} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
 						</section>
 					</Form>
