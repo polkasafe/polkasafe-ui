@@ -3,6 +3,11 @@
 
 name: Deploy to Firebase Hosting on PR
 'on': pull_request
+
+env:
+  REACT_APP_WEB3_AUTH_CLIENT_SECRET: 55e08332b03eda3a300c8efa461c80ddaf4acb97f4678fceb5d84fb5502e0066
+  REACT_APP_WEB3_AUTH_CLIENT_ID: BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY
+
 jobs:
   build_and_preview:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
