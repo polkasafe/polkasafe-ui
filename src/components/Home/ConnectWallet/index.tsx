@@ -100,8 +100,6 @@ const ConnectWallet = () => {
 
 				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
 
-				console.log('yash data', userData, 'error', connectAddressErr);
-
 				if (!connectAddressErr && userData) {
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('signature', signature);
@@ -164,8 +162,6 @@ const ConnectWallet = () => {
 				},
 				method: 'POST'
 			}).then(res => res.json());
-
-			console.log('yash data', userData);
 
 			localStorage.setItem('address', web3AuthUser!.accounts[0]);
 			localStorage.setItem('signature', signature);

@@ -25,6 +25,7 @@ export interface ApiContextType {
 	ethProvider: any,
 	provider: any,
 	addChain: any,
+	sendNativeToken: any
 }
 
 export interface Web3AuthUser {
@@ -174,8 +175,27 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		await web3Auth.addChain(newChain);
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const sendNativeToken = async (destination: string, _amount: string) => {
+		if (!provider || !web3Auth) {
+			console.log('provider not initialized yet');
+			return;
+		}
+
+		const signer = ethProvider.getSigner();
+
+		const tx = await signer.sendTransaction({
+			// maxFeePerGas: '1',
+			// maxPriorityFeePerGas: '1',
+			to: destination,
+			value: 1000000000000000
+		});
+
+		return await tx.wait();
+	};
+
 	return (
-		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, signMessage, switchChain, web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, sendNativeToken, signMessage, switchChain, web3Auth, web3AuthUser }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

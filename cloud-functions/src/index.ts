@@ -202,12 +202,12 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 				const newAddress: IAddressBookItem = {
 					name: DEFAULT_USER_ADDRESS_NAME,
-					address: address!
+					address: address
 				};
 
 				// else create a new user document
 				const newUser: IUser = {
-					address: address!,
+					address: address,
 					created_at: new Date(),
 					email: null,
 					addressBook: [newAddress],

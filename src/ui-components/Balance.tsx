@@ -2,7 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import formatBnBalance from 'src/utils/formatBnBalance';
 
@@ -15,19 +17,36 @@ interface Props {
 const Balance = ({ address, className, onChange }: Props) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
+	const { ethProvider } = useGlobalWeb3Context();
+
 	const [balance, setBalance] = useState<string>('0');
 
-	useEffect(() => {
-		if (!api || !apiReady || !address) return;
+	const fetchEthBalance = async (address: string) => {
+		try {
+			const balance = ethers.utils.formatEther(
+				await ethProvider.getBalance(address)
+			);
+			setBalance(balance);
+		} catch (err) {
+			console.log('Err from fetchEthBalance', err);
+		}
+	};
 
-		api.query?.system?.account(address).then(res => {
-			const balanceStr = res?.data?.free?.toString() || '0';
-			setBalance(balanceStr);
-			if(onChange){
-				onChange(balanceStr);
-			}
-		}).catch(e => console.error(e));
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => {
+		if (address.startsWith('0x')) {
+			fetchEthBalance(address);
+		} else {
+			if (!api || !apiReady || !address) return;
+
+			api.query?.system?.account(address).then(res => {
+				const balanceStr = res?.data?.free?.toString() || '0';
+				setBalance(balanceStr);
+				if (onChange) {
+					onChange(balanceStr);
+				}
+			}).catch(e => console.error(e));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address, api, apiReady]);
 
 	return (
