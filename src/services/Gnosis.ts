@@ -2,10 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
-import SafeApiKit, { OwnerResponse, ProposeTransactionProps, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
+import SafeApiKit, { OwnerResponse, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
 import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
-import { SafeTransactionData, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
+import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
+import { ethers } from 'ethers';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
 export class GnosisSafeService {
@@ -40,8 +40,6 @@ export class GnosisSafeService {
 			return safeAddress;
 		} catch (err) {
 			console.log('error from createSafe', err);
-			const parsedEthersError = getParsedEthersError(err);
-			console.log('yash error from creation', parsedEthersError);
 			return '';
 		}
 	};
@@ -66,26 +64,26 @@ export class GnosisSafeService {
 
 		console.log(multisigAddress, to,value, senderAddress);
 
-		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, safeAddress: multisigAddress, isL1SafeMasterCopy: true });
+		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter,  isL1SafeMasterCopy: true, safeAddress: multisigAddress });
 
 		const safeTransactionData: SafeTransactionDataPartial = {
-			to,
 			data: '0x00',
+			to,
 			value
 		};
 
 		const safeTransaction = await safeSdk.createTransaction({ safeTransactionData });
 
 		const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
-		console.log(safeTxHash);
-		const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+		const hashBytes = ethers.utils.arrayify(safeTxHash);
+		const signature = await this.signer.signMessage(hashBytes);
 
 		await this.safeService.proposeTransaction({
 			safeAddress: multisigAddress,
 			safeTransactionData: safeTransaction.data,
 			safeTxHash,
 			senderAddress,
-			senderSignature: senderSignature.data
+			senderSignature: signature.data
 		});
 	};
 

@@ -9,6 +9,7 @@ import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransactio
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
@@ -27,13 +28,12 @@ import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
-import { useGlobalWeb3Context } from 'src/context';
 
 const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
-	const {web3AuthUser} = useGlobalWeb3Context();
+	const { web3AuthUser } = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));

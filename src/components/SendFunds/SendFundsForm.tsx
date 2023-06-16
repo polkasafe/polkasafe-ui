@@ -11,6 +11,7 @@ import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Swit
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
+import { ethers } from 'ethers';
 import React, { FC, useEffect, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
@@ -20,6 +21,7 @@ import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
+import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
@@ -39,8 +41,6 @@ import styled from 'styled-components';
 
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
-import { GnosisSafeService } from 'src/services';
-import { ethers } from 'ethers';
 
 interface ISendFundsFormProps {
 	onCancel?: () => void;
@@ -151,7 +151,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
 
-			// await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
+			await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
 			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
 			console.log('yash pendingTx', pendingTxs);
 		} else {
