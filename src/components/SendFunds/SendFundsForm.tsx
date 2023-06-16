@@ -53,6 +53,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAndAmount, setRecipientAndAmount] = useState<IRecipientAndAmount[]>([{ amount: new BN(0), recipient: defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '' }]);
 	const [callData, setCallData] = useState<string>('');
+	const [transferKeepAlive, setTransferKeepAlive] = useState<boolean>(true);
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
 		addressBook?.map((account) => ({
 			label: <AddressComponent address={account.address} />,
@@ -143,7 +144,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 		if(!api || !apiReady || !recipientAndAmount || recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero())) return;
 
-		const batch = api.tx.utility.batch(recipientAndAmount.map((item) => api.tx.balances.transferKeepAlive(item.recipient, item.amount.toString())));
+		const batch = api.tx.utility.batch(recipientAndAmount.map((item) => transferKeepAlive ?  api.tx.balances.transferKeepAlive(item.recipient, item.amount.toString()) : api.tx.balances.transfer(item.recipient, item.amount.toString())));
 		let tx: SubmittableExtrinsic<'promise'>;
 		if(isProxy && multisig?.proxy){
 			tx = api.tx.proxy.proxy(multisig.proxy, null, batch);
@@ -153,7 +154,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setCallData(batch.method.toHex());
 		}
 
-	}, [amount, api, apiReady, isProxy, multisig, recipientAndAmount]);
+	}, [amount, api, apiReady, isProxy, multisig, recipientAndAmount, transferKeepAlive]);
 
 	useEffect(() => {
 		const fetchBalanceInfos = async () => {
@@ -168,7 +169,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 			//gas fee
 			if(!['westend', 'rococo'].includes(network)){
-				const txn = api.tx.balances.transferKeepAlive(recipientAndAmount[0].recipient, amount);
+				const txn = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAndAmount[0].recipient, amount) : api.tx.balances.transfer(recipientAndAmount[0].recipient, amount);
 				const gasInfo = await txn.paymentInfo(address);
 				setTotalGas(new BN(gasInfo.partialFee.toString()));
 			}
@@ -179,7 +180,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setFetchBalancesLoading(false);
 		};
 		fetchBalanceInfos();
-	}, [address, amount, api, apiReady, network, recipientAndAmount]);
+	}, [address, amount, api, apiReady, network, recipientAndAmount, transferKeepAlive]);
 
 	//calculate total amount
 	useEffect(() => {
@@ -214,7 +215,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				recipientAndAmount,
 				setLoadingMessages,
 				transactionFields: transactionFieldsObject,
-				transferKeepAlive: true
+				transferKeepAlive
 			});
 			setTransactionData(queueItemData);
 			setLoading(false);
@@ -395,59 +396,61 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							<section className=''>
 								<div className='flex items-start gap-x-[10px]'>
 									<div>
-										{recipientAndAmount.map(({ recipient }, i) => (
-											<article key={recipient} className='w-[500px] flex items-start gap-x-2 mb-3'>
-												<div className='w-[55%]'>
-													<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
-													<Form.Item
-														name="recipient"
-														rules={[{ required: true }]}
-														help={(!recipient && 'Recipient Address is Required') || (!validRecipient[i] && 'Please add a valid Address')}
-														className='border-0 outline-0 my-0 p-0'
-														validateStatus={recipient && validRecipient[i] ? 'success' : 'error'}
-													>
-														<div className='h-[50px]'>
-															{recipient && autocompleteAddresses.some((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
-																<div className='border border-solid border-primary rounded-lg px-2 h-full flex justify-between items-center'>
-																	{autocompleteAddresses.find((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
-																	<button
-																		className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
-																		onClick={() => {
-																			onRecipientChange('', i);
+										<div className='flex flex-col gap-y-3 mb-2'>
+											{recipientAndAmount.map(({ recipient }, i) => (
+												<article key={recipient} className='w-[500px] flex items-start gap-x-2'>
+													<div className='w-[55%]'>
+														<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
+														<Form.Item
+															name="recipient"
+															rules={[{ required: true }]}
+															help={(!recipient && 'Recipient Address is Required') || (!validRecipient[i] && 'Please add a valid Address')}
+															className='border-0 outline-0 my-0 p-0'
+															validateStatus={recipient && validRecipient[i] ? 'success' : 'error'}
+														>
+															<div className='h-[50px]'>
+																{recipient && autocompleteAddresses.some((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
+																	<div className='border border-solid border-primary rounded-lg px-2 h-full flex justify-between items-center'>
+																		{autocompleteAddresses.find((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
+																		<button
+																			className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
+																			onClick={() => {
+																				onRecipientChange('', i);
+																			}}
+																		>
+																			<OutlineCloseIcon className='text-primary w-2 h-2' />
+																		</button>
+																	</div>
+																	:
+																	<AutoComplete
+																		autoFocus
+																		defaultOpen
+																		filterOption={(inputValue, options) => {
+																			return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
 																		}}
-																	>
-																		<OutlineCloseIcon className='text-primary w-2 h-2' />
-																	</button>
-																</div>
-																:
-																<AutoComplete
-																	autoFocus
-																	defaultOpen
-																	filterOption={(inputValue, options) => {
-																		return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
-																	}}
-																	notFoundContent={validRecipient[i] && <AddAddressModal defaultAddress={recipient} />}
-																	options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
-																	id='recipient'
-																	placeholder="Send to Address.."
-																	onChange={(value) => onRecipientChange(value, i)}
-																	defaultValue={defaultSelectedAddress || ''}
-																/>
-															}
-														</div>
-													</Form.Item>
-												</div>
-												<div className='flex items-center gap-x-2 w-[45%]'>
-													<BalanceInput label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
-													{i !== 0 && <Button
-														onClick={() => onRemoveRecipient(i)}
-														className='text-failure border-none outline-none bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
-														<DeleteIcon />
-													</Button>}
-												</div>
-											</article>
-										))}
-										<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-xs flex items-center' onClick={onAddRecipient} >Add Recipient</Button>
+																		notFoundContent={validRecipient[i] && <AddAddressModal defaultAddress={recipient} />}
+																		options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
+																		id='recipient'
+																		placeholder="Send to Address.."
+																		onChange={(value) => onRecipientChange(value, i)}
+																		defaultValue={defaultSelectedAddress || ''}
+																	/>
+																}
+															</div>
+														</Form.Item>
+													</div>
+													<div className='flex items-center gap-x-2 w-[45%]'>
+														<BalanceInput label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
+														{i !== 0 && <Button
+															onClick={() => onRemoveRecipient(i)}
+															className='text-failure border-none outline-none bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
+															<DeleteIcon />
+														</Button>}
+													</div>
+												</article>
+											))}
+										</div>
+										<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another</Button>
 									</div>
 									<div className='flex flex-col gap-y-4'>
 										<article className='w-[412px] flex items-center'>
@@ -608,7 +611,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										<p className='text-white text-sm font-normal leading-[15px]'>
 									Transfer with account keep-alive checks
 										</p>
-										<Switch disabled size='small' className='text-primary' defaultChecked />
+										<Switch checked={transferKeepAlive} onChange={checked => setTransferKeepAlive(checked)}  size='small' className='text-primary' />
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>

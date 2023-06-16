@@ -176,7 +176,7 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 
 	return (
 		<>
-			<Spin spinning={loading} indicator={<LoadingLottie width={300} message={`Updating your ${fieldName} field...`} /> }>
+			<Spin spinning={loading} indicator={<LoadingLottie width={250} message={`Updating your ${fieldName} field...`} /> }>
 				<div className={className}>
 					<EditOptionModal />
 
