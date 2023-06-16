@@ -2,10 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Form, Input, MenuProps, Modal } from 'antd';
+import { Button, Dropdown, Form, Input, MenuProps, Modal, Switch } from 'antd';
 import { Checkbox } from 'antd';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import CancelBtn from 'src/components/Settings/CancelBtn';
+import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -33,6 +35,7 @@ const Notifications = () => {
 	const [cancelledTxn, setCancelledTxn] = useState<boolean>(false);
 	const [scheduleTxn, setScheduleTxn]=useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [channelPreferencesLoading, setChannelPreferencesLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
 	const [openTelegramModal, setOpenTelegramModal] = useState<boolean>(false);
@@ -212,6 +215,73 @@ const Notifications = () => {
 		}
 	};
 
+	const updateNotificationChannelPreferences = async ({ channel, enabled, reset }: { channel: CHANNEL, enabled?: boolean, reset?: boolean }) => {
+
+		try{
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			setChannelPreferencesLoading(true);
+
+			const newChannelPreferences = reset
+				? { ...notification_preferences.channelPreferences, [channel]: { enabled: false, handle: '', name: channel, verification_token: '', verified: false } }
+				: { ...notification_preferences.channelPreferences, [channel]: { ...notification_preferences.channelPreferences[channel], enabled } };
+
+			const updateNotificationTriggerRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateNotificationChannelPreferences`, {
+				body: JSON.stringify({
+					channelPreferences: newChannelPreferences
+				}),
+				headers: firebaseFunctionsHeader(network),
+				method: 'POST'
+			});
+
+			const { data: updateNotificationTriggerData, error: updateNotificationTriggerError } = await updateNotificationTriggerRes.json() as { data: string, error: string };
+
+			if(updateNotificationTriggerError) {
+				queueNotification({
+					header: 'Failed!',
+					message: updateNotificationTriggerError,
+					status: NotificationStatus.ERROR
+				});
+				setChannelPreferencesLoading(false);
+				return;
+			}
+
+			if(updateNotificationTriggerData){
+				queueNotification({
+					header: 'Success!',
+					message: 'Your Notification Preferences has been Updated.',
+					status: NotificationStatus.SUCCESS
+				});
+				if(enabled !== undefined){
+					setUserDetailsContextState(prev => ({
+						...prev,
+						notification_preferences: { ...prev.notification_preferences, channelPreferences: { ...prev.notification_preferences.channelPreferences, [channel]: { ...prev.notification_preferences.channelPreferences[channel], enabled } } }
+					}));
+				}
+				if(reset){
+					setUserDetailsContextState(prev => ({
+						...prev,
+						notification_preferences: { ...prev.notification_preferences, channelPreferences: { ...prev.notification_preferences.channelPreferences, [channel]: { enabled: false, handle: '', name: channel, verification_token: '', verified: false } } }
+					}));
+				}
+				setChannelPreferencesLoading(false);
+			}
+		} catch (error){
+			console.log('ERROR', error);
+			queueNotification({
+				header: 'Failed!',
+				message: 'Error in Updating Notification Preferences.',
+				status: NotificationStatus.ERROR
+			});
+			setChannelPreferencesLoading(false);
+		}
+	};
+
 	const verifyEmail = async () => {
 
 		try{
@@ -333,7 +403,19 @@ const Notifications = () => {
 	const TelegramModal: FC = () => {
 		return (
 			<>
-				<Button onClick={() => setOpenTelegramModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+				{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified
+					?
+					<div className='flex items-center gap-x-2'>
+						<CheckOutlined className='text-success'/>
+						<div className='text-white'>Telegram Verified!</div>
+						<Button onClick={() => setOpenTelegramModal(true)} className='flex items-center outline-none border-none bg-transparant text-primary'>RESET</Button>
+					</div>
+					:
+					<div className='flex items-center'>
+						<Button onClick={() => setOpenTelegramModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<span>to a Telegram chat to get Telegram notifications</span>
+					</div>
+				}
 				<Modal
 					centered
 					footer={false}
@@ -348,7 +430,21 @@ const Notifications = () => {
 					open={openTelegramModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					<TelegramInfoModal getVerifyToken={getVerifyToken} />
+					{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified
+						? <div>
+							<span className='text-white'>Are you sure you want to Reset Telegram Handle?</span>
+							<div className='flex items-center justify-between mt-5'>
+								<CancelBtn title='No' onClick={() => setOpenTelegramModal(false)} />
+								<RemoveBtn loading={channelPreferencesLoading} title='Yes' onClick={async () => {
+									setOpenTelegramModal(true);
+									await updateNotificationChannelPreferences({ channel: CHANNEL.TELEGRAM, reset: true });
+									setOpenTelegramModal(false);
+								}} />
+							</div>
+						</div>
+						:
+						<TelegramInfoModal getVerifyToken={getVerifyToken} />
+					}
 				</Modal>
 			</>
 		);
@@ -357,7 +453,19 @@ const Notifications = () => {
 	const DiscordModal: FC = () => {
 		return (
 			<>
-				<Button onClick={() => setOpenDiscordModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+				{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified
+					?
+					<div className='flex items-center gap-x-2'>
+						<CheckOutlined className='text-success'/>
+						<div className='text-white'>Discord Verified!</div>
+						<Button onClick={() => setOpenDiscordModal(true)} className='flex items-center outline-none border-none bg-transparant text-primary'>RESET</Button>
+					</div>
+					:
+					<div className='flex items-center'>
+						<Button onClick={() => setOpenDiscordModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<span>to a Discord channel to get Discord notifications</span>
+					</div>
+				}
 				<Modal
 					centered
 					footer={false}
@@ -372,7 +480,21 @@ const Notifications = () => {
 					open={openDiscordModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					<DiscordInfoModal getVerifyToken={getVerifyToken} />
+					{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified
+						? <div>
+							<span className='text-white'>Are you sure you want to Reset Discord Handle?</span>
+							<div className='flex items-center justify-between mt-5'>
+								<CancelBtn title='No' onClick={() => setOpenDiscordModal(false)} />
+								<RemoveBtn loading={channelPreferencesLoading} title='Yes' onClick={async () => {
+									setOpenDiscordModal(true);
+									await updateNotificationChannelPreferences({ channel: CHANNEL.DISCORD, reset: true });
+									setOpenDiscordModal(false);
+								}} />
+							</div>
+						</div>
+						:
+						<DiscordInfoModal getVerifyToken={getVerifyToken} />
+					}
 				</Modal>
 			</>
 		);
@@ -381,7 +503,10 @@ const Notifications = () => {
 	const SlackModal: FC = () => {
 		return (
 			<>
-				<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+				<div className='flex items-center'>
+					<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+					<span>to a Slack channel to get Slack notifications</span>
+				</div>
 				<Modal
 					centered
 					footer={false}
@@ -396,7 +521,21 @@ const Notifications = () => {
 					open={openSlackModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					<SlackInfoModal getVerifyToken={getVerifyToken} />
+					{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified
+						? <div>
+							<span className='text-white'>Are you sure you want to Reset Slack Handle?</span>
+							<div className='flex items-center justify-between mt-5'>
+								<CancelBtn title='No' onClick={() => setOpenSlackModal(false)} />
+								<RemoveBtn loading={channelPreferencesLoading} title='Yes' onClick={async () => {
+									setOpenSlackModal(true);
+									await updateNotificationChannelPreferences({ channel: CHANNEL.SLACK, reset: true });
+									setOpenSlackModal(false);
+								}} />
+							</div>
+						</div>
+						:
+						<SlackInfoModal getVerifyToken={getVerifyToken} />
+					}
 				</Modal>
 			</>
 		);
@@ -475,24 +614,36 @@ const Notifications = () => {
 				}
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
-				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span></div>
-				<div className='col-span-5 flex items-center'>
+				<div className='col-span-3 flex items-center gap-x-2'>
+					<span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span>
+					{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.TELEGRAM, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.enabled} />
+					}
+				</div>
+				<div className='col-span-5'>
 					<TelegramModal/>
-					<span>to a Telegram chat to get Telegram notifications</span>
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
-				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span></div>
-				<div className='col-span-5 flex items-center'>
+				<div className='col-span-3 flex items-center gap-x-2'>
+					<span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span>
+					{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.DISCORD, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.DISCORD]?.enabled} />
+					}
+				</div>
+				<div className='col-span-5'>
 					<DiscordModal/>
-					<span>to a Discord channel to get Discord notifications</span>
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
-				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon /> Slack Notifications</span></div>
-				<div className='col-span-5 flex items-center'>
+				<div className='col-span-3 flex items-center gap-x-2'>
+					<span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon /> Slack Notifications</span>
+					{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.SLACK, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.SLACK]?.enabled} />
+					}
+				</div>
+				<div className='col-span-5'>
 					<SlackModal/>
-					<span>to a Slack channel to get Slack notifications</span>
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>

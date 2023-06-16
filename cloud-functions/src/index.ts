@@ -1076,7 +1076,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { channelPreferences } = req.body as { channelPreferences: IUserNotificationChannelPreferences };
+		const { channelPreferences } = req.body as { channelPreferences: {[index: string]: IUserNotificationChannelPreferences} };
 		if (!channelPreferences || typeof channelPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
