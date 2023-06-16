@@ -90,4 +90,8 @@ export class GnosisSafeService {
 	getPendingTx = async (multisigAddress: string) => {
 		return (await this.safeService.getPendingTransactions(multisigAddress)).results;
 	};
+
+	getAllCompletedTx = async (multisigAddress: string) => {
+		return (await this.safeService.getAllTransactions(multisigAddress, { executed: true, trusted: true }));
+	};
 }

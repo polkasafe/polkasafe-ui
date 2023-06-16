@@ -3,16 +3,20 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import dayjs from 'dayjs';
+import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import noTransactionsHistory from 'src/assets/icons/no-transaction.svg';
 import noTransactionsQueued from 'src/assets/icons/no-transactions-queued.svg';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
+import { GnosisSafeService } from 'src/services';
 import { IQueueItem,ITransaction } from 'src/types';
 import { ArrowUpRightIcon, RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
@@ -27,14 +31,15 @@ import shortenAddress from 'src/utils/shortenAddress';
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
 import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 
-const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>>}) => {
+const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>>}) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, addressBook, multisigAddresses } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
-	const [transactions, setTransactions] = useState<ITransaction[]>();
-	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
+	const [transactions, setTransactions] = useState<any>();
+	const [queuedTransactions, setQueuedTransactions] = useState<any>([]);
 
 	const [historyLoading, setHistoryLoading] = useState<boolean>(false);
 	const [queueLoading, setQueueLoading] = useState<boolean>(false);
@@ -44,32 +49,23 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
-		const getTransactions = async () => {
-			if(!userAddress || !signature || !activeMultisig) return;
-
-			setHistoryLoading(true);
-			try{
-				const { data, error } = await getHistoryTransactions(
-					activeMultisig,
-					network,
-					10,
-					1
-				);
-				if(error){
-					setHistoryLoading(false);
-					console.log('Error in Fetching Transactions: ', error);
-				}
-				if(data){
-					setHistoryLoading(false);
-					setTransactions(data);
-				}
-			} catch (error) {
-				console.log(error);
-				setHistoryLoading(false);
-			}
+		const getTxs = async () => {
+			const signer = ethProvider.getSigner();
+			const ethAdapter = new EthersAdapter({
+				ethers: ethProvider,
+				signerOrProvider: signer
+			});
+			const txUrl = 'https://safe-transaction-goerli.safe.global';
+			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
+			setQueuedTransactions(pendingTxs);
+			const allTxs = await gnosisService.getAllCompletedTx(activeMultisig);
+			console.log('yash alltxs', allTxs);
+			setTransactions(allTxs);
 		};
-		getTransactions();
-	}, [activeMultisig, network, signature, userAddress, newTxn]);
+
+		getTxs();
+	}, [ethProvider, web3AuthUser]);
 
 	useEffect(() => {
 		const getQueue = async () => {
@@ -140,50 +136,34 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto scale-90 w-[111%] origin-top-left">
 						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
-						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
-							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
-								let decodedCallData = null;
-
-								if(transaction.callData) {
-									const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
-									if(!error && data) {
-										decodedCallData = data.extrinsicCall?.toJSON();
-									}
-								}
-
-								const isProxyApproval = decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id);
-								setProxyInProcess(decodedCallData && decodedCallData?.args?.proxy_type);
-
-								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
-								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;
-
-								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
-									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
-
+						{ queuedTransactions ? queuedTransactions.length > 0 ?
+							queuedTransactions.filter((_: any, i: number) => i < 10).map((transaction: {
+								safeTxHash: any; callHash: any;}, i: React.Key | null | undefined): any => {
+								const tx = transaction as any;
 								return (
-									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center pb-2 mb-2">
+									<Link to={`/transactions?tab=Queue#${transaction.safeTxHash}`} key={i} className="flex items-center pb-2 mb-2">
 										<div className="flex flex-1 items-center">
-											{isProxyApproval ?
-												<div className='bg-[#FF79F2] text-[#FF79F2] bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
-													<ArrowUpRightIcon />
-												</div>
+
+											<div className='bg-[#FF79F2] text-[#FF79F2] bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
+												<ArrowUpRightIcon />
+											</div>
 												:
-												<div className='bg-waiting text-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
-													<ReloadOutlined />
-												</div>}
+											<div className='bg-waiting text-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
+												<ReloadOutlined />
+											</div>
 											<div className='ml-3'>
 												<h1 className='text-md text-white'>
-													{ decodedCallData && !isProxyApproval ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+													<span title={tx.to}>To: {tx.to}</span> : <span>Txn: {shortenAddress(tx.safeTxHash)}</span>
 												</h1>
-												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
+												{/* <p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p> */}
 											</div>
 										</div>
-										{!isProxyApproval &&
-											<div>
-												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
-												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
-											</div>
-										}
+
+										<div>
+											{/* <h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1> */}
+											{/* {!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>} */}
+										</div>
+
 										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
 											<ArrowRightOutlined/>
 										</div>
@@ -211,27 +191,22 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 scale-90 w-[111%] origin-top-left overflow-auto">
 						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
-						{!historyLoading ? (transactions && transactions.length > 0) ?
-							transactions.filter((_, i) => i < 10).map((transaction, i) => {
-								const sent = transaction.from === activeMultisig;
+						{transactions ? transactions.length > 0  ?
+							transactions.filter((_: any, i: number) => i < 10).map((transaction: { callHash: any; to: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined; value: any; }, i: React.Key | null | undefined) => {
 
 								return (
 									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
 										<div className="flex items-center justify-between">
-											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
+											{/* <div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div> */}
 											<div>
-												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.to, network))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
-													:
-													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.from, network))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
-												}
-												<p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p>
+
+												<h1 className='text-md text-white'>To: {transaction.to}</h1>
+
+												{/* <p className='text-text_secondary text-xs'>{dayjs(transaction.created_at).format('D-MM-YY [at] HH:mm')}</p> */}
 											</div>
 										</div>
 										<div>
-											{sent ? <h1 className='text-md text-failure'>-{transaction.amount_token} {transaction.token}</h1>
-												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
-											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd} USD</p>
+											{<h1 className='text-md text-failure'> {ethers.utils.parseUnits(`${transaction.value}`, 'ether').toString()} ETH</h1>}
 										</div>
 									</Link>
 								);
