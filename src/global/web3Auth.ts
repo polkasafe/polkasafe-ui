@@ -32,6 +32,7 @@ export const webAuth = new Web3Auth({
 
 export const openloginAdapter = new OpenloginAdapter({
 	adapterSettings: {
+		network: 'testnet',
 		whiteLabel: {
 			dark: true,
 			defaultLanguage: 'en',
