@@ -1105,6 +1105,7 @@ export const notify = functions.https.onRequest(async (req, res) => {
 		if (!source || !Object.values(NOTIFICATION_SOURCE).includes(source as any)) return res.status(400).json({ error: responseMessages.invalid_headers });
 
 		const { trigger, args } = req.body;
+		functions.logger.info('notify called with: ', { source, trigger, args }, { structuredData: true });
 		if (!trigger) return res.status(400).json({ error: responseMessages.missing_params });
 		if (args && (typeof args !== 'object' || Array.isArray(args))) return res.status(400).json({ error: responseMessages.invalid_params });
 
