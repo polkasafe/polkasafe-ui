@@ -503,10 +503,19 @@ const Notifications = () => {
 	const SlackModal: FC = () => {
 		return (
 			<>
-				<div className='flex items-center'>
-					<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
-					<span>to a Slack channel to get Slack notifications</span>
-				</div>
+				{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified
+					?
+					<div className='flex items-center gap-x-2'>
+						<CheckOutlined className='text-success'/>
+						<div className='text-white'>Slack Verified!</div>
+						<Button onClick={() => setOpenSlackModal(true)} className='flex items-center outline-none border-none bg-transparant text-primary'>RESET</Button>
+					</div>
+					:
+					<div className='flex items-center'>
+						<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<span>to a Slack channel to get Slack notifications</span>
+					</div>
+				}
 				<Modal
 					centered
 					footer={false}
