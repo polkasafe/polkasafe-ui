@@ -19,9 +19,10 @@ interface IAddressComponent{
     iconSize?: number
 	withBadge?: boolean
 	name?: string
+	onlyAddress?: boolean
 }
 
-const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddressComponent) => {
+const AddressComponent = ({ address, name, withBadge=true, iconSize=30, onlyAddress }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -71,17 +72,12 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddre
 						theme='polkadot'
 					/>
 			}
-			<div>
+			{onlyAddress ?
 				<div
-					className='font-medium text-sm flex text-white'
+					className='flex items-center gap-x-3 font-normal text-sm text-text_secondary'
 				>
-					{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
-				</div>
-				<div
-					className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'
-				>
-					<span>
-						{shortenAddress(getEncodedAddress(address, network) || '')}
+					<span className='text-white'>
+						{shortenAddress(getEncodedAddress(address, network) || '', 10)}
 					</span>
 					<span
 						className='flex items-center gap-x-2'
@@ -91,8 +87,30 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddre
 							<ExternalLinkIcon  />
 						</a>
 					</span>
+				</div> :
+				<div>
+					<div
+						className='font-medium text-sm flex text-white'
+					>
+						{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
+					</div>
+					<div
+						className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'
+					>
+						<span>
+							{shortenAddress(getEncodedAddress(address, network) || '')}
+						</span>
+						<span
+							className='flex items-center gap-x-2'
+						>
+							<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
+							<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
+								<ExternalLinkIcon  />
+							</a>
+						</span>
+					</div>
 				</div>
-			</div>
+			}
 		</div>
 	);
 };

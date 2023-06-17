@@ -50,7 +50,7 @@ export default async function ownProposalCreated(args: Args) {
 	const postTypeName = getPostTypeNameFromPostType(postType as EPAProposalType);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		...args,
 		username: proposerUserData.username,
 		link,
@@ -61,6 +61,7 @@ export default async function ownProposalCreated(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject,
 		{

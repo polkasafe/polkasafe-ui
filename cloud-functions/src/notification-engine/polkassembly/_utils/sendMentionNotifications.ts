@@ -18,8 +18,13 @@ interface Args {
 const TRIGGER_NAME = 'newMention';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 
-export default async function sendMentionNotifications({ firestore_db, authorUsername, htmlContent, network, type, url } : Args) {
+export default async function sendMentionNotifications(args : Args) {
+	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
+	const { firestore_db, authorUsername, htmlContent, network, type, url } = args;
+	console.log(`Running trigger: ${TRIGGER_NAME}, with args: ${JSON.stringify({ authorUsername, htmlContent, network, type, url })}`);
+
 	const mentionedUsernames = getMentionedUsernames(htmlContent).filter((username) => username !== authorUsername);
+	console.log(`Mentioned usernames: ${JSON.stringify(mentionedUsernames)}`);
 	if (!mentionedUsernames.length) return;
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
@@ -39,24 +44,29 @@ export default async function sendMentionNotifications({ firestore_db, authorUse
 		if (!(mentionedUserNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.mention_types || []).includes(type)) continue;
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+			...args,
 			authorUsername,
 			url,
 			content: htmlContent,
 			domain: `https://${network}.polkassembly.io`,
-			mentionedUsername
+			username: mentionedUsername,
+			mentionType: type
 		});
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject,
 			{
 				network
 			}
 		);
+
+		console.log(`Sending notification for trigger: ${TRIGGER_NAME}, mention type: ${type} by user ${mentionedUserData.id}`);
 		await notificationServiceInstance.notifyAllChannels(mentionedUserNotificationPreferences);
 	}
 }

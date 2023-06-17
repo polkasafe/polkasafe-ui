@@ -1079,7 +1079,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { channelPreferences } = req.body as { channelPreferences: IUserNotificationChannelPreferences };
+		const { channelPreferences } = req.body as { channelPreferences: {[index: string]: IUserNotificationChannelPreferences} };
 		if (!channelPreferences || typeof channelPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -1160,11 +1160,14 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 		functions.logger.info('polkasafeTelegramBotCommands req', { req } );
 
 		try {
-			const { message } = req.body;
-			let { text, chat } = message;
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
 
-			if (!text || !chat) {
-				const { edited_message } = req.body;
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
 				text = edited_message.text;
 				chat = edited_message.chat;
 			}
@@ -1784,11 +1787,14 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 		functions.logger.info('polkassemblyTelegramBotCommands req', { req } );
 
 		try {
-			const { message } = req.body;
-			let { text, chat } = message;
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
 
-			if (!text || !chat) {
-				const { edited_message } = req.body;
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
 				text = edited_message.text;
 				chat = edited_message.chat;
 			}
@@ -1811,9 +1817,9 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 				To interact with this bot, you can use the following commands:
 
-				- '/add <username> <verificationToken>': Use this command to add a username to Polkassembly Bot.
+				- '/add <username><space><verificationToken>': Use this command to add a username to Polkassembly Bot.
 
-				- '/remove <username> <verificationToken>': Use this command to remove a username from Polkassembly Bot
+				- '/remove <username><space><verificationToken>': Use this command to remove a username from Polkassembly Bot
 
 				Please note that you need to replace '<username>' with the actual username you want to add or remove, and '<verificationToken>' with the token provided for verification.
 				`
@@ -1829,7 +1835,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /add <username> <verificationToken>'
+						'Invalid command. Please use the following format: /add <username><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -1896,7 +1902,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /remove <web3Address> <verificationToken>'
+						'Invalid command. Please use the following format: /remove <web3Address><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -1956,7 +1962,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 			return res.sendStatus(200);
 		} catch (err:unknown) {
-			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
+			functions.logger.error('Error in polkassemblyTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

@@ -13,6 +13,7 @@ export class NotificationService {
 		protected readonly source: NOTIFICATION_SOURCE,
 		protected readonly trigger: string,
 		protected readonly htmlMessage: string,
+		protected readonly markdownMessage: string,
 		protected readonly message: string,
 		protected readonly subject: string,
 		protected readonly sourceArgs?: {[index: string]: any} // additional data a source might need
@@ -68,7 +69,7 @@ export class NotificationService {
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
-		bot.sendMessage(chatId, this.message).catch((error) => console.error('Error in sending telegram : ', error));
+		bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
@@ -83,7 +84,8 @@ export class NotificationService {
 		await sendDiscordMessage(
 			this.source,
 			userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
-			this.message
+			this.markdownMessage,
+			this.subject,
 		).catch((error) => console.error('Error in sending Discord message : ', error));
 	}
 
@@ -121,7 +123,7 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
 		try {
-			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
+			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.markdownMessage);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
 		}

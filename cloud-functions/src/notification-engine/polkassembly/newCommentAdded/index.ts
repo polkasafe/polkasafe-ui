@@ -33,17 +33,20 @@ export default async function newCommentAdded(args: Args) {
 
 	const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
 	const postDocData = postDoc.data();
-	if (!postDoc.exists || !postDocData) return;
+	if (!postDoc.exists || !postDocData) throw Error(`Post not found for trigger: ${TRIGGER_NAME}`);
 
 	const subscribers: number[] = [...(postDocData?.subscribers || []), postDocData.user_id]; // add post author to subscribers
-	if (!subscribers || !subscribers?.length) return;
+	if (!subscribers || !subscribers?.length) {
+		console.log(`No subscribers for a ${postType} type, post ${postId} on network ${network}`);
+		return;
+	}
 
 	// get comment author
 	const commentDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).get();
-	if (!commentDoc.exists) return;
+	if (!commentDoc.exists) throw Error(`Comment not found for trigger: ${TRIGGER_NAME}`);
 	const commentDocData = commentDoc.data() as IPAPostComment;
 	const commentAuthorDoc = await paUserRef(firestore_db, commentDocData.user_id).get();
-	if (!commentAuthorDoc.exists) return;
+	if (!commentAuthorDoc.exists) throw Error(`Comment author not found for trigger: ${TRIGGER_NAME}`);
 	const commentAuthorData = commentAuthorDoc.data() as IPAUser;
 
 	const commentUrl = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}#${commentId}`;
@@ -90,7 +93,7 @@ export default async function newCommentAdded(args: Args) {
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
 			postType: getPostTypeNameFromPostType(postType as EPAProposalType),
 			isPostAuthor: userId === postDocData.user_id,
@@ -105,12 +108,15 @@ export default async function newCommentAdded(args: Args) {
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject,
 			{
 				network
 			}
 		);
+
+		console.log(`Sending notification for trigger: ${TRIGGER_NAME} to user ${userId} on network ${network} for post ${postId} on comment ${commentId}`);
 		await notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 	}
 

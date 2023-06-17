@@ -60,7 +60,7 @@ export default async function newReplyAdded(args: Args) {
 	const replyHTML = converter.makeHtml(replyDocData.content);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		...args,
 		authorUsername: replyAuthorData.username,
 		commentUrl,
@@ -73,6 +73,7 @@ export default async function newReplyAdded(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject,
 		{
