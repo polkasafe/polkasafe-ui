@@ -9,6 +9,7 @@ import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 import ownProposalCreated from '../ownProposalCreated';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
+import subsquidToFirestoreProposalType from '../_utils/subsquidToFirestoreProposalType';
 
 const TRIGGER_NAME = 'newProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -27,12 +28,15 @@ export default async function newProposalCreated(args: Args) {
 	const proposerSubstrateAddress = getSubstrateAddress(proposerAddress || '');
 	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
+	const firestorePostType = subsquidToFirestoreProposalType(postType);
+	if (!firestorePostType) throw Error(`Invalid postType for trigger: ${TRIGGER_NAME}`);
+
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
-	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
+	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(firestorePostType as EPAProposalType);
 
 	let SUB_TRIGGER = '';
-	switch (postType) {
+	switch (firestorePostType) {
 	case EPAProposalType.REFERENDUM_V2:
 		SUB_TRIGGER = 'openGovReferendumSubmitted';
 		break;
@@ -50,7 +54,7 @@ export default async function newProposalCreated(args: Args) {
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(trackId) : postType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(trackId) : firestorePostType)
 		.get();
 
 	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
@@ -61,12 +65,12 @@ export default async function newProposalCreated(args: Args) {
 		const subscriberNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(subscriberData.notification_preferences, network);
 		if (!subscriberNotificationPreferences) continue;
 
-		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}`;
+		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
-		const postTypeName = getPostTypeNameFromPostType(postType as EPAProposalType);
+		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
 		const subject = triggerTemplate.subject;
 		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
@@ -89,7 +93,7 @@ export default async function newProposalCreated(args: Args) {
 			}
 		);
 
-		console.log(`Sending notification to user_id ${subscriberDoc.id} for trigger ${SUB_TRIGGER} on network ${network} for postType ${postType} and postId ${postId}`);
+		console.log(`Sending notification to user_id ${subscriberDoc.id} for trigger ${SUB_TRIGGER} on network ${network} for postType ${firestorePostType} and postId ${postId}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 

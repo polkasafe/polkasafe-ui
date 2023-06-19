@@ -1,5 +1,18 @@
 import { IUserNotificationChannelPreferences, IUserNotificationTriggerPreferences } from '../../notification_engine_constants';
 
+export enum EPASubsquidProposalType {
+  DEMOCRACY_PROPOSALS = 'DemocracyProposal',
+  TECH_COMMITTEE_PROPOSALS = 'TechCommitteeProposal',
+  TREASURY_PROPOSALS = 'TreasuryProposal',
+  REFERENDUMS = 'Referendum',
+  COUNCIL_MOTIONS = 'CouncilMotion',
+  BOUNTIES = 'Bounty',
+  TIPS = 'Tip',
+  CHILD_BOUNTIES = 'ChildBounty',
+  REFERENDUM_V2 = 'ReferendumV2',
+  FELLOWSHIP_REFERENDUMS = 'FellowshipReferendum'
+}
+
 export enum EPAProposalType {
 	DEMOCRACY_PROPOSALS = 'democracy_proposals',
 	TECH_COMMITTEE_PROPOSALS = 'tech_committee_proposals',

@@ -7,6 +7,7 @@ import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFr
 import { EPAPostStatusType, EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
+import subsquidToFirestoreProposalType from '../_utils/subsquidToFirestoreProposalType';
 
 const TRIGGER_NAME = 'proposalStatusChanged';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -25,13 +26,16 @@ export default async function proposalStatusChanged(args: Args) {
 	const { network, postType, postId, statusType, track = null, statusName } = args;
 	if (!network || !postType || !postId || typeof postId !== 'string' || !statusType || !statusName) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
+	const firestorePostType = subsquidToFirestoreProposalType(postType);
+	if (!firestorePostType) throw Error(`Invalid postType for trigger: ${TRIGGER_NAME}`);
+
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
-	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(postType as EPAProposalType);
+	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(firestorePostType as EPAProposalType);
 	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
 
 	let SUB_TRIGGER = '';
-	if (postType === EPAProposalType.REFERENDUM_V2) {
+	if (firestorePostType === EPAProposalType.REFERENDUM_V2) {
 		switch (statusType) {
 		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'openGovReferendumSubmitted';
@@ -45,7 +49,7 @@ export default async function proposalStatusChanged(args: Args) {
 		default:
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
 		}
-	} else if (postType === EPAProposalType.FELLOWSHIP_REFERENDUMS) {
+	} else if (firestorePostType === EPAProposalType.FELLOWSHIP_REFERENDUMS) {
 		switch (statusType) {
 		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'fellowshipReferendumSubmitted';
@@ -79,7 +83,7 @@ export default async function proposalStatusChanged(args: Args) {
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : postType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
 		.get();
 
 	for (const subscriberDoc of subscribersSnapshot.docs) {
@@ -88,12 +92,12 @@ export default async function proposalStatusChanged(args: Args) {
 		const subscriberNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(subscriberData.notification_preferences, network);
 		if (!subscriberNotificationPreferences) continue;
 
-		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}`;
+		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
-		const postTypeName = getPostTypeNameFromPostType(postType as EPAProposalType);
+		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
 		const subject = triggerTemplate.subject;
 		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
@@ -116,7 +120,7 @@ export default async function proposalStatusChanged(args: Args) {
 			}
 		);
 
-		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER} post ${postId}, postType ${postType}, network ${network}`);
+		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER} post ${postId}, postType ${firestorePostType}, network ${network}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 }
