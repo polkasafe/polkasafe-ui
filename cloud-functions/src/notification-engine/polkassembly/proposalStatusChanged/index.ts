@@ -4,7 +4,7 @@ import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
-import { EPAPostStatus, EPAProposalType, IPAUser } from '../_utils/types';
+import { EPAPostStatusType, EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 
@@ -15,15 +15,15 @@ interface Args {
 	network: string;
 	postType: string;
 	postId: string;
-	newStatus: EPAPostStatus;
+	statusType : EPAPostStatusType;
 	track?: string;
 	statusName: string;
 }
 
 export default async function proposalStatusChanged(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, newStatus, track = null, statusName } = args;
-	if (!network || !postType || !postId || typeof postId !== 'string' || !newStatus || !statusName) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	const { network, postType, postId, statusType, track = null, statusName } = args;
+	if (!network || !postType || !postId || typeof postId !== 'string' || !statusType || !statusName) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
@@ -32,42 +32,42 @@ export default async function proposalStatusChanged(args: Args) {
 
 	let SUB_TRIGGER = '';
 	if (postType === EPAProposalType.REFERENDUM_V2) {
-		switch (newStatus) {
-		case EPAPostStatus.SUBMITTED:
+		switch (statusType) {
+		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'openGovReferendumSubmitted';
 			break;
-		case EPAPostStatus.VOTING:
+		case EPAPostStatusType.VOTING:
 			SUB_TRIGGER = 'openGovReferendumInVoting';
 			break;
-		case EPAPostStatus.CLOSED:
+		case EPAPostStatusType.CLOSED:
 			SUB_TRIGGER = 'openGovReferendumClosed';
 			break;
 		default:
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
 		}
 	} else if (postType === EPAProposalType.FELLOWSHIP_REFERENDUMS) {
-		switch (newStatus) {
-		case EPAPostStatus.SUBMITTED:
+		switch (statusType) {
+		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'fellowshipReferendumSubmitted';
 			break;
-		case EPAPostStatus.VOTING:
+		case EPAPostStatusType.VOTING:
 			SUB_TRIGGER = 'fellowshipReferendumInVoting';
 			break;
-		case EPAPostStatus.CLOSED:
+		case EPAPostStatusType.CLOSED:
 			SUB_TRIGGER = 'fellowshipReferendumClosed';
 			break;
 		default:
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
 		}
 	} else {
-		switch (newStatus) {
-		case EPAPostStatus.SUBMITTED:
+		switch (statusType) {
+		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'gov1ProposalSubmitted';
 			break;
-		case EPAPostStatus.VOTING:
+		case EPAPostStatusType.VOTING:
 			SUB_TRIGGER = 'gov1ProposalInVoting';
 			break;
-		case EPAPostStatus.CLOSED:
+		case EPAPostStatusType.CLOSED:
 			SUB_TRIGGER = 'gov1ProposalClosed';
 			break;
 		default:

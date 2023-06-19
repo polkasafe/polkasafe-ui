@@ -16,7 +16,7 @@ export enum EPAProposalType {
 	GRANTS = 'grants'
 }
 
-export enum EPAPostStatus {
+export enum EPAPostStatusType {
 	SUBMITTED= 'submitted',
 	VOTING= 'voting',
 	CLOSED= 'closed'
