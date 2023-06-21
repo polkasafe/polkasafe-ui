@@ -92,7 +92,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 		<>
 			{(queuedTransactions && queuedTransactions.length > 0) ? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
-					console.log("yash tx data",index, " ",  transaction)
+					
 					return <section id={transaction.callHash} key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
@@ -104,7 +104,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							approvals={transaction.confimations || []}
 							threshold={multisig?.threshold || 0}
 							callData={transaction.data}
-							callHash={transaction.safeTxHash}
+							callHash={transaction.txHash}
 							note={transaction.note || ''}
 							refetch={() => setRefetch(prev => !prev)}
 							amountUSD={amountUSD || '0'}

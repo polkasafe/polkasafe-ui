@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { bnToBn } from '@polkadot/util';
-import { EthersAdapter } from '@safe-global/protocol-kit';
+import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
 import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -52,8 +52,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
-	console.log("yash hash", callHash)
-
 	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
@@ -62,7 +60,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [loadingMessages, setLoadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
+	const { web3AuthUser, ethProvider , web3Provider} = useGlobalWeb3Context();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
@@ -146,16 +144,43 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 
 	const handleApproveTransaction = async () => {
 		try {
-			console.log("yash active", multisig);
 			const signer = ethProvider.getSigner();
 			const ethAdapter = new EthersAdapter({
 				ethers: ethProvider,
 				signerOrProvider: signer
 			});
+
+			const web3Adapter = new Web3Adapter({
+				signerAddress: web3AuthUser!.accounts[0],
+				web3: web3Provider
+			})
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
-			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-			const response = await gnosisService.signAndConfirmTx();
-			console.log('yash response confirm', response);
+			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+			const response = await gnosisService.signAndConfirmTx(callHash, activeMultisig);
+			const updateTx = {
+				txSignature: response.signature,
+				txHash: callHash,
+				signer: web3AuthUser!.accounts[0]
+			}
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransaction`, {
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-signature': localStorage.getItem('signature')!,
+					'x-source': 'polkasafe'
+				},
+				method: 'POST',
+				body: JSON.stringify(updateTx)
+			}).then(res => res.json());
+
+			const rec = await gnosisService.executeTx(callHash, activeMultisig);
+
+			console.log(rec);
+
+
 		} catch (error) {
 			console.log(error);
 		}

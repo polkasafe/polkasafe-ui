@@ -6,7 +6,7 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { EthersAdapter } from '@safe-global/protocol-kit';
+import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
 import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
@@ -54,7 +54,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
+	const { web3AuthUser, ethProvider , web3Provider} = useGlobalWeb3Context();
 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -165,8 +165,12 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				ethers: ethProvider,
 				signerOrProvider: signer
 			});
+			const web3Adapter = new Web3Adapter({
+				signerAddress: web3AuthUser.accounts[0],
+				web3: web3Provider
+			})
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
-			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
 			const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
 

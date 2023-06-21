@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import SafeApiKit, { OwnerResponse, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
-import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
+import Safe, { SafeAccountConfig, SafeFactory, Web3Adapter } from '@safe-global/protocol-kit';
 import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 import { ethers } from 'ethers';
 
@@ -65,7 +65,7 @@ export class GnosisSafeService {
 		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter,  isL1SafeMasterCopy: true, safeAddress: multisigAddress });
 
 		const safeTransactionData: SafeTransactionDataPartial = {
-			data: '0x00',
+			data: '0x',
 			to,
 			value
 		};
@@ -73,15 +73,14 @@ export class GnosisSafeService {
 		const safeTransaction = await safeSdk.createTransaction({ safeTransactionData });
 
 		const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
-		const hashBytes = ethers.utils.arrayify(safeTxHash);
-		const signature = await this.signer.signMessage(hashBytes);
+		const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
 
 		await this.safeService.proposeTransaction({
 			safeAddress: multisigAddress,
 			safeTransactionData: safeTransaction.data,
 			safeTxHash,
 			senderAddress,
-			senderSignature: signature.data
+			senderSignature: senderSignature.data
 		});
 
 		return safeTxHash;
@@ -95,10 +94,16 @@ export class GnosisSafeService {
 		return (await this.safeService.getAllTransactions(multisigAddress, { executed: true, trusted: true }));
 	};
 
-	signAndConfirmTx = async (txHash: string) => {
-		console.log(txHash);
-		const hashBytes = ethers.utils.arrayify(txHash);
-		const signature = await this.signer.signMessage(hashBytes);
+	signAndConfirmTx = async (txHash: string, multisig: string) => {
+		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter,  isL1SafeMasterCopy: true, safeAddress: multisig });
+		const signature = await safeSdk.signTransactionHash(txHash)
 		return await this.safeService.confirmTransaction(txHash, signature.data);
+	};
+
+	executeTx = async (txHash: string, multisig: string) => {
+		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter,  isL1SafeMasterCopy: true, safeAddress: multisig });
+		const safeTransaction = await this.safeService.getTransaction(txHash)
+		const executeTxResponse = await safeSdk.executeTransaction(safeTransaction)
+		return await executeTxResponse.transactionResponse?.wait();
 	};
 }

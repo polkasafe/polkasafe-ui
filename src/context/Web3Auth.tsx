@@ -10,6 +10,7 @@ import { getWalletConnectV2Settings, WalletConnectV2Adapter } from '@web3auth/wa
 import { ethers } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import Web3 from 'web3';
 
 import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
 
@@ -27,6 +28,7 @@ export interface ApiContextType {
 	provider: any,
 	addChain: any,
 	sendNativeToken: any
+	web3Provider: any
 }
 
 export interface Web3AuthUser {
@@ -44,6 +46,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
 	const [web3AuthUser, setWeb3AuthUser] = useState<Web3AuthUser | null>(null);
 	const [ethProvider, setEthProvider] = useState<any | null>(null);
+	const [web3Provider, setWeb3Provider] = useState<any | null>(null);
 
 	useEffect(() => {
 		const init = async () => {
@@ -118,6 +121,15 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		if(web3Auth) login();
 
 	}, [ web3Auth, web3Auth]);
+
+	useEffect(() => {
+		const web3 = async () => {
+			console.log('running web3');
+			const web = new Web3(provider!);
+			setWeb3Provider(web);
+		};
+		web3();
+	}, [provider]);
 
 	const login = async () => {
 		if (!web3Auth) {
@@ -244,7 +256,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, sendNativeToken, signMessage, switchChain, web3Auth, web3AuthUser }}>
+		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, sendNativeToken, signMessage, switchChain, web3Auth, web3AuthUser, web3Provider }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);
