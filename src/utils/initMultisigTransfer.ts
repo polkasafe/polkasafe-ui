@@ -37,7 +37,7 @@ interface Args {
 	transferKeepAlive: boolean,
 	isProxy?: boolean,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>,
-	transactionFields?: {[key: string]: { name: string, value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 }
 
 export default async function initMultisigTransfer({

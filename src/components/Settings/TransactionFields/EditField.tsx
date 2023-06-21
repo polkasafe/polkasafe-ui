@@ -17,7 +17,7 @@ import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
-const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownOptions, required }: { className?: string, onCancel: () => void, field: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
+const EditField = ({ className, onCancel, category, subfield, fieldName, fieldType, dropdownOptions, required }: { className?: string, onCancel: () => void, category: string, subfield: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
 	const [loading, setLoading] = useState(false);
 	const { network } = useGlobalApiContext();
 	const { setUserDetailsContextState, transactionFields } = useGlobalUserDetailsContext();
@@ -116,10 +116,16 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 					body: JSON.stringify({
 						transactionFields:{
 							...transactionFields,
-							[field]: {
-								...transactionFields[field],
-								dropdownOptions: dropdownState,
-								required: requiredState
+							[category]: {
+								...transactionFields[category],
+								subfields: {
+									...transactionFields[category].subfields,
+									[subfield]: {
+										...transactionFields[category].subfields[subfield],
+										dropdownOptions: dropdownState,
+										required: requiredState
+									}
+								}
 							}
 						}
 					}),
@@ -149,16 +155,21 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 						...prev,
 						transactionFields: {
 							...prev.transactionFields,
-							[field]: {
-								...prev.transactionFields[field],
-								dropdownOptions: dropdownState,
-								required: requiredState
+							[category]: {
+								...prev.transactionFields[category],
+								subfields: {
+									...prev.transactionFields[category].subfields,
+									[subfield]: {
+										...prev.transactionFields[category].subfields[subfield],
+										required: requiredState
+									}
+								}
 							}
 						}
 					}));
 					setLoading(false);
 					setNewOption('');
-					setDropdownState(transactionFields[field].dropdownOptions);
+					setDropdownState(transactionFields[category].subfields[subfield].dropdownOptions);
 					onCancel();
 				}
 
@@ -228,7 +239,7 @@ const EditField = ({ className, onCancel, field, fieldName, fieldType, dropdownO
 							<CancelBtn loading={loading} className='w-[200px]' onClick={() => {
 								onCancel();
 								setNewOption('');
-								setDropdownState(transactionFields[field].dropdownOptions);
+								setDropdownState(transactionFields[category].subfields[subfield].dropdownOptions);
 							}} />
 							<ModalBtn disabled={(dropdownOptions && dropdownState === dropdownOptions) && requiredState === required} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
 						</section>

@@ -32,7 +32,7 @@ import SentInfo from './SentInfo';
 
 interface ITransactionProps {
 	totalAmount?: string
-	transactionFields?: {[key: string]: { name: string, value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	status: 'Approval' | 'Cancelled' | 'Executed';
 	date: string;
 	approvals: string[];

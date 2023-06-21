@@ -82,9 +82,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
-	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{[key: string]: { name: string, value: string | number }}>({});
+	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{category: string, subfields: {[subfield: string]: { name: string, value: string }}}>({ category: 'none', subfields: {} });
 
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
+
+	const [category, setCategory] = useState<string>('none');
 
 	const onRecipientChange = (value: string, i: number) => {
 		setRecipientAndAmount((prevState) => {
@@ -450,7 +452,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												</article>
 											))}
 										</div>
-										<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another</Button>
+										<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another Recipient</Button>
 									</div>
 									<div className='flex flex-col gap-y-4'>
 										<article className='w-[412px] flex items-center'>
@@ -516,70 +518,105 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								</div>
 							</section>
 
-							{Object.keys(transactionFields).map((key) => (
-								<section key={key} className='mt-[15px]'>
-									<label className='text-primary font-normal text-xs block mb-[5px]'>{transactionFields[key].fieldName}{transactionFields[key].required && '*'}</label>
-									<div className=''>
-										<article className='w-[500px]'>
-											{transactionFields[key].fieldType === EFieldType.SINGLE_SELECT && transactionFields[key].dropdownOptions ?
-												<Form.Item
-													name={`${transactionFields[key].fieldName}`}
-													rules={[{ message: 'Required', required: transactionFields[key].required }]}
-													className='border-0 outline-0 my-0 p-0'
-													help={(!transactionFieldsObject[key] || !transactionFieldsObject[key]?.value) && transactionFields[key].required && `${transactionFields[key].fieldName} is Required.`}
-													validateStatus={(!transactionFieldsObject[key] || !transactionFieldsObject[key]?.value) && transactionFields[key].required ? 'error' : 'success'}
-												>
-													<Dropdown
-														trigger={['click']}
-														className={'border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer'}
-														menu={{
-															items: transactionFields[key].dropdownOptions?.filter((item) => !item.archieved).map((item) => ({
-																key: item.optionName,
-																label: <span className='text-white'>{item.optionName}</span>
-															})),
-															onClick: (e) => {
-																setTransactionFieldsObject(prev => ({
-																	...prev,
-																	[key]: {
-																		name: transactionFields[key].fieldName,
-																		value: e.key
-																	}
-																}));
-															}
-														}}
+							<section className='mt-[15px] w-[500px]'>
+								<label className='text-primary font-normal text-xs block mb-[5px]'>Category*</label>
+								<Form.Item
+									name='category'
+									rules={[{ message: 'Required', required: true }]}
+									className='border-0 outline-0 my-0 p-0'
+								>
+									<Dropdown
+										trigger={['click']}
+										className={'border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer'}
+										menu={{
+											items: Object.keys(transactionFields).map((category) => ({
+												key: category,
+												label: <span className='text-white'>{transactionFields[category]?.fieldName}</span>
+											})),
+											onClick: (e) => setCategory(e.key)
+										}}
+									>
+										<div className="flex justify-between items-center text-white">
+											{transactionFields[category]?.fieldName}
+											<CircleArrowDownIcon className='text-primary' />
+										</div>
+									</Dropdown>
+								</Form.Item>
+							</section>
+
+							{transactionFields[category] && transactionFields[category].subfields && Object.keys(transactionFields[category].subfields).map((subfield) => {
+								const subfieldObject = transactionFields[category].subfields[subfield];
+								return (
+									<section key={subfield} className='mt-[15px]'>
+										<label className='text-primary font-normal text-xs block mb-[5px]'>{subfieldObject.subfieldName}{subfieldObject.required && '*'}</label>
+										<div className=''>
+											<article className='w-[500px]'>
+												{subfieldObject.subfieldType === EFieldType.SINGLE_SELECT && subfieldObject.dropdownOptions ?
+													<Form.Item
+														name={`${subfieldObject.subfieldName}`}
+														rules={[{ message: 'Required', required: subfieldObject.required }]}
+														className='border-0 outline-0 my-0 p-0'
+														help={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required && `${subfieldObject.subfieldName} is Required.`}
+														validateStatus={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required ? 'error' : 'success'}
 													>
-														<div className="flex justify-between items-center text-white">
-															{transactionFieldsObject[key] && transactionFieldsObject[key]?.value ? transactionFieldsObject[key]?.value : <span className='text-text_secondary'>Select {transactionFields[key].fieldName}</span>}
-															<CircleArrowDownIcon className='text-primary' />
-														</div>
-													</Dropdown>
-												</Form.Item>
-												:
-												<Form.Item
-													name={`${transactionFields[key].fieldName}`}
-													rules={[{ message: 'Required', required: transactionFields[key].required }]}
-													className='border-0 outline-0 my-0 p-0'
-												>
-													<div className='flex items-center h-[40px]'>
-														<Input
-															placeholder={`${transactionFields[key].fieldName}`}
-															className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
-															id={`${transactionFields[key].fieldName}`}
-															value={transactionFieldsObject[key]?.value}
-															onChange={(e) => setTransactionFieldsObject(prev => ({
-																...prev,
-																[key]: {
-																	name: transactionFields[key].fieldName,
-																	value: e.target.value
+														<Dropdown
+															trigger={['click']}
+															className={'border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer'}
+															menu={{
+																items: subfieldObject.dropdownOptions?.filter((item) => !item.archieved).map((item) => ({
+																	key: item.optionName,
+																	label: <span className='text-white'>{item.optionName}</span>
+																})),
+																onClick: (e) => {
+																	setTransactionFieldsObject(prev => ({
+																		...prev,
+																		subfields: {
+																			...prev.subfields,
+																			[subfield]: {
+																				name: subfieldObject.subfieldName,
+																				value: e.key
+																			}
+																		}
+																	}));
 																}
-															}))}
-														/>
-													</div>
-												</Form.Item>}
-										</article>
-									</div>
-								</section>
-							))}
+															}}
+														>
+															<div className="flex justify-between items-center text-white">
+																{transactionFieldsObject.subfields[subfield]?.value ? transactionFieldsObject.subfields[subfield]?.value : <span className='text-text_secondary'>Select {subfieldObject.subfieldName}</span>}
+																<CircleArrowDownIcon className='text-primary' />
+															</div>
+														</Dropdown>
+													</Form.Item>
+													:
+													<Form.Item
+														name={`${subfieldObject.subfieldName}`}
+														rules={[{ message: 'Required', required: subfieldObject.required }]}
+														className='border-0 outline-0 my-0 p-0'
+													>
+														<div className='flex items-center h-[40px]'>
+															<Input
+																placeholder={`${subfieldObject.subfieldName}`}
+																className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
+																id={`${subfieldObject.subfieldName}`}
+																value={transactionFieldsObject.subfields[subfield]?.value}
+																onChange={(e) => setTransactionFieldsObject(prev => ({
+																	...prev,
+																	subfields: {
+																		...prev.subfields,
+																		[subfield]: {
+																			name: subfieldObject.subfieldName,
+																			value: e.target.value
+																		}
+																	}
+																}))}
+															/>
+														</div>
+													</Form.Item>}
+											</article>
+										</div>
+									</section>
+								);
+							})}
 
 							<section className='mt-[15px]'>
 								<label className='text-primary font-normal text-xs block mb-7'>Note</label>
@@ -635,7 +672,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields).some((key) => (!transactionFieldsObject[key] || !transactionFieldsObject[key]?.value) && transactionFields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (!transactionFieldsObject.subfields[key]?.value) && transactionFields[category].subfields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 						</section>
 					</Spin>
 			}

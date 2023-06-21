@@ -160,6 +160,13 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
 									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
 
+								let batchCallRecipients: string[] = [];
+								if(decodedCallData && decodedCallData?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center pb-2 mb-2">
 										<div className="flex flex-1 items-center">
@@ -172,8 +179,8 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 													<ReloadOutlined />
 												</div>}
 											<div className='ml-3'>
-												<h1 className='text-md text-white'>
-													{ decodedCallData && !isProxyApproval ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+												<h1 className='text-md text-white truncate'>
+													{ decodedCallData && !isProxyApproval ? <span>To: {batchCallRecipients ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
 												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
 											</div>

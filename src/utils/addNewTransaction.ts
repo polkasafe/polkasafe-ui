@@ -9,7 +9,7 @@ import { ITransaction } from 'src/types';
 
 import formatBnBalance from './formatBnBalance';
 
-type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'id' | 'token'> & { amount: BN, transactionFields?: {[key: string]: { name: string, value: string | number }}};
+type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'id' | 'token'> & { amount: BN, transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}};
 
 export async function addNewTransaction ({ amount, transactionFields, network, block_number, callData, callHash, from, to, note } : Args): Promise<{data?: ITransaction, error: string} | any> {
 

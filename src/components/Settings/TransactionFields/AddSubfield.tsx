@@ -17,12 +17,10 @@ import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
-const AddCustomField = ({ className, onCancel }: { className?: string, onCancel: () => void }) => {
+const AddSubfield = ({ className, onCancel, category }: { className?: string, onCancel: () => void, category: string }) => {
 	const [loading, setLoading] = useState(false);
 
-	const [fieldName, setFieldName] = useState<string>('');
-	const [fieldDesc, setFieldDesc] = useState<string>('');
-	const [subfields, setSubfields] = useState<{ name: string, subfieldType: EFieldType, required: boolean }[]>([]);
+	const [subfields, setSubfields] = useState<{ name: string, subfieldType: EFieldType, required: boolean }[]>([{ name: '', required: true, subfieldType: EFieldType.SINGLE_SELECT }]);
 	const { network } = useGlobalApiContext();
 	const { setUserDetailsContextState, transactionFields } = useGlobalUserDetailsContext();
 
@@ -101,10 +99,12 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 					body: JSON.stringify({
 						transactionFields:{
 							...transactionFields,
-							[fieldName.toLowerCase().split(' ').join('_')]: {
-								fieldDesc,
-								fieldName,
-								subfields: subfieldsObject
+							[category]: {
+								...transactionFields[category],
+								subfields: {
+									...transactionFields[category].subfields,
+									...subfieldsObject
+								}
 							}
 						}
 					}),
@@ -134,10 +134,12 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 						...prev,
 						transactionFields: {
 							...prev.transactionFields,
-							[fieldName.toLowerCase().split(' ').join('_')]: {
-								fieldDesc,
-								fieldName,
-								subfields: subfieldsObject
+							[category]: {
+								...prev.transactionFields[category],
+								subfields: {
+									...prev.transactionFields[category].subfields,
+									...subfieldsObject
+								}
 							}
 						}
 					}));
@@ -159,80 +161,25 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 
 	return (
 		<>
-			<Spin spinning={loading} indicator={<LoadingLottie width={300} message={`Updating your ${fieldName} field...`} /> }>
+			<Spin spinning={loading} indicator={<LoadingLottie width={300} message={`Updating your ${transactionFields[category].fieldName} category...`} /> }>
 				<div className={className}>
 					<Form disabled={ loading }>
-
 						<section className='max-h-[75vh] overflow-y-auto'>
-
-							<div className="flex flex-col gap-y-3 mb-4">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-									htmlFor="name"
-								>
-							Field Name*
-								</label>
-								<Form.Item
-									name="name"
-									rules={[
-										{
-											message: 'Required',
-											required: true
-										}
-									]}
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="Give the address a name"
-										className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-										id="name"
-										onChange={(e) => setFieldName(e.target.value)}
-										value={fieldName}
-									/>
-								</Form.Item>
-							</div>
-							<div className="flex flex-col gap-y-3 mb-4">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-									htmlFor="description"
-								>
-							Field Description*
-								</label>
-								<Form.Item
-									name="description"
-									rules={[
-										{
-											message: 'Required',
-											required: true
-										}
-									]}
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="Give the address a name"
-										className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-										id="description"
-										onChange={(e) => setFieldDesc(e.target.value)}
-										value={fieldDesc}
-									/>
-								</Form.Item>
-							</div>
-
 							{subfields && subfields.map((subfield, i) => (
 								<div key={i} className='flex flex-col gap-y-3'>
-									<div className='flex items-center justify-between'>
+									{i !== 0 && <div className='flex items-center justify-between'>
 										<span className='text-white text-sm' >Sub-Field Details</span>
 										<Button icon={<MinusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={() => onRemoveSubfield(i)} >Remove Sub-Field</Button>
-									</div>
+									</div>}
 									<div className="flex flex-col gap-y-3 mb-4">
 										<label
 											className="text-primary text-xs leading-[13px] font-normal"
 											htmlFor="name"
 										>
-										Sub-Field Name*
+                                            Sub-Field Name*
 										</label>
 										<Form.Item
-											name={`sub-field-${i+1}`}
+											name={`sub-field-add-${i+1}`}
 											rules={[
 												{
 													message: 'Required',
@@ -244,7 +191,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 											<Input
 												placeholder="Give the address a name"
 												className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-												id={`sub-field-${i+1}`}
+												id={`sub-field-add-${i+1}`}
 												onChange={(e) => onSubfieldNameChange(e.target.value, i)}
 												value={subfield.name}
 											/>
@@ -279,7 +226,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 
 						<section className='flex items-center gap-x-5 justify-between mt-10'>
 							<CancelBtn loading={loading} className='w-[200px]' onClick={onCancel} />
-							<ModalBtn disabled={!fieldName || subfields.some((subfield) => subfield.name === '')} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
+							<ModalBtn disabled={subfields.some((subfield) => subfield.name === '')} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
 						</section>
 					</Form>
 				</div>
@@ -288,7 +235,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 	);
 };
 
-export default styled(AddCustomField)`
+export default styled(AddSubfield)`
 	.ant-select input {
 		font-size: 14px !important;
 		font-style: normal !important;

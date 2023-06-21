@@ -59,7 +59,7 @@ export interface ITransaction {
 	amount_token: string;
 	network: string;
 	note?: string;
-	transactionFields?: {[key: string]: { name: string, value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	notifications?: {
 		[address: string]: {
 			lastNotified: Date;
@@ -89,7 +89,7 @@ export interface IContactFormResponse {
 
 export interface IQueueItem {
 	totalAmount?: string
-	transactionFields?: {[key: string]: { value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	callData: string;
 	callHash: string;
 	network: string;
@@ -157,13 +157,19 @@ export enum EFieldType{
 	// ATTACHMENT = 'Attachment'
 }
 
+export interface ITransactionCategorySubfields{
+	[subfield: string]: {
+		subfieldName: string;
+		subfieldType: EFieldType;
+		required: boolean;
+		dropdownOptions?: IDropdownOptions[]
+	}
+}
+
 export interface ITransactionFields{
 	[field: string]: {
 		fieldName: string,
 		fieldDesc: string,
-		fieldType: EFieldType,
-		required: boolean,
-		deleted?: boolean,
-		dropdownOptions?: IDropdownOptions[],
+		subfields: ITransactionCategorySubfields
 	}
 }

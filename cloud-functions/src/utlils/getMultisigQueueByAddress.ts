@@ -50,7 +50,7 @@ export default async function getMultisigQueueByAddress(
 				const newQueueItem: IQueueItem = {
 					callData: transactionDoc.exists && transaction?.callData ? transaction?.callData : '',
 					totalAmount: transactionDoc.exists && transaction?.amount_token ? transaction?.amount_token : '',
-					transactionFields: transactionDoc.exists && transaction?.transactionFields ? transaction?.transactionFields : {},
+					transactionFields: transactionDoc.exists && transaction?.transactionFields ? transaction?.transactionFields : { category: 'none', subfields: {} },
 					callHash: multisigQueueItem.call_hash,
 					status: multisigQueueItem.status,
 					network: network,

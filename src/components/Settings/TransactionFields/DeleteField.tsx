@@ -13,7 +13,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
-const DeleteField = ({ onCancel, field }: { onCancel: () => void, field: string }) => {
+const DeleteField = ({ onCancel, subfield, category }: { onCancel: () => void, category: string, subfield: string }) => {
 	const { transactionFields, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
@@ -32,11 +32,18 @@ const DeleteField = ({ onCancel, field }: { onCancel: () => void, field: string 
 				setLoading(true);
 
 				const newTransactionFields = { ...transactionFields };
-				delete newTransactionFields[field];
+				const newSubfields = { ...newTransactionFields[category].subfields };
+				delete newSubfields[subfield];
 
 				const updateTransactionFieldsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionFields`, {
 					body: JSON.stringify({
-						transactionFields: newTransactionFields
+						transactionFields: {
+							...transactionFields,
+							[category]: {
+								...transactionFields[category],
+								subfields: newSubfields
+							}
+						}
 					}),
 					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
@@ -62,7 +69,13 @@ const DeleteField = ({ onCancel, field }: { onCancel: () => void, field: string 
 					});
 					setUserDetailsContextState((prev) => ({
 						...prev,
-						transactionFields: newTransactionFields
+						transactionFields: {
+							...prev.transactionFields,
+							[category]: {
+								...prev.transactionFields[category],
+								subfields: newSubfields
+							}
+						}
 					}));
 					setLoading(false);
 					onCancel();
@@ -87,7 +100,7 @@ const DeleteField = ({ onCancel, field }: { onCancel: () => void, field: string 
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to delete
 				<span className='text-primary mx-1.5'>
-					{transactionFields[field]?.fieldName}
+					{transactionFields[category].subfields?.[subfield].subfieldName}
 				</span>
                 ?
 			</p>

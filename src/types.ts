@@ -61,14 +61,20 @@ export enum EFieldType{
 	// ATTACHMENT = 'Attachment'
 }
 
+export interface ITransactionCategorySubfields{
+	[subfield: string]: {
+		subfieldName: string;
+		subfieldType: EFieldType;
+		required: boolean;
+		dropdownOptions?: IDropdownOptions[]
+	}
+}
+
 export interface ITransactionFields{
 	[field: string]: {
 		fieldName: string,
 		fieldDesc: string,
-		fieldType: EFieldType,
-		required: boolean,
-		deleted?: boolean,
-		dropdownOptions?: IDropdownOptions[],
+		subfields: ITransactionCategorySubfields
 	}
 }
 
@@ -175,7 +181,7 @@ export interface ITxNotification {
 
 export interface IQueueItem {
 	totalAmount?: string
-	transactionFields?: {[key: string]: { name: string, value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	callData: string;
 	callHash: string;
 	network: string;

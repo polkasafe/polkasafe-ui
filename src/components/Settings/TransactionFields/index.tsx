@@ -12,15 +12,16 @@ import FieldsList from './FieldsList';
 
 const ManageMultisig = () => {
 
-	const { address: userAddress } = useGlobalUserDetailsContext();
+	const { address: userAddress, transactionFields } = useGlobalUserDetailsContext();
 	const [openAddCustomFieldModal, setOpenAddCustomFieldModal] = useState(false);
+	const [category, setCategory] = useState<string>(Object.keys(transactionFields)[0] || 'none');
 
 	const AddCustomFieldModal = ({ className }: { className?: string }) => {
 		return (
 			<>
 				<Button onClick={() => setOpenAddCustomFieldModal(true)}  size='large' className={'outline-none border-none text-xs md:text-sm font-medium bg-primary text-white rounded-md md:rounded-lg flex items-center gap-x-3'}>
 					<PlusCircleOutlined/>
-					<span>Add Custom Field</span>
+					<span>Add New Category</span>
 				</Button>
 				<Modal
 					centered
@@ -49,12 +50,18 @@ const ManageMultisig = () => {
 					<p className='text-white'>Looks like you are not Logged in. Please Log in to use our Features.</p>
 				</section> : <>
 					<div className='bg-bg-main p-5 rounded-xl relative overflow-hidden'>
+						<section className='mb-2' ><p className='text-white text-lg'>Categories</p></section>
+						<section className='mb-4 text-sm w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+							<p>Categories enable your team to organize payments and transactions with context, such as tags, dates, attachments, etc. They generate financial reports, offer insights, and facilitate filtering, sorting, and searching of financial data. You can customize category names and data types to suit your organization&apos;s needs.</p>
+						</section>
 						<section className='flex items-center justify-between flex-col gap-5 md:flex-row mb-6'>
-							<div className='flex-1'></div>
+							<div className='flex-1 flex items-center gap-x-3'>
+								{Object.keys(transactionFields).map(field => <Button onClick={() => setCategory(field)} className={` border border-solid ${category === field ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields[field].fieldName}</Button>)}
+							</div>
 							<AddCustomFieldModal/>
 						</section>
 						<section>
-							<FieldsList />
+							<FieldsList category={category} />
 						</section>
 					</div>
 				</>}

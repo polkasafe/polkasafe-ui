@@ -1,6 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Divider, Modal, Switch } from 'antd';
 import React, { useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -11,10 +12,11 @@ import { EFieldType, IDropdownOptions } from 'src/types';
 import { DeleteIcon, EditIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import styled from 'styled-components';
 
+import AddSubfield from './AddSubfield';
 import DeleteField from './DeleteField';
 import EditField from './EditField';
 
-const EditFieldModal = ({ className, field, fieldName, fieldType, dropdownOptions, required }: { className?: string, field: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
+const EditFieldModal = ({ className, category, subfield, fieldName, fieldType, dropdownOptions, required }: { className?: string, category: string, subfield: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
 	const [openEditFieldModal, setOpenEditFieldModal] = useState(false);
 	return (
 		<>
@@ -37,13 +39,13 @@ const EditFieldModal = ({ className, field, fieldName, fieldType, dropdownOption
 				open={openEditFieldModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
-				<EditField field={field} fieldName={fieldName} fieldType={fieldType} required={required} dropdownOptions={dropdownOptions}  onCancel={() => setOpenEditFieldModal(false)} />
+				<EditField category={category} subfield={subfield} fieldName={fieldName} fieldType={fieldType} required={required} dropdownOptions={dropdownOptions}  onCancel={() => setOpenEditFieldModal(false)} />
 			</Modal>
 		</>
 	);
 };
 
-const DeleteFieldModal = ({ className, field }: { className?: string, field: string }) => {
+const DeleteFieldModal = ({ className, subfield, category }: { className?: string, subfield: string, category: string }) => {
 	const [openDeleteFieldModal, setOpenDeleteFieldModal] = useState(false);
 	return (
 		<>
@@ -64,18 +66,49 @@ const DeleteFieldModal = ({ className, field }: { className?: string, field: str
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Delete Field</h3>}
 				open={openDeleteFieldModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
-				<DeleteField field={field} onCancel={() => setOpenDeleteFieldModal(false)} />
+				<DeleteField category={category} subfield={subfield} onCancel={() => setOpenDeleteFieldModal(false)} />
 			</Modal>
 		</>
 	);
 };
 
-const FieldsList = ({ className }: { className?: string, disabled?: boolean }) => {
+const FieldsList = ({ className, category }: { className?: string, category: string }) => {
 	const { transactionFields, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [loading, setLoading] = useState<boolean>(false);
+	const [openAddSubfieldModal, setOpenAddSubfieldModal] = useState(false);
+
+	const AddSubfieldModal = ({ className, category }: { className?: string, category: string }) => {
+		return (
+			<>
+				<Button
+					icon={<PlusCircleOutlined className='text-primary' />}
+					className='my-2 bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'
+					onClick={() => setOpenAddSubfieldModal(true)}
+				>
+					Add Sub-Field
+				</Button>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenAddSubfieldModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Sub-Fields</h3>}
+					open={openAddSubfieldModal}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
+				>
+					<AddSubfield category={category} onCancel={() => setOpenAddSubfieldModal(false)} />
+				</Modal>
+			</>
+		);
+	};
 
 	const handleRequiredChange = async (key: string, requiredState: boolean) => {
 
@@ -88,25 +121,21 @@ const FieldsList = ({ className }: { className?: string, disabled?: boolean }) =
 				return;
 			}
 			else{
-				setUserDetailsContextState((prev) => ({
-					...prev,
-					transactionFields: {
-						...prev.transactionFields,
-						[key]: {
-							...prev.transactionFields[key],
-							required: requiredState
-						}
-					}
-				}));
 				setLoading(true);
 
 				const updateTransactionFieldsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionFields`, {
 					body: JSON.stringify({
 						transactionFields:{
 							...transactionFields,
-							[key]: {
-								...transactionFields[key],
-								required: requiredState
+							[category]: {
+								...transactionFields[category],
+								subfields: {
+									...transactionFields[category].subfields,
+									[key]: {
+										...transactionFields[category].subfields[key],
+										required: requiredState
+									}
+								}
 							}
 						}
 					}),
@@ -119,16 +148,6 @@ const FieldsList = ({ className }: { className?: string, disabled?: boolean }) =
 				if(updateTransactionFieldsError) {
 					console.log(updateTransactionFieldsError);
 					setLoading(false);
-					setUserDetailsContextState((prev) => ({
-						...prev,
-						transactionFields: {
-							...prev.transactionFields,
-							[key]: {
-								...prev.transactionFields[key],
-								required: !requiredState
-							}
-						}
-					}));
 					return;
 				}
 
@@ -137,9 +156,15 @@ const FieldsList = ({ className }: { className?: string, disabled?: boolean }) =
 						...prev,
 						transactionFields: {
 							...prev.transactionFields,
-							[key]: {
-								...prev.transactionFields[key],
-								required: requiredState
+							[category]: {
+								...prev.transactionFields[category],
+								subfields: {
+									...prev.transactionFields[category].subfields,
+									[key]: {
+										...prev.transactionFields[category].subfields[key],
+										required: requiredState
+									}
+								}
 							}
 						}
 					}));
@@ -150,30 +175,17 @@ const FieldsList = ({ className }: { className?: string, disabled?: boolean }) =
 		} catch (error){
 			console.log('ERROR', error);
 			setLoading(false);
-			setUserDetailsContextState((prev) => ({
-				...prev,
-				transactionFields: {
-					...prev.transactionFields,
-					[key]: {
-						...prev.transactionFields[key],
-						required: !requiredState
-					}
-				}
-			}));
 		}
 	};
 
 	return (
 		<div className='text-sm font-medium leading-[15px] '>
-			<article className='grid grid-cols-6 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
-				<span className='col-span-1'>
-					Field Name
-				</span>
+			<article className='grid grid-cols-5 gap-x-5 bg-bg-secondary text-text_secondary py-5 px-4 rounded-lg'>
 				<span className='col-span-2'>
-					Field Description
+					Sub-Field Name
 				</span>
 				<span className='col-span-1'>
-					Field Type
+					Sub-Field Type
 				</span>
 				<span className='col-span-1'>
 					Required
@@ -183,32 +195,36 @@ const FieldsList = ({ className }: { className?: string, disabled?: boolean }) =
 				</span>
 			</article>
 			{
-				Object.keys(transactionFields).filter((key) => transactionFields[key].deleted !== true).map((key, index) => {
-					return (
-						<article key={index}>
-							<div className='grid grid-cols-6 gap-x-5 py-6 px-4 text-white'>
-								<p className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
-									{transactionFields[key].fieldName}
-								</p>
-								<div className='col-span-2 flex items-center'>
-									{transactionFields[key].fieldDesc}
+				category === 'none' ?
+					<section className='my-4 text-sm w-full text-white font-normal flex justify-center'>
+						This Category cannot be Customized.
+					</section>
+					:
+					transactionFields[category] && transactionFields[category].subfields && Object.keys(transactionFields[category].subfields).map((subfield, index) => {
+						const subfieldObject = transactionFields[category].subfields[subfield];
+						return (
+							<article key={index}>
+								<div className='grid grid-cols-5 gap-x-5 py-6 px-4 text-white'>
+									<div className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-2 flex items-center text-base'>
+										{subfieldObject.subfieldName}
+									</div>
+									<div className='col-span-1 flex items-center gap-x-[10px]'>
+										{subfieldObject.subfieldType}
+									</div>
+									<div className='col-span-1 flex items-center gap-x-[10px]'>
+										<Switch disabled={loading} onChange={(checked) => handleRequiredChange(subfield, checked)} size='small' defaultChecked={subfieldObject.required} />
+									</div>
+									<div className='col-span-1 flex items-center gap-x-[10px]'>
+										<EditFieldModal category={category} subfield={subfield} className={className} fieldName={subfieldObject.subfieldName} fieldType={subfieldObject.subfieldType} required={subfieldObject.required} dropdownOptions={subfieldObject.dropdownOptions} />
+										<DeleteFieldModal category={category} subfield={subfield} className={className} />
+									</div>
 								</div>
-								<div className='col-span-1 flex items-center gap-x-[10px]'>
-									{transactionFields[key].fieldType}
-								</div>
-								<div className='col-span-1 flex items-center gap-x-[10px]'>
-									<Switch disabled={loading} onChange={(checked) => handleRequiredChange(key, checked)} size='small' checked={transactionFields[key].required} />
-								</div>
-								<div className='col-span-1 flex items-center gap-x-[10px]'>
-									<EditFieldModal field={key} className={className} fieldName={transactionFields[key].fieldName} fieldType={transactionFields[key].fieldType} required={transactionFields[key].required} dropdownOptions={transactionFields[key].dropdownOptions} />
-									<DeleteFieldModal field={key} className={className} />
-								</div>
-							</div>
-							{Object.keys(transactionFields).length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
-						</article>
-					);
-				})
+								{Object.keys(transactionFields[category].subfields).length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
+							</article>
+						);
+					})
 			}
+			{category !== 'none' && <AddSubfieldModal category={category} />}
 		</div>
 	);
 };

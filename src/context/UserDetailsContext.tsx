@@ -65,56 +65,32 @@ export const initialUserDetailsContext : UserDetailsContextType = {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	},
 	transactionFields: {
-		['category']: {
-			dropdownOptions:[
-				{
-					optionName: 'Contributor Compensation'
-				},
-				{
-					optionName: 'Expense Reimbursement'
-				},
-				{
-					optionName: 'Airdrop'
-				},
-				{
-					optionName: 'Grants'
-				},
-				{
-					optionName: 'Others'
-				}
-			],
+		['airdrop']: {
 			fieldDesc: 'N/A',
-			fieldName: 'Category',
-			fieldType: EFieldType.SINGLE_SELECT,
-			required: true
-		},
-		['project']: {
-			dropdownOptions:[
-				{
-					optionName: 'Project A'
-				},
-				{
-					optionName: 'Project B'
+			fieldName: 'Airdrop',
+			subfields: {
+				['bitcoin']: {
+					subfieldName: 'Bitcoin',
+					subfieldType: EFieldType.SINGLE_SELECT,
+					required: true,
+					dropdownOptions: [
+						{
+							optionName: 'Option 1'
+						},
+						{
+							optionName: 'Option 2'
+						},
+						{
+							optionName: 'Option 3'
+						}
+					]
 				}
-			],
-			fieldDesc: 'Select a Project',
-			fieldName: 'Project',
-			fieldType: EFieldType.SINGLE_SELECT,
-			required: true
+			}
 		},
-		['department']: {
-			dropdownOptions:[
-				{
-					optionName: 'Management'
-				},
-				{
-					optionName: 'Human Resources'
-				}
-			],
-			fieldDesc: 'Select a Department',
-			fieldName: 'Department',
-			fieldType: EFieldType.SINGLE_SELECT,
-			required: true
+		['none']: {
+			fieldDesc: 'N/A',
+			fieldName: 'None',
+			subfields: {}
 		}
 	}
 };

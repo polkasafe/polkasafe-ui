@@ -28,7 +28,7 @@ import NotifyButton from './NotifyButton';
 
 interface ISentInfoProps {
 	amount: string | string[];
-	transactionFields?: {[key: string]: { name: string, value: string | number }}
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	amountUSD: string;
 	date: string;
 	// time: string;
@@ -292,30 +292,36 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 						<AddressComponent address={depositor} />
 					</div>
 				}
-				{transactionFields && Object.keys(transactionFields).map((key) => (
-					<div
-						key={key}
-						className='flex items-center justify-between mt-3'
+
+				<div
+					className='flex items-center justify-between mt-3'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
+							Category:
+					</span>
+					<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
+						{transactionFields?.category}
+					</span>
+				</div>
+				{transactionFields && transactionFields.subfields && Object.keys(transactionFields?.subfields).map((key) => {
+					const subfield = transactionFields.subfields[key];
+					return (
+						<div
+							key={key}
+							className='flex items-center justify-between mt-3'
 						>
-							{transactionFields[key].name}:
-						</span>
-						{key === 'category' ? <span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
-							{transactionFields[key].value}
-						</span> :
-							key === 'project' ? <span className='text-white'>
-								{transactionFields[key].value}
-							</span> :
-								key === 'department' ? <span className='text-white'>
-									{transactionFields[key].value}
-								</span> :
-									<span className='text-white'>
-										{transactionFields[key].value}
-									</span>}
-					</div>
-				))}
+							<span
+								className='text-text_secondary font-normal text-sm leading-[15px]'
+							>
+								{subfield.name}:
+							</span>
+							<span className='text-primary border border-solid border-waiting rounded-lg px-[6px] py-1'>
+								{subfield.value}
+							</span>
+						</div>
+					);})}
 				<div
 					className='flex items-center gap-x-5 justify-between mt-3'
 				>
