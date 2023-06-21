@@ -6,8 +6,8 @@ export default function getTemplateRender(template:string, options: {[index: str
 	const htmlMessage = ejs.render(template, options);
 	const textMessage = convert(htmlMessage);
 
-	const bodyStartIndex = htmlMessage.indexOf('<body>') + 6;
-	const bodyEndIndex = htmlMessage.indexOf('</body>');
+	const bodyStartIndex = htmlMessage.indexOf('<div id="main-content">');
+	const bodyEndIndex = htmlMessage.indexOf('<div id="end-content">');
 	const bodyHtml = htmlMessage.substring(bodyStartIndex, bodyEndIndex);
 
 	const turndownService = new TurndownService();

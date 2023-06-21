@@ -94,6 +94,10 @@ export default async function proposalStatusChanged(args: Args) {
 
 		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
+		const networkRef = firestore_db.collection('networks').doc(network);
+
+		const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
+
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
@@ -104,7 +108,8 @@ export default async function proposalStatusChanged(args: Args) {
 			...args,
 			username: subscriberData.username,
 			link,
-			postType: postTypeName
+			postType: postTypeName,
+			title: postDoc.title
 		});
 
 		const notificationServiceInstance = new NotificationService(
