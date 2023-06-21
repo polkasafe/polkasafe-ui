@@ -18,7 +18,7 @@ interface IMultisigProps {
 }
 
 const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, className, onCancel }) => {
-	const [ isMultisigVisible, setMultisigVisible] = useState(false);
+	const [isMultisigVisible, setMultisigVisible] = useState(false);
 	const [openLinkMultisig, setOpenLinkMultisig] = useState(false);
 	const [openCreateMultisig, setOpenCreateMultisig] = useState(false);
 
@@ -29,7 +29,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 					className='flex items-center justify-center bg-primary text-primary bg-opacity-10 w-[100%] border-none'
 					onClick={() => setOpenLinkMultisig(true)}
 				>
-					<LinkIcon/>Link Multisig
+					<LinkIcon />Link Multisig
 				</Button>
 				<Modal
 					centered
@@ -45,7 +45,7 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 					open={openLinkMultisig}
 					className='w-auto md:min-w-[500px] scale-90'
 				>
-					<LinkMultisig onCancel={() => {setOpenLinkMultisig(false); onCancel?.();}} />
+					<LinkMultisig onCancel={() => { setOpenLinkMultisig(false); onCancel?.(); }} />
 				</Modal>
 			</>
 		);
@@ -77,12 +77,12 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 
 	return (
 		<div className={className}>
-			<CreateMultisigModal/>
-			{isMultisigVisible&&!isModalPopup?<div className='p-5'>
-				<CreateMultisig homepage={homepage} onCancel = {() => {
+			<CreateMultisigModal />
+			{isMultisigVisible && !isModalPopup ? <div className='p-5'>
+				<CreateMultisig homepage={homepage} onCancel={() => {
 					setMultisigVisible(false);
 				}} />
-			</div>:<div className='h-full flex flex-col justify-center'>
+			</div> : <div className='h-full flex flex-col justify-center'>
 				<div className='p-5'>
 					<div className='text-center mb-10'>
 						<h1 className='text-lg font-bold text-white'>Add Multisig</h1>
@@ -99,14 +99,14 @@ const AddMultisig: React.FC<IMultisigProps> = ({ isModalPopup, homepage, classNa
 							<div>
 								<Button className='flex items-center justify-center bg-primary text-white w-[100%] border-none'
 									onClick={() => {
-										if(!isModalPopup){
+										if (!isModalPopup) {
 											setMultisigVisible(true);
-										}else{
+										} else {
 											setOpenCreateMultisig(true);
 										}
 									}}
 								>
-									<CreateMultisigIcon/> Multisig
+									<CreateMultisigIcon /> Multisig
 								</Button>
 							</div>
 						</div>

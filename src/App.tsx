@@ -9,6 +9,7 @@ import { styledTheme } from 'src/themes/styledTheme';
 import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
+import { Web3AuthProvider } from './context';
 import { ApiContextProvider } from './context/ApiContext';
 import { DAppContextProvider } from './context/DAppContext';
 import ModalContextProvider from './context/ModalContext';
@@ -21,16 +22,18 @@ function App() {
 		<BrowserRouter>
 			<ConfigProvider theme={antdTheme}>
 				<ThemeProvider theme={styledTheme}>
-					<ApiContextProvider>
-						<UserDetailsProvider>
-							<DAppContextProvider>
-								<GlobalStyle/>
-								<ModalContextProvider>
-									<AppLayout />
-								</ModalContextProvider>
-							</DAppContextProvider>
-						</UserDetailsProvider>
-					</ApiContextProvider>
+					<Web3AuthProvider>
+						<ApiContextProvider>
+							<UserDetailsProvider>
+								<DAppContextProvider>
+									<GlobalStyle />
+									<ModalContextProvider>
+										<AppLayout />
+									</ModalContextProvider>
+								</DAppContextProvider>
+							</UserDetailsProvider>
+						</ApiContextProvider>
+					</Web3AuthProvider>
 				</ThemeProvider>
 			</ConfigProvider>
 		</BrowserRouter>

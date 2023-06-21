@@ -11,7 +11,6 @@ import shortIframe from 'src/assets/short-iframe.svg';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
 
 import Footer from './Footer';
@@ -35,7 +34,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
 
-	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
+	//const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
 	const hideSlider = iframeState && isAppsPage;
 
@@ -53,16 +52,16 @@ const AppLayout = ({ className }: {className?: string}) => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	},[location]);
 
-	const handleIframeLoad = () => {
-		setLoading(false);
-		// Not abel to grab the elements because of same frame origin
-		// const iframe = document.getElementById('Dapp') as HTMLIFrameElement;
-		// const iframeDocument = iframe?.contentDocument|| iframe?.contentWindow?.document;
-		// const button = iframeDocument?.getElementsByClassName('DfTopBar--rightContent')[0];
-		// const search = iframeDocument?.getElementsByClassName('DfSearch')[0];
-		// search?.style?.display = 'none';
-		// button.style.display ='none';
-	};
+	// const handleIframeLoad = () => {
+	// setLoading(false);
+	//  Not abel to grab the elements because of same frame origin
+	//  const iframe = document.getElementById('Dapp') as HTMLIFrameElement;
+	//  const iframeDocument = iframe?.contentDocument|| iframe?.contentWindow?.document;
+	//  const button = iframeDocument?.getElementsByClassName('DfTopBar--rightContent')[0];
+	//  const search = iframeDocument?.getElementsByClassName('DfSearch')[0];
+	//  search?.style?.display = 'none';
+	//  button.style.display ='none';
+	// };
 
 	return (
 		<Layout className={className}>
@@ -125,12 +124,12 @@ const AppLayout = ({ className }: {className?: string}) => {
 					{iframeVisibility && isAppsPage ? (
 						<div className='w-full rounded-lg'>
 							{!!loading && <Loader size='large' />}
-							<iframe
+							{/* <iframe
 								id='Dapp'
 								onLoad={handleIframeLoad}
 								src={IframeUrl}
 								className={`w-full h-[calc(100%)] ${loading ? 'hidden':'block'}`}
-							></iframe>
+							></iframe> */}
 							{ !hideSlider &&  <img
 								src={longIframe}
 								alt=''
