@@ -20,6 +20,7 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
@@ -167,8 +168,28 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
 
-			await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
+			const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
 
+			const txBody = {
+				amount_token: ethers.utils.parseEther('0.001').toString(),
+				safeAddress: activeMultisig,
+				data: '0x00',
+				txHash: safeTxHash,
+				to: web3AuthUser.accounts[0]
+			};
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-signature': localStorage.getItem('signature')!,
+					'x-source': 'polkasafe'
+				},
+				method: 'POST',
+				body: JSON.stringify(txBody)
+			}).then(res => res.json());
 		} else {
 			if (!api || !apiReady || !address) {
 				return;

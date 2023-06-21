@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { bnToBn } from '@polkadot/util';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Collapse, Divider, message,Skeleton } from 'antd';
 import BN from 'bn.js';
 import classNames from 'classnames';
@@ -11,11 +12,13 @@ import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import  { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
+import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress, IQueueItem, ITxNotification } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
@@ -49,6 +52,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
+	console.log("yash hash", callHash)
+
 	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
@@ -57,6 +62,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [loadingMessages, setLoadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
@@ -139,80 +145,19 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	}, [decodedCallData, multisig, multisigAddresses, network]);
 
 	const handleApproveTransaction = async () => {
-		if(!api || !apiReady || !address){
-			return;
-		}
-
-		await setSigner(api, loggedInWallet);
-
-		if(!multisig) return;
-
-		setLoading(true);
-		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
-				return;
-			}
-			if(decodedCallData?.args?.proxy_type){
-				await approveProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					navigate,
-					network,
-					note: note || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
-			}
-			else if(decodedCallData?.args?.call?.args?.delegate){
-				await approveAddProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
-					note: note || '',
-					proxyAddress: multisig.proxy || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
-			}
-			else{
-				await approveMultisigTransfer({
-					amount: network === 'astar' ? bnToBn(decodedCallData.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					note: note || '',
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-					setLoadingMessages
-				});
-			}
-			setLoading(false);
-			setSuccess(true);
-			setTimeout(() => {
-				setSuccess(false);
-				setOpenLoadingModal(false);
-			}, 5000);
-			if(!openLoadingModal){
-				refetch?.();
-			}
+			console.log("yash active", multisig);
+			const signer = ethProvider.getSigner();
+			const ethAdapter = new EthersAdapter({
+				ethers: ethProvider,
+				signerOrProvider: signer
+			});
+			const txUrl = 'https://safe-transaction-goerli.safe.global';
+			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+			const response = await gnosisService.signAndConfirmTx();
+			console.log('yash response confirm', response);
 		} catch (error) {
 			console.log(error);
-			setLoading(false);
-			setFailure(true);
-			setTimeout(() => {
-				setFailure(false);
-				setOpenLoadingModal(false);
-			}, 5000);
 		}
 	};
 
@@ -330,7 +275,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 								</p>
 								<p className={`${isProxyApproval || isProxyAddApproval || isProxyRemovalApproval ? 'col-span-4' : 'col-span-2'} flex items-center justify-end gap-x-4`}>
 									<span className='text-waiting'>
-										{!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold})
+										{/* {!approvals.includes(address) && 'Awaiting your Confirmation'} ({approvals.length}/{threshold}) */}
 									</span>
 									<span className='text-white text-sm'>
 										{

@@ -62,8 +62,6 @@ export class GnosisSafeService {
 
 	createSafeTx = async (multisigAddress: string, to: string, value: string, senderAddress: string) => {
 
-		console.log(multisigAddress, to,value, senderAddress);
-
 		const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter,  isL1SafeMasterCopy: true, safeAddress: multisigAddress });
 
 		const safeTransactionData: SafeTransactionDataPartial = {
@@ -85,6 +83,8 @@ export class GnosisSafeService {
 			senderAddress,
 			senderSignature: signature.data
 		});
+
+		return safeTxHash;
 	};
 
 	getPendingTx = async (multisigAddress: string) => {
@@ -93,5 +93,12 @@ export class GnosisSafeService {
 
 	getAllCompletedTx = async (multisigAddress: string) => {
 		return (await this.safeService.getAllTransactions(multisigAddress, { executed: true, trusted: true }));
+	};
+
+	signAndConfirmTx = async (txHash: string) => {
+		console.log(txHash);
+		const hashBytes = ethers.utils.arrayify(txHash);
+		const signature = await this.signer.signMessage(hashBytes);
+		return await this.safeService.confirmTransaction(txHash, signature.data);
 	};
 }

@@ -926,35 +926,99 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 export const addTransaction = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const { amount_token, safeAddress, data, txHash, to, note } = req.body;
 
-		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
-		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to) return res.status(400).json({ error: responseMessages.invalid_params });
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
 
 		try {
-			const usdValue = await fetchTokenUSDValue(network);
-			const newTransaction: ITransaction = {
-				callData,
-				callHash,
+			// const usdValue = await fetchTokenUSDValue(network);
+			const newTransaction = {
+				data,
 				created_at: new Date(),
-				block_number: Number(block_number),
-				from,
+				safeAddress,
 				to,
-				token: chainProperties[network].tokenSymbol,
-				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
 				amount_token: String(amount_token),
+				txHash,
 				network,
 				note: note || ''
 			};
 
-			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));
+			const transactionRef = firestoreDB.collection('transactions').doc(String(txHash));
 			await transactionRef.set(newTransaction);
 
 			return res.status(200).json({ data: responseMessages.success });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getAllTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
+		const multisigAddress = String(req.get('x-multisig'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			const query = firestoreDB.collection('transactions')
+				.where('safeAddress', '==', multisigAddress);
+			const querySnapshot = await query.get();
+
+			const transactionsArray = querySnapshot.docs.map((doc) => doc.data());
+
+			return res.status(200).json({ data: transactionsArray });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+
+
+export const getAllMultisigsBySignatory = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			const query = firestoreDB.collection('multisigAddresses').where('signatories', 'array-contains', address);
+			const querySnapshot = await query.get();
+
+			const multisigArray = querySnapshot.docs.map((doc) => doc.data());
+
+			return res.status(200).json({ data: multisigArray });
 		} catch (err: unknown) {
 			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });

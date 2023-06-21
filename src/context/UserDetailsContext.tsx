@@ -87,7 +87,13 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			method: 'POST'
 		});
 
+		const getAllMultisigs = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAllMultisigsBySignatory`, {
+			headers: firebaseFunctionsHeader(network),
+			method: 'POST'
+		});
+
 		const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
+		const { data: multisigs } = await getAllMultisigs.json() as any;
 
 		if(!connectAddressErr && userData){
 			setUserDetailsContextState((prevState) => {
@@ -98,7 +104,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					addressBook: userData?.addressBook || [],
 					createdAt: userData?.created_at,
 					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
-					multisigAddresses: userData?.multisigAddresses,
+					multisigAddresses: multisigs,
 					multisigSettings: userData?.multisigSettings || {},
 					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences
 				};

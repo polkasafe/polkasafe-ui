@@ -9,6 +9,7 @@ import { Web3Auth } from '@web3auth/modal';
 import { getWalletConnectV2Settings, WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
 import { ethers } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 
 import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
 
@@ -69,11 +70,54 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 				await webAuth.initModal();
 			} catch (err) {
 				console.log(`Error from web3Auth init func - ${err}`);
+				if (err.code === 5007) {
+					//handleWeb3AuthConnection();
+				}
 			}
+
 		};
 
 		init();
 	}, []);
+
+	const handleWeb3AuthConnection = async () => {
+		const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressTokenEth`, {
+			headers: {
+				'x-address': web3AuthUser!.accounts[0]
+			},
+			method: 'POST'
+		});
+
+		const { data: token, error: tokenError } = await tokenResponse.json();
+
+		if (!tokenError) {
+			const signature = await signMessage(token);
+
+			const { data: userData } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, { //@TODO error handling
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-signature': signature,
+					'x-source': 'polkasafe'
+				},
+				method: 'POST'
+			}).then(res => res.json());
+
+			localStorage.setItem('address', web3AuthUser!.accounts[0]);
+			localStorage.setItem('signature', signature);
+			console.log('yash data', userData);
+
+		}
+	};
+
+	useEffect(() => {
+		console.log('yash web3Auth', web3Auth);
+		if(web3Auth) login();
+
+	}, [ web3Auth, web3Auth]);
 
 	const login = async () => {
 		if (!web3Auth) {
@@ -81,9 +125,14 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 			return;
 		}
 
-		const web3authProvider = await web3Auth.connect();
-		setProvider(web3authProvider);
-		await getUserInfo(web3authProvider!);
+		try{
+			const web3authProvider = await web3Auth.connect();
+			setProvider(web3authProvider);
+			await getUserInfo(web3authProvider!);
+			await handleWeb3AuthConnection();
+		}catch (err) {
+			console.log(`Error from login: ${err}`);
+		}
 	};
 
 	const logout = async (): Promise<any | null> => {
