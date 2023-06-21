@@ -1,7 +1,7 @@
 import { networkTrackInfo } from './trackInfo';
 
 export const getTrackName = (network: string, trackId: number, fellowshipOrigin:boolean) => {
-	if (networkTrackInfo[network]) {
+	if (!(network in networkTrackInfo)) {
 		return '';
 	}
 	const tracksObj = networkTrackInfo[network];
