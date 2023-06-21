@@ -18,13 +18,13 @@ interface Args {
 	network: string;
 	postType: string;
 	postId: string;
-	trackId?: string
+	track?: string
 	proposerAddress: string;
 }
 
 export default async function newProposalCreated(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, proposerAddress, trackId = null } = args;
+	const { network, postType, postId, proposerAddress, track = null } = args;
 	const proposerSubstrateAddress = getSubstrateAddress(proposerAddress || '');
 	if (!network || !postType || !postId || typeof postId !== 'string' || !proposerAddress || !proposerSubstrateAddress) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
@@ -48,13 +48,13 @@ export default async function newProposalCreated(args: Args) {
 		break;
 	}
 
-	if (!isOpenGovProposal && !trackId) throw Error(`Missing trackId for trigger: ${TRIGGER_NAME} and sub trigger ${SUB_TRIGGER}`);
+	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME} and sub trigger ${SUB_TRIGGER}`);
 
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(trackId) : firestorePostType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
 		.get();
 
 	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
@@ -97,7 +97,6 @@ export default async function newProposalCreated(args: Args) {
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 
-	// trigger ownProposalCreated
 	await ownProposalCreated({
 		network,
 		postType,
