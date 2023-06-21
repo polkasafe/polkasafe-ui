@@ -86,7 +86,7 @@ export default async function newProposalCreated(args: Args) {
 			username: subscriberData.username,
 			link,
 			postType: postTypeName,
-			title: postDocData?.title || '',
+			title: postDocData?.title || 'Untitled',
 			track: trackName
 		});
 
