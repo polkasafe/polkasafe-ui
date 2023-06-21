@@ -8,6 +8,7 @@ import { EPAPostStatusType, EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
 import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 import subsquidToFirestoreProposalType from '../_utils/subsquidToFirestoreProposalType';
+import { networkTrackInfo } from '../_utils/trackInfo';
 
 const TRIGGER_NAME = 'proposalStatusChanged';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -35,7 +36,16 @@ export default async function proposalStatusChanged(args: Args) {
 	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
 
 	let SUB_TRIGGER = '';
+	let trackName = '';
+	const tracks = Object.keys(networkTrackInfo[network]);
 	if (firestorePostType === EPAProposalType.REFERENDUM_V2) {
+		for (const track of tracks) {
+			if (networkTrackInfo?.[network]?.[track]?.trackId === Number(track) && !networkTrackInfo?.[network]?.[track]?.fellowshipOrigin) {
+				trackName = networkTrackInfo[network][track].name.split('_').map((a:string) => a.charAt(0).toUpperCase()+a.slice(1)).join(' ');
+				break;
+			}
+		}
+
 		switch (statusType) {
 		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'openGovReferendumSubmitted';
@@ -50,6 +60,13 @@ export default async function proposalStatusChanged(args: Args) {
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
 		}
 	} else if (firestorePostType === EPAProposalType.FELLOWSHIP_REFERENDUMS) {
+		for (const track of tracks) {
+			if (networkTrackInfo?.[network]?.[track]?.trackId === Number(track) && networkTrackInfo?.[network]?.[track]?.fellowshipOrigin) {
+				trackName = networkTrackInfo[network][track].name.split('_').map((a:string) => a.charAt(0).toUpperCase()+a.slice(1)).join(' ');
+				break;
+			}
+		}
+
 		switch (statusType) {
 		case EPAPostStatusType.SUBMITTED:
 			SUB_TRIGGER = 'fellowshipReferendumSubmitted';
@@ -97,6 +114,10 @@ export default async function proposalStatusChanged(args: Args) {
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
+		const networkRef = firestore_db.collection('networks').doc(network);
+
+		const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
+		const postDocData = postDoc.data();
 		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
 		const subject = triggerTemplate.subject;
@@ -104,7 +125,9 @@ export default async function proposalStatusChanged(args: Args) {
 			...args,
 			username: subscriberData.username,
 			link,
-			postType: postTypeName
+			postType: postTypeName,
+			title: postDocData?.title || '',
+			track: trackName
 		});
 
 		const notificationServiceInstance = new NotificationService(
