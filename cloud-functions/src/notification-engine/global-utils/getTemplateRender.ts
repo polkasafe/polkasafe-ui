@@ -6,9 +6,9 @@ export default function getTemplateRender(template:string, options: {[index: str
 	const htmlMessage = ejs.render(template, options);
 	const textMessage = convert(htmlMessage);
 
-	const bodyStartIndex = htmlMessage.indexOf('<body>') + 6;
-	const bodyEndIndex = htmlMessage.indexOf('</body>');
-	const bodyHtml = htmlMessage.substring(bodyStartIndex, bodyEndIndex);
+	const startIndex = htmlMessage.indexOf('<div id="main-content">') + 23;
+	const endIndex = htmlMessage.indexOf('<div id="end-content">');
+	const bodyHtml = htmlMessage.substring(startIndex, endIndex);
 
 	const turndownService = new TurndownService();
 	const markdownMessage = turndownService.turndown(bodyHtml);
