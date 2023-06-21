@@ -107,7 +107,7 @@ export const htmlTemplateContainer = (source: NOTIFICATION_SOURCE, content: stri
 				</div>
 				<br/><br/>
 				<div style="text-align: center">
-                    <a href="${notificationSettingsLink} class="link">Change your notification settings</a>
+                    <a href="${notificationSettingsLink}" class="link">Change your notification settings</a>
                 </div>
                 <hr />
 				<div>
