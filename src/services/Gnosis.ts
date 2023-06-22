@@ -106,4 +106,10 @@ export class GnosisSafeService {
 		const executeTxResponse = await safeSdk.executeTransaction(safeTransaction)
 		return await executeTxResponse.transactionResponse?.wait();
 	};
+
+	getMultisigData = async (multisigAddress: string) => {
+		const info = await this.safeService.getSafeInfo(multisigAddress);
+		console.log(info);
+		return info;
+	};
 }

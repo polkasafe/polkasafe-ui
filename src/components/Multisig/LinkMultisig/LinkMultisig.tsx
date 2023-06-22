@@ -4,9 +4,12 @@
 /* eslint-disable no-tabs */
 /* eslint-disable sort-keys */
 
+import { SafeInfoResponse } from '@safe-global/api-kit';
+import { Web3Adapter } from '@safe-global/protocol-kit';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
@@ -14,6 +17,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
+import { GnosisSafeService } from 'src/services';
 import { IAddressBookItem, IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
@@ -37,8 +41,11 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const [viewReviews, setViewReviews] = useState(true);
 	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { web3AuthUser, ethProvider , web3Provider } = useGlobalWeb3Context();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
+
+	const [multisigInfo, setMultisigInfo] = useState<SafeInfoResponse | null>(null);
 
 	const [multisigData, setMultisigData] = useState<IMultisigAddress>();
 
@@ -214,49 +221,46 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 			}
 			else{
 
-				const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
-					body: JSON.stringify({
-						multisigAddress,
-						network
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
+				const signer = ethProvider.getSigner();
+
+				const web3Adapter = new Web3Adapter({
+					signerAddress: web3AuthUser!.accounts[0],
+					web3: web3Provider
 				});
+				const txUrl = 'https://safe-transaction-goerli.safe.global';
+				const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
-				const { data: multisigDataRes, error: multisigError } = await getMultisigDataRes.json() as { data: IMultisigAddress, error: string };
+				const info = await gnosisService.getMultisigData(multisigAddress);
+				setMultisigInfo(info);
 
-				if(multisigError) {
+				// const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
+				// 	body: JSON.stringify({
+				// 		multisigAddress,
+				// 		network
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network),
+				// 	method: 'POST'
+				// });
 
-					queueNotification({
-						header: 'Error!',
-						message: multisigError,
-						status: NotificationStatus.ERROR
-					});
+				// const { data: multisigDataRes, error: multisigError } = await getMultisigDataRes.json() as { data: IMultisigAddress, error: string };
+
+				// if(multisigError) {
+
+				// 	queueNotification({
+				// 		header: 'Error!',
+				// 		message: multisigError,
+				// 		status: NotificationStatus.ERROR
+				// 	});
+				// 	setLoading(false);
+				// 	return;
+				// }
+
+				if(info){
 					setLoading(false);
-					return;
-				}
-
-				if(multisigDataRes){
-					setLoading(false);
-
-					setMultisigData(multisigDataRes);
-					const signatoriesArray = multisigDataRes.signatories.map((address: string) => {
-						return {
-							address: address,
-							name: ''
-						};
-					});
-					signatoriesArray.forEach((signatory) => {
-						const signatoryAddress = getEncodedAddress(signatory.address, network);
-						signatory.name = addressBook.find((item) => item.address === signatoryAddress)?.name || '';
-						signatory.address = signatoryAddress || signatory.address;
-					});
-					setSignatoriesWithName(signatoriesArray);
 					setNameAddress(false);
 					setViewOwners(false);
-
+					setSignatoriesArray(info.owners.map(address => ({ name: '', address })));
 				}
-
 			}
 		} catch (error){
 			console.log('ERROR', error);
@@ -272,38 +276,39 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	const checkMultisig = (signatories: ISignatory[]) => {
 		const signatoryAddresses = signatories.map(item => item.address);
-		const response = _createMultisig(signatoryAddresses, threshold, chainProperties[network].ss58Format);
-		if(response && response.multisigAddress && getEncodedAddress(response.multisigAddress, network) === multisigAddress){
-			setMultisigData(prevState => {
-				return {
-					...prevState,
-					name: multisigName,
-					address: multisigAddress,
-					signatories: signatoryAddresses,
-					threshold,
-					network,
-					created_at: new Date()
-				};
-			});
-			setSignatoriesWithName(signatories);
-			setNameAddress(false);
-			setViewOwners(false);
-			setViewReviews(false);
-		}
-		else{
-			queueNotification({
-				header: 'Error!',
-				message: 'No Multisig found with these Signatories.',
-				status: NotificationStatus.ERROR
-			});
-		}
+
+		setMultisigData(prevState => {
+			return {
+				...prevState,
+				name: multisigName,
+				address: multisigAddress,
+				signatories: signatoryAddresses,
+				threshold,
+				network,
+				created_at: new Date()
+			};
+		});
+		setSignatoriesWithName(signatories);
+		setNameAddress(false);
+		setViewOwners(false);
+		setViewReviews(false);
+
 	};
 
-	const handleLinkMultisig = () => {
+	const handleLinkMultisig = async () => {
 		setLoading(true);
 		if(multisigData){
 			const name = multisigName ? multisigName : multisigData?.name || DEFAULT_MULTISIG_NAME;
-			handleMultisigBadge(multisigData.signatories, multisigData.threshold, name, network);
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+				body: JSON.stringify({
+					signatories: signatoriesArray.map(item => item.address),
+					threshold,
+					multisigName,
+					proxyAddress: multisigInfo?.address
+				}),
+				headers: firebaseFunctionsHeader('goerli', localStorage.getItem('address')!, localStorage.getItem('signature')!),
+				method: 'POST'
+			});
 		}
 		else{
 			queueNotification({
