@@ -170,7 +170,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
 
 			//gas fee
-			if(!['westend', 'rococo'].includes(network)){
+			if(!['westend', 'rococo', 'kusama'].includes(network)){
 				const txn = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAndAmount[0].recipient, amount) : api.tx.balances.transfer(recipientAndAmount[0].recipient, amount);
 				const gasInfo = await txn.paymentInfo(address);
 				setTotalGas(new BN(gasInfo.partialFee.toString()));

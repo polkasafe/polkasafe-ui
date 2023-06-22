@@ -293,7 +293,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 						<AddressComponent address={depositor} />
 					</div>
 				}
-				{!!transactionFields && transactionFields.category !== 'none' &&
+				{!!transactionFields && Object.keys(transactionFields).length !== 0 && transactionFields.category !== 'none' &&
 				<>
 					<div
 						className='flex items-center justify-between mt-3'
