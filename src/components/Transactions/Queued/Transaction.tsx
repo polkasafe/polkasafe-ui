@@ -139,7 +139,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
-		else if(decodedCallData?.args && !decodedCallData?.args?.dest ){
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.calls ){
 			setCustomTx(true);
 		}
 	}, [decodedCallData, multisig, multisigAddresses, network]);
