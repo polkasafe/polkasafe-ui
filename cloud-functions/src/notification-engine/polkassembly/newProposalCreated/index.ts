@@ -10,6 +10,7 @@ import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNet
 import ownProposalCreated from '../ownProposalCreated';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 import subsquidToFirestoreProposalType from '../_utils/subsquidToFirestoreProposalType';
+import { getTrackName } from '../_utils/getTrackName';
 
 const TRIGGER_NAME = 'newProposalCreated';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -36,11 +37,15 @@ export default async function newProposalCreated(args: Args) {
 	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(firestorePostType as EPAProposalType);
 
 	let SUB_TRIGGER = '';
+	let trackName = '';
+	// TODO: Aleem / Mridul => Need to add a check for args === firebase_args.
 	switch (firestorePostType) {
 	case EPAProposalType.REFERENDUM_V2:
+		trackName = getTrackName(network, Number(track), false);
 		SUB_TRIGGER = 'openGovReferendumSubmitted';
 		break;
 	case EPAProposalType.FELLOWSHIP_REFERENDUMS:
+		trackName = getTrackName(network, Number(track), true);
 		SUB_TRIGGER = 'fellowshipReferendumSubmitted';
 		break;
 	default:
@@ -73,6 +78,10 @@ export default async function newProposalCreated(args: Args) {
 		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
+		const networkRef = firestore_db.collection('networks').doc(network);
+
+		const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
+		const postDocData = postDoc.data();
 		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
 		const subject = triggerTemplate.subject;
@@ -80,7 +89,9 @@ export default async function newProposalCreated(args: Args) {
 			...args,
 			username: subscriberData.username,
 			link,
-			postType: postTypeName
+			postType: postTypeName,
+			title: postDocData?.title || 'Untitled',
+			track: trackName
 		});
 
 		const notificationServiceInstance = new NotificationService(
