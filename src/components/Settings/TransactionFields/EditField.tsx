@@ -17,11 +17,12 @@ import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
-const EditField = ({ className, onCancel, category, subfield, fieldName, fieldType, dropdownOptions, required }: { className?: string, onCancel: () => void, category: string, subfield: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
+const EditField = ({ className, onCancel, category, subfield, subfieldName, subfieldType, dropdownOptions, required }: { className?: string, onCancel: () => void, category: string, subfield: string, subfieldName: string, subfieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
 	const [loading, setLoading] = useState(false);
 	const { network } = useGlobalApiContext();
 	const { setUserDetailsContextState, transactionFields } = useGlobalUserDetailsContext();
 	const [requiredState, setRequiredState] = useState<boolean>(required);
+	const [newSubfieldName, setNewSubfieldName] = useState<string>(subfieldName || '');
 	const [newOption, setNewOption] = useState<string>('');
 	const [dropdownState, setDropdownState] = useState<IDropdownOptions[] | undefined>(dropdownOptions);
 	const [openEditOptionModal, setOpenEditOptionModal] = useState({ i: 0, open: false });
@@ -123,7 +124,8 @@ const EditField = ({ className, onCancel, category, subfield, fieldName, fieldTy
 									[subfield]: {
 										...transactionFields[category].subfields[subfield],
 										dropdownOptions: dropdownState,
-										required: requiredState
+										required: requiredState,
+										subfieldName: newSubfieldName
 									}
 								}
 							}
@@ -161,7 +163,9 @@ const EditField = ({ className, onCancel, category, subfield, fieldName, fieldTy
 									...prev.transactionFields[category].subfields,
 									[subfield]: {
 										...prev.transactionFields[category].subfields[subfield],
-										required: requiredState
+										dropdownOptions: dropdownState,
+										required: requiredState,
+										subfieldName: newSubfieldName
 									}
 								}
 							}
@@ -187,21 +191,43 @@ const EditField = ({ className, onCancel, category, subfield, fieldName, fieldTy
 
 	return (
 		<>
-			<Spin spinning={loading} indicator={<LoadingLottie width={250} message={`Updating your ${fieldName} field...`} /> }>
+			<Spin spinning={loading} indicator={<LoadingLottie width={250} message={`Updating your ${subfieldName} field...`} /> }>
 				<div className={className}>
 					<EditOptionModal />
 
-					<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Field Name</p>
-					<div className=' p-[10px] mb-4 text-text_secondary border-2 border-dashed border-bg-secondary rounded-lg'>
-						{fieldName}
+					<div className="flex flex-col gap-y-3 mb-4">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor='sub-field-name'
+						>
+							Sub-Field Name*
+						</label>
+						<Form.Item
+							name={'sub-field-name'}
+							rules={[
+								{
+									message: 'Required',
+									required: true
+								}
+							]}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Sub-Field Name"
+								className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id={'sub-field-name'}
+								onChange={(e) => setNewSubfieldName(e.target.value)}
+								value={newSubfieldName}
+							/>
+						</Form.Item>
 					</div>
 
-					<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Field Type</p>
+					<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Sub-Field Type</p>
 					<div className=' p-[10px] mb-4 text-text_secondary border-2 border-dashed border-bg-secondary rounded-lg'>
-						{fieldType}
+						{subfieldType}
 					</div>
 					<Form disabled={ loading }>
-						{fieldType === EFieldType.SINGLE_SELECT &&
+						{subfieldType === EFieldType.SINGLE_SELECT &&
 						<section>
 							<div className='flex items-center justify-between mb-2'>
 								<label className='text-primary font-normal text-xs leading-[13px] block'>Dropdown Options</label>
@@ -241,7 +267,7 @@ const EditField = ({ className, onCancel, category, subfield, fieldName, fieldTy
 								setNewOption('');
 								setDropdownState(transactionFields[category].subfields[subfield].dropdownOptions);
 							}} />
-							<ModalBtn disabled={(dropdownOptions && dropdownState === dropdownOptions) && requiredState === required} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
+							<ModalBtn disabled={(dropdownOptions && dropdownState === dropdownOptions) && requiredState === required && (newSubfieldName === subfieldName || newSubfieldName === '')} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
 						</section>
 					</Form>
 				</div>

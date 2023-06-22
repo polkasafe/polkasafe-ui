@@ -186,6 +186,12 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											</div>
 										</div>
 										{!isProxyApproval &&
+										transaction?.totalAmount ?
+											<div>
+												<h1 className='text-md text-white'>- {transaction.totalAmount} {chainProperties[network].tokenSymbol}</h1>
+												{!isNaN(Number(amountUSD)) && <p className='text-text_secondary text-right text-xs'>{(Number(amountUSD) * Number(transaction.totalAmount)).toFixed(2)} USD</p>}
+											</div>
+											:
 											<div>
 												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
 												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}

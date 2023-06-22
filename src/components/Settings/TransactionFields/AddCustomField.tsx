@@ -1,9 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { MinusCircleOutlined,PlusCircleOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Form, Input, Spin, Switch } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { Form, Input, Spin } from 'antd';
 import React, { useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -12,66 +10,17 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { EFieldType, ITransactionCategorySubfields, NotificationStatus } from 'src/types';
-import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
+import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
-const AddCustomField = ({ className, onCancel }: { className?: string, onCancel: () => void }) => {
+const AddCustomField = ({ className, onCancel, setCatgory }: { className?: string, onCancel: () => void, setCatgory: React.Dispatch<React.SetStateAction<string>>}) => {
 	const [loading, setLoading] = useState(false);
 
 	const [fieldName, setFieldName] = useState<string>('');
 	const [fieldDesc, setFieldDesc] = useState<string>('');
-	const [subfields, setSubfields] = useState<{ name: string, subfieldType: EFieldType, required: boolean }[]>([]);
 	const { network } = useGlobalApiContext();
 	const { setUserDetailsContextState, transactionFields } = useGlobalUserDetailsContext();
-
-	const fieldTypeOptions: ItemType[] = Object.values(EFieldType).map((key) => ({
-		key: key,
-		label: <span className='text-white'>{key}</span>
-	}));
-
-	const onSubfieldNameChange = (value: string, i: number) => {
-		setSubfields((prevState) => {
-			const copyArray = [...prevState];
-			const copyObject = { ...copyArray[i] };
-			copyObject.name = value;
-			copyArray[i] = copyObject;
-			return copyArray;
-		});
-	};
-	const onSubfieldTypeChange = (type: EFieldType, i: number) => {
-		setSubfields((prevState) => {
-			const copyArray = [...prevState];
-			const copyObject = { ...copyArray[i] };
-			copyObject.subfieldType = type;
-			copyArray[i] = copyObject;
-			return copyArray;
-		});
-	};
-	const onSubfieldRequiredChange = (required: boolean, i: number) => {
-		setSubfields((prevState) => {
-			const copyArray = [...prevState];
-			const copyObject = { ...copyArray[i] };
-			copyObject.required = required;
-			copyArray[i] = copyObject;
-			return copyArray;
-		});
-	};
-
-	const onAddSubfield = () => {
-		setSubfields((prevState) => {
-			const copyOptionsArray = [...prevState];
-			copyOptionsArray.push({ name: '', required: true, subfieldType: EFieldType.SINGLE_SELECT });
-			return copyOptionsArray;
-		});
-	};
-
-	const onRemoveSubfield = (i: number) => {
-		const copyOptionsArray = [...subfields];
-		copyOptionsArray.splice(i, 1);
-		setSubfields(copyOptionsArray);
-	};
 
 	const handleSave = async () => {
 
@@ -86,17 +35,6 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 			else{
 				setLoading(true);
 
-				const subfieldsObject: ITransactionCategorySubfields = {};
-				if(subfields){
-					subfields.forEach((item) => {
-						subfieldsObject[`${item.name.toLowerCase().split(' ').join('_')}`] = {
-							required: item.required,
-							subfieldName: item.name,
-							subfieldType: item.subfieldType
-						};
-					});
-				}
-
 				const updateTransactionFieldsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransactionFields`, {
 					body: JSON.stringify({
 						transactionFields:{
@@ -104,7 +42,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 							[fieldName.toLowerCase().split(' ').join('_')]: {
 								fieldDesc,
 								fieldName,
-								subfields: subfieldsObject
+								subfields: {}
 							}
 						}
 					}),
@@ -137,11 +75,12 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 							[fieldName.toLowerCase().split(' ').join('_')]: {
 								fieldDesc,
 								fieldName,
-								subfields: subfieldsObject
+								subfields: {}
 							}
 						}
 					}));
 					setLoading(false);
+					setCatgory(fieldName.toLowerCase().split(' ').join('_'));
 					onCancel();
 				}
 
@@ -159,7 +98,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 
 	return (
 		<>
-			<Spin spinning={loading} indicator={<LoadingLottie width={300} message={`Updating your ${fieldName} field...`} /> }>
+			<Spin spinning={loading} indicator={<LoadingLottie width={200} message={`Updating your ${fieldName} field...`} /> }>
 				<div className={className}>
 					<Form disabled={ loading }>
 
@@ -170,7 +109,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 									className="text-primary text-xs leading-[13px] font-normal"
 									htmlFor="name"
 								>
-							Field Name*
+								Category Name*
 								</label>
 								<Form.Item
 									name="name"
@@ -196,16 +135,10 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 									className="text-primary text-xs leading-[13px] font-normal"
 									htmlFor="description"
 								>
-							Field Description*
+								Category Description
 								</label>
 								<Form.Item
 									name="description"
-									rules={[
-										{
-											message: 'Required',
-											required: true
-										}
-									]}
 									className='border-0 outline-0 my-0 p-0'
 								>
 									<Input
@@ -218,7 +151,7 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 								</Form.Item>
 							</div>
 
-							{subfields && subfields.map((subfield, i) => (
+							{/* {subfields && subfields.map((subfield, i) => (
 								<div key={i} className='flex flex-col gap-y-3'>
 									<div className='flex items-center justify-between'>
 										<span className='text-white text-sm' >Sub-Field Details</span>
@@ -273,13 +206,13 @@ const AddCustomField = ({ className, onCancel }: { className?: string, onCancel:
 										<Switch size='small' className='w-auto' checked={subfield.required} onChange={(checked) => onSubfieldRequiredChange(checked, i)} />
 									</div>
 								</div>
-							))}
-							<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddSubfield} >Add Sub-Field</Button>
+							))} */}
+							{/* <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddSubfield} >Add Sub-Field</Button> */}
 						</section>
 
 						<section className='flex items-center gap-x-5 justify-between mt-10'>
 							<CancelBtn loading={loading} className='w-[200px]' onClick={onCancel} />
-							<ModalBtn disabled={!fieldName || subfields.some((subfield) => subfield.name === '')} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
+							<ModalBtn disabled={!fieldName} loading={loading} onClick={handleSave} className='w-[200px]' title='Save' />
 						</section>
 					</Form>
 				</div>

@@ -16,7 +16,7 @@ import AddSubfield from './AddSubfield';
 import DeleteField from './DeleteField';
 import EditField from './EditField';
 
-const EditFieldModal = ({ className, category, subfield, fieldName, fieldType, dropdownOptions, required }: { className?: string, category: string, subfield: string, fieldName: string, fieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
+const EditFieldModal = ({ className, category, subfield, subfieldName, subfieldType, dropdownOptions, required }: { className?: string, category: string, subfield: string, subfieldName: string, subfieldType: EFieldType, dropdownOptions?: IDropdownOptions[], required: boolean }) => {
 	const [openEditFieldModal, setOpenEditFieldModal] = useState(false);
 	return (
 		<>
@@ -35,11 +35,11 @@ const EditFieldModal = ({ className, category, subfield, fieldName, fieldType, d
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl capitalize'>{fieldName} Details</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl capitalize'>{subfieldName} Details</h3>}
 				open={openEditFieldModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
-				<EditField category={category} subfield={subfield} fieldName={fieldName} fieldType={fieldType} required={required} dropdownOptions={dropdownOptions}  onCancel={() => setOpenEditFieldModal(false)} />
+				<EditField category={category} subfield={subfield} subfieldName={subfieldName} subfieldType={subfieldType} required={required} dropdownOptions={dropdownOptions}  onCancel={() => setOpenEditFieldModal(false)} />
 			</Modal>
 		</>
 	);
@@ -64,7 +64,7 @@ const DeleteFieldModal = ({ className, subfield, category }: { className?: strin
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Delete Field</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Delete Sub-Field</h3>}
 				open={openDeleteFieldModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
@@ -74,7 +74,7 @@ const DeleteFieldModal = ({ className, subfield, category }: { className?: strin
 	);
 };
 
-const FieldsList = ({ className, category }: { className?: string, category: string }) => {
+const SubfieldsList = ({ className, category }: { className?: string, category: string }) => {
 	const { transactionFields, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [loading, setLoading] = useState<boolean>(false);
@@ -200,36 +200,42 @@ const FieldsList = ({ className, category }: { className?: string, category: str
 						This Category cannot be Customized.
 					</section>
 					:
-					transactionFields[category] && transactionFields[category].subfields && Object.keys(transactionFields[category].subfields).map((subfield, index) => {
-						const subfieldObject = transactionFields[category].subfields[subfield];
-						return (
-							<article key={index}>
-								<div className='grid grid-cols-5 gap-x-5 py-6 px-4 text-white'>
-									<div className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-2 flex items-center text-base'>
-										{subfieldObject.subfieldName}
+					transactionFields[category] && !Object.keys(transactionFields[category].subfields).length
+						?
+						<section className='my-4 text-sm w-full text-white font-normal flex justify-center'>
+							Please add Sub-Fields to this Category.
+						</section>
+						:
+						transactionFields[category] && transactionFields[category].subfields && Object.keys(transactionFields[category].subfields).map((subfield, index) => {
+							const subfieldObject = transactionFields[category].subfields[subfield];
+							return (
+								<article key={index}>
+									<div className='grid grid-cols-5 gap-x-5 py-6 px-4 text-white'>
+										<div className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-2 flex items-center text-base'>
+											{subfieldObject.subfieldName}
+										</div>
+										<div className='col-span-1 flex items-center gap-x-[10px]'>
+											{subfieldObject.subfieldType}
+										</div>
+										<div className='col-span-1 flex items-center gap-x-[10px]'>
+											<Switch disabled={loading} onChange={(checked) => handleRequiredChange(subfield, checked)} size='small' defaultChecked={subfieldObject.required} />
+										</div>
+										<div className='col-span-1 flex items-center gap-x-[10px]'>
+											<EditFieldModal category={category} subfield={subfield} className={className} subfieldName={subfieldObject.subfieldName} subfieldType={subfieldObject.subfieldType} required={subfieldObject.required} dropdownOptions={subfieldObject.dropdownOptions} />
+											<DeleteFieldModal category={category} subfield={subfield} className={className} />
+										</div>
 									</div>
-									<div className='col-span-1 flex items-center gap-x-[10px]'>
-										{subfieldObject.subfieldType}
-									</div>
-									<div className='col-span-1 flex items-center gap-x-[10px]'>
-										<Switch disabled={loading} onChange={(checked) => handleRequiredChange(subfield, checked)} size='small' defaultChecked={subfieldObject.required} />
-									</div>
-									<div className='col-span-1 flex items-center gap-x-[10px]'>
-										<EditFieldModal category={category} subfield={subfield} className={className} fieldName={subfieldObject.subfieldName} fieldType={subfieldObject.subfieldType} required={subfieldObject.required} dropdownOptions={subfieldObject.dropdownOptions} />
-										<DeleteFieldModal category={category} subfield={subfield} className={className} />
-									</div>
-								</div>
-								{Object.keys(transactionFields[category].subfields).length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
-							</article>
-						);
-					})
+									{Object.keys(transactionFields[category].subfields).length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
+								</article>
+							);
+						})
 			}
 			{category !== 'none' && <AddSubfieldModal category={category} />}
 		</div>
 	);
 };
 
-export default styled(FieldsList)`
+export default styled(SubfieldsList)`
 	.ant-spin-nested-loading .ant-spin-blur{
 		opacity: 0 !important;
 	}

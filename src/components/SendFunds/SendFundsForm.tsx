@@ -435,6 +435,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 																		id='recipient'
 																		placeholder="Send to Address.."
 																		onChange={(value) => onRecipientChange(value, i)}
+																		value={recipientAndAmount[i].recipient}
 																		defaultValue={defaultSelectedAddress || ''}
 																	/>
 																}
@@ -529,10 +530,16 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										trigger={['click']}
 										className={'border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer'}
 										menu={{
-											items: Object.keys(transactionFields).map((category) => ({
-												key: category,
-												label: <span className='text-white'>{transactionFields[category]?.fieldName}</span>
-											})),
+											items: [
+												...Object.keys(transactionFields).filter(c => c !== 'none').map((c) => ({
+													key: c,
+													label: <span className='text-white'>{transactionFields[c]?.fieldName}</span>
+												})),
+												{
+													key: 'none',
+													label: <span className='text-white'>Other</span>
+												}
+											],
 											onClick: (e) => setCategory(e.key)
 										}}
 									>
@@ -556,8 +563,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														name={`${subfieldObject.subfieldName}`}
 														rules={[{ message: 'Required', required: subfieldObject.required }]}
 														className='border-0 outline-0 my-0 p-0'
-														help={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required && `${subfieldObject.subfieldName} is Required.`}
-														validateStatus={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required ? 'error' : 'success'}
+														// help={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required && `${subfieldObject.subfieldName} is Required.`}
+														// validateStatus={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required ? 'error' : 'success'}
 													>
 														<Dropdown
 															trigger={['click']}
@@ -569,7 +576,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 																})),
 																onClick: (e) => {
 																	setTransactionFieldsObject(prev => ({
-																		...prev,
+																		category: transactionFields[category].fieldName,
 																		subfields: {
 																			...prev.subfields,
 																			[subfield]: {
@@ -589,7 +596,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 													</Form.Item>
 													:
 													<Form.Item
-														name={`${subfieldObject.subfieldName}`}
+														name={subfield}
 														rules={[{ message: 'Required', required: subfieldObject.required }]}
 														className='border-0 outline-0 my-0 p-0'
 													>
@@ -597,10 +604,10 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 															<Input
 																placeholder={`${subfieldObject.subfieldName}`}
 																className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
-																id={`${subfieldObject.subfieldName}`}
+																id={subfield}
 																value={transactionFieldsObject.subfields[subfield]?.value}
 																onChange={(e) => setTransactionFieldsObject(prev => ({
-																	...prev,
+																	category: transactionFields[category].fieldName,
 																	subfields: {
 																		...prev.subfields,
 																		[subfield]: {

@@ -19,13 +19,14 @@ interface Props{
 	defaultValue?: string
 }
 
-const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue='' }: Props) => {
+const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
 	const { network } = useGlobalApiContext();
 	const [bnBalance, setBnBalance] = useState(new BN(0));
 
 	useEffect(() => {
 		const value = Number(defaultValue);
+		if(isNaN(value)) return;
 		if(!value || value <= 0) {
 			setIsValidInput(false);
 			onChange(new BN(0));

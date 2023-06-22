@@ -8,7 +8,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 
 import AddCustomField from './AddCustomField';
-import FieldsList from './FieldsList';
+import SubfieldsList from './SubfieldsList';
 
 const ManageMultisig = () => {
 
@@ -33,11 +33,11 @@ const ManageMultisig = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl capitalize'>Custom Field Details</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl capitalize'>Add Category</h3>}
 					open={openAddCustomFieldModal}
 					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
-					<AddCustomField  onCancel={() => setOpenAddCustomFieldModal(false)} />
+					<AddCustomField setCatgory={setCategory}  onCancel={() => setOpenAddCustomFieldModal(false)} />
 				</Modal>
 			</>
 		);
@@ -56,12 +56,13 @@ const ManageMultisig = () => {
 						</section>
 						<section className='flex items-center justify-between flex-col gap-5 md:flex-row mb-6'>
 							<div className='flex-1 flex items-center gap-x-3'>
-								{Object.keys(transactionFields).map(field => <Button onClick={() => setCategory(field)} className={` border border-solid ${category === field ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields[field].fieldName}</Button>)}
+								{Object.keys(transactionFields).filter(field => field !== 'none').map(field => <Button onClick={() => setCategory(field)} className={` border border-solid ${category === field ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields[field].fieldName}</Button>)}
+								<Button onClick={() => setCategory('none')} className={` border border-solid ${category === 'none' ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields['none'].fieldName}</Button>
 							</div>
 							<AddCustomFieldModal/>
 						</section>
 						<section>
-							<FieldsList category={category} />
+							<SubfieldsList category={category} />
 						</section>
 					</div>
 				</>}

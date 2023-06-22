@@ -292,36 +292,38 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 						<AddressComponent address={depositor} />
 					</div>
 				}
-
-				<div
-					className='flex items-center justify-between mt-3'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
+				{!!transactionFields && transactionFields.category !== 'none' &&
+				<>
+					<div
+						className='flex items-center justify-between mt-3'
 					>
-							Category:
-					</span>
-					<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
-						{transactionFields?.category}
-					</span>
-				</div>
-				{transactionFields && transactionFields.subfields && Object.keys(transactionFields?.subfields).map((key) => {
-					const subfield = transactionFields.subfields[key];
-					return (
-						<div
-							key={key}
-							className='flex items-center justify-between mt-3'
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
 						>
-							<span
-								className='text-text_secondary font-normal text-sm leading-[15px]'
+							Category:
+						</span>
+						<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
+							{transactionFields?.category}
+						</span>
+					</div>
+					{transactionFields && transactionFields.subfields && Object.keys(transactionFields?.subfields).map((key) => {
+						const subfield = transactionFields.subfields[key];
+						return (
+							<div
+								key={key}
+								className='flex items-center justify-between mt-3'
 							>
-								{subfield.name}:
-							</span>
-							<span className='text-primary border border-solid border-waiting rounded-lg px-[6px] py-1'>
-								{subfield.value}
-							</span>
-						</div>
-					);})}
+								<span
+									className='text-text_secondary font-normal text-sm leading-[15px]'
+								>
+									{subfield.name}:
+								</span>
+								<span className='text-waiting bg-waiting bg-opacity-5 border border-solid border-waiting rounded-lg px-[6px] py-[3px]'>
+									{subfield.value}
+								</span>
+							</div>
+						);})}
+				</>}
 				<div
 					className='flex items-center gap-x-5 justify-between mt-3'
 				>
