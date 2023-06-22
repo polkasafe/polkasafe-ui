@@ -36,15 +36,30 @@ export default async function ownProposalCreated(args: Args) {
 	const addressDoc = await firestore_db.collection('addresses').doc(proposerSubstrateAddress).get();
 	if (!addressDoc.exists) throw Error(`Address not found: ${proposerSubstrateAddress}`);
 	const addressDocData = addressDoc.data() as { user_id: number };
-	if (!addressDocData.user_id) throw Error(`User not found for address : ${proposerSubstrateAddress}`);
+	if (!addressDocData.user_id) {
+		console.log(`User not found for address : ${proposerSubstrateAddress}`);
+		return;
+	}
 
 	const proposerUserDoc = await paUserRef(firestore_db, addressDocData.user_id).get();
-	if (!proposerUserDoc.exists) throw Error(`User not found for address : ${proposerSubstrateAddress}`);
+	if (!proposerUserDoc.exists) {
+		console.log(`User not found for address : ${proposerSubstrateAddress}`);
+		return;
+	}
 
 	const proposerUserData = proposerUserDoc.data() as IPAUser;
-	if (!proposerUserData.notification_preferences) throw Error(`Notification preferences not found for user: ${addressDocData.user_id}`);
+	if (!proposerUserData.notification_preferences) {
+		console.log(`Notification preferences not found for user: ${addressDocData.user_id}`);
+		return;
+	}
+
 	const proposerNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(proposerUserData.notification_preferences, network);
-	if (!proposerNotificationPreferences) throw Error(`Notification preferences not found for user: ${addressDocData.user_id}`);
+	if (!proposerNotificationPreferences) {
+		console.log(`Notification preferences not found for user: ${addressDocData.user_id}`);
+		return;
+	}
+
+	console.log(`Subscribed user for ${TRIGGER_NAME} with id: ${addressDocData.user_id}`);
 
 	const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
@@ -73,5 +88,8 @@ export default async function ownProposalCreated(args: Args) {
 			link
 		}
 	);
+
+	console.log(`Sending notification to user: ${addressDocData.user_id}`);
+
 	await notificationServiceInstance.notifyAllChannels(proposerNotificationPreferences);
 }

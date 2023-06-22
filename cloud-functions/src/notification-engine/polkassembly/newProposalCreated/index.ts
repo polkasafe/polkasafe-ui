@@ -62,6 +62,9 @@ export default async function newProposalCreated(args: Args) {
 	for (const subscriberDoc of subscribersSnapshot.docs) {
 		const subscriberData = subscriberDoc.data() as IPAUser;
 		if (!subscriberData.notification_preferences) continue;
+
+		console.log(`Subscribed user for ${SUB_TRIGGER} with id: ${subscriberData.id}`);
+
 		const subscriberNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(subscriberData.notification_preferences, network);
 		if (!subscriberNotificationPreferences) continue;
 

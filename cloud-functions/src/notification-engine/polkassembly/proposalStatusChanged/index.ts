@@ -86,9 +86,14 @@ export default async function proposalStatusChanged(args: Args) {
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
 		.get();
 
+	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
+
 	for (const subscriberDoc of subscribersSnapshot.docs) {
 		const subscriberData = subscriberDoc.data() as IPAUser;
 		if (!subscriberData.notification_preferences) continue;
+
+		console.log(`Subscribed user for ${SUB_TRIGGER} with id: ${subscriberData.id}`);
+
 		const subscriberNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(subscriberData.notification_preferences, network);
 		if (!subscriberNotificationPreferences) continue;
 
@@ -120,7 +125,7 @@ export default async function proposalStatusChanged(args: Args) {
 			}
 		);
 
-		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER} post ${postId}, postType ${firestorePostType}, network ${network}`);
+		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER}, post ${postId}, postType ${firestorePostType}, network ${network}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 }
