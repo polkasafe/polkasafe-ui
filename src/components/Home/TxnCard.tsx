@@ -167,6 +167,12 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
 									});
 								}
+								else if(decodedCallData && decodedCallData?.args?.call?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.call?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center pb-2 mb-2">
 										<div className="flex flex-1 items-center">
