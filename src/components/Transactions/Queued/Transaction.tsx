@@ -66,6 +66,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
 	const [isProxyAddApproval, setIsProxyAddApproval] = useState<boolean>(false);
 	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
+	const [customTx, setCustomTx] = useState<boolean>(false);
 
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
@@ -138,6 +139,9 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest ){
+			setCustomTx(true);
+		}
 	}, [decodedCallData, multisig, multisigAddresses, network]);
 
 	const handleApproveTransaction = async () => {
@@ -152,7 +156,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		setLoading(true);
 		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
+			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
 				setOpenLoadingModal(false);
 				return;
 			}
@@ -195,7 +199,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 					multisig,
 					network,
 					note: note || '',
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.[0]?.args.dest?.id || decodedCallData?.args?.call?.args?.calls?.[0]?.args.dest?.id || '',
+					recipientAddress: decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.[0]?.args.dest?.id || decodedCallData?.args?.call?.args?.calls?.[0]?.args.dest?.id || '',
 					setLoadingMessages
 				});
 			}
@@ -311,10 +315,10 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 									</span>
 
 									<span>
-										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
+										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : customTx ? 'Custom Transaction' : 'Sent'}
 									</span>
 								</p>
-								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
+								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && !customTx &&
 							<p className='col-span-2 flex items-center gap-x-[6px]'>
 								<ParachainIcon src={chainProperties[network].logo} />
 								<span
@@ -380,6 +384,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 							isProxyRemovalApproval={isProxyRemovalApproval}
 							notifications={notifications}
 							transactionFields={transactionFields}
+							customTx={customTx}
 						/>
 
 					</div>

@@ -50,9 +50,10 @@ interface ISentInfoProps {
 	isProxyRemovalApproval?: boolean
 	notifications?:ITxNotification;
 	getMultiDataLoading?: boolean;
+	customTx?:boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -247,7 +248,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 								</>
 							))}
 						</div>
-					: isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading ? <></>
+					: isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading || customTx ? <></>
 						:
 						<section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
 							<span>
