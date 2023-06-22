@@ -41,11 +41,11 @@ export default async function newProposalCreated(args: Args) {
 	// TODO: Aleem / Mridul => Need to add a check for args === firebase_args.
 	switch (firestorePostType) {
 	case EPAProposalType.REFERENDUM_V2:
-		trackName = getTrackName(network, Number(trackId), false);
+		trackName = getTrackName(network, Number(track), false);
 		SUB_TRIGGER = 'openGovReferendumSubmitted';
 		break;
 	case EPAProposalType.FELLOWSHIP_REFERENDUMS:
-		trackName = getTrackName(network, Number(trackId), true);
+		trackName = getTrackName(network, Number(track), true);
 		SUB_TRIGGER = 'fellowshipReferendumSubmitted';
 		break;
 	default:
