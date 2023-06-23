@@ -4,7 +4,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
-import { networks, tokenSymbol } from './global/networkConstants';
+import { tokenSymbol } from './global/networkConstants';
 
 export enum CHANNEL {
 	EMAIL = 'email',
@@ -49,21 +49,15 @@ export enum Triggers {
 export interface UserDetailsContextType {
 	loggedInWallet: Wallet;
     activeMultisig: string;
-	isProxy: boolean;
     address: string;
 	createdAt: Date;
     multisigAddresses: IMultisigAddress[];
-	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
-	notification_preferences: IUserNotificationPreferences;
     addressBook: IAddressBookItem[];
-		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 }
 
 export enum Wallet {
-    POLKADOT = 'polkadot-js',
-	SUBWALLET = 'subwallet-js',
-	TALISMAN = 'talisman',
+	WEB3AUTH = 'web3-auth'
 }
 
 export interface AccountMeta {
@@ -77,7 +71,6 @@ export interface Account {
     meta: AccountMeta;
 }
 
-export type Network = typeof networks[keyof typeof networks];
 export type TokenSymbol = typeof tokenSymbol[keyof typeof tokenSymbol];
 
 export interface ChainProps {
@@ -92,7 +85,17 @@ export interface ChainProps {
 }
 
 export type ChainPropType = {
-    [index: string]: ChainProps;
+	[network: string]: {
+		blockExplorer: string;
+		chainId: string;
+		chainNamespace: string;
+		decimals: number;
+		displayName: string;
+		rpcTarget: string;
+		ticker: string;
+		tickerName: string;
+		logo: string
+	};
 };
 
 export interface IAddressBookItem {

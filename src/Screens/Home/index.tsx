@@ -3,9 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { PlusCircleOutlined } from '@ant-design/icons';
 import { EthersAdapter } from '@safe-global/protocol-kit';
-import { Button, Modal, notification } from 'antd';
+import { Button, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
@@ -16,7 +15,6 @@ import DashboardCard from 'src/components/Home/DashboardCard';
 import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
-import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -27,26 +25,25 @@ import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
-const Home = ({ className }: { className?: string }) => {
+const Home = () => {
 	const { address, notification_preferences, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
-	const { network, api, apiReady } = useGlobalApiContext();
+	const { network } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
-	const [openProxyModal, setOpenProxyModal] = useState(false);
 	const [hasProxy, setHasProxy] = useState<boolean>(true);
 	const [proxyNotInDb, setProxyNotInDb] = useState<boolean>(false);
 	const [proxyInProcess, setProxyInProcess] = useState<boolean>(false);
 
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
-	const [transactionLoading, setTransactionLoading] = useState(false);
+	const [transactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(true);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig: any = {};
+
 	useEffect(() => {
 		if ((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1) {
 			setOpenNewUserModal(true);
@@ -95,12 +92,12 @@ const Home = ({ className }: { className?: string }) => {
 
 	useEffect(() => {
 		const handleNewTransaction = async () => {
-			if (!api || !apiReady || !activeMultisig) return;
+			if (!activeMultisig) return;
 
 			if (web3AuthUser) {
-				const signer = ethProvider.getSigner();
+				const signer = ethProvider?.getSigner();
 				const ethAdapter = new EthersAdapter({
-					ethers: ethProvider,
+					ethers: ethProvider!,
 					signerOrProvider: signer
 				});
 				const txUrl = 'https://safe-transaction-goerli.safe.global';
@@ -113,23 +110,11 @@ const Home = ({ className }: { className?: string }) => {
 				} else {
 					setIsOnchain(false);
 				}
-			} else {
-				setTransactionLoading(true);
-				// check if wallet has existential deposit
-				const hasExistentialDepositRes = await hasExistentialDeposit(api, multisig?.address || activeMultisig, network);
-
-				if (!hasExistentialDepositRes) {
-					setIsOnchain(false);
-				} else {
-					setIsOnchain(true);
-				}
 			}
-
-			setTransactionLoading(false);
 		};
 		handleNewTransaction();
 
-	}, [activeMultisig, api, apiReady, network, multisig, newTxn, web3AuthUser, ethProvider]);
+	}, [web3AuthUser, ethProvider]);
 
 	useEffect(() => {
 		if (!isOnchain) {
@@ -155,30 +140,6 @@ const Home = ({ className }: { className?: string }) => {
 		}
 	}, [isOnchain]);
 
-	const AddProxyModal: React.FC = () => {
-		return (
-			<>
-				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined />} >Create Proxy</Button>
-				<Modal
-					centered
-					footer={false}
-					closeIcon={
-						<button
-							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-							onClick={() => setOpenProxyModal(false)}
-						>
-							<OutlineCloseIcon className='text-primary w-2 h-2' />
-						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Proxy</h3>}
-					open={openProxyModal}
-					className={`w-auto md:min-w-[500px] ${className}`}
-				>
-					<AddProxy setProxyInProcess={setProxyInProcess} homepage onCancel={() => setOpenProxyModal(false)} />
-				</Modal>
-			</>
-		);
-	};
-
 	return (
 		<>
 			{
@@ -190,30 +151,24 @@ const Home = ({ className }: { className?: string }) => {
 							//!multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0
 							?
 							<section>
-								{network !== 'astar' && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
+								{!isOnchain ?
 									<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
-										<AddProxyModal />
+										<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
+										<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
 									</section>
 									:
-									!isOnchain ?
-										<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-											<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
-											<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
+									proxyNotInDb ?
+										<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+											<p className='text-white'>Your Proxy has been Created.</p>
+											<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
 										</section>
 										:
-										proxyNotInDb ?
-											<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-												<p className='text-white'>Your Proxy has been Created.</p>
-												<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
+										proxyInProcess && !hasProxy ?
+											<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+												<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
 											</section>
 											:
-											proxyInProcess && !hasProxy ?
-												<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
-												</section>
-												:
-												<></>
+											<></>
 								}
 								{!notification_preferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified &&
 									<EmailBadge />

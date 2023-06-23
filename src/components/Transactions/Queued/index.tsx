@@ -22,7 +22,7 @@ import Transaction from './Transaction';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-interface IQueued{
+interface IQueued {
 	loading: boolean
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>
 	refetch: boolean
@@ -40,7 +40,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
-		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+		fetchTokenToUSDPrice(1, network).then((formattedUSD) => {
 			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
 		});
 	}, [network]);
@@ -54,7 +54,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 	}, [location.hash, queuedTransactions]);
 
 	const fetchQueuedTransactions = useCallback(async () => {
-		try{
+		try {
 			setLoading(true);
 
 			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAllTransaction`, { //@TODO error handling
@@ -64,35 +64,35 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 					'Content-Type': 'application/json',
 					'x-address': web3AuthUser!.accounts[0],
 					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-signature': localStorage.getItem("signature")!,
-					"x-multisig": activeMultisig,
+					'x-multisig': activeMultisig,
+					'x-signature': localStorage.getItem('signature')!,
 					'x-source': 'polkasafe'
 				},
 				method: 'GET'
 			}).then(res => res.json());
 
-			if(data){
+			if (data) {
 				setQueuedTransactions(data);
 				setLoading(false);
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeMultisig, network]);
 
 	useEffect(() => {
 		fetchQueuedTransactions();
 	}, [fetchQueuedTransactions, refetch]);
 
-	if(loading) return <Loader size='large'/>;
+	if (loading) return <Loader size='large' />;
 
 	return (
 		<>
 			{(queuedTransactions && queuedTransactions.length > 0) ? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
-					
+
 					return <section id={transaction.callHash} key={index}>
 						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
 							{created_at}
@@ -113,7 +113,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 						/>
 					</section>;
 				})}
-			</div>: <NoTransactionsQueued/>}
+			</div> : <NoTransactionsQueued />}
 		</>
 	);
 };

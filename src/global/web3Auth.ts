@@ -4,13 +4,13 @@
 
 import { CHAIN_NAMESPACES } from '@web3auth/base';
 import { MetamaskAdapter } from '@web3auth/metamask-adapter';
-import { Web3Auth } from '@web3auth/modal';
+import { Web3Auth, Web3AuthOptions } from '@web3auth/modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import { TorusWalletAdapter } from '@web3auth/torus-evm-adapter';
 import { TorusWalletConnectorPlugin } from '@web3auth/torus-wallet-connector-plugin';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
-export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY' ;
+export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY';
 export const WEB3AUTH_SECRET = '55e08332b03eda3a300c8efa461c80ddaf4acb97f4678fceb5d84fb5502e0066';
 
 export const webAuth = new Web3Auth({
@@ -54,7 +54,7 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 		whiteLabel: {
 			logoDark: 'https://web3auth.io/images/w3a-L-Favicon-1.svg', //@TODO
 			logoLight: 'https://web3auth.io/images/w3a-D-Favicon-1.svg',
-			theme: {  colors: { primary: '#00a8ff' }, isDark: true }
+			theme: { colors: { primary: '#00a8ff' }, isDark: true }
 		}
 	}
 });
@@ -78,3 +78,17 @@ export const metamaskAdapter = new MetamaskAdapter({
 export const torusWalletAdapter = new TorusWalletAdapter({
 	clientId: WEB3AUTH_CLIENT_ID
 });
+
+export const options: Web3AuthOptions = {
+	clientId: WEB3AUTH_CLIENT_ID,
+	web3AuthNetwork: 'testnet',
+	chainConfig: {
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		chainId: '0x5',
+		rpcTarget: 'https://rpc.ankr.com/eth_goerli'
+	},
+	uiConfig: {
+		theme: 'dark',
+		loginMethodsOrder: ['google', 'facebook']
+	}
+};

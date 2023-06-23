@@ -19,16 +19,14 @@ import {
 } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
-import _createMultisig from './utlils/_createMultisig';
 import '@polkadot/api-augment';
 import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
-import { chainProperties, networks } from './constants/network_constants';
+import { chainProperties } from './constants/network_constants';
 import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
 import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
-import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
 import decodeCallData from './utlils/decodeCallData';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
@@ -58,7 +56,7 @@ const corsHandler = cors({ origin: true });
 const isValidRequest = async (address?: string, signature?: string, network?: string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
 	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_headers };
-	if (!Object.values(networks).includes(network)) return { isValid: false, error: responseMessages.invalid_network };
+	// if (!Object.values(networks).includes(network)) return { isValid: false, error: responseMessages.invalid_network };
 
 	const isValid = await isValidSignature(signature, address);
 	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };

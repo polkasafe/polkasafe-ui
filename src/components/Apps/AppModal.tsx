@@ -5,7 +5,7 @@ import React from 'react';
 import subid from 'src/assets/subid.svg';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useModalContext } from 'src/context/ModalContext';
-import { networks } from 'src/global/networkConstants';
+import { NETWORK } from 'src/global/networkConstants';
 import { ArrowRightIcon } from 'src/ui-components/CustomIcons';
 const AppModal = () => {
 	const { setIframeVisibility } = useGlobalDAppContext();
@@ -23,7 +23,7 @@ const AppModal = () => {
 					<div className='mt-5 flex flex-col gap-3'>
 						<div className='text-[#8B8B8B] font-medium text-base text-14 leading-tight font-archivo'>Available networks</div>
 						<div className='flex gap-2 flex-wrap max-w-[400px]'>
-							{Object.values(networks).map((net) =>
+							{Object.values(NETWORK).map((net) =>
 								<button key={net} className='rounded-lg py-2 px-[10px] text-sm leading-[15px] text-white text-primary bg-highlight'> {net} </button>
 							)}
 						</div>

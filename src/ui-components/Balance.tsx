@@ -5,7 +5,6 @@
 import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useGlobalWeb3Context } from 'src/context';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import formatBnBalance from 'src/utils/formatBnBalance';
 
 interface Props {
@@ -14,8 +13,7 @@ interface Props {
 	onChange?: (balance: string) => void
 }
 
-const Balance = ({ address, className, onChange }: Props) => {
-	const { api, apiReady, network } = useGlobalApiContext();
+const Balance = ({ address, className }: Props) => {
 
 	const { ethProvider } = useGlobalWeb3Context();
 
@@ -33,26 +31,13 @@ const Balance = ({ address, className, onChange }: Props) => {
 	};
 
 	useEffect(() => {
-		if (address.startsWith('0x')) {
-			fetchEthBalance(address);
-		} else {
-			if (!api || !apiReady || !address) return;
-
-			api.query?.system?.account(address).then(res => {
-				const balanceStr = res?.data?.free?.toString() || '0';
-				setBalance(balanceStr);
-				if (onChange) {
-					onChange(balanceStr);
-				}
-			}).catch(e => console.error(e));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [address, api, apiReady]);
+		if (address) fetchEthBalance(address);
+	}, [address]);
 
 	return (
 		<div className={`bg-highlight rounded-lg px-[10px] py-[6px] ml-auto font-normal text-xs leading-[13px] flex items-center justify-center ${className}`}>
 			<span className='text-primary mr-2'>Balance: </span>
-			<span className='text-white'>{formatBnBalance(balance, { numberAfterComma: 4, withUnit: true }, network)}</span>
+			<span className='text-white'>{ethers.utils.parseUnits(balance.toString(), 'ether').toString()}</span>
 		</div>
 	);
 };

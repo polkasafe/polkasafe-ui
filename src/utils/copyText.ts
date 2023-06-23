@@ -23,20 +23,13 @@ const showMessage = (): void => {
 		duration: 3,
 		style: {
 			position: 'fixed',
-			right:0
+			right: 0
 		},
 		type: 'success'
 	});
 };
 
-export default function copyText(text: string, isAddress?: boolean, network?: string) {
-
-	let textToCopy = text;
-
-	if (isAddress && network) {
-		textToCopy = getEncodedAddress(text, network) || '';
-	}
-
-	navigator.clipboard.writeText(`${textToCopy}`);
+export default function copyText(text: string) {
+	navigator.clipboard.writeText(`${text}`);
 	showMessage();
 }

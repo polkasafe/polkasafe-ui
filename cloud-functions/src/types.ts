@@ -1,5 +1,3 @@
-import { KeypairType } from '@polkadot/util-crypto/types';
-
 export interface IAddressBookItem {
 	name: string;
 	address: string;
@@ -37,12 +35,14 @@ export interface IMultisigAddress {
 
 export interface ChainProperties {
 	[network: string]: {
-		ss58Format: number;
-		tokenDecimals: number;
-		tokenSymbol: string;
-		blockTime: number;
-		keyringType?: KeypairType;
-		rpcEndpoint: string;
+		blockExplorer: string;
+		chainId: string;
+		chainNamespace: string;
+		decimals: number;
+		displayName: string;
+		rpcTarget: string;
+		ticker: string;
+		tickerName: string
 	};
 }
 

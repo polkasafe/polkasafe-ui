@@ -2,19 +2,18 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import '@polkadot/api-augment';
-
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider } from '@web3auth/base';
+import { SafeEventEmitterProvider } from '@web3auth/base';
 import { Web3Auth } from '@web3auth/modal';
 import { getWalletConnectV2Settings, WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter';
 import { ethers } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import Web3 from 'web3';
 
 import { metamaskAdapter, openloginAdapter, torusPlugin, torusWalletAdapter, webAuth } from '../global';
 
-export interface ApiContextType {
+export interface Web3AuthContextType {
 	web3Auth: Web3Auth | null,
 	login: any,
 	logout: any,
@@ -24,11 +23,12 @@ export interface ApiContextType {
 	web3AuthUser: Web3AuthUser | null,
 	signMessage: any,
 	switchChain: any,
-	ethProvider: any,
-	provider: any,
+	ethProvider: any | null,
+	provider: SafeEventEmitterProvider | null,
 	addChain: any,
 	sendNativeToken: any
-	web3Provider: any
+	web3Provider: Web3 | null
+	handleWeb3AuthConnection: any
 }
 
 export interface Web3AuthUser {
@@ -37,7 +37,7 @@ export interface Web3AuthUser {
 	accounts: [string]
 }
 
-export const Web3AuthContext: React.Context<ApiContextType> = React.createContext(
+export const Web3AuthContext: React.Context<Web3AuthContextType> = React.createContext(
 	{} as any
 );
 
@@ -46,7 +46,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
 	const [web3AuthUser, setWeb3AuthUser] = useState<Web3AuthUser | null>(null);
 	const [ethProvider, setEthProvider] = useState<any | null>(null);
-	const [web3Provider, setWeb3Provider] = useState<any | null>(null);
+	const [web3Provider, setWeb3Provider] = useState<Web3 | null>(null);
 
 	useEffect(() => {
 		const init = async () => {
@@ -73,77 +73,72 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 				await webAuth.initModal();
 			} catch (err) {
 				console.log(`Error from web3Auth init func - ${err}`);
-				if (err.code === 5007) {
-					//handleWeb3AuthConnection();
-				}
 			}
-
 		};
 
 		init();
 	}, []);
 
-	const handleWeb3AuthConnection = async () => {
+	useEffect(() => {
+		if (web3Auth) {
+			console.log('web3Auth running');
+			login();
+		}
+	}, [web3Auth]);
+
+	useEffect(() => {
+		if (provider) getUserInfo(provider);
+	}, [provider]);
+
+	useEffect(() => {
+		const web3Providers = async () => {
+			const web = new Web3(provider!);
+			setWeb3Provider(web);
+
+			const ethersProvider = new ethers.providers.Web3Provider(provider!);
+			setEthProvider(ethersProvider);
+		};
+		if (provider) web3Providers();
+	}, [provider]);
+
+	const handleWeb3AuthConnection = async (ethProvider: any): Promise<any | null> => {
+		const signer = ethProvider.getSigner();
+
 		const tokenResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/getConnectAddressTokenEth`, {
-			headers: {
-				'x-address': web3AuthUser!.accounts[0]
-			},
+			headers: firebaseFunctionsHeader('goerli', await signer.getAddress()),
 			method: 'POST'
 		});
 
 		const { data: token, error: tokenError } = await tokenResponse.json();
 
 		if (!tokenError) {
-			const signature = await signMessage(token);
+			const signature = await signMessage(token, ethProvider);
 
-			const { data: userData } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, { //@TODO error handling
-				headers: {
-					'Accept': 'application/json',
-					'Acess-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-signature': signature,
-					'x-source': 'polkasafe'
-				},
-				method: 'POST'
-			}).then(res => res.json());
+			if (signature) {
+				const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+					headers: firebaseFunctionsHeader('goerli', await signer.getAddress(), signature),
+					method: 'POST'
+				}).then(res => res.json());
 
-			localStorage.setItem('address', web3AuthUser!.accounts[0]);
-			localStorage.setItem('signature', signature);
-			console.log('yash data', userData);
-
+				localStorage.setItem('address', await signer.getAddress());
+				localStorage.setItem('signature', signature);
+				return data;
+			}
 		}
 	};
 
-	useEffect(() => {
-		console.log('yash web3Auth', web3Auth);
-		if(web3Auth) login();
-
-	}, [ web3Auth, web3Auth]);
-
-	useEffect(() => {
-		const web3 = async () => {
-			console.log('running web3');
-			const web = new Web3(provider!);
-			setWeb3Provider(web);
-		};
-		web3();
-	}, [provider]);
-
-	const login = async () => {
+	const login = async (): Promise<string | null> => {
 		if (!web3Auth) {
 			console.log('Web3 Auth not installed');
-			return;
+			return null;
 		}
-
-		try{
+		try {
 			const web3authProvider = await web3Auth.connect();
 			setProvider(web3authProvider);
-			await getUserInfo(web3authProvider!);
-			await handleWeb3AuthConnection();
-		}catch (err) {
+			return await getUserInfo(web3authProvider!);
+		} catch (err) {
 			console.log(`Error from login: ${err}`);
+			return null;
 		}
 	};
 
@@ -168,7 +163,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const getUserInfo = async (givenProvider?: SafeEventEmitterProvider): Promise<any | null> => {
 		if (!web3Auth) {
 			console.log('Web3 Auth not installed');
-			return;
+			return null;
 		}
 		const user = await web3Auth.getUserInfo();
 
@@ -184,13 +179,20 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 				email: user.email || '',
 				name: user.name || ''
 			});
-			return user;
+
+			return ethersProvider;
 		} catch (err) {
 			console.log(err, 'err from getUserInfo');
+			return null;
 		}
 	};
 
-	const signMessage = async (message: string): Promise<string> => {
+	const signMessage = async (message: string, ethProvider: any): Promise<string | null> => {
+		if (!ethProvider) {
+			console.log('provider not initialized yet signMessage');
+			return null;
+		}
+
 		try {
 			const signer = ethProvider.getSigner();
 
@@ -200,9 +202,13 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		}
 	};
 
-	const getChainId = async (): Promise<number> => {
+	const getChainId = async (): Promise<number | null> => {
+		if (!provider || !web3Auth || !ethProvider) {
+			console.log('provider not initialized yet');
+			return null;
+		}
 		const { chainId } = await (ethProvider.getNetwork());
-		console.log('yash chainId', chainId);
+
 		return chainId;
 	};
 
@@ -218,27 +224,16 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		}
 	};
 
-	const addChain = async () => {
+	const addChain = async (newChain: any) => {
 		if (!provider || !web3Auth) {
 			console.log('provider not initialized yet');
 			return;
 		}
-		const newChain = {
-			blockExplorer: 'https://goerli.etherscan.io',
-			chainId: '0x5',
-			chainNamespace: CHAIN_NAMESPACES.EIP155,
-			decimals: 18,
-			displayName: 'Goerli',
-			rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
-			ticker: 'ETH',
-			tickerName: 'Goerli'
-		};
 		await web3Auth.addChain(newChain);
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const sendNativeToken = async (destination: string, _amount: string) => {
-		if (!provider || !web3Auth) {
+	const sendNativeToken = async (destination: string, amount: string) => {
+		if (!provider || !web3Auth || !ethProvider) {
 			console.log('provider not initialized yet');
 			return;
 		}
@@ -246,17 +241,15 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		const signer = ethProvider.getSigner();
 
 		const tx = await signer.sendTransaction({
-			// maxFeePerGas: '1',
-			// maxPriorityFeePerGas: '1',
 			to: destination,
-			value: 1000000000000000
+			value: amount
 		});
 
 		return await tx.wait();
 	};
 
 	return (
-		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, login, logout, provider, sendNativeToken, signMessage, switchChain, web3Auth, web3AuthUser, web3Provider }}>
+		<Web3AuthContext.Provider value={{ addChain, authenticateUser, ethProvider, getChainId, getUserInfo, handleWeb3AuthConnection, login, logout, provider, sendNativeToken, signMessage, switchChain, web3Auth, web3AuthUser, web3Provider }}>
 			{children}
 		</Web3AuthContext.Provider>
 	);

@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { encodeAddress } from '@polkadot/util-crypto';
-import { chainProperties } from 'src/global/networkConstants';
 
 /**
  * Return an address encoded for the current network
@@ -13,16 +12,16 @@ import { chainProperties } from 'src/global/networkConstants';
  *
  */
 export default function getEncodedAddress(address: string, network: string): string | null {
-	const ss58Format = chainProperties?.[network]?.ss58Format;
+	const ss58Format = 1;
 
 	if (!network || ss58Format === undefined) {
 		return null;
 	}
 
-	try{
+	try {
 		return encodeAddress(address, ss58Format);
-	} catch(e) {
-		console.error('getEncodedAddress error', e);
+	} catch (e) {
+		//console.error('getEncodedAddress error', e);
 		return null;
 	}
 }

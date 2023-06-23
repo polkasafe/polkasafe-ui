@@ -28,7 +28,7 @@ import styled from 'styled-components';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
-	const { api, apiReady, network } = useGlobalApiContext();
+	const { network } = useGlobalApiContext();
 	const { activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
@@ -81,21 +81,8 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 			const rec = await sendNativeToken(activeMultisig, amount);
 			console.log('yash rec', rec);
 		} else {
-			if (!api || !apiReady) return;
-
-			await setSigner(api, loggedInWallet);
-
 			setLoading(true);
 			try {
-				await transferFunds({
-					amount: amount,
-					api,
-					network,
-					recepientAddress: activeMultisig,
-					senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
-					setLoadingMessages,
-					setTxnHash
-				});
 				setLoading(false);
 				setSuccess(true);
 			} catch (error) {
@@ -170,7 +157,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 														defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
 													/>
 													<div className='absolute right-2'>
-														<button onClick={() => copyText(selectedSender, true, network)}>
+														<button onClick={() => copyText(selectedSender)}>
 															<CopyIcon className='mr-2 text-primary' />
 														</button>
 														<QrModal />
@@ -213,7 +200,6 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
 									<ModalBtn
 										disabled={false}
-										//!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))
 										loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
