@@ -137,7 +137,7 @@ export default async function proposalStatusChanged(args: Args) {
 			}
 		);
 
-		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER}, post ${postId}, postType ${firestorePostType}, network ${network}`);
+		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER}, post ${postId}, postType ${firestorePostType}, network ${network} and status ${statusName}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
 }

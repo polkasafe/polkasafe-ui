@@ -54,6 +54,12 @@ export class NotificationService {
 			to: userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.handle
 		};
 
+		console.log('Sending email : ', {
+			handle: userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.handle,
+			source: this.source,
+			trigger: this.trigger
+		});
+
 		sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
 	}
 
@@ -69,6 +75,12 @@ export class NotificationService {
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
+		console.log('Sending Telegram notification : ', {
+			handle: chatId,
+			source: this.source,
+			trigger: this.trigger
+		});
+
 		bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
@@ -80,6 +92,12 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
 		) return;
+
+		console.log('Sending Discord notification : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
+			source: this.source,
+			trigger: this.trigger
+		});
 
 		await sendDiscordMessage(
 			this.source,
@@ -98,7 +116,7 @@ export class NotificationService {
 		const roomId = userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle;
 
 		const requestBody = {
-			roomId: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle,
+			roomId,
 			body: this.message,
 			messageType: 'text'
 		};
@@ -106,6 +124,12 @@ export class NotificationService {
 		const config = {
 			headers: { 'Authorization': `Bearer ${ELEMENT_API_KEY}` }
 		};
+
+		console.log('Sending Element notification : ', {
+			handle: roomId,
+			source: this.source,
+			trigger: this.trigger
+		});
 
 		try {
 			await axios.post('https://api.element.io/v1/rooms/' + roomId + '/send', requestBody, config);
@@ -123,6 +147,12 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
 		) return;
 		try {
+			console.log('Sending slack notification : ', {
+				handle: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
+				source: this.source,
+				trigger: this.trigger
+			});
+
 			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.markdownMessage);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
