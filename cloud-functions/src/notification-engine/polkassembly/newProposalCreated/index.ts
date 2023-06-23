@@ -80,7 +80,7 @@ export default async function newProposalCreated(args: Args) {
 
 		const networkRef = firestore_db.collection('networks').doc(network);
 
-		const postDoc = await networkRef.collection('post_types').doc(postType as EPAProposalType).collection('posts').doc(String(postId)).get();
+		const postDoc = await networkRef.collection('post_types').doc(firestorePostType as EPAProposalType).collection('posts').doc(String(postId)).get();
 		const postDocData = postDoc.data();
 		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
