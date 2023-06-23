@@ -35,11 +35,21 @@ export class NotificationService {
 	}
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
+		console.log('sendEmailNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.verified
+		});
+
 		if (!SENDGRID_API_KEY ||
-			(!isVerificationEmail && !userNotificationPreferences?.triggerPreferences?.[this.trigger]?.enabled)||
+			(!isVerificationEmail && !userNotificationPreferences?.triggerPreferences?.[this.trigger]?.enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified)
-		) return;
+		) {
+			console.log('sendEmailNotification returning as conditions not met');
+			return;
+		}
 
 		const FROM = {
 			email: NOTIFICATION_SOURCE_EMAIL[this.source],
@@ -64,12 +74,22 @@ export class NotificationService {
 	}
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendTelegramNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.verified
+		});
+
 		const SOURCE_TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN[this.source];
 
 		if (!SOURCE_TELEGRAM_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled
-		) return;
+		) {
+			console.log('sendTelegramNotification returning as conditions not met');
+			return;
+		}
 
 		const bot = new TelegramBot(SOURCE_TELEGRAM_BOT_TOKEN, { polling: false });
 
@@ -85,13 +105,23 @@ export class NotificationService {
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendDiscordNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.verified
+		});
+
 		const SOURCE_DISCORD_BOT_TOKEN = DISCORD_BOT_SECRETS[this.source].token;
 
 		if (!SOURCE_DISCORD_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
-		) return;
+		) {
+			console.log('sendDiscordNotification returning as conditions not met');
+			return;
+		}
 
 		console.log('Sending Discord notification : ', {
 			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
@@ -108,10 +138,20 @@ export class NotificationService {
 	}
 
 	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendElementNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.verified
+		});
+
 		if (!ELEMENT_API_KEY ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.enabled
-		) return;
+		) {
+			console.log('sendElementNotification returning as conditions not met');
+			return;
+		}
 
 		const roomId = userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle;
 
@@ -139,13 +179,23 @@ export class NotificationService {
 	}
 
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendSlackNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.verified
+		});
+
 		const SOURCE_SLACK_BOT_TOKEN = SLACK_BOT_TOKEN[this.source];
 
 		if (!SOURCE_SLACK_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
-		) return;
+		) {
+			console.log('sendSlackNotification returning as conditions not met');
+			return;
+		}
 		try {
 			console.log('Sending slack notification : ', {
 				handle: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
