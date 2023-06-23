@@ -117,7 +117,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 				successMessage='Transaction Successful!'
 				amount={amount}
 				sender={selectedSender}
-				recipient={activeMultisig}
+				recipients={[activeMultisig]}
 				created_at={new Date()}
 				txnHash={txnHash}
 				onDone={() => {

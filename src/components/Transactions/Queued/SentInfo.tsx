@@ -27,7 +27,8 @@ import EditNote from './EditNote';
 import NotifyButton from './NotifyButton';
 
 interface ISentInfoProps {
-	amount: string;
+	amount: string | string[];
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	amountUSD: string;
 	date: string;
 	// time: string;
@@ -38,7 +39,7 @@ interface ISentInfoProps {
 	callHash: string;
 	callData: string;
 	callDataString: string;
-	recipientAddress?: string;
+	recipientAddress?: string | string[];
 	setCallDataString: React.Dispatch<React.SetStateAction<string>>
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
@@ -52,7 +53,7 @@ interface ISentInfoProps {
 	customTx?:boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -130,75 +131,140 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
 				{ recipientAddress && amount ?
-					<>
-						<p
-							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-						>
-							<span>
+					(typeof recipientAddress === 'string' && typeof amount === 'string') ?
+						<>
+							<p
+								className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+							>
+								<span>
 							Send
-							</span>
-							<span
-								className='text-failure'
-							>
-								{amount ? parseDecodedValue({
-									network,
-									value: String(amount),
-									withUnit: true
-								}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
-									network,
-									value: String(amount),
-									withUnit: false
-								}))).toFixed(2)} USD)</span>}
-							</span>
-							<span>
-							To:
-							</span>
-						</p>
-						<div
-							className='mt-3 flex items-center gap-x-4'
-						>
-							{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
-							<div
-								className='flex flex-col gap-y-[6px]'
-							>
-								<p
-									className='font-medium text-sm leading-[15px] text-white'
+								</span>
+								<span
+									className='text-failure'
 								>
-									{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
-								</p>
-								{recipientAddress &&
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span>
-								{getEncodedAddress(recipientAddress, network)}
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
+									{amount ? parseDecodedValue({
+										network,
+										value: String(amount),
+										withUnit: true
+									}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+										network,
+										value: String(amount),
+										withUnit: false
+									}))).toFixed(2)} USD)</span>}
+								</span>
+								<span>
+							To:
+								</span>
+							</p>
+							<div
+								className='mt-3 flex items-center gap-x-4'
 							>
-								<button onClick={() => copyText(recipientAddress, true, network)}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
-									<ExternalLinkIcon />
-								</a>
-							</span>
-						</p>}
+								{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
+								<div
+									className='flex flex-col gap-y-[6px]'
+								>
+									<p
+										className='font-medium text-sm leading-[15px] text-white'
+									>
+										{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+									</p>
+									{recipientAddress &&
+										<p
+											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+										>
+											<span>
+												{getEncodedAddress(recipientAddress, network)}
+											</span>
+											<span
+												className='flex items-center gap-x-2 text-sm'
+											>
+												<button onClick={() => copyText(recipientAddress, true, network)}><CopyIcon className='hover:text-primary'/></button>
+												<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
+													<ExternalLinkIcon />
+												</a>
+											</span>
+										</p>}
+								</div>
 							</div>
+						</>
+						:
+						<div className='flex flex-col gap-y-1' >
+							{Array.isArray(recipientAddress) && recipientAddress.map((item, i) => (
+								<>
+									<p
+										className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+									>
+										<span>
+											Send
+										</span>
+										<span
+											className='text-failure'
+										>
+											{amount[i] ? parseDecodedValue({
+												network,
+												value: String(amount[i]),
+												withUnit: true
+											}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount[i] && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+												network,
+												value: String(amount[i]),
+												withUnit: false
+											}))).toFixed(2)} USD)</span>}
+										</span>
+										<span>
+											To:
+										</span>
+									</p>
+									<div
+										className='mt-3 flex items-center gap-x-4'
+									>
+										{item && <Identicon size={30} theme='polkadot' value={item} />}
+										<div
+											className='flex flex-col gap-y-[6px]'
+										>
+											<p
+												className='font-medium text-sm leading-[15px] text-white'
+											>
+												{recipientAddress ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+											</p>
+											{recipientAddress &&
+											<p
+												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+											>
+												<span>
+													{getEncodedAddress(item, network)}
+												</span>
+												<span
+													className='flex items-center gap-x-2 text-sm'
+												>
+													<button onClick={() => copyText(item, true, network)}><CopyIcon className='hover:text-primary'/></button>
+													<a href={`https://${network}.subscan.io/account/${getEncodedAddress(item, network)}`} target='_blank' rel="noreferrer" >
+														<ExternalLinkIcon />
+													</a>
+												</span>
+											</p>}
+										</div>
+									</div>
+									{recipientAddress.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
+								</>
+							))}
 						</div>
-					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading || customTx ? <></>
-						: <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
+					: isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading || customTx ? <></>
+						:
+						<section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
 							<span>
 								<WarningCircleIcon className='text-base' />
 							</span>
 							<p className=''>
 								Transaction was not created on Polkasafe, enter call data to fetch this data.
 							</p>
-						</section>}
+						</section>
+				}
 				{!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
 				}
 				{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && <Divider className='bg-text_secondary my-5' />}
 				<div
-					className='flex items-center gap-x-5 mt-3'
+					className='flex items-center gap-x-5 justify-between mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -217,7 +283,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 				</div>
 				{depositor &&
 					<div
-						className='flex items-center gap-x-5 mt-3'
+						className='flex items-center gap-x-5 justify-between mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -227,8 +293,40 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 						<AddressComponent address={depositor} />
 					</div>
 				}
+				{!!transactionFields && Object.keys(transactionFields).length !== 0 && transactionFields.category !== 'none' &&
+				<>
+					<div
+						className='flex items-center justify-between mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Category:
+						</span>
+						<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
+							{transactionFields?.category}
+						</span>
+					</div>
+					{transactionFields && transactionFields.subfields && Object.keys(transactionFields?.subfields).map((key) => {
+						const subfield = transactionFields.subfields[key];
+						return (
+							<div
+								key={key}
+								className='flex items-center justify-between mt-3'
+							>
+								<span
+									className='text-text_secondary font-normal text-sm leading-[15px]'
+								>
+									{subfield.name}:
+								</span>
+								<span className='text-waiting bg-waiting bg-opacity-5 border border-solid border-waiting rounded-lg px-[6px] py-[3px]'>
+									{subfield.value}
+								</span>
+							</div>
+						);})}
+				</>}
 				<div
-					className='flex items-center gap-x-5 mt-3'
+					className='flex items-center gap-x-5 justify-between mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -257,7 +355,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 				{showDetails &&
 				<>
 					<div
-						className='flex items-center gap-x-5 mt-3'
+						className='flex items-center gap-x-5 justify-between mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -280,7 +378,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 							</span>
 						</p>
 					</div>
-					{callData && <div className='flex items-center gap-x-5 mt-3'>
+					{callData && <div className='flex items-center gap-x-5 justify-between mt-3'>
 						<span className='text-text_secondary font-normal text-sm leading-[15px]'>Call Data:</span>
 						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
 							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
@@ -290,7 +388,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 						</p>
 					</div>}
 					{delegate_id &&
-					<div className='flex items-center gap-x-5 mt-3'>
+					<div className='flex items-center gap-x-5 justify-between mt-3'>
 						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
 							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
 						</span>

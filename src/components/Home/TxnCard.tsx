@@ -160,6 +160,19 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
 									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
 
+								let batchCallRecipients: string[] = [];
+								if(decodedCallData && decodedCallData?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
+								else if(decodedCallData && decodedCallData?.args?.call?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.call?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.callHash}`} key={i} className="flex items-center pb-2 mb-2">
 										<div className="flex flex-1 items-center">
@@ -172,13 +185,19 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 													<ReloadOutlined />
 												</div>}
 											<div className='ml-3'>
-												<h1 className='text-md text-white'>
-													{ decodedCallData && !isProxyApproval ? <span title={destSubstrateAddress || ''}>To: {toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+												<h1 className='text-md text-white truncate'>
+													{ decodedCallData && !isProxyApproval ? <span>To: {batchCallRecipients ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
 												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
 											</div>
 										</div>
 										{!isProxyApproval &&
+										transaction?.totalAmount ?
+											<div>
+												<h1 className='text-md text-white'>- {transaction.totalAmount} {chainProperties[network].tokenSymbol}</h1>
+												{!isNaN(Number(amountUSD)) && <p className='text-text_secondary text-right text-xs'>{(Number(amountUSD) * Number(transaction.totalAmount)).toFixed(2)} USD</p>}
+											</div>
+											:
 											<div>
 												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
 												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
@@ -221,7 +240,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
 											<div>
 												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.to, network))?.name || shortenAddress(getEncodedAddress(transaction.to, network) || '')}</h1>
+													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(String(transaction.to), network))?.name || shortenAddress(getEncodedAddress(String(transaction.to), network) || '')}</h1>
 													:
 													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.from, network))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}

@@ -46,6 +46,38 @@ export enum Triggers {
 	APPROVAL_REMINDER = 'approvalReminder'
 }
 
+export interface IDropdownOptions{
+	optionName: string,
+	archieved?: boolean
+}
+
+export enum EFieldType{
+	SINGLE_SELECT = 'Single-select',
+	// MULTI_SELECT = 'Multi-select',
+	TEXT = 'Text'
+	// NUMBER = 'Number',
+	// DATE = 'Date/Date-range',
+	// LINK = 'link',
+	// ATTACHMENT = 'Attachment'
+}
+
+export interface ITransactionCategorySubfields{
+	[subfield: string]: {
+		subfieldName: string;
+		subfieldType: EFieldType;
+		required: boolean;
+		dropdownOptions?: IDropdownOptions[]
+	}
+}
+
+export interface ITransactionFields{
+	[field: string]: {
+		fieldName: string,
+		fieldDesc: string,
+		subfields: ITransactionCategorySubfields
+	}
+}
+
 export interface UserDetailsContextType {
 	loggedInWallet: Wallet;
     activeMultisig: string;
@@ -58,6 +90,7 @@ export interface UserDetailsContextType {
     addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
+	transactionFields: ITransactionFields
 }
 
 export enum Wallet {
@@ -113,6 +146,7 @@ export interface IUser {
 	multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
 	notification_preferences: IUserNotificationPreferences;
+	transactionFields?: ITransactionFields
 }
 
 export interface IMultisigAddress {
@@ -146,6 +180,8 @@ export interface ITxNotification {
 }
 
 export interface IQueueItem {
+	totalAmount?: string
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	callData: string;
 	callHash: string;
 	network: string;
@@ -163,11 +199,11 @@ export interface ITransaction {
 	created_at: Date;
 	block_number: number;
 	from: string;
-	to: string;
+	to: string | string[];
 	id: string;
 	token: string;
 	amount_usd: number;
-	amount_token: number;
+	amount_token: number | number[];
 	network: string;
 	note?: string;
 	notifications?: {

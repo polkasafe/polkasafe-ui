@@ -4,7 +4,7 @@
 
 import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Button, Modal,Tooltip } from 'antd';
+import { Button, Modal,Skeleton,Tooltip } from 'antd';
 import { Spin } from 'antd';
 import React, { FC, useCallback, useEffect,useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
@@ -204,22 +204,24 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					</div>
 				</div>
 				<div className="flex gap-x-5 flex-wrap text-xs">
-					<div>
-						<div className='text-white'>Signatories</div>
-						<div className='font-bold text-lg text-primary'>
-							{signatureLoader ? <Spin size='default' /> : currentMultisig?.signatories.length || 0}
+					{assetDataLoader ? <Skeleton paragraph={{ rows: 1, width: 150 }} active /> : <>
+						<div>
+							<div className='text-white'>Signatories</div>
+							<div className='font-bold text-lg text-primary'>
+								{signatureLoader ? <Spin size='default' /> : currentMultisig?.signatories.length || 0}
+							</div>
 						</div>
-					</div>
-					<div>
-						<div className='text-white'>Tokens</div>
-						<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size='default' /> : assetsData.length}</div>
-					</div>
-					<div>
-						<div className='text-white'>USD Amount</div>
-						<div className='font-bold text-lg text-primary'>
-							{assetDataLoader ? <Spin size='default' /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
+						<div>
+							<div className='text-white'>Tokens</div>
+							<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size='default' /> : assetsData.length}</div>
 						</div>
-					</div>
+						<div>
+							<div className='text-white'>USD Amount</div>
+							<div className='font-bold text-lg text-primary'>
+								{assetDataLoader ? <Spin size='default' /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
+							</div>
+						</div>
+					</>}
 				</div>
 				<div className="flex justify-around w-full mt-5">
 					<TransactionModal/>
