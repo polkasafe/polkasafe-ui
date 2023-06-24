@@ -186,7 +186,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 												</div>}
 											<div className='ml-3'>
 												<h1 className='text-md text-white truncate'>
-													{ decodedCallData && !isProxyApproval ? <span>To: {batchCallRecipients ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+													{ decodedCallData && !isProxyApproval ? <span>To: {batchCallRecipients.length ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
 												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
 											</div>
