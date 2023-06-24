@@ -131,7 +131,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
 				{ recipientAddress && amount ?
-					(typeof recipientAddress === 'string' && typeof amount === 'string') ?
+					(typeof recipientAddress === 'string') ?
 						<>
 							<p
 								className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
