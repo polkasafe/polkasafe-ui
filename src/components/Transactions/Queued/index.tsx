@@ -2,17 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { EthersAdapter } from '@safe-global/protocol-kit';
 import dayjs from 'dayjs';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { GnosisSafeService } from 'src/services';
-import { IQueueItem } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 
@@ -29,15 +23,14 @@ interface IQueued {
 	setRefetch: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
+	const { activeMultisig, multisigAddresses, activeMultisigTxs } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	const [queuedTransactions, setQueuedTransactions] = useState<any[]>([]);
 	const location = useLocation();
 	const [amountUSD, setAmountUSD] = useState<string>('');
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		fetchTokenToUSDPrice(1, network).then((formattedUSD) => {
@@ -53,38 +46,10 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 		}
 	}, [location.hash, queuedTransactions]);
 
-	const fetchQueuedTransactions = useCallback(async () => {
-		try {
-			setLoading(true);
-
-			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAllTransaction`, { //@TODO error handling
-				headers: {
-					'Accept': 'application/json',
-					'Acess-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-multisig': activeMultisig,
-					'x-signature': localStorage.getItem('signature')!,
-					'x-source': 'polkasafe'
-				},
-				method: 'GET'
-			}).then(res => res.json());
-
-			if (data) {
-				setQueuedTransactions(data);
-				setLoading(false);
-			}
-		} catch (error) {
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, network]);
-
 	useEffect(() => {
-		fetchQueuedTransactions();
-	}, [fetchQueuedTransactions, refetch]);
+		const queue = activeMultisigTxs.filter((item: any) => (item.executed !== true && item.type !== 'fund'));
+		setQueuedTransactions(queue);
+	}, [activeMultisigTxs, refetch]);
 
 	if (loading) return <Loader size='large' />;
 
@@ -94,14 +59,12 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 				{queuedTransactions.map((transaction, index) => {
 
 					return <section id={transaction.callHash} key={index}>
-						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
-							{created_at}
-						</h4> */}
 						<Transaction
+							value={transaction.amount_token}
 							setQueuedTransactions={setQueuedTransactions}
 							date={dayjs(transaction.modified).format('llll')}
 							status={transaction.isExecuted ? 'Executed' : 'Approval'}
-							approvals={transaction.confimations || []}
+							approvals={transaction.signatures ? transaction.signatures.map((item: any) => item.address) : []}
 							threshold={multisig?.threshold || 0}
 							callData={transaction.data}
 							callHash={transaction.txHash}

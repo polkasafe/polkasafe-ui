@@ -17,7 +17,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
-import { IQueueItem,ITransaction } from 'src/types';
+import { IQueueItem, ITransaction } from 'src/types';
 import { ArrowUpRightIcon, RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
@@ -31,92 +31,38 @@ import shortenAddress from 'src/utils/shortenAddress';
 import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
 import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
 
-const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>>}) => {
+const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
-	const { activeMultisig, addressBook, multisigAddresses } = useGlobalUserDetailsContext();
-	const { api, apiReady, network } = useGlobalApiContext();
+	const { activeMultisig, multisigAddresses, activeMultisigTxs } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
+
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	const [transactions, setTransactions] = useState<any>();
 	const [queuedTransactions, setQueuedTransactions] = useState<any>([]);
+	const [completedTransactions, setCompletedTransactions] = useState<any>([]);
 
 	const [historyLoading, setHistoryLoading] = useState<boolean>(false);
 	const [queueLoading, setQueueLoading] = useState<boolean>(false);
 
 	const [amountUSD, setAmountUSD] = useState<string>('');
 
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig);
 
 	useEffect(() => {
-		const getTxs = async () => {
-			const signer = ethProvider.getSigner();
-			const ethAdapter = new EthersAdapter({
-				ethers: ethProvider,
-				signerOrProvider: signer
-			});
-			const txUrl = 'https://safe-transaction-goerli.safe.global';
-			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
-			setQueuedTransactions(pendingTxs);
-			const allTxs = await gnosisService.getAllCompletedTx(activeMultisig);
-			console.log('yash alltxs', allTxs);
-			setTransactions(allTxs);
-		};
+		const queued = activeMultisigTxs.filter((item: any) => item.executed !== true && item.type !== 'fund');
+		setQueuedTransactions(queued);
+		const complete = activeMultisigTxs.filter((item: any) => item.executed === true && item.type === 'fund');
+		setCompletedTransactions(complete);
+	}, [activeMultisig, activeMultisigTxs]);
 
-		getTxs();
-	}, [ethProvider, web3AuthUser]);
+	console.log(queuedTransactions, 'queuedTransactions');
 
 	useEffect(() => {
-		const getQueue = async () => {
-			try{
-				setQueueLoading(true);
-				const userAddress = localStorage.getItem('address');
-				const signature = localStorage.getItem('signature');
+		if (!userAddress || !signature || !activeMultisig) return;
 
-				if(!userAddress || !signature || !activeMultisig) {
-					setQueueLoading(false);
-					return;
-				}
-				else{
-
-					const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
-						body: JSON.stringify({
-							limit: 10,
-							multisigAddress: multisig?.address,
-							network,
-							page: 1
-						}),
-						headers: firebaseFunctionsHeader(network),
-						method: 'POST'
-					});
-
-					const { data: queueTransactions, error: queueTransactionsError } = await getQueueTransactions.json() as { data: IQueueItem[], error: string };
-
-					if(queueTransactionsError) {
-						setQueueLoading(false);
-						return;
-					}
-
-					if(queueTransactions){
-						setQueuedTransactions(queueTransactions);
-						setQueueLoading(false);
-					}
-
-				}
-			} catch (error){
-				console.log('ERROR', error);
-				setQueueLoading(false);
-			}
-		};
-
-		getQueue();
-	}, [activeMultisig, multisig?.address, network, newTxn]);
-
-	useEffect(() => {
-		if(!userAddress || !signature || !activeMultisig) return;
-
-		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+		fetchTokenToUSDPrice(1, network).then((formattedUSD) => {
 			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
 		});
 	}, [activeMultisig, network, signature, userAddress]);
@@ -130,30 +76,29 @@ const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatc
 						<h2 className="text-base font-bold text-white">Transaction Queue</h2>
 						<Link to="/transactions?tab=Queue" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
-							<RightArrowOutlined/>
+							<RightArrowOutlined />
 						</Link>
 					</div>
 
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto scale-90 w-[111%] origin-top-left">
 						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
-						{ queuedTransactions ? queuedTransactions.length > 0 ?
-							queuedTransactions.filter((_: any, i: number) => i < 10).map((transaction: {
-								safeTxHash: any; callHash: any;}, i: React.Key | null | undefined): any => {
+						{queuedTransactions ? queuedTransactions.length > 0 ?
+							queuedTransactions.filter((_: any, i: number) => i < 10).map((transaction, i): any => {
 								const tx = transaction as any;
 								return (
-									<Link to={`/transactions?tab=Queue#${transaction.safeTxHash}`} key={i} className="flex items-center pb-2 mb-2">
+									<Link to={`/transactions?tab=Queue#${transaction.txHash}`} key={i} className="flex items-center pb-2 mb-2">
 										<div className="flex flex-1 items-center">
 
 											<div className='bg-[#FF79F2] text-[#FF79F2] bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
 												<ArrowUpRightIcon />
 											</div>
-												:
+											:
 											<div className='bg-waiting text-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
 												<ReloadOutlined />
 											</div>
 											<div className='ml-3'>
 												<h1 className='text-md text-white'>
-													<span title={tx.to}>To: {tx.to}</span> : <span>Txn: {shortenAddress(tx.safeTxHash)}</span>
+													<span title={tx.to}>To: {tx.to}</span> : <span>Txn: {shortenAddress(tx.txHash)}</span>
 												</h1>
 												{/* <p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p> */}
 											</div>
@@ -165,10 +110,11 @@ const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatc
 										</div>
 
 										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
-											<ArrowRightOutlined/>
+											<ArrowRightOutlined />
 										</div>
 									</Link>
-								);})
+								);
+							})
 							:
 							<div className={'flex flex-col gap-y-5 items-center justify-center'}>
 								<img className={'block w-[250px] h-[140px]'} src={noTransactionsQueued} alt="Zero transaction icon" />
@@ -185,14 +131,14 @@ const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatc
 						<h2 className="text-base font-bold text-white">Transaction History</h2>
 						<Link to="/transactions?tab=History" className="flex items-center justify-center text-primary cursor-pointer">
 							<p className='mx-2 text-primary text-sm'>View All</p>
-							<RightArrowOutlined/>
+							<RightArrowOutlined />
 						</Link>
 					</div>
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 scale-90 w-[111%] origin-top-left overflow-auto">
 						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
-						{transactions ? transactions.length > 0  ?
-							transactions.filter((_: any, i: number) => i < 10).map((transaction: { callHash: any; to: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined; value: any; }, i: React.Key | null | undefined) => {
+						{completedTransactions ? completedTransactions.length > 0 ?
+							completedTransactions.filter((_: any, i: number) => i < 10).map((transaction: { callHash: any; to: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined; value: any; }, i: React.Key | null | undefined) => {
 
 								return (
 									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
@@ -206,7 +152,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatc
 											</div>
 										</div>
 										<div>
-											{<h1 className='text-md text-failure'> {ethers.utils.parseUnits(`${transaction.value}`, 'ether').toString()} ETH</h1>}
+											{/* {<h1 className='text-md text-failure'> {ethers.utils.parseUnits(transaction.value, 'ether').toString()} ETH</h1>} */}
 										</div>
 									</Link>
 								);

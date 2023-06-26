@@ -859,14 +859,53 @@ export const updateTransaction = functions.https.onRequest(async (req, res) => {
 			const signatures = doc.data()?.signatures || [];
 
 			if (doc.exists) {
+				if (!signatures.map((item: any) => item.address).includes(signer)) {
+					query.update({
+						signatures: [
+							...signatures,
+							{
+								siganture: txSignature,
+								address: signer
+							}
+						]
+					});
+				}
+			}
+
+			return res.status(200).json({ message: 'updated' });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const completeTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		const { receipt, txHash } = req.body;
+
+		try {
+			const query = firestoreDB.collection('transactions').doc(txHash);
+			const doc = await query.get();
+			const signatures = doc.data()?.signatures || [];
+
+			if (doc.exists) {
 				query.update({
-					signatures: [
-						...signatures,
-						{
-							siganture: txSignature,
-							address: signer
-						}
-					]
+					receipt,
+					executed: true
 				});
 			}
 

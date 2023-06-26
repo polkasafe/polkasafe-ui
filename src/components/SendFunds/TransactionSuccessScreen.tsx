@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import BN from 'bn.js';
 import dayjs from 'dayjs';
+import { ethers } from 'ethers';
 import React from 'react';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import ModalBtn from 'src/components/Multisig/ModalBtn';
@@ -13,33 +14,32 @@ import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import shortenAddress from 'src/utils/shortenAddress';
 
-interface ITransactionSuccessScreen{
-    amount: BN
-    txnHash?: string
-    created_at: Date
-    sender: string
-    recipient: string
-    onDone?: () => void
-    successMessage: string
-    waitMessage?: string
+interface ITransactionSuccessScreen {
+	amount: ethers.BigNumber
+	txnHash?: string
+	created_at: Date
+	sender: string
+	recipient: string
+	onDone?: () => void
+	successMessage: string
+	waitMessage?: string
 }
 
 const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipient, onDone, successMessage, waitMessage }: ITransactionSuccessScreen) => {
-	const { network } = useGlobalApiContext();
 	return (
 		<div className='flex flex-col items-center'>
 			<SuccessTransactionLottie message={successMessage} waitMessage={waitMessage} />
 			<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg my-1 text-text_secondary'>
 				<div className='flex justify-between items-center'>
 					<span>Amount:</span>
-					<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 4, withUnit: true }, network)}</span>
+					<span className='text-failure'>-{ethers.utils.parseUnits(amount.toString(), 'ether').toString()}</span>
 				</div>
 				{txnHash &&
 					<div className='flex justify-between items-center'>
 						<span>Txn Hash:</span>
 						<div className='flex items-center gap-x-1'>
 							<span className='text-white'>{shortenAddress(txnHash)}</span>
-							<button onClick={() => copyText(txnHash, false, network)}>
+							<button onClick={() => copyText(txnHash)}>
 								<CopyIcon className='mr-2 text-primary' />
 							</button>
 						</div>

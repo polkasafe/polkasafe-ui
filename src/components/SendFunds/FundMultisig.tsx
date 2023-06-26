@@ -4,6 +4,7 @@
 import { AutoComplete, Form, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
+import { ethers } from 'ethers';
 import React, { FC, useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
@@ -35,7 +36,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const { web3AuthUser, sendNativeToken } = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
-	const [amount, setAmount] = useState(new BN(0));
+	const [amount, setAmount] = useState('0');
 	const [loading, setLoading] = useState(false);
 	const [showQrModal, setShowQrModal] = useState(false);
 	const [success, setSuccess] = useState(false);
@@ -44,6 +45,8 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [txnHash, setTxnHash] = useState<string>('');
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
+
+	console.log('amount', ethers.utils.parseUnits('1', 'ether'));
 
 	useEffect(() => {
 		if (!getSubstrateAddress(selectedSender)) {
@@ -54,62 +57,16 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 		}
 	}, [selectedSender]);
 
-	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: <AddressComponent name={account.name} address={account.address} />,
-		value: account.address
-	}));
-
-	const addSenderHeading = () => {
-		const elm = document.getElementById('recipient_list');
-		if (elm) {
-			const parentElm = elm.parentElement;
-			if (parentElm) {
-				const isElmPresent = document.getElementById('recipient_heading');
-				if (!isElmPresent) {
-					const recipientHeading = document.createElement('p');
-					recipientHeading.textContent = 'Addresses';
-					recipientHeading.id = 'recipient_heading';
-					recipientHeading.classList.add('recipient_heading');
-					parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
-				}
-			}
-		}
-	};
-
 	const handleSubmit = async () => {
-		if (web3AuthUser) {
-			const rec = await sendNativeToken(activeMultisig, amount);
-			console.log('yash rec', rec);
-		} else {
-			setLoading(true);
-			try {
-				setLoading(false);
-				setSuccess(true);
-			} catch (error) {
-				console.log(error);
-				setLoading(false);
-				setFailure(true);
-				setTimeout(() => setFailure(false), 5000);
-			}
-		}
-	};
-
-	const QrModal: FC = () => {
-		return (
-			<>
-				<button onClick={() => setShowQrModal(true)}><QRIcon className='text-text_secondary' /></button>
-				<Modal title={<span className='font-bold text-lg text-white' >Address QR</span>} onCancel={() => setShowQrModal(false)} open={showQrModal} footer={null}>
-					<AddressQr address={selectedSender} />
-				</Modal>
-			</>
-		);
+		await sendNativeToken(activeMultisig, ethers.utils.parseUnits(amount, 'ether'));
+		setSuccess(true);
 	};
 
 	return (
 		<>
 			{success ? <TransactionSuccessScreen
 				successMessage='Transaction Successful!'
-				amount={amount}
+				amount={ethers.utils.parseEther(amount)}
 				sender={selectedSender}
 				recipient={activeMultisig}
 				created_at={new Date()}
@@ -139,7 +96,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 									</div>
 									<div className='flex items-center gap-x-[10px]'>
 										<div className='w-full'>
-											<Form.Item
+											{/* <Form.Item
 												name="sender"
 												rules={[{ required: true }]}
 												help={!isValidSender && 'Please add a valid Address.'}
@@ -154,7 +111,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 														id='sender'
 														placeholder="Send from Address.."
 														onChange={(value) => setSelectedSender(value)}
-														defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
+														defaultValue={addressBook[0]?.address}
 													/>
 													<div className='absolute right-2'>
 														<button onClick={() => copyText(selectedSender)}>
@@ -163,7 +120,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 														<QrModal />
 													</div>
 												</div>
-											</Form.Item>
+											</Form.Item> */}
 										</div>
 									</div>
 								</section>

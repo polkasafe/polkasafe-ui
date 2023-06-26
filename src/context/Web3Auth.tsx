@@ -232,7 +232,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 		await web3Auth.addChain(newChain);
 	};
 
-	const sendNativeToken = async (destination: string, amount: string) => {
+	const sendNativeToken = async (destination: string, amount: ethers.BigNumber) => {
 		if (!provider || !web3Auth || !ethProvider) {
 			console.log('provider not initialized yet');
 			return;
@@ -242,7 +242,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 
 		const tx = await signer.sendTransaction({
 			to: destination,
-			value: amount
+			value: amount.toString()
 		});
 
 		return await tx.wait();

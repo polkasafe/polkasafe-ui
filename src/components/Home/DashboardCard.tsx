@@ -153,8 +153,8 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-lg text-primary'>
-							{/* {!activeMultisigData.assetBalance ? <Spin size='default' /> : activeMultisigData.assetBalance.toFixed(2) || 'N/A'} */}
-							0
+							{activeMultisigData.assetBalance || <Spin size='default' />}
+
 						</div>
 					</div>
 				</div>

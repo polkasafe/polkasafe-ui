@@ -53,17 +53,16 @@ interface ISendFundsFormProps {
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
-	const { api, apiReady, network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider , web3Provider} = useGlobalWeb3Context();
+	const { network } = useGlobalApiContext();
+	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
-	const [amount, setAmount] = useState(new BN(0));
+	const [amount, setAmount] = useState('0');
 	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '');
 	const [showQrModal, setShowQrModal] = useState(false);
-	const [callData, setCallData] = useState<string>('');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
-		addressBook?.map((account) => ({
+		addressBook?.map((account: any) => ({
 			label: <AddressComponent address={account.address} />,
 			value: account.address
 		}))
@@ -71,7 +70,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
 
-	const [validRecipient, setValidRecipient] = useState(true);
 	const [form] = Form.useForm();
 
 	const [multisigBalance, setMultisigBalance] = useState<string>('');
@@ -90,31 +88,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
-	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
-
-	useEffect(() => {
-		if (!recipientAddress) return;
-
-		if (!getSubstrateAddress(recipientAddress)) {
-			setValidRecipient(false);
-			return;
-		} else {
-			setValidRecipient(true);
-		}
-
-		if (api && apiReady && recipientAddress && amount) {
-			const call = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-			let tx: SubmittableExtrinsic<'promise'>;
-			if (isProxy && multisig?.proxy) {
-				tx = api.tx.proxy.proxy(multisig.proxy, null, call);
-				setCallData(tx.method.toHex());
-			}
-			else {
-				setCallData(call.method.toHex());
-			}
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [amount, api, apiReady, recipientAddress, isProxy, multisig]);
+	const multisig = multisigAddresses?.find((multisig: any) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	useEffect(() => {
 		const getTxs = async () => {
@@ -132,119 +106,38 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		getTxs();
 	}, [ethProvider]);
 
-	useEffect(() => {
-		const fetchBalanceInfos = async () => {
-			if (!api || !apiReady || !address || !recipientAddress) {
-				return;
-			}
-			setFetchBalancesLoading(true);
-			//deposit balance
-			const depositBase = api.consts.multisig.depositBase.toString();
-			const depositFactor = api.consts.multisig.depositFactor.toString();
-			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
-
-			//gas fee
-			if (!['westend', 'rococo'].includes(network)) {
-				const txn = api.tx.balances.transferKeepAlive(recipientAddress, amount);
-				const gasInfo = await txn.paymentInfo(address);
-				setTotalGas(new BN(gasInfo.partialFee.toString()));
-			}
-
-			//initiator balance
-			const initiatorBalance = await api.query.system.account(address);
-			setInitiatorBalance(new BN(initiatorBalance.data.free.toString()));
-			setFetchBalancesLoading(false);
-		};
-		fetchBalanceInfos();
-	}, [address, amount, api, apiReady, network, recipientAddress]);
-
 	const handleSubmit = async () => {
-		if (web3AuthUser) {
-			const signer = ethProvider.getSigner();
-			const ethAdapter = new EthersAdapter({
-				ethers: ethProvider,
-				signerOrProvider: signer
-			});
-			const web3Adapter = new Web3Adapter({
-				signerAddress: web3AuthUser.accounts[0],
-				web3: web3Provider
-			})
-			const txUrl = 'https://safe-transaction-goerli.safe.global';
-			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+		const signer = ethProvider.getSigner();
+		const web3Adapter = new Web3Adapter({
+			signerAddress: web3AuthUser!.accounts[0],
+			web3: web3Provider
+		});
+		const txUrl = 'https://safe-transaction-goerli.safe.global';
+		const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
-			const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
+		const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser!.accounts[0], ethers.utils.parseUnits(amount, 'ether').toString(), web3AuthUser!.accounts[0]);
 
-			const txBody = {
-				amount_token: ethers.utils.parseEther('0.001').toString(),
-				safeAddress: activeMultisig,
-				data: '0x00',
-				txHash: safeTxHash,
-				to: web3AuthUser.accounts[0]
-			};
-			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
-				headers: {
-					'Accept': 'application/json',
-					'Acess-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-signature': localStorage.getItem('signature')!,
-					'x-source': 'polkasafe'
-				},
-				method: 'POST',
-				body: JSON.stringify(txBody)
-			}).then(res => res.json());
-		} else {
-			if (!api || !apiReady || !address) {
-				return;
-			}
-
-			await setSigner(api, loggedInWallet);
-
-			if (!multisig || !recipientAddress || !amount) {
-				queueNotification({
-					header: 'Error!',
-					message: 'Invalid Input.',
-					status: NotificationStatus.ERROR
-				});
-				return;
-			}
-			setLoading(true);
-			try {
-				const queueItemData = await initMultisigTransfer({
-					amount,
-					api,
-					initiatorAddress: address,
-					isProxy,
-					multisig,
-					network,
-					note,
-					recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
-					setLoadingMessages,
-					transferKeepAlive: true
-				});
-				setTransactionData(queueItemData);
-				setLoading(false);
-				setSuccess(true);
-			} catch (error) {
-				console.log(error);
-				setTransactionData(error);
-				setLoading(false);
-				setFailure(true);
-			}
-		}
-	};
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const QrModal: FC = () => {
-		return (
-			<>
-				<button onClick={() => setShowQrModal(true)}><QRIcon className='text-text_secondary' /></button>
-				<Modal title={<span className='font-bold text-lg text-white' >Address QR</span>} onCancel={() => setShowQrModal(false)} open={showQrModal} footer={null}>
-					<AddressQr address={recipientAddress} />
-				</Modal>
-			</>
-		);
+		const txBody = {
+			amount_token: ethers.utils.parseUnits(amount, 'ether').toString(),
+			data: '0x00',
+			safeAddress: activeMultisig,
+			to: web3AuthUser?.accounts[0],
+			txHash: safeTxHash
+		};
+		await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
+			body: JSON.stringify(txBody),
+			headers: {
+				'Accept': 'application/json',
+				'Acess-Control-Allow-Origin': '*',
+				'Content-Type': 'application/json',
+				'x-address': web3AuthUser!.accounts[0],
+				'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+				'x-signature': localStorage.getItem('signature')!,
+				'x-source': 'polkasafe'
+			},
+			method: 'POST'
+		}).then(res => res.json());
+		// console.log('amount in parse', ethers.utils.parseUnits(amount, 'ether').toString());
 	};
 
 	const AddAddressModal: FC = () => {
@@ -376,7 +269,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					<Spin wrapperClassName={className} spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						{initiatorBalance.lte(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 							<WarningCircleIcon />
-							<p>The balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
+							<p>The balance in your logged in account {addressBook.find((item: any) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
 						</section>
 							:
 							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }} />
@@ -417,9 +310,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										<Form.Item
 											name="recipient"
 											rules={[{ required: true }]}
-											help={(!recipientAddress && 'Recipient Address is Required') || (!validRecipient && 'Please add a valid Address')}
 											className='border-0 outline-0 my-0 p-0'
-											validateStatus={recipientAddress && validRecipient ? 'success' : 'error'}
 										>
 											<div>
 												{recipientAddress && autocompleteAddresses.some((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipientAddress)) ?
@@ -441,7 +332,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														filterOption={(inputValue, options) => {
 															return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
 														}}
-														notFoundContent={validRecipient && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
 														options={autocompleteAddresses}
 														id='recipient'
 														placeholder="Send to Address.."
@@ -477,52 +367,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 									</article>
 								</div>
 							</section>
-
-							{callData && !!Number(amount) && recipientAddress &&
-								<section className='mt-[15px]'>
-									<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Call Data</label>
-									<div className='flex items-center gap-x-[10px]'>
-										<article className='w-[500px]'>
-											<div
-												className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-												onClick={() => copyText(callData)}
-											>
-												{shortenAddress(callData, 10)}
-												<button className='text-primary'><CopyIcon /></button>
-											</div>
-
-										</article>
-									</div>
-								</section>
-							}
-
-							<section className='mt-[15px]'>
-								<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
-								<div className='flex items-center gap-x-[10px]'>
-									<article className='w-[500px]'>
-										<Form.Item
-											name="existential_deposit"
-											rules={[]}
-											className='border-0 outline-0 my-0 p-0'
-										>
-											<div className='flex items-center h-[40px]'>
-												<Input
-													disabled={true}
-													type='number'
-													placeholder={String(chainProperties[network].existentialDeposit)}
-													className="text-sm font-normal leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
-													id="existential_deposit"
-												/>
-												<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
-													<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-													<span>{chainProperties[network].tokenSymbol}</span>
-												</div>
-											</div>
-										</Form.Item>
-									</article>
-								</div>
-							</section>
-
 							<section className='mt-[15px]'>
 								<label className='text-primary font-normal text-xs block mb-7'>Note</label>
 								<div className=''>
