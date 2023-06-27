@@ -34,25 +34,25 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleAddAddress = async () => {
-		if(!address || !name) return;
+		if (!address || !name) return;
 
-		if(!getSubstrateAddress(address)){
+		if (!getSubstrateAddress(address)) {
 			messageApi.warning('Invalid address');
 			return;
 		}
 
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
 			}
-			else{
-				if(addressBook.some((item) => item.address === address)){
+			else {
+				if (addressBook.some((item: any) => item.address === address)) {
 					queueNotification({
 						header: 'Error!',
 						message: 'Address exists in Address book.',
@@ -73,7 +73,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
-				if(addAddressError) {
+				if (addAddressError) {
 
 					queueNotification({
 						header: 'Error!',
@@ -84,9 +84,9 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 					return;
 				}
 
-				if(addAddressData){
+				if (addAddressData) {
 
-					setUserDetailsContextState((prevState) => {
+					setUserDetailsContextState((prevState: any) => {
 						return {
 							...prevState,
 							addressBook: addAddressData
@@ -99,20 +99,20 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						status: NotificationStatus.SUCCESS
 					});
 					setLoading(false);
-					if(onCancel){
+					if (onCancel) {
 						onCancel();
 					}
-					else{
+					else {
 						toggleVisibility();
 					}
-					if(setAddAddress){
+					if (setAddAddress) {
 						setAddAddress('');
 					}
 
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -131,7 +131,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						className="text-primary text-xs leading-[13px] font-normal"
 						htmlFor="name"
 					>
-											Name
+						Name
 					</label>
 					<Form.Item
 						name="name"
@@ -157,7 +157,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						className="text-primary text-xs leading-[13px] font-normal"
 						htmlFor="address"
 					>
-											Address
+						Address
 					</label>
 					<Form.Item
 						name="address"
@@ -175,7 +175,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 					</Form.Item>
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-					<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
+					<CancelBtn onClick={onCancel ? onCancel : toggleVisibility} />
 					<AddBtn loading={loading} disabled={!name || !address} title='Add' onClick={handleAddAddress} />
 				</div>
 			</Form>

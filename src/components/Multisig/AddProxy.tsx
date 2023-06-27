@@ -5,25 +5,19 @@
 
 import Identicon from '@polkadot/react-identicon';
 import { Spin } from 'antd';
-import BN from 'bn.js';
 import dayjs from 'dayjs';
 import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import { CheckOutlined, CopyIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import copyText from 'src/utils/copyText';
-import formatBnBalance from 'src/utils/formatBnBalance';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
-import { transferAndProxyBatchAll } from 'src/utils/transferAndProxyBatchAll';
 
 import Loader from '../UserFlow/Loader';
 import AddProxySuccessScreen from './AddProxySuccessScreen';
@@ -32,50 +26,28 @@ interface IMultisigProps {
 	className?: string
 	onCancel?: () => void
 	homepage?: boolean
-    signatories?: string[]
-    threshold?: number
+	signatories?: string[]
+	threshold?: number
 	setProxyInProcess?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, homepage, setProxyInProcess }) => {
-	const { address: userAddress, multisigAddresses, activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
-	const { network, api, apiReady } = useGlobalApiContext();
+const AddProxy: React.FC<IMultisigProps> = ({ onCancel, homepage, setProxyInProcess }) => {
+	const { address: userAddress, multisigAddresses, activeMultisig, addressBook } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState<boolean>(false);
-	const [success, setSuccess] = useState<boolean>(false);
+	const [success] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const [loadingMessages] = useState<string>('');
 
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig);
+	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig);
 
-	const [txnHash, setTxnHash] = useState<string>('');
+	const [txnHash] = useState<string>('');
 
 	const createProxy = async () => {
-		if(!api || !apiReady ) return;
-
-		await setSigner(api, loggedInWallet);
-
-		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
-			.muln(1)
-			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
 
 		setLoading(true);
-		setLoadingMessages(`A Base Amount (${formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.`);
 		try {
-			await transferAndProxyBatchAll({
-				amount: reservedProxyDeposit,
-				api,
-				multisigAddress: multisig?.address || activeMultisig,
-				network,
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages,
-				setTxnHash,
-				signatories: signatories ? signatories : multisig?.signatories || [],
-				threshold: threshold ? threshold : multisig?.threshold || 2
-			});
-			setSuccess(true);
-			setLoading(false);
+			console.log('');
 		} catch (error) {
 			console.log(error);
 			setFailure(true);
@@ -86,14 +58,14 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 	const CreateProxyFailedScreen: React.FC = () => {
 		return (
 			<div className='flex flex-col items-center'>
-				<FailedTransactionLottie message='Proxy creation failed!'/>
+				<FailedTransactionLottie message='Proxy creation failed!' />
 				<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-4 text-text_secondary'>
 					{txnHash &&
 						<div className='flex justify-between items-center'>
 							<span>Txn Hash:</span>
 							<div className='flex items-center gap-x-1'>
 								<span className='text-white'>{shortenAddress(txnHash)}</span>
-								<button onClick={() => copyText(txnHash, false, network)}>
+								<button onClick={() => copyText(txnHash)}>
 									<CopyIcon className='mr-2 text-primary' />
 								</button>
 							</div>
@@ -126,23 +98,23 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 					onCancel?.();
 				}}
 			/> :
-				failure ? <CreateProxyFailedScreen/> :
+				failure ? <CreateProxyFailedScreen /> :
 					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						{!homepage &&
-						<div className="flex justify-center gap-x-4 items-center mb-5 w-full">
-							<div className='flex flex-col text-white items-center justify-center'>
-								<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
-								<p className='text-text_secondary'>Create Multisig</p>
+							<div className="flex justify-center gap-x-4 items-center mb-5 w-full">
+								<div className='flex flex-col text-white items-center justify-center'>
+									<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined /></div>
+									<p className='text-text_secondary'>Create Multisig</p>
+								</div>
+								<Loader className='bg-primary h-[2px] w-[80px]' />
+								<div className='flex flex-col text-white items-center justify-center'>
+									<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
+									<p>Create Proxy</p>
+								</div>
 							</div>
-							<Loader className='bg-primary h-[2px] w-[80px]'/>
-							<div className='flex flex-col text-white items-center justify-center'>
-								<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>2</div>
-								<p>Create Proxy</p>
-							</div>
-						</div>
 						}
 						<div className='w-full flex justify-center mb-3'>
-							<ProxyImpPoints/>
+							<ProxyImpPoints />
 						</div>
 						<div className='text-primary mb-2'>Signed As</div>
 						<div className='mb-4 p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center gap-x-4'>
@@ -155,7 +127,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 								/>
 							</div>
 							<div className='flex flex-col gap-y-[6px]'>
-								<h4 className='font-medium text-sm leading-[15px] text-white'>{addressBook?.find(a => a.address === userAddress)?.name }</h4>
+								<h4 className='font-medium text-sm leading-[15px] text-white'>{addressBook?.find((a: any) => a.address === userAddress)?.name}</h4>
 								<p className='text-text_secondary font-normal text-xs leading-[13px]'>{userAddress}</p>
 							</div>
 							<Balance address={userAddress} />
@@ -169,7 +141,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 						</section>
 
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
-							<CancelBtn onClick={onCancel}/>
+							<CancelBtn onClick={onCancel} />
 							<AddBtn title='Create Proxy' onClick={createProxy} />
 						</div>
 					</Spin>

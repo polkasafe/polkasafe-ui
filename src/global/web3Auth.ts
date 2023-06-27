@@ -80,15 +80,17 @@ export const torusWalletAdapter = new TorusWalletAdapter({
 });
 
 export const options: Web3AuthOptions = {
-	clientId: WEB3AUTH_CLIENT_ID,
-	web3AuthNetwork: 'testnet',
 	chainConfig: {
-		chainNamespace: CHAIN_NAMESPACES.EIP155,
 		chainId: '0x5',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
 		rpcTarget: 'https://rpc.ankr.com/eth_goerli'
 	},
+	clientId: WEB3AUTH_CLIENT_ID,
 	uiConfig: {
-		theme: 'dark',
-		loginMethodsOrder: ['google', 'facebook']
-	}
+		loginMethodsOrder: ['google', 'facebook'],
+		theme: 'dark'
+
+	},
+	web3AuthNetwork: 'testnet'
+
 };

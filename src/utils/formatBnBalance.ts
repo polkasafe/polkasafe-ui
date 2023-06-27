@@ -42,7 +42,7 @@ export default function formatBnBalance(value: BN | string, options: Options, ne
 		prefix = prefix.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	}
 
-	const unit = withUnit ? ` ${chainProperties[network]?.tokenSymbol}` : '';
+	const unit = withUnit ? ` ${chainProperties[network]}` : '';
 
 	return `${prefix}${comma}${suffix}${unit}`;
 }

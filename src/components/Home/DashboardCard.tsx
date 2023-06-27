@@ -6,7 +6,8 @@ import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
 import { Button, Modal, Tooltip } from 'antd';
 import { Spin } from 'antd';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import React, { FC, useState } from 'react';
 import ethLogo from 'src/assets/eth.png';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
@@ -125,7 +126,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
 								{hasProxy &&
 									<Tooltip title='Switch Account'>
-										<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' /></Button>
+										<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState((prev: any) => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' /></Button>
 									</Tooltip>
 								}
 							</div>
@@ -148,12 +149,12 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					</div>
 					<div>
 						<div className='text-white'>ETH</div>
-						<div className='font-bold text-lg text-primary'>{!activeMultisigData.safeBalance ? <Spin size='default' /> : activeMultisigData.safeBalance.toString()}</div>
+						<div className='font-bold text-lg text-primary'>{!activeMultisigData.safeBalance ? <Spin size='default' /> : ethers.utils.formatEther(activeMultisigData.safeBalance.toString()).split('').slice(0, 5).join('')}</div>
 					</div>
 					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-lg text-primary'>
-							{activeMultisigData.assetBalance || <Spin size='default' />}
+							{activeMultisigData.assetBalance ? <Spin size='default' /> : 0}
 
 						</div>
 					</div>

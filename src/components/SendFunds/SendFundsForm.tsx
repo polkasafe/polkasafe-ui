@@ -4,40 +4,31 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { PlusCircleOutlined } from '@ant-design/icons';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
-import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import { ethers } from 'ethers';
 import React, { FC, useEffect, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
-import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, LineIcon, OutlineCloseIcon, QRIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { LineIcon, OutlineCloseIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
-import copyText from 'src/utils/copyText';
 import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import initMultisigTransfer from 'src/utils/initMultisigTransfer';
-import { setSigner } from 'src/utils/setSigner';
-import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import TransactionFailedScreen from './TransactionFailedScreen';
@@ -52,43 +43,40 @@ interface ISendFundsFormProps {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, address } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [note, setNote] = useState<string>('');
-	const [loading, setLoading] = useState(false);
+	const [loading] = useState(false);
 	const [amount, setAmount] = useState('0');
 	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '');
-	const [showQrModal, setShowQrModal] = useState(false);
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
 		addressBook?.map((account: any) => ({
 			label: <AddressComponent address={account.address} />,
 			value: account.address
 		}))
 	);
-	const [success, setSuccess] = useState(false);
-	const [failure, setFailure] = useState(false);
+	const [success] = useState(false);
+	const [failure] = useState(false);
 
 	const [form] = Form.useForm();
 
 	const [multisigBalance, setMultisigBalance] = useState<string>('');
 
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const [loadingMessages] = useState<string>('');
 
-	const [transactionData, setTransactionData] = useState<any>({});
+	const [transactionData] = useState<any>({});
 
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 
-	const [totalDeposit, setTotalDeposit] = useState<BN>(new BN(0));
+	const [totalDeposit] = useState<BN>(new BN(0));
 
-	const [totalGas, setTotalGas] = useState<BN>(new BN(0));
+	const [totalGas] = useState<BN>(new BN(0));
 
-	const [initiatorBalance, setInitiatorBalance] = useState<BN>(new BN(0));
+	const [initiatorBalance] = useState<BN>(new BN(0));
 
-	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
-
-	const multisig = multisigAddresses?.find((multisig: any) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
+	const [fetchBalancesLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		const getTxs = async () => {
@@ -110,7 +98,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		const signer = ethProvider.getSigner();
 		const web3Adapter = new Web3Adapter({
 			signerAddress: web3AuthUser!.accounts[0],
-			web3: web3Provider
+			web3: web3Provider as any
 		});
 		const txUrl = 'https://safe-transaction-goerli.safe.global';
 		const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);

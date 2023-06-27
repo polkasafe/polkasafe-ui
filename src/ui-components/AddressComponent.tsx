@@ -14,19 +14,19 @@ import shortenAddress from 'src/utils/shortenAddress';
 
 import { CopyIcon, ExternalLinkIcon } from './CustomIcons';
 
-interface IAddressComponent{
-    address: string
-    iconSize?: number
+interface IAddressComponent {
+	address: string
+	iconSize?: number
 	withBadge?: boolean
 	name?: string
 }
 
-const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddressComponent) => {
+const AddressComponent = ({ address, name, withBadge = true, iconSize = 30 }: IAddressComponent) => {
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	return (
 		<div
@@ -75,7 +75,7 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddre
 				<div
 					className='font-medium text-sm flex text-white'
 				>
-					{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
+					{name || addressBook?.find((item: any) => item.address === address)?.name || multisigAddresses.find((item: any) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
 				</div>
 				<div
 					className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'
@@ -86,9 +86,9 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30 }: IAddre
 					<span
 						className='flex items-center gap-x-2'
 					>
-						<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
+						<button onClick={() => copyText(address)}><CopyIcon className='hover:text-primary' /></button>
 						<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
-							<ExternalLinkIcon  />
+							<ExternalLinkIcon />
 						</a>
 					</span>
 				</div>

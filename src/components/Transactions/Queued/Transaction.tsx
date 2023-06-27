@@ -81,7 +81,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 
 			const web3Adapter = new Web3Adapter({
 				signerAddress: web3AuthUser!.accounts[0],
-				web3: web3Provider
+				web3: web3Provider as any
 			});
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
@@ -119,91 +119,31 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 
 			const web3Adapter = new Web3Adapter({
 				signerAddress: web3AuthUser!.accounts[0],
-				web3: web3Provider
+				web3: web3Provider as any
 			});
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 			const response = await gnosisService.executeTx(callHash, activeMultisig);
-			console.log('execute receipt response', response);
-			if (response) {
-				const completeTx = {
-					receipt: response,
-					txHash: callHash
-				};
-				await fetch(`${FIREBASE_FUNCTIONS_URL}/completeTransaction`, {
-					body: JSON.stringify(completeTx),
-					headers: {
-						'Accept': 'application/json',
-						'Acess-Control-Allow-Origin': '*',
-						'Content-Type': 'application/json',
-						'x-address': web3AuthUser!.accounts[0],
-						'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-						'x-signature': localStorage.getItem('signature')!,
-						'x-source': 'polkasafe'
-					},
-					method: 'POST'
-				}).then(res => res.json());
-			}
+			const completeTx = {
+				receipt: response || {},
+				txHash: callHash
+			};
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/completeTransaction`, {
+				body: JSON.stringify(completeTx),
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-signature': localStorage.getItem('signature')!,
+					'x-source': 'polkasafe'
+				},
+				method: 'POST'
+			}).then(res => res.json());
 
 		} catch (error) {
 			console.log(error);
-		}
-	};
-
-	const handleCancelTransaction = async () => {
-		// await setSigner(api, loggedInWallet);
-
-		// const multisig = multisigAddresses?.find((multisig: any) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
-
-		// if (!multisig) return;
-
-		// setLoading(true);
-		// setOpenLoadingModal(true);
-		try {
-			// if ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) {
-			// 	return;
-			// }
-			// if (decodedCallData?.args?.proxy_type) {
-			// 	await cancelProxy({
-			// 		api,
-			// 		approvingAddress: address,
-			// 		callHash,
-			// 		multisig,
-			// 		network,
-			// 		setLoadingMessages
-			// 	});
-			// }
-			// else {
-			// 	await cancelMultisigTransfer({
-			// 		api,
-			// 		approvingAddress: address,
-			// 		callHash,
-			// 		multisig,
-			// 		network,
-			// 		recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-			// 		setLoadingMessages
-			// 	});
-			// }
-			// setLoading(false);
-			// setSuccess(true);
-			// setTimeout(() => {
-			// 	setSuccess(false);
-			// 	setOpenLoadingModal(false);
-			// }, 5000);
-			// if (!openLoadingModal) {
-			// 	document.getElementById(callHash)?.remove();
-			// 	if (numberOfTransactions < 2 && setQueuedTransactions) {
-			// 		setQueuedTransactions([]);
-			// 	}
-			// }
-		} catch (error) {
-			console.log(error);
-			setLoading(false);
-			setFailure(true);
-			setTimeout(() => {
-				setFailure(false);
-				setOpenLoadingModal(false);
-			}, 5000);
 		}
 	};
 
@@ -294,7 +234,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							setCallDataString={setCallDataString}
 							handleApproveTransaction={handleApproveTransaction}
 							handleExecuteTransaction={handleExecuteTransaction}
-							handleCancelTransaction={handleCancelTransaction}
+							handleCancelTransaction={async () => { }}
 							note={note}
 							isProxyApproval={isProxyApproval}
 							isProxyAddApproval={isProxyAddApproval}

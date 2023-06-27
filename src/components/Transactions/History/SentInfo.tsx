@@ -20,7 +20,7 @@ interface ISentInfoProps {
 	amountType: string;
 	date: string;
 	// time: string;
-    className?: string;
+	className?: string;
 	recipient: string
 	callHash: string
 	note?: string
@@ -32,7 +32,7 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
+	const threshold = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
 
 	return (
 		<div
@@ -45,7 +45,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 				>
 					<span>
-							Sent
+						Sent
 					</span>
 					<span
 						className='text-failure'
@@ -53,20 +53,20 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						{amount} {amountType} ({amount_usd} USD)
 					</span>
 					<span>
-							to:
+						to:
 					</span>
 				</p>
 				<div
 					className='mt-3 flex items-center gap-x-4'
 				>
-					<Identicon size={30} value={recipient} theme='polkadot'  />
+					<Identicon size={30} value={recipient} theme='polkadot' />
 					<div
 						className='flex flex-col gap-y-[6px]'
 					>
 						<p
 							className='font-medium text-sm leading-[15px] text-white'
 						>
-							{addressBook?.find((item) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
+							{addressBook?.find((item: any) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
 						</p>
 						<p
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -77,7 +77,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							<span
 								className='flex items-center gap-x-2 text-sm'
 							>
-								<button onClick={() => copyText(recipient, true, network)}><CopyIcon className='hover:text-primary'/></button>
+								<button onClick={() => copyText(recipient)}><CopyIcon className='hover:text-primary' /></button>
 								<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
 									<ExternalLinkIcon />
 								</a>
@@ -92,7 +92,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							From:
+						From:
 					</span>
 					<AddressComponent address={from} />
 				</div>
@@ -102,7 +102,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Txn Hash:
+						Txn Hash:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -115,7 +115,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => copyText(callHash)}><CopyIcon/></button>
+							<button onClick={() => copyText(callHash)}><CopyIcon /></button>
 							{/* <ExternalLinkIcon /> */}
 						</span>
 					</p>
@@ -126,7 +126,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Executed:
+						Executed:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -138,14 +138,14 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						</span>
 					</p>
 				</div>
-				{loading ? <Spin className='mt-3'/> : note &&
+				{loading ? <Spin className='mt-3' /> : note &&
 					<div
 						className='flex items-center gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
 						>
-								Note:
+							Note:
 						</span>
 						<p
 							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -177,7 +177,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-							Created
+								Created
 							</div>
 						</Timeline.Item>
 						<Timeline.Item
@@ -191,7 +191,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-							Confirmations <span className='text-text_secondary'>{threshold} of {threshold}</span>
+								Confirmations <span className='text-text_secondary'>{threshold} of {threshold}</span>
 							</div>
 						</Timeline.Item>
 						<Timeline.Item

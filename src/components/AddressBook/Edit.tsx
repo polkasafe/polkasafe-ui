@@ -23,17 +23,17 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 	const { network } = useGlobalApiContext();
 
 	const handleAddAddress = async () => {
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
 			}
-			else{
+			else {
 
 				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
 					body: JSON.stringify({
@@ -46,7 +46,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
-				if(addAddressError) {
+				if (addAddressError) {
 
 					queueNotification({
 						header: 'Error!',
@@ -57,8 +57,8 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 					return;
 				}
 
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
+				if (addAddressData) {
+					setUserDetailsContextState((prevState: any) => {
 						return {
 							...prevState,
 							addressBook: addAddressData
@@ -76,7 +76,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -91,7 +91,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 					className="text-primary text-xs leading-[13px] font-normal"
 					htmlFor="name"
 				>
-                    Name
+					Name
 				</label>
 				<Form.Item
 					name="name"
@@ -108,7 +108,7 @@ const EditAddress = ({ addressToEdit, nameToEdit }: { addressToEdit: string, nam
 				</Form.Item>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn onClick={toggleVisibility} />
 				<AddBtn loading={loading} onClick={handleAddAddress} title='Save' />
 			</div>
 		</Form>

@@ -4,8 +4,6 @@
 
 import { message } from 'antd';
 
-import getEncodedAddress from './getEncodedAddress';
-
 /**
  * Return an address encoded for the current network
  *

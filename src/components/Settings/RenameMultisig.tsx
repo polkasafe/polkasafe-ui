@@ -21,20 +21,20 @@ const RenameMultisig = ({ name }: { name: string }) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const { activeMultisig, setUserDetailsContextState, multisigAddresses } = useGlobalUserDetailsContext();
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleMultisigNameChange = async () => {
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature || !multisigAddresses || !multisig?.address) {
+			if (!userAddress || !signature || !multisigAddresses || !multisig?.address) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
 			}
-			else{
+			else {
 
 				const changeNameRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/renameMultisig`, {
 					body: JSON.stringify({
@@ -47,7 +47,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 
 				const { data: changeNameData, error: changeNameError } = await changeNameRes.json() as { data: any, error: string };
 
-				if(changeNameError) {
+				if (changeNameError) {
 
 					queueNotification({
 						header: 'Error!',
@@ -58,13 +58,13 @@ const RenameMultisig = ({ name }: { name: string }) => {
 					return;
 				}
 
-				if(changeNameData){
+				if (changeNameData) {
 
 					const copyMultisigAddresses = [...multisigAddresses];
 					const copyObject = copyMultisigAddresses?.find((item) => item.address === multisig.address);
-					if(copyObject){
+					if (copyObject) {
 						copyObject.name = multisigName;
-						setUserDetailsContextState((prev) => {
+						setUserDetailsContextState((prev: any) => {
 							return {
 								...prev,
 								multisigAddresses: copyMultisigAddresses,
@@ -90,7 +90,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -105,7 +105,7 @@ const RenameMultisig = ({ name }: { name: string }) => {
 					className="text-white font-anormal text-sm leading-[15px]"
 					htmlFor="review"
 				>
-                   Enter Name
+					Enter Name
 				</label>
 				<Form.Item
 					name="multisig_name"
@@ -124,8 +124,8 @@ const RenameMultisig = ({ name }: { name: string }) => {
 				</Form.Item>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
-				<ModalBtn loading={loading} onClick={handleMultisigNameChange} title='Update'/>
+				<CancelBtn onClick={toggleVisibility} />
+				<ModalBtn loading={loading} onClick={handleMultisigNameChange} title='Update' />
 			</div>
 		</Form>
 	);

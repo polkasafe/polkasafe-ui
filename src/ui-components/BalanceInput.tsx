@@ -3,12 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Form, Input } from 'antd';
-import BN from 'bn.js';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { chainProperties } from 'src/global/networkConstants';
-import { inputToBn } from 'src/utils/inputToBn';
 
 interface Props {
 	className?: string
@@ -19,10 +17,8 @@ interface Props {
 	defaultValue?: string
 }
 
-const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue = '' }: Props) => {
-	const [isValidInput, setIsValidInput] = useState(true);
+const BalanceInput = ({ className, label = '', onChange, placeholder = '', defaultValue = '' }: Props) => {
 	const { network } = useGlobalApiContext();
-	const [bnBalance, setBnBalance] = useState('0');
 
 	return <section className={`${className}`}>
 		<label className='text-primary font-normal text-xs leading-[13px] block mb-2'>{label}</label>

@@ -17,24 +17,19 @@ import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalWeb3Context } from 'src/context';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { GnosisSafeService } from 'src/services';
 import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
 const Home = () => {
 	const { address, notification_preferences, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
-	const [hasProxy, setHasProxy] = useState<boolean>(true);
-	const [proxyNotInDb, setProxyNotInDb] = useState<boolean>(false);
-	const [proxyInProcess, setProxyInProcess] = useState<boolean>(false);
+	const [hasProxy] = useState<boolean>(true);
+	const [proxyNotInDb] = useState<boolean>(false);
+	const [proxyInProcess] = useState<boolean>(false);
 
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
@@ -42,53 +37,12 @@ const Home = () => {
 	const [isOnchain, setIsOnchain] = useState(true);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
-	const multisig: any = {};
-
 	useEffect(() => {
 		if ((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1) {
 			setOpenNewUserModal(true);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [createdAt]);
-
-	useEffect(() => {
-		const fetchProxyData = async () => {
-			if (!multisig || network === 'astar') return;
-			const response = await fetch(
-				`https://${network}.api.subscan.io/api/scan/events`,
-				{
-					body: JSON.stringify({
-						row: 1,
-						page: 0,
-						module: 'proxy',
-						call: 'PureCreated',
-						address: multisig.address
-					}),
-					headers: SUBSCAN_API_HEADERS,
-					method: 'POST'
-				}
-			);
-
-			const responseJSON = await response.json();
-			if (responseJSON.data.count === 0) {
-				return;
-			}
-			else {
-				const params = JSON.parse(responseJSON.data?.events[0]?.params);
-				const proxyAddress = getEncodedAddress(params[0].value, network);
-				if (proxyAddress) {
-					setProxyNotInDb(true);
-				}
-			}
-		};
-		if (multisig?.proxy) {
-			setHasProxy(true);
-		}
-		else {
-			setHasProxy(false);
-			fetchProxyData();
-		}
-	}, [multisig, network]);
 
 	useEffect(() => {
 		const handleNewTransaction = async () => {
@@ -175,7 +129,7 @@ const Home = () => {
 								}
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
-										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={setNewTxn} />
+										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={() => { }} />
 									</div>
 									<div className='col-start-1 col-end-13 lg:col-start-8 h-full'>
 										<AddressCard />
@@ -183,7 +137,7 @@ const Home = () => {
 								</div>
 								<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
 									<div className='col-start-1 col-end-13 lg:col-end-13'>
-										<TxnCard setProxyInProcess={setProxyInProcess} newTxn={newTxn} />
+										<TxnCard />
 									</div>
 								</div>
 							</section>

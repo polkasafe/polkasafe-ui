@@ -9,34 +9,32 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IAddressBookItem } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { AddIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 
-interface INewUserModal{
-    open: boolean
-    onCancel: () => void
+interface INewUserModal {
+	open: boolean
+	onCancel: () => void
 }
 
 const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 
 	const [loading, setLoading] = useState(false);
 	const { network } = useGlobalApiContext();
-	const { setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
-	const { accounts } = useGetWalletAccounts(loggedInWallet);
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleAddAddress = async (address: string, name: string) => {
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 
 				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
 					body: JSON.stringify({
@@ -49,12 +47,12 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
-				if(addAddressError) {
+				if (addAddressError) {
 					return;
 				}
 
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
+				if (addAddressData) {
+					setUserDetailsContextState((prevState: any) => {
 						return {
 							...prevState,
 							addressBook: addAddressData
@@ -64,14 +62,14 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 		}
 	};
 
 	const addToAddressBook = async () => {
 		setLoading(true);
-		for(const account of accounts){
+		for (const account of [] as any) {
 			await handleAddAddress(account.address, account.name || DEFAULT_ADDRESS_NAME);
 		}
 		setLoading(false);
@@ -96,7 +94,7 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 				className='my-0 w-[560px]'
 			>
 				<p className='text-white font-medium text-sm leading-[15px]'>
-                    Do You Want To Add Your Wallet Addresses To Your Address Book?
+					Do You Want To Add Your Wallet Addresses To Your Address Book?
 				</p>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<Button
@@ -114,7 +112,7 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 						size='large'
 						className='flex items-center border-none outline-none text-white text-sm font-normal leading-[15px] bg-primary rounded-lg min-w-[130px] justify-center'
 					>
-                        Import
+						Import
 					</Button>
 				</div>
 			</Form>

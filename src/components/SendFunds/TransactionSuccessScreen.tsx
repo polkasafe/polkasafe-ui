@@ -1,21 +1,18 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import BN from 'bn.js';
 import dayjs from 'dayjs';
 import { ethers } from 'ethers';
 import React from 'react';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import ModalBtn from 'src/components/Multisig/ModalBtn';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import shortenAddress from 'src/utils/shortenAddress';
 
 interface ITransactionSuccessScreen {
-	amount: ethers.BigNumber
+	amount: string
 	txnHash?: string
 	created_at: Date
 	sender: string

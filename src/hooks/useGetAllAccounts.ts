@@ -5,8 +5,8 @@
 import { Signer } from '@polkadot/api/types';
 import { isWeb3Injected, web3Enable } from '@polkadot/extension-dapp';
 import { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
-import { useContext, useEffect, useState } from 'react';
-import { ApiContext, useGlobalApiContext } from 'src/context/ApiContext';
+import { useEffect, useState } from 'react';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { APP_NAME } from 'src/global/appName';
 import { Wallet } from 'src/types';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -14,9 +14,9 @@ import getEncodedAddress from 'src/utils/getEncodedAddress';
 type Response = {
 	noExtension: boolean;
 	noAccounts: boolean;
-	signersMap: {[key:string]: Signer}
+	signersMap: { [key: string]: Signer }
 	accounts: InjectedAccount[]
-	accountsMap: {[key:string]: string}
+	accountsMap: { [key: string]: string }
 }
 
 const initResponse: Response = {
@@ -28,7 +28,6 @@ const initResponse: Response = {
 };
 
 const useGetAllAccounts = () => {
-	const { api, apiReady } = useContext(ApiContext);
 	const { network } = useGlobalApiContext();
 
 	const [response, setResponse] = useState<Response>(initResponse);
@@ -63,7 +62,7 @@ const useGetAllAccounts = () => {
 			console.log('Error fetching wallet accounts : ', err);
 		}
 
-		if(!injected) {
+		if (!injected) {
 			return;
 		}
 
@@ -79,9 +78,6 @@ const useGetAllAccounts = () => {
 	};
 
 	const getAccounts = async (): Promise<undefined> => {
-		if (!api || !apiReady) {
-			return;
-		}
 
 		const extensions = await web3Enable(APP_NAME);
 
@@ -96,17 +92,17 @@ const useGetAllAccounts = () => {
 		}
 
 		let accounts: InjectedAccount[] = [];
-		let polakadotJSAccounts : InjectedAccount[] | undefined;
+		let polakadotJSAccounts: InjectedAccount[] | undefined;
 		// let subwalletAccounts: InjectedAccount[] | undefined;
 		// let talismanAccounts: InjectedAccount[] | undefined;
 
-		const signersMapLocal = response.signersMap as {[key:string]: Signer};
-		const accountsMapLocal = response.accountsMap as {[key:string]: string};
+		const signersMapLocal = response.signersMap as { [key: string]: Signer };
+		const accountsMapLocal = response.accountsMap as { [key: string]: string };
 
 		for (const extObj of extensions) {
-			if(extObj.name == 'polkadot-js') {
+			if (extObj.name == 'polkadot-js') {
 				signersMapLocal['polkadot-js'] = extObj.signer;
-				polakadotJSAccounts = await getWalletAccounts(Wallet.POLKADOT);
+				polakadotJSAccounts = await getWalletAccounts(Wallet.WEB3AUTH);
 			}
 			// else if(extObj.name == 'subwallet-js') {
 			// signersMapLocal['subwallet-js'] = extObj.signer;
@@ -117,7 +113,7 @@ const useGetAllAccounts = () => {
 			// }
 		}
 
-		if(polakadotJSAccounts) {
+		if (polakadotJSAccounts) {
 			accounts = accounts.concat(polakadotJSAccounts);
 			polakadotJSAccounts.forEach((acc: InjectedAccount) => {
 				accountsMapLocal[acc.address] = 'polkadot-js';
@@ -152,18 +148,13 @@ const useGetAllAccounts = () => {
 
 		setResponse(responseLocal);
 
-		if (accounts.length > 0) {
-			const signer: Signer = signersMapLocal[accountsMapLocal[accounts[0].address]];
-			api.setSigner(signer);
-		}
-
 		return;
 	};
 
 	useEffect(() => {
 		getAccounts();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [api, apiReady]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return response;
 };

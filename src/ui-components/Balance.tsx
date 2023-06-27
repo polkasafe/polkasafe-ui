@@ -5,7 +5,6 @@
 import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useGlobalWeb3Context } from 'src/context';
-import formatBnBalance from 'src/utils/formatBnBalance';
 
 interface Props {
 	className?: string

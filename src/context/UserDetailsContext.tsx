@@ -2,8 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { BigNumber, ethers } from 'ethers';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { UserDetailsContextType, Wallet } from 'src/types';
@@ -33,26 +32,6 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	const [activeMultisigTxs, setActiveMultisigTxs] = useState<any[]>([]);
 	const [activeMultisigData, setActiveMultisigData] = useState<any>({});
 	const { ethProvider } = useGlobalWeb3Context();
-
-	const handleGetAssets = useCallback(async () => {
-
-		if (activeMultisigData.safeBalance) {
-
-			try {
-				const { USD } = await fetch('https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD').then(res => res.json());
-				console.log('running eth 12', BigInt(USD) * BigInt(ethers.utils.parseUnits(activeMultisigData.safeBalance.toString(), 'ether').toString()));
-				console.log('eth 12', ethers.utils.parseUnits(activeMultisigData.safeBalance.toString(), 'ether'));
-				setActiveMultisigData((prev: any) => ({ ...prev, assetBalance: USD * ethers.utils.parseUnits(prev.safeBalance.toString(), 'wei').toNumber() }));
-
-			} catch (error) {
-				console.log('ERROR', error);
-			}
-		}
-	}, [activeMultisigData]);
-
-	useEffect(() => {
-		handleGetAssets();
-	}, [handleGetAssets]);
 
 	useEffect(() => {
 		const address = localStorage.getItem('address');

@@ -18,7 +18,6 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
@@ -26,10 +25,6 @@ import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { inputToBn } from 'src/utils/inputToBn';
-import { setSigner } from 'src/utils/setSigner';
-import { transferFunds } from 'src/utils/transferFunds';
 
 import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
@@ -45,8 +40,8 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }) => {
-	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
-	const { network, api, apiReady } = useGlobalApiContext();
+	const { setUserDetailsContextState, address: userAddress, multisigAddresses } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,7 +53,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 	const { openModal, toggleVisibility } = useModalContext();
 
 	const [loading, setLoading] = useState<boolean>(false);
-	const [success, setSuccess] = useState<boolean>(false);
+	const [success] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
 	const [addAddress, setAddAddress] = useState<string>('');
@@ -69,7 +64,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 	const [createMultisigData, setCreateMultisigData] = useState<IMultisigAddress>({} as any);
 
 	const createProxy = (multisigData: IMultisigAddress, create: boolean) => {
-		setUserDetailsContextState((prevState) => {
+		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
 				activeMultisig: multisigData.address,
@@ -86,37 +81,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 		onCancel?.();
 		if (create) {
 			openModal('Create Proxy', <AddProxy onCancel={() => toggleVisibility()} />);
-		}
-	};
-
-	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
-		if (!api || !apiReady) return;
-
-		await setSigner(api, loggedInWallet);
-
-		setLoading(true);
-		setLoadingMessages(`Please Sign To Add A Small (${chainProperties[network].existentialDeposit} ${chainProperties[network].tokenSymbol}) Existential Deposit To Make Your Multisig Onchain.`);
-		try {
-			await transferFunds({
-				amount: inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0],
-				api,
-				network,
-				recepientAddress: multisigData.address,
-				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages
-			});
-			if (network === 'astar') {
-				createProxy(multisigData, false);
-			}
-			else {
-				setSuccess(true);
-			}
-			setLoading(false);
-		} catch (error) {
-			console.log(error);
-			setFailure(true);
-			setLoading(false);
-			createProxy(multisigData, false);
 		}
 	};
 
@@ -141,7 +105,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 					const safeAddress = await gnosisService.createSafe(
 						signatories.reverse() as [string],
 						threshold!);
-					if(safeAddress === '') return;
+					if (safeAddress === '') return;
 					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 						body: JSON.stringify({
 							signatories: ['0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA', '0x44468113c75e78e9937553A2834Fb4a3e261C71B', '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE'],
@@ -180,7 +144,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 					}
 
 					if (multisigData) {
-						if (multisigAddresses?.some((item) => item.address === multisigData.address && !item.disabled)) {
+						if (multisigAddresses?.some((item: any) => item.address === multisigData.address && !item.disabled)) {
 							queueNotification({
 								header: 'Multisig Exist!',
 								message: 'Please try adding a different multisig.',
@@ -195,7 +159,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 							status: NotificationStatus.SUCCESS
 						});
 						setCreateMultisigData(multisigData);
-						await addExistentialDeposit(multisigData);
 					}
 
 				}

@@ -3,69 +3,28 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons';
-import { EthersAdapter } from '@safe-global/protocol-kit';
-import dayjs from 'dayjs';
-import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import noTransactionsHistory from 'src/assets/icons/no-transaction.svg';
 import noTransactionsQueued from 'src/assets/icons/no-transactions-queued.svg';
-import { useGlobalWeb3Context } from 'src/context';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { chainProperties } from 'src/global/networkConstants';
-import { GnosisSafeService } from 'src/services';
-import { IQueueItem, ITransaction } from 'src/types';
 import { ArrowUpRightIcon, RightArrowOutlined } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
-import decodeCallData from 'src/utils/decodeCallData';
-import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getHistoryTransactions from 'src/utils/getHistoryTransactions';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 
-import BottomLeftArrow from '../../assets/icons/bottom-left-arrow.svg';
-import TopRightArrow from '../../assets/icons/top-right-arrow.svg';
+const TxnCard = () => {
 
-const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatch<React.SetStateAction<boolean>> }) => {
-	const userAddress = localStorage.getItem('address');
-	const signature = localStorage.getItem('signature');
-	const { activeMultisig, multisigAddresses, activeMultisigTxs } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
+	const { activeMultisig, activeMultisigTxs } = useGlobalUserDetailsContext();
 
-	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
-
-	const [transactions, setTransactions] = useState<any>();
 	const [queuedTransactions, setQueuedTransactions] = useState<any>([]);
 	const [completedTransactions, setCompletedTransactions] = useState<any>([]);
-
-	const [historyLoading, setHistoryLoading] = useState<boolean>(false);
-	const [queueLoading, setQueueLoading] = useState<boolean>(false);
-
-	const [amountUSD, setAmountUSD] = useState<string>('');
-
-	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig);
 
 	useEffect(() => {
 		const queued = activeMultisigTxs.filter((item: any) => item.executed !== true && item.type !== 'fund');
 		setQueuedTransactions(queued);
-		const complete = activeMultisigTxs.filter((item: any) => item.executed === true && item.type === 'fund');
+		const complete = activeMultisigTxs.filter((item: any) => item.executed === true);
 		setCompletedTransactions(complete);
 	}, [activeMultisig, activeMultisigTxs]);
-
-	console.log(queuedTransactions, 'queuedTransactions');
-
-	useEffect(() => {
-		if (!userAddress || !signature || !activeMultisig) return;
-
-		fetchTokenToUSDPrice(1, network).then((formattedUSD) => {
-			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
-		});
-	}, [activeMultisig, network, signature, userAddress]);
 
 	return (
 		<div>
@@ -83,7 +42,7 @@ const TxnCard = ({ newTxn }: { newTxn: boolean, setProxyInProcess: React.Dispatc
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 overflow-auto scale-90 w-[111%] origin-top-left">
 						<h1 className="text-primary text-sm mb-4">Pending Transactions</h1>
 						{queuedTransactions ? queuedTransactions.length > 0 ?
-							queuedTransactions.filter((_: any, i: number) => i < 10).map((transaction, i): any => {
+							queuedTransactions.filter((_: any, i: number) => i < 10).map((transaction: any, i: any) => {
 								const tx = transaction as any;
 								return (
 									<Link to={`/transactions?tab=Queue#${transaction.txHash}`} key={i} className="flex items-center pb-2 mb-2">

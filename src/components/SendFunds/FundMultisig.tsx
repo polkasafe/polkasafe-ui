@@ -1,11 +1,9 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { AutoComplete, Form, Modal, Spin } from 'antd';
-import { DefaultOptionType } from 'antd/es/select';
-import BN from 'bn.js';
+import { Form, Spin } from 'antd';
 import { ethers } from 'ethers';
-import React, { FC, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -13,49 +11,28 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, QRIcon } from 'src/ui-components/CustomIcons';
-import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { setSigner } from 'src/utils/setSigner';
-import { transferFunds } from 'src/utils/transferFunds';
 import styled from 'styled-components';
 
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { network } = useGlobalApiContext();
-	const { activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
 
-	const { accounts } = useGetWalletAccounts(loggedInWallet);
-	const { web3AuthUser, sendNativeToken } = useGlobalWeb3Context();
+	const { sendNativeToken } = useGlobalWeb3Context();
 
-	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
+	const [selectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState('0');
-	const [loading, setLoading] = useState(false);
-	const [showQrModal, setShowQrModal] = useState(false);
+	const [loading] = useState(false);
 	const [success, setSuccess] = useState(false);
-	const [failure, setFailure] = useState(false);
-	const [isValidSender, setIsValidSender] = useState(true);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const [txnHash, setTxnHash] = useState<string>('');
+	const [failure] = useState(false);
+	const [loadingMessages] = useState<string>('');
+	const [txnHash] = useState<string>('');
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
-
-	console.log('amount', ethers.utils.parseUnits('1', 'ether'));
-
-	useEffect(() => {
-		if (!getSubstrateAddress(selectedSender)) {
-			setIsValidSender(false);
-		}
-		else {
-			setIsValidSender(true);
-		}
-	}, [selectedSender]);
 
 	const handleSubmit = async () => {
 		await sendNativeToken(activeMultisig, ethers.utils.parseUnits(amount, 'ether'));
@@ -66,7 +43,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 		<>
 			{success ? <TransactionSuccessScreen
 				successMessage='Transaction Successful!'
-				amount={ethers.utils.parseEther(amount)}
+				amount={ethers.utils.formatEther(amount)}
 				sender={selectedSender}
 				recipient={activeMultisig}
 				created_at={new Date()}

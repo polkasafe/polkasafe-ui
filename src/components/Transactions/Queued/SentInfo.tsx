@@ -4,27 +4,21 @@
 import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Modal, Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITxNotification } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import { getMultisigInfo } from 'src/utils/getMultisigInfo';
-import { notify } from 'src/utils/notify';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
-
-import EditNote from './EditNote';
-import NotifyButton from './NotifyButton';
 
 interface ISentInfoProps {
 	amount: string;
@@ -52,10 +46,8 @@ interface ISentInfoProps {
 	getMultiDataLoading?: boolean;
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, handleExecuteTransaction, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications }) => {
+const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
 	const { network } = useGlobalApiContext();
-
-	console.log('threshold and apporvales', threshold, approvals);
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);

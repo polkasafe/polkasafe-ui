@@ -6,13 +6,10 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { usePagination } from 'src/hooks/usePagination';
-import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import Pagination from 'src/ui-components/Pagination';
-import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
@@ -39,7 +36,7 @@ const History: FC<IHistory> = ({ loading }) => {
 
 	useEffect(() => {
 		if (activeMultisigTxs) {
-			const txs = activeMultisigTxs.filter((item: any) => item.executed === true && item.type === 'fund');
+			const txs = activeMultisigTxs.filter((item: any) => item.executed === true);
 			setTransactions(txs);
 		}
 	}, [activeMultisigTxs]);

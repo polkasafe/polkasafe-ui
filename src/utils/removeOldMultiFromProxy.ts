@@ -21,22 +21,22 @@ interface Props {
 	api: ApiPromise;
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
-    newSignatories: string[];
-    newThreshold: number;
-    proxyAddress: string;
-    multisigAddress: string;
+	newSignatories: string[];
+	newThreshold: number;
+	proxyAddress: string;
+	multisigAddress: string;
 }
 
-export async function removeOldMultiFromProxy({ multisigAddress, recepientAddress, proxyAddress, api, network, senderAddress, setLoadingMessages, newSignatories, newThreshold } : Props) {
+export async function removeOldMultiFromProxy({ multisigAddress, recepientAddress, proxyAddress, api, network, senderAddress, setLoadingMessages, newSignatories, newThreshold }: Props) {
 
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	const encodedSignatories = newSignatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 
@@ -109,7 +109,7 @@ export async function removeOldMultiFromProxy({ multisigAddress, recepientAddres
 							console.log('Transaction failed');
 
 							const errorModule = (event.data as any)?.dispatchError?.asModule;
-							if(!errorModule) {
+							if (!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',

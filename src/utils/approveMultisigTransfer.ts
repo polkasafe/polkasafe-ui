@@ -31,11 +31,11 @@ interface Args {
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
+export async function approveMultisigTransfer({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	// 2. Set relevant vars
@@ -45,15 +45,15 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	let displayAmount: string;
 
 	// remove approving address address from signatories
-	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
-	if(!callDataHex) return;
+	if (!callDataHex) return;
 
-	if(callDataHex && amount && recipientAddress) {
+	if (callDataHex && amount && recipientAddress) {
 		AMOUNT_TO_SEND = amount.toString();
 		displayAmount = formatBalance(AMOUNT_TO_SEND);
 
@@ -69,7 +69,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 
-	if(!multisigInfo) {
+	if (!multisigInfo) {
 		console.log('No multisig info found');
 		return;
 	}
@@ -202,7 +202,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								console.log('Transaction failed');
 
 								const errorModule = (event.data as any)?.dispatchError?.asModule;
-								if(!errorModule) {
+								if (!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',

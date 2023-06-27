@@ -22,10 +22,6 @@ import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
-import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
-import { setSigner } from 'src/utils/setSigner';
 
 const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCancel }: { addressToRemove: string, oldThreshold: number, oldSignatoriesLength: number, onCancel: () => void }) => {
 	const [newThreshold, setNewThreshold] = useState(oldThreshold === oldSignatoriesLength ? oldThreshold - 1 : oldThreshold);
@@ -33,22 +29,22 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 	const [success, setSuccess] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
 	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
-	const { api, apiReady, network } = useGlobalApiContext();
-	const [txnHash, setTxnHash] = useState<string>('');
+	const { multisigAddresses, activeMultisig, address: userAddress, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
+	const [txnHash] = useState<string>('');
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleMultisigCreate = async (newSignatories: string[], newThreshold: number) => {
-		try{
+		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !newSignatories || !newThreshold) {
+			if (!address || !signature || !newSignatories || !newThreshold) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 				setLoadingMessages('Creating Your Proxy.');
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
@@ -61,14 +57,14 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 					method: 'POST'
 				});
 
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress };
 
-				if(multisigError) {
+				if (multisigError) {
 					return;
 				}
 
-				if(multisigData){
-					setUserDetailsContextState((prevState) => {
+				if (multisigData) {
+					setUserDetailsContextState((prevState: any) => {
 						return {
 							...prevState,
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
@@ -84,20 +80,17 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 		}
 	};
 
 	const changeMultisig = async () => {
-		if(!api || !apiReady ) return;
 
-		await setSigner(api, loggedInWallet);
+		const newSignatories = multisig && multisig.signatories.filter((item: any) => item !== addressToRemove) || [];
 
-		const newSignatories = multisig && multisig.signatories.filter((item) => item !== addressToRemove) || [];
-
-		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
-		if(multisigAddresses.some((item) => item.address === newMultisigAddress.multisigAddress)){
+		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].decimals);
+		if (multisigAddresses.some((item: any) => item.address === newMultisigAddress.multisigAddress)) {
 			queueNotification({
 				header: 'Multisig Exists',
 				message: 'The new edited multisig already exists in your multisigs.',
@@ -109,32 +102,8 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 		setLoading(true);
 		try {
 			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
-			await addNewMultiToProxy({
-				api,
-				network,
-				newSignatories,
-				newThreshold,
-				oldMultisigAddress: multisig?.address || activeMultisig,
-				oldSignatories: multisig?.signatories || [],
-				oldThreshold: multisig?.threshold || 2,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages,
-				setTxnHash
-			});
 			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
-			await removeOldMultiFromProxy({
-				api,
-				multisigAddress: multisig?.address || '',
-				network,
-				newSignatories,
-				newThreshold,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(userAddress) || userAddress,
-				setLoadingMessages
-			});
+
 			setSuccess(true);
 			setLoading(false);
 			await handleMultisigCreate(newSignatories, newThreshold);
@@ -154,12 +123,12 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 					signatories={multisig?.signatories || []}
 					threshold={multisig?.threshold || 2}
 					txnHash={txnHash}
-					onDone={() => {onCancel?.(); setSuccess(false);}}
+					onDone={() => { onCancel?.(); setSuccess(false); }}
 					successMessage='Multisig Edit in Progress!'
 					waitMessage='All threshold signatories need to sign the Transaction to Edit the Multisig.'
 				/>
 					:
-					failure ? <FailedTransactionLottie message='Failed!'/>
+					failure ? <FailedTransactionLottie message='Failed!' />
 						:
 						<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 							<Form
@@ -170,7 +139,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 										<img src={AddMultisigSVG} />
 										<p className='text-text_secondary'>Add New Multisig</p>
 									</div>
-									<Loader className='bg-primary h-[2px] w-[80px]'/>
+									<Loader className='bg-primary h-[2px] w-[80px]' />
 									<div className='flex flex-col text-white items-center justify-center'>
 										<img src={RemoveMultisigSVG} />
 										<p className='text-text_secondary'>Remove Old Multisig</p>
@@ -226,7 +195,7 @@ const RemoveOwner = ({ addressToRemove, oldThreshold, oldSignatoriesLength, onCa
 									<p
 										className='text-text_secondary font-normal text-sm leading-[15px]'
 									>
-								out of <span className='text-white font-medium'>{oldSignatoriesLength - 1}</span> owners
+										out of <span className='text-white font-medium'>{oldSignatoriesLength - 1}</span> owners
 									</p>
 								</div>
 								<div className='flex items-center justify-between gap-x-4 mt-[30px]'>

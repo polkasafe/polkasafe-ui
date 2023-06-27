@@ -38,7 +38,7 @@ const AddressDropdown = () => {
 
 		await logout();
 
-		setUserDetailsContextState(prevState => {
+		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
 				activeMultisig: localStorage.getItem('active_multisig') || '',
@@ -76,7 +76,7 @@ const AddressDropdown = () => {
 						<Identicon size={15} value={address} theme='polkadot' />
 					</span>}
 					<span title={address} className='hidden md:inline-flex w-20 overflow-hidden truncate'>
-						{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item: any) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-sm', {
@@ -109,7 +109,7 @@ const AddressDropdown = () => {
 							theme='polkadot'
 						/>
 						<p className='text-white font-normal text-sm'>
-							{addressBook?.find(item => item.address === address)?.name}
+							{addressBook?.find((item: any) => item.address === address)?.name}
 						</p>
 						<p className='bg-bg-secondary mb-1 w-[300px] font-normal gap-x-2 text-sm p-2 rounded-lg flex items-center justify-center'>
 							<span className='text-text_secondary'>{shortenAddress(address)}</span>

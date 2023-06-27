@@ -8,7 +8,6 @@ import React, { useEffect, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import { IAddressBookItem } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -17,14 +16,14 @@ import { inputToBn } from 'src/utils/inputToBn';
 
 import NewUserModal from '../Home/ConnectWallet/NewUserModal';
 
-interface ISignature{
+interface ISignature {
 	name: string
 	address: string
 	key: number,
 	balance?: string
 }
 
-interface ISignatoryProps{
+interface ISignatoryProps {
 	setSignatories: React.Dispatch<React.SetStateAction<string[]>>
 	signatories: string[]
 	filterAddress?: string
@@ -35,30 +34,26 @@ interface ISignatoryProps{
 const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISignatoryProps) => {
 
 	const { address, addressBook } = useGlobalUserDetailsContext();
-	const { network, api, apiReady } = useGlobalApiContext();
-	const { accounts } = useGetWalletAccounts();
+	const { network } = useGlobalApiContext();
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
 	const [addresses, setAddresses] = useState<ISignature[]>([]);
 
 	useEffect(() => {
-		setAddresses(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
+		setAddresses(addressBook?.filter((item: any, i: any) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
 			address: item.address,
-			key: i+1,
+			key: i + 1,
 			name: item.name
 		})));
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [addressBook]);
 
 	useEffect(() => {
-		if(!api || !apiReady){
-			return;
-		}
 		const fetchBalances = async () => {
-			const results = await Promise.allSettled(addresses.map((item) => api.query.system.account(item.address)));
-			results.forEach((result, i) => {
-				if(result.status === 'fulfilled'){
+			const results = await Promise.allSettled(addresses.map((item) => item)) as any;
+			results.forEach((result: any, i: any) => {
+				if (result.status === 'fulfilled') {
 					const balance = result.value;
 					setAddresses((prev) => {
 						const copyPrev = [...prev];
@@ -70,31 +65,31 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			});
 		};
 		fetchBalances();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ api, apiReady, addressBook]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [addressBook]);
 
-	const dragStart = (event:any) => {
+	const dragStart = (event: any) => {
 		event.dataTransfer.setData('text', event.target.id);
 	};
 
-	const dragOver = (event:any) => {
+	const dragOver = (event: any) => {
 		event.preventDefault();
 	};
 
-	const drop = (event:any) => {
+	const drop = (event: any) => {
 
 		event.preventDefault();
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
 
-		if(!address) return; //is invalid
+		if (!address) return; //is invalid
 
 		setSignatories((prevState) => {
-			if(prevState.includes(address)){
+			if (prevState.includes(address)) {
 				console.log('yash prevState', prevState, address);
 				return prevState;
 			}
-			else{
+			else {
 				console.log('yash prevState', prevState, address, [
 					...prevState,
 					address
@@ -107,18 +102,18 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		});
 
 		const drop2 = document.getElementById(`drop2${homepage && '-home'}`);
-		if(data) {drop2?.appendChild(document.getElementById(data)!);}
+		if (data) { drop2?.appendChild(document.getElementById(data)!); }
 
 	};
 
-	const dropReturn = (event:any) => {
+	const dropReturn = (event: any) => {
 		event.preventDefault();
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
 
-		if(!address) return; //is invalid
+		if (!address) return; //is invalid
 
-		if(signatories.includes(address)){
+		if (signatories.includes(address)) {
 			setSignatories((prevState) => {
 				const copyState = [...prevState];
 				const index = copyState.indexOf(address);
@@ -127,17 +122,17 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			});
 		}
 		const drop1 = document.getElementById(`drop1${homepage && '-home'}`);
-		if(data) {drop1?.appendChild(document.getElementById(data)!);}
+		if (data) { drop1?.appendChild(document.getElementById(data)!); }
 	};
 
-	const clickDropReturn = (event:any) => {
+	const clickDropReturn = (event: any) => {
 		event.preventDefault();
 		const data = event.target.id;
 		const address = `${data}`.split('-')[1];
 
-		if(!address) return; //is invalid
+		if (!address) return; //is invalid
 
-		if(signatories.includes(address)){
+		if (signatories.includes(address)) {
 			setSignatories((prevState) => {
 				const copyState = [...prevState];
 				const index = copyState.indexOf(address);
@@ -146,7 +141,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			});
 		}
 		const drop1 = document.getElementById(`drop1${homepage && '-home'}`);
-		if(data) {drop1?.appendChild(document.getElementById(data)!);}
+		if (data) { drop1?.appendChild(document.getElementById(data)!); }
 	};
 
 	const clickDrop = async (event: any) => {
@@ -154,13 +149,11 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		const data = event.target.id;
 		const address = `${data}`.split('-')[1];
 
-		if(!address || !api || !apiReady) return; //is invalid
-
 		setSignatories((prevState) => {
-			if(prevState.includes(address)){
+			if (prevState.includes(address)) {
 				return prevState;
 			}
-			else{
+			else {
 				return [
 					...prevState,
 					address
@@ -169,7 +162,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		});
 
 		const drop2 = document.getElementById(`drop2${homepage && '-home'}`);
-		if(data) {drop2?.appendChild(document.getElementById(data)!);}
+		if (data) { drop2?.appendChild(document.getElementById(data)!); }
 	};
 
 	return (
@@ -180,7 +173,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-y-auto'>
 						{addresses.length > 0 ? addresses.map((address) => {
-							const lowBalance = address.balance && (Number(address.balance) < Number(inputToBn(`${chainProperties[network].existentialDeposit}`, network)[0]) || Number(address.balance) === 0);
+							const lowBalance = address.balance && (Number(address.balance) < Number(inputToBn(`${chainProperties[network].decimals}`, network)[0]) || Number(address.balance) === 0);
 							return (
 								<p onClick={signatories.includes(address.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white flex items-center gap-x-2' draggable onDragStart={dragStart}>
 									{address.name}
@@ -196,7 +189,8 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 										</Tooltip>
 									}
 								</p>
-							);})
+							);
+						})
 							:
 							// <Tooltip title='Import Addresses From Your Wallet.'>
 							// <Button onClick={() => setAddWalletAddress(true)} className='bg-primary flex items-center justify-center border-none outline-none text-white w-full' icon={<AddIcon/>}>
@@ -205,8 +199,8 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 							// </Tooltip>
 							<>
 								<div className='text-sm text-text_secondary'>Addresses imported directly from your Polkadot.js wallet</div>
-								{accounts.filter((item) => item.address !== getEncodedAddress(address, network)).map((account, i) => (
-									<p onClick={signatories.includes(getSubstrateAddress(account.address) || account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
+								{[].filter((item: any) => item.address !== getEncodedAddress(address, network)).map((account: any, i: any) => (
+									<p onClick={signatories.includes(getSubstrateAddress(account.address) || account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i + 1}-${account.address}`} key={`${i + 1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
 								))}
 							</>
 						}

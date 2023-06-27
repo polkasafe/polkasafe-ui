@@ -5,10 +5,8 @@
 import dayjs from 'dayjs';
 import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
-import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
@@ -25,18 +23,9 @@ interface IQueued {
 
 const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
 	const { activeMultisig, multisigAddresses, activeMultisigTxs } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-
 	const [queuedTransactions, setQueuedTransactions] = useState<any[]>([]);
 	const location = useLocation();
-	const [amountUSD, setAmountUSD] = useState<string>('');
 	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
-
-	useEffect(() => {
-		fetchTokenToUSDPrice(1, network).then((formattedUSD) => {
-			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
-		});
-	}, [network]);
 
 	useEffect(() => {
 		const hash = location.hash.slice(1);
@@ -70,7 +59,7 @@ const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
 							callHash={transaction.txHash}
 							note={transaction.note || ''}
 							refetch={() => setRefetch(prev => !prev)}
-							amountUSD={amountUSD || '0'}
+							amountUSD={'0'}
 							numberOfTransactions={queuedTransactions.length || 0}
 							notifications={transaction?.notifications || {}}
 						/>

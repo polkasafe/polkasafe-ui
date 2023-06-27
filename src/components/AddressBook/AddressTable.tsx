@@ -23,7 +23,7 @@ export interface IAddress {
 	address: string;
 }
 interface IAddressProps {
-    address: IAddress[];
+	address: IAddress[];
 	className?: string
 }
 
@@ -89,28 +89,28 @@ const AddAddress: FC<IAddressProps> = ({ address, className }) => {
 									/>
 									<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{address}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
+										<button className='hover:text-primary' onClick={() => copyText(address)}><CopyIcon /></button>
 										<a href={`https://${network}.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
-											<ExternalLinkIcon  />
+											<ExternalLinkIcon />
 										</a>
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center justify-right gap-x-[10px]'>
 									<button
-										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={address} nameToEdit={name} />) }
+										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={address} nameToEdit={name} />)}
 										className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon />
 									</button>
 									{index > 0 &&
-									<button
-										onClick={() => openModal('Remove Address', <RemoveAddress addressToRemove={address} name={name} />) }
-										className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
-										<DeleteIcon />
-									</button>}
+										<button
+											onClick={() => openModal('Remove Address', <RemoveAddress addressToRemove={address} name={name} />)}
+											className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
+											<DeleteIcon />
+										</button>}
 									<TransactionModal defaultAddress={address} className={className} />
 								</div>
 							</article>
-							{address.length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
+							{address.length - 1 !== index ? <Divider className='bg-text_secondary my-0' /> : null}
 						</>
 					);
 				})

@@ -5,23 +5,22 @@ import dayjs from 'dayjs';
 import React from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import ModalBtn from 'src/components/Multisig/ModalBtn';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import shortenAddress from 'src/utils/shortenAddress';
 
-interface ITransactionFailedScreen{
-    txnHash?: string
-    created_at: Date
-    sender: string
-    onDone?: () => void
-    failedMessage: string
-    waitMessage?: string
+interface ITransactionFailedScreen {
+	txnHash?: string
+	created_at: Date
+	sender: string
+	onDone?: () => void
+	failedMessage: string
+	waitMessage?: string
 }
 
 const TransactionFailedScreen = ({ txnHash, created_at, sender, onDone, failedMessage, waitMessage }: ITransactionFailedScreen) => {
-	const { network } = useGlobalApiContext();
+
 	return (
 		<div className='flex flex-col items-center'>
 			<FailedTransactionLottie className='mb-3' message={failedMessage} waitMessage={waitMessage} />
@@ -31,7 +30,7 @@ const TransactionFailedScreen = ({ txnHash, created_at, sender, onDone, failedMe
 						<span>Txn Hash:</span>
 						<div className='flex items-center gap-x-1'>
 							<span className='text-white'>{shortenAddress(txnHash)}</span>
-							<button onClick={() => copyText(txnHash, false, network)}>
+							<button onClick={() => copyText(txnHash)}>
 								<CopyIcon className='mr-2 text-primary' />
 							</button>
 						</div>
