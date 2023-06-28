@@ -6,19 +6,35 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+<<<<<<< HEAD
 import { AutoComplete, Button, Divider, Dropdown, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
+=======
+import { EthersAdapter } from '@safe-global/protocol-kit';
+import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
+import { DefaultOptionType } from 'antd/es/select';
+import BN from 'bn.js';
+import classNames from 'classnames';
+import { ethers } from 'ethers';
+import React, { FC, useEffect, useState } from 'react';
+>>>>>>> gnosis-testing
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
+<<<<<<< HEAD
 import { EFieldType, NotificationStatus } from 'src/types';
+=======
+import { GnosisSafeService } from 'src/services';
+import { NotificationStatus } from 'src/types';
+>>>>>>> gnosis-testing
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -48,6 +64,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, transactionFields } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { web3AuthUser,ethProvider } = useGlobalWeb3Context();
+
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
@@ -191,6 +209,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	}, [recipientAndAmount]);
 
 	const handleSubmit = async () => {
+<<<<<<< HEAD
 		if(!api || !apiReady || !address){
 			return;
 		}
@@ -228,6 +247,58 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setLoading(false);
 			setFailure(true);
 		}
+=======
+		if(web3AuthUser) {
+			const signer = ethProvider.getSigner();
+			const ethAdapter = new EthersAdapter({
+				ethers: ethProvider,
+				signerOrProvider: signer
+			});
+			const txUrl = 'https://safe-transaction-goerli.safe.global';
+			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+
+			await gnosisService.createSafeTx(activeMultisig, web3AuthUser.accounts[0], ethers.utils.parseEther('0.001').toString(), web3AuthUser.accounts[0]);
+			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
+			console.log('yash pendingTx', pendingTxs);
+		} else {
+			if(!api || !apiReady || !address){
+				return;
+			}
+
+			await setSigner(api, loggedInWallet);
+
+			if(!multisig || !recipientAddress || !amount){
+				queueNotification({
+					header: 'Error!',
+					message: 'Invalid Input.',
+					status: NotificationStatus.ERROR
+				});
+				return;
+			}
+			setLoading(true);
+			try {
+				const queueItemData = await initMultisigTransfer({
+					amount,
+					api,
+					initiatorAddress: address,
+					isProxy,
+					multisig,
+					network,
+					note,
+					recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
+					setLoadingMessages,
+					transferKeepAlive: true
+				});
+				setTransactionData(queueItemData);
+				setLoading(false);
+				setSuccess(true);
+			} catch (error) {
+				console.log(error);
+				setTransactionData(error);
+				setLoading(false);
+				setFailure(true);
+			}}
+>>>>>>> gnosis-testing
 	};
 
 	const AddAddressModal = ({ defaultAddress }: { defaultAddress: string }) => {
@@ -679,7 +750,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
+<<<<<<< HEAD
 							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (!transactionFieldsObject.subfields[key]?.value) && transactionFields[category].subfields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+=======
+							<ModalBtn disabled={false}
+								// !recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))
+								loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+>>>>>>> gnosis-testing
 						</section>
 					</Spin>
 			}

@@ -9,6 +9,7 @@ import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransactio
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
@@ -31,6 +32,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const { activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
+	const { web3AuthUser, sendNativeToken } = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
@@ -44,10 +46,10 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
 
 	useEffect(() => {
-		if(!getSubstrateAddress(selectedSender)){
+		if (!getSubstrateAddress(selectedSender)) {
 			setIsValidSender(false);
 		}
-		else{
+		else {
 			setIsValidSender(true);
 		}
 	}, [selectedSender]);
@@ -75,28 +77,33 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	};
 
 	const handleSubmit = async () => {
-		if(!api || !apiReady ) return;
+		if (web3AuthUser) {
+			const rec = await sendNativeToken(activeMultisig, amount);
+			console.log('yash rec', rec);
+		} else {
+			if (!api || !apiReady) return;
 
-		await setSigner(api, loggedInWallet);
+			await setSigner(api, loggedInWallet);
 
-		setLoading(true);
-		try {
-			await transferFunds({
-				amount: amount,
-				api,
-				network,
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
-				setLoadingMessages,
-				setTxnHash
-			});
-			setLoading(false);
-			setSuccess(true);
-		} catch (error) {
-			console.log(error);
-			setLoading(false);
-			setFailure(true);
-			setTimeout(() => setFailure(false), 5000);
+			setLoading(true);
+			try {
+				await transferFunds({
+					amount: amount,
+					api,
+					network,
+					recepientAddress: activeMultisig,
+					senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
+					setLoadingMessages,
+					setTxnHash
+				});
+				setLoading(false);
+				setSuccess(true);
+			} catch (error) {
+				console.log(error);
+				setLoading(false);
+				setFailure(true);
+				setTimeout(() => setFailure(false), 5000);
+			}
 		}
 	};
 
@@ -127,7 +134,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 			/>
 				: failure ? <FailedTransactionLottie message='Failed!' />
 					:
-					<Spin spinning={loading} indicator={<LoadingLottie width={300} message={loadingMessages} /> }>
+					<Spin spinning={loading} indicator={<LoadingLottie width={300} message={loadingMessages} />}>
 						<div className={className}>
 
 							<p className='text-primary font-normal text-xs leading-[13px] mb-2'>Recipient</p>
@@ -137,7 +144,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 								<Balance address={activeMultisig} />
 							</div>
 
-							<Form disabled={ loading }>
+							<Form disabled={loading}>
 								<section className='mt-6'>
 									<div className='flex items-center justify-between mb-2'>
 										<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
@@ -204,7 +211,10 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+									<ModalBtn
+										disabled={false}
+										//!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))
+										loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>

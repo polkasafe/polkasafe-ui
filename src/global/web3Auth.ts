@@ -10,8 +10,8 @@ import { TorusWalletAdapter } from '@web3auth/torus-evm-adapter';
 import { TorusWalletConnectorPlugin } from '@web3auth/torus-wallet-connector-plugin';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
-export const WEB3AUTH_CLIENT_ID = process.env.REACT_APP_WEB3_AUTH_CLIENT_ID;
-export const WEB3AUTH_SECRET = process.env.REACT_APP_WEB3_AUTH_CLIENT_SECRET;
+export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY' ;
+export const WEB3AUTH_SECRET = '55e08332b03eda3a300c8efa461c80ddaf4acb97f4678fceb5d84fb5502e0066';
 
 export const webAuth = new Web3Auth({
 	chainConfig: {
@@ -62,9 +62,14 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 
 export const metamaskAdapter = new MetamaskAdapter({
 	chainConfig: {
-		chainId: '0x1',
+		blockExplorer: 'https://goerli.etherscan.io',
+		chainId: '0x5',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		rpcTarget: 'https://rpc.ankr.com/eth' // This is the public RPC we have added, please pass on your own endpoint while creating an app
+		decimals: 18,
+		displayName: 'Goerli',
+		rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
+		ticker: 'ETH',
+		tickerName: 'Goerli'
 	},
 	clientId: WEB3AUTH_CLIENT_ID,
 	sessionTime: 3600, // 1 hour in seconds

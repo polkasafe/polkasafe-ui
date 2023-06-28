@@ -16,12 +16,17 @@ import {
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
 <<<<<<< HEAD
+<<<<<<< HEAD
 	IUserNotificationChannelPreferences
 } from './types';
 =======
 	IUserNotificationChannelPreferences,
 	ITransactionFields } from './types';
 >>>>>>> origin
+=======
+	IUserNotificationChannelPreferences
+} from './types';
+>>>>>>> gnosis-testing
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -74,8 +79,11 @@ const verifyEthSignature = async (address: string, signature: string, message: s
 	const messageBytes = ethers.toUtf8Bytes(message);
 
 	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
+<<<<<<< HEAD
 
 	console.log('address', address, recoveredAddress.toLowerCase());
+=======
+>>>>>>> gnosis-testing
 	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
 	return isValid;
 };
@@ -151,15 +159,14 @@ export const getConnectAddressTokenEth = functions.https.onRequest(async (req, r
 export const connectAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
 
-		try {
-			const substrateAddress = getSubstrateAddress(String(address));
+		const multisigAddresses = await getMultisigAddressesByAddress(address);
 
+<<<<<<< HEAD
 			const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
 				channelPreferences: {
 					[CHANNEL.IN_APP]: {
@@ -171,14 +178,29 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				},
 				triggerPreferences: {}
 			};
+=======
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+>>>>>>> gnosis-testing
 
-			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
 
-			// check if address doc already exists
-			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			const doc = await addressRef.get();
-			if (doc.exists) {
-				const data = doc.data();
+		if (signature?.startsWith('0x')) {
+			try {
+				const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
+					channelPreferences: {
+						[CHANNEL.IN_APP]: {
+							name: CHANNEL.IN_APP,
+							enabled: true,
+							handle: address,
+							verified: true
+						}
+					},
+					triggerPreferences: {}
+				};
+
+				const data = addressData;
 				if (data && data.created_at) {
 					const addressDoc = {
 						...data,
@@ -186,14 +208,18 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 					} as IUser;
 
 					const resUser: IUserResponse = {
-						address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),
+						address: address,
 						email: addressDoc.email,
 						created_at: addressDoc.created_at,
-						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })),
+						addressBook: addressDoc.addressBook,
 						multisigAddresses: multisigAddresses.map((item) => (
 							{
 								...item,
+<<<<<<< HEAD
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+=======
+								signatories: item.signatories
+>>>>>>> gnosis-testing
 							})),
 						multisigSettings: addressDoc.multisigSettings,
 						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
@@ -204,16 +230,44 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 					if (addressDoc.notification_preferences) return;
 
 					// set default notification preferences if not set
-					await doc.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+					await addressRef?.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
 					return;
 				}
+
+				const newAddress: IAddressBookItem = {
+					name: DEFAULT_USER_ADDRESS_NAME,
+					address: address
+				};
+
+				// else create a new user document
+				const newUser: IUser = {
+					address: address,
+					created_at: new Date(),
+					email: null,
+					addressBook: [newAddress],
+					multisigSettings: {},
+					notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
+				};
+
+				const newUserResponse: IUserResponse = {
+					...newUser,
+					multisigAddresses: []
+				};
+
+				await addressRef?.set(newUser, { merge: true });
+				return res.status(200).json({ data: newUserResponse });
+			} catch (err: unknown) {
+				functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
 			}
+		} else {
+			const { isValid, error } = await isValidRequest(address, signature, network);
+			if (!isValid) return res.status(400).json({ error });
 
-			const newAddress: IAddressBookItem = {
-				name: DEFAULT_USER_ADDRESS_NAME,
-				address: String(substrateAddress)
-			};
+			try {
+				const substrateAddress = getSubstrateAddress(String(address));
 
+<<<<<<< HEAD
 			// else create a new user document
 			const newUser: IUser = {
 				address: String(substrateAddress),
@@ -223,12 +277,32 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 				multisigSettings: {},
 				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
 			};
+=======
+				const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
+					channelPreferences: {
+						[CHANNEL.IN_APP]: {
+							name: CHANNEL.IN_APP,
+							enabled: true,
+							handle: String(substrateAddress),
+							verified: true
+						}
+					},
+					triggerPreferences: {}
+				};
+>>>>>>> gnosis-testing
 
-			const newUserResponse: IUserResponse = {
-				...newUser,
-				multisigAddresses
-			};
+				// check if address doc already exists
+				const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+				const doc = await addressRef.get();
+				if (doc.exists) {
+					const data = doc.data();
+					if (data && data.created_at) {
+						const addressDoc = {
+							...data,
+							created_at: data?.created_at.toDate()
+						} as IUser;
 
+<<<<<<< HEAD
 			await addressRef.set(newUser, { merge: true });
 			return res.status(200).json({ data: newUserResponse });
 		} catch (err: unknown) {
@@ -296,12 +370,37 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 				await addressRef!.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
 				return;
 			}
+=======
+						const resUser: IUserResponse = {
+							address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),
+							email: addressDoc.email,
+							created_at: addressDoc.created_at,
+							addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })),
+							multisigAddresses: multisigAddresses.map((item) => (
+								{
+									...item,
+									signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
+								})),
+							multisigSettings: addressDoc.multisigSettings,
+							notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+						};
 
-			const newAddress: IAddressBookItem = {
-				name: DEFAULT_USER_ADDRESS_NAME,
-				address: address!
-			};
+						res.status(200).json({ data: resUser });
+						if (addressDoc.notification_preferences) return;
 
+						// set default notification preferences if not set
+						await doc.ref.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+						return;
+					}
+				}
+>>>>>>> gnosis-testing
+
+				const newAddress: IAddressBookItem = {
+					name: DEFAULT_USER_ADDRESS_NAME,
+					address: String(substrateAddress)
+				};
+
+<<<<<<< HEAD
 			// else create a new user document
 			const newUser: IUser = {
 				address: address!,
@@ -311,17 +410,37 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 				multisigSettings: {},
 				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
 			};
+=======
+				// else create a new user document
+				const newUser: IUser = {
+					address: String(substrateAddress),
+					created_at: new Date(),
+					email: null,
+					addressBook: [newAddress],
+					multisigSettings: {},
+					notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
+				};
+>>>>>>> gnosis-testing
 
-			const newUserResponse: IUserResponse = {
-				...newUser,
-				multisigAddresses: []
-			};
+				const newUserResponse: IUserResponse = {
+					...newUser,
+					multisigAddresses
+				};
 
+<<<<<<< HEAD
 			await addressRef!.ref.set(newUser, { merge: true });
 			return res.status(200).json({ data: newUserResponse });
 		} catch (err: unknown) {
 			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
+=======
+				await addressRef.set(newUser, { merge: true });
+				return res.status(200).json({ data: newUserResponse });
+			} catch (err: unknown) {
+				functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+>>>>>>> gnosis-testing
 		}
 	});
 });
@@ -329,30 +448,54 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
 
-		try {
-			const substrateAddress = getSubstrateAddress(String(address));
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
 
-			const { name, address: addressToAdd } = req.body;
-			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
-			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
-			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
 
-			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
-			const doc = await addressRef.get();
-			if (doc.exists) {
-				const addressDoc = {
-					...doc.data(),
-					created_at: doc.data()?.created_at.toDate()
-				} as IUser;
-				const addressBook = addressDoc.addressBook || [];
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
 
-				// check if address already exists in address book
+		const { name, address: addressToAdd } = req.body;
+		if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressDoc = {
+			...doc.data(),
+			created_at: doc.data()?.created_at.toDate()
+		} as IUser;
+		const addressBook = addressDoc.addressBook || [];
+
+		if (signature?.startsWith('0x')) {
+			const isValid = await verifyEthSignature(address, signature, addressData?.token);
+			if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+			try {
+				const addressIndex = addressBook.findIndex((a) => a.address == addressToAdd);
+				if (addressIndex > -1) {
+					addressBook[addressIndex] = { name, address: addressToAdd };
+					await addressRef.set({ addressBook }, { merge: true });
+					return res.status(200).json({ data: addressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
+				}
+
+				const newAddressBook = [...addressBook, { name, address: addressToAdd }];
+				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
+				return res.status(200).json({ data: newAddressBook });
+			} catch (err) {
+				functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+		} else {
+			const { isValid, error } = await isValidRequest(address, signature, network);
+			if (!isValid) return res.status(400).json({ error });
+
+			try {
+				const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+				if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
+
 				const addressIndex = addressBook.findIndex((a) => a.address == substrateAddressToAdd);
 				if (addressIndex > -1) {
 					addressBook[addressIndex] = { name, address: substrateAddressToAdd };
@@ -363,11 +506,17 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
 				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
+			} catch (err) {
+				functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
 			}
+<<<<<<< HEAD
 			return res.status(400).json({ error: responseMessages.invalid_params });
 		} catch (err: unknown) {
 			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
+=======
+>>>>>>> gnosis-testing
 		}
 	});
 });
@@ -417,13 +566,22 @@ export const removeFromAddressBook = functions.https.onRequest(async (req, res) 
 export const createMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
 
 		const { signatories, threshold, multisigName, proxyAddress, disabled } = req.body;
+
 		if (!signatories || !threshold || !multisigName) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
@@ -434,29 +592,24 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
-		// cannot send proxy address if disabled is true
-		if (proxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
+		const newMultisigSettings: IMultisigSettings = {
+			deleted: false,
+			name: multisigName
+		};
 
 		// check if signatories contain duplicate addresses
 		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
 
-		try {
-			const substrateAddress = getSubstrateAddress(String(address));
-			let oldProxyMultisigRef = null;
+		if (signature?.startsWith('0x')) {
+			const isValid = await verifyEthSignature(address, signature, addressData?.token);
+			if (!isValid) return res.status(400).json({ error: 'something went wrong' });
 
 			if (proxyAddress) {
-				const proxyMultisigQuery = await firestoreDB.collection('multisigAddresses').where('proxy', '==', proxyAddress).limit(1).get();
-				if (!proxyMultisigQuery.empty) {
-					// check if the multisig linked to this proxy has this user as a signatory.
-					const multisigDoc = proxyMultisigQuery.docs[0];
-					const multisigData = multisigDoc.data();
-					oldProxyMultisigRef = multisigDoc.ref;
-					if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
-				}
-			}
+				const multisigDoc = await multisigColl.doc(proxyAddress).get();
 
-			const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
+				if (multisigDoc.exists) return res.status(400).json({ error: responseMessages.address_already_exists });
 
+<<<<<<< HEAD
 			// check if substrateSignatories contains the address of the user (not if creating a new proxy)
 			if (!proxyAddress && !substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
 
@@ -480,36 +633,138 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 				const resData: { [key: string]: any } = {
 					...multisigDocData,
+=======
+				const multisigDocument = {
+					address: proxyAddress,
+					created_at: new Date(),
+					disabled: disabled || false,
+>>>>>>> gnosis-testing
 					name: multisigName,
-					created_at: multisigDocData?.created_at?.toDate(),
-					signatories: multisigDocData?.signatories?.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)),
-					updated_at: multisigDocData?.updated_at?.toDate() || multisigDocData?.created_at.toDate()
+					network,
+					signatories,
+					threshold,
+					updated_at: new Date()
+				};
+				await multisigColl.doc(proxyAddress).set(multisigDocument);
+
+				return;
+			}
+		} else {
+			const { isValid, error } = await isValidRequest(address, signature, network);
+			if (!isValid) return res.status(400).json({ error });
+
+			// cannot send proxy address if disabled is true
+			if (proxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
+			try {
+				const substrateAddress = getSubstrateAddress(String(address));
+				let oldProxyMultisigRef = null;
+
+				if (proxyAddress) {
+					const proxyMultisigQuery = await firestoreDB.collection('multisigAddresses').where('proxy', '==', proxyAddress).limit(1).get();
+					if (!proxyMultisigQuery.empty) {
+						// check if the multisig linked to this proxy has this user as a signatory.
+						const multisigDoc = proxyMultisigQuery.docs[0];
+						const multisigData = multisigDoc.data();
+						oldProxyMultisigRef = multisigDoc.ref;
+						if (!multisigData.signatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.unauthorised });
+					}
+				}
+
+				const substrateSignatories = signatories.map((signatory) => getSubstrateAddress(String(signatory))).sort();
+
+				// check if substrateSignatories contains the address of the user (not if creating a new proxy)
+				if (!proxyAddress && !substrateSignatories.includes(substrateAddress)) return res.status(400).json({ error: responseMessages.missing_user_signatory });
+
+				const { multisigAddress, error: createMultiErr } = _createMultisig(substrateSignatories, Number(threshold), chainProperties[network].ss58Format);
+				if (createMultiErr || !multisigAddress) return res.status(400).json({ error: createMultiErr || responseMessages.multisig_create_error });
+
+				const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
+				// change user's multisig settings to deleted: false and set the name
+
+				// check if the multisig exists in our db
+				const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
+				const multisigDoc = await multisigRef.get();
+
+				if (multisigDoc.exists) {
+					const multisigDocData = multisigDoc.data();
+
+					const resData: { [key: string]: any } = {
+						...multisigDocData,
+						name: multisigName,
+						created_at: multisigDocData?.created_at?.toDate(),
+						signatories: multisigDocData?.signatories?.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)),
+						updated_at: multisigDocData?.updated_at?.toDate() || multisigDocData?.created_at.toDate()
+					};
+
+					if (proxyAddress) {
+						const batch = firestoreDB.batch();
+
+						batch.update(multisigRef, {
+							proxy: proxyAddress,
+							disabled: false,
+							updated_at: new Date()
+						});
+
+						if (oldProxyMultisigRef) {
+							batch.update(oldProxyMultisigRef, {
+								proxy: '',
+								disabled: true,
+								updated_at: new Date()
+							});
+						}
+
+						await batch.commit();
+
+						resData.proxy = proxyAddress;
+						resData.disabled = false;
+					}
+
+					res.status(200).json({ data: resData });
+
+					await firestoreDB.collection('addresses').doc(substrateAddress).set({
+						'multisigSettings': {
+							[encodedMultisigAddress]: newMultisigSettings
+						}
+					}, { merge: true });
+
+					return;
+				}
+
+				const newDate = new Date();
+
+				const newMultisig: IMultisigAddress = {
+					address: encodedMultisigAddress,
+					created_at: newDate,
+					updated_at: newDate,
+					disabled: disabled || false,
+					name: multisigName,
+					signatories: substrateSignatories,
+					network: String(network).toLowerCase(),
+					threshold: Number(threshold)
+				};
+
+				const newMultisigWithEncodedSignatories = {
+					...newMultisig,
+					signatories: newMultisig.signatories.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format))
 				};
 
 				if (proxyAddress) {
-					const batch = firestoreDB.batch();
-
-					batch.update(multisigRef, {
-						proxy: proxyAddress,
-						disabled: false,
-						updated_at: new Date()
-					});
-
-					if (oldProxyMultisigRef) {
-						batch.update(oldProxyMultisigRef, {
-							proxy: '',
-							disabled: true,
-							updated_at: new Date()
-						});
-					}
-
-					await batch.commit();
-
-					resData.proxy = proxyAddress;
-					resData.disabled = false;
+					newMultisig.proxy = proxyAddress;
 				}
 
-				res.status(200).json({ data: resData });
+				await multisigRef.set(newMultisig, { merge: true });
+
+				functions.logger.info('New multisig created with an address of ', encodedMultisigAddress);
+				res.status(200).json({ data: newMultisigWithEncodedSignatories });
+
+				if (oldProxyMultisigRef) {
+					await oldProxyMultisigRef.update({
+						proxy: '',
+						disabled: true,
+						updated_at: newDate
+					});
+				}
 
 				await firestoreDB.collection('addresses').doc(substrateAddress).set({
 					'multisigSettings': {
@@ -518,7 +773,11 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 				}, { merge: true });
 
 				return;
+			} catch (err: unknown) {
+				functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
 			}
+<<<<<<< HEAD
 
 			const newDate = new Date();
 
@@ -565,6 +824,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 		} catch (err: unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
+=======
+>>>>>>> gnosis-testing
 		}
 	});
 });
@@ -572,22 +833,26 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 export const getMultisigDataByMultisigAddress = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
-		const address = req.get('x-address');
 		const network = String(req.get('x-network'));
 
-		const { isValid, error } = await isValidRequest(address, signature, network);
-		if (!isValid) return res.status(400).json({ error });
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
 
 		const { multisigAddress } = req.body;
 		if (!multisigAddress || !network) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 
-		try {
-			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
-
-			// check if the multisig already exists in our db
-			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
+		if (signature?.startsWith('0x')) {
+			const multisigRef = await multisigColl.doc(multisigAddress).get();
 			if (multisigRef.exists) {
 				const data = multisigRef.data();
 				return res.status(200).json({
@@ -598,32 +863,56 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 					}
 				});
 			}
+		} else {
+			try {
+				const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
 
-			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
-			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
-			if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
+				// check if the multisig already exists in our db
+				const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
+				if (multisigRef.exists) {
+					const data = multisigRef.data();
+					return res.status(200).json({
+						data: {
+							...data,
+							created_at: data?.created_at.toDate(),
+							updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
+						}
+					});
+				}
 
-			const newMultisig: IMultisigAddress = {
-				address: encodedMultisigAddress,
-				created_at: new Date(),
-				updated_at: new Date(),
-				name: DEFAULT_MULTISIG_NAME,
-				signatories: multisigMetaData.signatories || [],
-				network: String(network).toLowerCase(),
-				threshold: Number(multisigMetaData.threshold) || 0
-			};
+				const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
+				if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
+				if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
 
-			res.status(200).json({ data: newMultisig });
+				const newMultisig: IMultisigAddress = {
+					address: encodedMultisigAddress,
+					created_at: new Date(),
+					updated_at: new Date(),
+					name: DEFAULT_MULTISIG_NAME,
+					signatories: multisigMetaData.signatories || [],
+					network: String(network).toLowerCase(),
+					threshold: Number(multisigMetaData.threshold) || 0
+				};
 
-			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
-				// make a copy to db
-				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
-				await newMultisigRef.set(newMultisig);
+				res.status(200).json({ data: newMultisig });
+
+				if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
+					// make a copy to db
+					const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
+					await newMultisigRef.set(newMultisig);
+				}
+				return;
+			} catch (err: unknown) {
+				functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
+				return res.status(500).json({ error: responseMessages.internal });
 			}
+<<<<<<< HEAD
 			return;
 		} catch (err: unknown) {
 			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
+=======
+>>>>>>> gnosis-testing
 		}
 	});
 });
@@ -871,10 +1160,13 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 <<<<<<< HEAD
 		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
 		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to) return res.status(400).json({ error: responseMessages.invalid_params });
+<<<<<<< HEAD
 =======
 		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
 		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
 >>>>>>> origin
+=======
+>>>>>>> gnosis-testing
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
@@ -2095,6 +2387,9 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 			return res.sendStatus(200);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> gnosis-testing
 		} catch (err: unknown) {
 			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
 =======

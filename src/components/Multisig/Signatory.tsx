@@ -82,6 +82,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 	};
 
 	const drop = (event:any) => {
+
 		event.preventDefault();
 		const data = event.dataTransfer.getData('text');
 		const address = `${data}`.split('-')[1];
@@ -90,9 +91,14 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 
 		setSignatories((prevState) => {
 			if(prevState.includes(address)){
+				console.log('yash prevState', prevState, address);
 				return prevState;
 			}
 			else{
+				console.log('yash prevState', prevState, address, [
+					...prevState,
+					address
+				]);
 				return [
 					...prevState,
 					address

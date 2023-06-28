@@ -30,7 +30,7 @@
     "ejs": "^3.1.9",
     "ethers": "^6.4.2",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^4.4.1",
+    "firebase-functions": "^4.4.0",
     "html-to-text": "^9.0.5",
     "node-telegram-bot-api": "^0.61.0",
     "showdown": "^2.1.0",

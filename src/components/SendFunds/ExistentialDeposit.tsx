@@ -9,6 +9,7 @@ import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransactio
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
@@ -32,6 +33,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 	const { api, apiReady, network } = useGlobalApiContext();
 	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
 	const { accounts } = useGetWalletAccounts(loggedInWallet);
+	const { web3AuthUser } = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
@@ -54,7 +56,10 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 		}
 	}, [selectedSender]);
 
-	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
+	const autocompleteAddresses: DefaultOptionType[] = web3AuthUser ? web3AuthUser.accounts.map(item => ({
+		label: <AddressComponent name={''} address={item} />,
+		value: item
+	})) : accounts?.map((account) => ({
 		label: <AddressComponent name={account.name} address={account.address} />,
 		value: account.address
 	}));
