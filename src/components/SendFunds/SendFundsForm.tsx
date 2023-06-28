@@ -7,12 +7,12 @@
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EthersAdapter } from '@safe-global/protocol-kit';
-import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
+import { AutoComplete, Button, Divider, Dropdown, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import { ethers } from 'ethers';
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -22,7 +22,7 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
-import { NotificationStatus } from 'src/types';
+import { EFieldType, NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -216,7 +216,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 			await setSigner(api, loggedInWallet);
 
-			if (!multisig || !recipientAddress || !amount) {
+			if (!multisig) {
 				queueNotification({
 					header: 'Error!',
 					message: 'Invalid Input.',
@@ -227,14 +227,14 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setLoading(true);
 			try {
 				const queueItemData = await initMultisigTransfer({
-					amount,
+
 					api,
 					initiatorAddress: address,
 					isProxy,
 					multisig,
 					network,
 					note,
-					recipientAddress: getSubstrateAddress(recipientAddress) || recipientAddress,
+					recipientAndAmount: [],
 					setLoadingMessages,
 					transferKeepAlive: true
 				});
