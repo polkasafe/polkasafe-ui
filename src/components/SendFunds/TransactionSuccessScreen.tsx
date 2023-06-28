@@ -18,13 +18,13 @@ interface ITransactionSuccessScreen{
     txnHash?: string
     created_at: Date
     sender: string
-    recipient: string
+    recipients: string[]
     onDone?: () => void
     successMessage: string
     waitMessage?: string
 }
 
-const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipient, onDone, successMessage, waitMessage }: ITransactionSuccessScreen) => {
+const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipients, onDone, successMessage, waitMessage }: ITransactionSuccessScreen) => {
 	const { network } = useGlobalApiContext();
 	return (
 		<div className='flex flex-col items-center'>
@@ -54,8 +54,10 @@ const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipie
 					<span><AddressComponent address={sender} /></span>
 				</div>
 				<div className='flex justify-between items-center'>
-					<span>Recipient:</span>
-					<span><AddressComponent address={recipient} /></span>
+					<span>Recipients: <span className='text-white'>{recipients.length}</span></span>
+					<div className='flex flex-col gap-y-1' >
+						{recipients.map((recipient) => <AddressComponent key={recipient} address={recipient} />)}
+					</div>
 				</div>
 			</div>
 			<div className='flex justify-center mt-2'>

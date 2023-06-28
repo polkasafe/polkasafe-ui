@@ -1,3 +1,4 @@
 export default function getMentionedUsernames(content: string): string[] {
-	return String(content).match(/(?<=\s|^)@[^\s@]+\b(?!@)/g)?.map((mention) => mention.replace('@', '')) || [];
+	const pattern = /\B@[a-z0-9_-]+/gi;
+	return String(content).match(pattern)?.map((mention) => mention.replace('@', '')) || [];
 }

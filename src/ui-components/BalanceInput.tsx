@@ -19,13 +19,14 @@ interface Props{
 	defaultValue?: string
 }
 
-const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue='' }: Props) => {
+const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
 	const { network } = useGlobalApiContext();
 	const [bnBalance, setBnBalance] = useState(new BN(0));
 
 	useEffect(() => {
 		const value = Number(defaultValue);
+		if(isNaN(value)) return;
 		if(!value || value <= 0) {
 			setIsValidInput(false);
 			onChange(new BN(0));
@@ -61,7 +62,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 	};
 
 	return <section className={`${className}`}>
-		<label className='text-primary font-normal text-xs leading-[13px] block mb-2'>{ label }</label>
+		<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>{ label }</label>
 		<div className='flex items-center gap-x-[10px]'>
 			<article className='w-full'>
 				<Form.Item
@@ -72,13 +73,13 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 					help={!isValidInput ? 'Please input a valid value' : (fromBalance && !bnBalance?.isZero() && bnBalance?.gte(new BN(fromBalance)) && 'Insufficient Balance in Sender Account.')}
 					initialValue={chainProperties[network].existentialDeposit}
 				>
-					<div className='flex items-center h-[40px]'>
+					<div className='flex items-center h-[50px]'>
 						<Input
 							id="balance"
 							onChange={(a) => onBalanceChange(a.target.value)}
 							placeholder={`${placeholder} ${chainProperties[network]?.tokenSymbol}`}
 							defaultValue={defaultValue}
-							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24"
+							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
 						/>
 						<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
 							<ParachainIcon src={chainProperties[network].logo} className='mr-2' />

@@ -122,7 +122,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 				'
 				amount={amount}
 				sender={selectedSender}
-				recipient={multisig?.address || activeMultisig}
+				recipients={[multisig?.address || activeMultisig]}
 				created_at={new Date()}
 				txnHash={txnHash}
 				onDone={() => {

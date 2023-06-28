@@ -30,7 +30,7 @@ export default async function verifyEmail(args: Args) {
 		const token = uuidv4();
 
 		const updatedNotificationPreferences: IUserNotificationPreferences = {
-			triggerPreferences: { ...userNotificationPreferences.triggerPreferences },
+			triggerPreferences: { ...(userNotificationPreferences?.triggerPreferences || {}) },
 			channelPreferences: {
 				...userNotificationPreferences.channelPreferences,
 				[CHANNEL.EMAIL]: {
@@ -47,7 +47,7 @@ export default async function verifyEmail(args: Args) {
 		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 		const subject = triggerTemplate.subject;
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 			...args,
 			token
 		});
@@ -60,6 +60,7 @@ export default async function verifyEmail(args: Args) {
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject
 		);

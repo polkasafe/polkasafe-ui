@@ -1,5 +1,5 @@
 import { NOTIFICATION_SOURCE } from '../notification_engine_constants';
-import { emailTemplateContainer } from './email-template-container';
+import { htmlTemplateContainer } from './html-template-container';
 
 export interface ITriggerTemplate {
 	subject: string;
@@ -18,7 +18,7 @@ export default async function getTriggerTemplate(
 
 	return {
 		subject: triggerData.subject || `${source.charAt(0).toUpperCase()}${source.slice(1)} notification`,
-		template: emailTemplateContainer(source, String(triggerData.template)),
+		template: htmlTemplateContainer(source, String(triggerData.template)),
 		args: triggerData.args || []
 	};
 }

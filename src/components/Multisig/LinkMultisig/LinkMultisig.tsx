@@ -19,6 +19,7 @@ import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
@@ -330,7 +331,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						<NameAddress multisigName={multisigName} setMultisigName={setMultisigName} multisigAddress={multisigAddress} setMultisigAddress={setMultisigAddress} />
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 							<CancelBtn onClick={onCancel} />
-							<AddBtn disabled={!multisigAddress} title='Continue' loading={loading} onClick={handleViewOwners}/>
+							<AddBtn disabled={!multisigAddress || !getSubstrateAddress(multisigAddress)} title='Continue' loading={loading} onClick={handleViewOwners}/>
 						</div>
 					</div>:<div>
 						{viewReviews?<div>

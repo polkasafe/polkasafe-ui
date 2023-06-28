@@ -13,7 +13,7 @@
     "server": "npm run build -- --watch | firebase emulators:start --only functions"
   },
   "engines": {
-    "node": "16"
+    "node": "18"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -30,10 +30,11 @@
     "ejs": "^3.1.9",
     "ethers": "^6.4.2",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^4.1.1",
+    "firebase-functions": "^4.4.1",
     "html-to-text": "^9.0.5",
     "node-telegram-bot-api": "^0.61.0",
     "showdown": "^2.1.0",
+    "turndown": "^7.1.2",
     "uuid": "^9.0.0",
     "validator": "^13.9.0",
     "web3": "^1.10.0"
@@ -44,6 +45,7 @@
     "@types/html-to-text": "^9.0.0",
     "@types/node-telegram-bot-api": "^0.61.6",
     "@types/showdown": "^2.0.1",
+    "@types/turndown": "^5.0.1",
     "@types/uuid": "^9.0.0",
     "@types/validator": "^13.7.17",
     "@typescript-eslint/eslint-plugin": "^5.12.0",

@@ -63,12 +63,13 @@ export default async function executedProxy(args: Args) {
 
 			if (triggerTemplate.args.length > 0 && !isValidTemplateArgs(templateArgValues, triggerTemplate.args)) throw Error(`Invalid arguments for trigger template : ${TRIGGER_NAME}`);
 
-			const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, templateArgValues);
+			const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, templateArgValues);
 
 			const notificationServiceInstance = new NotificationService(
 				SOURCE,
 				TRIGGER_NAME,
 				htmlMessage,
+				markdownMessage,
 				textMessage,
 				subject,
 				{

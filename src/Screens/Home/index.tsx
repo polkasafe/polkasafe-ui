@@ -148,7 +148,7 @@ const Home = ({ className }: { className?: string }) => {
 						</button>}
 					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Proxy</h3>}
 					open={openProxyModal}
-					className={`w-auto md:min-w-[500px] ${className}`}
+					className={`w-auto md:min-w-[500px] scale-90 ${className}`}
 				>
 					<AddProxy setProxyInProcess={setProxyInProcess} homepage onCancel={() => setOpenProxyModal(false)} />
 				</Modal>

@@ -6,7 +6,7 @@ import validator from 'validator';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 
 const TRIGGER_NAME = 'verifyEmail';
-const SOURCE = NOTIFICATION_SOURCE.POLKASAFE;
+const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 
 interface Args {
 	email: string;
@@ -25,7 +25,7 @@ export default async function verifyEmail(args: Args) {
 	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		...args,
 		verifyUrl
 	});
@@ -37,7 +37,7 @@ export default async function verifyEmail(args: Args) {
 				name: CHANNEL.EMAIL,
 				enabled: true,
 				handle: email,
-				verified: false,
+				verified: true,
 				verification_token: ''
 			}
 		}
@@ -47,6 +47,7 @@ export default async function verifyEmail(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject
 	);

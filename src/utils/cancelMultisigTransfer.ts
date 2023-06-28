@@ -36,7 +36,7 @@ export async function cancelMultisigTransfer ({ api, approvingAddress, callHash,
 		if(!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
-	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== getEncodedAddress(approvingAddress, network));
 
 	// 3. Retrieve and unwrap the timepoint
 	const info = await api.query.multisig.multisigs(multisig.address, callHash);

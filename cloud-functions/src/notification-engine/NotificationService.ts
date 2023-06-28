@@ -13,6 +13,7 @@ export class NotificationService {
 		protected readonly source: NOTIFICATION_SOURCE,
 		protected readonly trigger: string,
 		protected readonly htmlMessage: string,
+		protected readonly markdownMessage: string,
 		protected readonly message: string,
 		protected readonly subject: string,
 		protected readonly sourceArgs?: {[index: string]: any} // additional data a source might need
@@ -34,11 +35,21 @@ export class NotificationService {
 	}
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
+		console.log('sendEmailNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.EMAIL]?.verified
+		});
+
 		if (!SENDGRID_API_KEY ||
-			(!isVerificationEmail && !userNotificationPreferences?.triggerPreferences?.[this.trigger]?.enabled)||
+			(!isVerificationEmail && !userNotificationPreferences?.triggerPreferences?.[this.trigger]?.enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.enabled) ||
 			(!isVerificationEmail && !userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified)
-		) return;
+		) {
+			console.log('sendEmailNotification returning as conditions not met');
+			return;
+		}
 
 		const FROM = {
 			email: NOTIFICATION_SOURCE_EMAIL[this.source],
@@ -53,50 +64,99 @@ export class NotificationService {
 			to: userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.handle
 		};
 
+		console.log('Sending email : ', {
+			handle: userNotificationPreferences?.channelPreferences?.[CHANNEL.EMAIL]?.handle,
+			source: this.source,
+			trigger: this.trigger
+		});
+
 		sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
 	}
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendTelegramNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.verified
+		});
+
 		const SOURCE_TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN[this.source];
 
 		if (!SOURCE_TELEGRAM_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled
-		) return;
+		) {
+			console.log('sendTelegramNotification returning as conditions not met');
+			return;
+		}
 
 		const bot = new TelegramBot(SOURCE_TELEGRAM_BOT_TOKEN, { polling: false });
 
 		const chatId = userNotificationPreferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle;
 
-		bot.sendMessage(chatId, this.message).catch((error) => console.error('Error in sending telegram : ', error));
+		console.log('Sending Telegram notification : ', {
+			handle: chatId,
+			source: this.source,
+			trigger: this.trigger
+		});
+
+		bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendDiscordNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.verified
+		});
+
 		const SOURCE_DISCORD_BOT_TOKEN = DISCORD_BOT_SECRETS[this.source].token;
 
 		if (!SOURCE_DISCORD_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle
-		) return;
+		) {
+			console.log('sendDiscordNotification returning as conditions not met');
+			return;
+		}
+
+		console.log('Sending Discord notification : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
+			source: this.source,
+			trigger: this.trigger
+		});
 
 		await sendDiscordMessage(
 			this.source,
 			userNotificationPreferences.channelPreferences?.[CHANNEL.DISCORD]?.handle,
-			this.message
+			this.markdownMessage,
+			this.subject,
 		).catch((error) => console.error('Error in sending Discord message : ', error));
 	}
 
 	public async sendElementNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendElementNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.verified
+		});
+
 		if (!ELEMENT_API_KEY ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.enabled
-		) return;
+		) {
+			console.log('sendElementNotification returning as conditions not met');
+			return;
+		}
 
 		const roomId = userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle;
 
 		const requestBody = {
-			roomId: userNotificationPreferences.channelPreferences?.[CHANNEL.ELEMENT]?.handle,
+			roomId,
 			body: this.message,
 			messageType: 'text'
 		};
@@ -104,6 +164,12 @@ export class NotificationService {
 		const config = {
 			headers: { 'Authorization': `Bearer ${ELEMENT_API_KEY}` }
 		};
+
+		console.log('Sending Element notification : ', {
+			handle: roomId,
+			source: this.source,
+			trigger: this.trigger
+		});
 
 		try {
 			await axios.post('https://api.element.io/v1/rooms/' + roomId + '/send', requestBody, config);
@@ -113,15 +179,31 @@ export class NotificationService {
 	}
 
 	public async sendSlackNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
+		console.log('sendSlackNotification called with : ', {
+			handle: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
+			triggerEnabled: userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled,
+			channelEnabled: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled,
+			channelVerified: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.verified
+		});
+
 		const SOURCE_SLACK_BOT_TOKEN = SLACK_BOT_TOKEN[this.source];
 
 		if (!SOURCE_SLACK_BOT_TOKEN ||
 			!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.enabled ||
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle
-		) return;
+		) {
+			console.log('sendSlackNotification returning as conditions not met');
+			return;
+		}
 		try {
-			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.message);
+			console.log('Sending slack notification : ', {
+				handle: userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle,
+				source: this.source,
+				trigger: this.trigger
+			});
+
+			await sendSlackMessage(this.source, String(userNotificationPreferences.channelPreferences?.[CHANNEL.SLACK]?.handle), this.markdownMessage);
 		} catch (error) {
 			console.error(`Error sending slack message: ${error}`);
 		}

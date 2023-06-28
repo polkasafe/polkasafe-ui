@@ -44,7 +44,7 @@ export default async function approvalReminder(args: Args) {
 	const link = `/transactions?tab=Queue#${callHash}&network=${network}&multisigAddress=${multisigAddress}`;
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		network,
 		multisigName: userMultisigName || defaultMultisigName,
 		multisigAddress: multisigAddress,
@@ -55,6 +55,7 @@ export default async function approvalReminder(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject,
 		{

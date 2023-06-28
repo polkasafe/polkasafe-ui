@@ -4,10 +4,11 @@ import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notific
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
-import { IPAUserPreference, EPAProposalType, IPAPostComment, IPAUser, IPACommentReply } from '../_utils/types';
+import { EPAProposalType, IPAPostComment, IPAUser, IPACommentReply, EMentionType } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
 import sendMentionNotifications from '../_utils/sendMentionNotifications';
+import getNetworkNotificationPrefsFromPANotificationPrefs from '../_utils/getNetworkNotificationPrefsFromPANotificationPrefs';
 
 const TRIGGER_NAME = 'newReplyAdded';
 const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
@@ -15,45 +16,41 @@ const SOURCE = NOTIFICATION_SOURCE.POLKASSEMBLY;
 interface Args {
 	network: string;
 	postType: string;
-	postId: string | number;
-	commentId: string | number;
-	replyId: string | number;
+	postId: string;
+	commentId: string;
+	replyId: string;
 }
 
 export default async function newReplyAdded(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
-	const { network, postType, postId, commentId, replyId } = args;
-
-	const postIdNumber = Number(postId);
-	const commentIdNumber = Number(commentId);
-	const replyIdNumber = Number(replyId);
-
-	if (!network || !postType || !postId || isNaN(postIdNumber) || !commentId || isNaN(commentIdNumber) || !replyId || isNaN(replyIdNumber)) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	const { network, postType, postId = null, commentId = null, replyId = null } = args;
+	if (!network || !postType || !postId || !commentId || !replyId) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
+	// get comment and comment author data
 	const commentDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).get();
 	if (!commentDoc.exists) return;
 	const commentDocData = commentDoc.data() as IPAPostComment;
-	const commentAuthorDoc = await paUserRef(firestore_db, network, commentDocData.user_id).get();
+	const commentAuthorDoc = await paUserRef(firestore_db, commentDocData.user_id).get();
 	if (!commentAuthorDoc.exists) return;
 	const commentAuthorData = commentAuthorDoc.data() as IPAUser;
 
+	if (!commentAuthorData.notification_preferences) return;
+
+	// get reply and reply author data
 	const replyDoc = await paPostsRef(firestore_db, network, postType as EPAProposalType).doc(String(postId)).collection('comments').doc(String(commentId)).collection('replies').doc(String(replyId)).get();
 	if (!replyDoc.exists) return;
 	const replyDocData = replyDoc.data() as IPACommentReply;
-	const replyAuthorDoc = await paUserRef(firestore_db, network, replyDocData.user_id).get();
+	const replyAuthorDoc = await paUserRef(firestore_db, replyDocData.user_id).get();
 	if (!replyAuthorDoc.exists) return;
 	const replyAuthorData = replyAuthorDoc.data() as IPAUser;
 
 	const commentUrl = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(postType as EPAProposalType)}/${postId}#${commentId}`;
 
-	const networkRef = firestore_db.collection('networks').doc(network);
-	const commentAuthorPreferencesDoc = await networkRef.collection('user_preferences').doc(String(commentAuthorData.id)).get();
-	const commentAuthorPreferencesDocData = commentAuthorPreferencesDoc.data() as IPAUserPreference;
-	if (!commentAuthorPreferencesDocData || Number(commentAuthorPreferencesDocData.user_id) === Number(replyAuthorData.id)) return; // skip if user replied to his own comment
+	if (Number(commentAuthorData.id) === Number(replyAuthorData.id)) return; // skip if user replied to his own comment
 
-	const commentAuthorNotificationPreferences: IUserNotificationPreferences = commentAuthorPreferencesDocData.notification_settings;
+	const commentAuthorNotificationPreferences: IUserNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(commentAuthorData.notification_preferences, network);
 	if (!commentAuthorNotificationPreferences) return;
 
 	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
@@ -63,7 +60,7 @@ export default async function newReplyAdded(args: Args) {
 	const replyHTML = converter.makeHtml(replyDocData.content);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
+	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
 		...args,
 		authorUsername: replyAuthorData.username,
 		commentUrl,
@@ -76,20 +73,21 @@ export default async function newReplyAdded(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject,
 		{
 			network
 		}
 	);
-	notificationServiceInstance.notifyAllChannels(commentAuthorNotificationPreferences);
+	await notificationServiceInstance.notifyAllChannels(commentAuthorNotificationPreferences);
 
 	await sendMentionNotifications({
 		firestore_db,
 		authorUsername: replyAuthorData.username,
 		htmlContent: replyHTML,
 		network,
-		type: 'reply',
+		type: EMentionType.REPLY,
 		url: commentUrl
 	});
 }

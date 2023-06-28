@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import ConnectWalletImg from 'src/assets/connect-wallet.svg';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { initialUserDetailsContext, useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { APP_NAME } from 'src/global/appName';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
@@ -121,7 +121,8 @@ const ConnectWallet = () => {
 									pendingTransaction: 2,
 									transactionExecuted: true
 								}
-							}
+							},
+							transactionFields: userData?.transactionFields || initialUserDetailsContext.transactionFields
 						};
 					});
 					setLoading(false);

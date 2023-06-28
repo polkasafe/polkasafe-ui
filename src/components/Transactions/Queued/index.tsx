@@ -108,6 +108,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							{created_at}
 						</h4> */}
 						<Transaction
+							totalAmount={transaction.totalAmount}
 							setQueuedTransactions={setQueuedTransactions}
 							date={dayjs(transaction.created_at).format('llll')}
 							status={transaction.status}
@@ -120,6 +121,7 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 							amountUSD={amountUSD}
 							numberOfTransactions={queuedTransactions.length || 0}
 							notifications={transaction?.notifications}
+							transactionFields={transaction?.transactionFields}
 						/>
 					</section>;
 				})}

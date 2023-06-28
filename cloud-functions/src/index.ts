@@ -15,8 +15,13 @@ import {
 	IUser,
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
+<<<<<<< HEAD
 	IUserNotificationChannelPreferences
 } from './types';
+=======
+	IUserNotificationChannelPreferences,
+	ITransactionFields } from './types';
+>>>>>>> origin
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -191,7 +196,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
 						multisigSettings: addressDoc.multisigSettings,
-						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
+						transactionFields: addressDoc.transactionFields
 					};
 
 					res.status(200).json({ data: resUser });
@@ -862,8 +868,13 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
+<<<<<<< HEAD
 		const { amount_token, block_number, callData, callHash, from, to, note } = req.body;
 		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to) return res.status(400).json({ error: responseMessages.invalid_params });
+=======
+		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
+		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
+>>>>>>> origin
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
@@ -878,7 +889,8 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
 				amount_token: String(amount_token),
 				network,
-				note: note || ''
+				note: note || '',
+				transactionFields: transactionFields || {}
 			};
 
 			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));
@@ -1199,7 +1211,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { channelPreferences } = req.body as { channelPreferences: IUserNotificationChannelPreferences };
+		const { channelPreferences } = req.body as { channelPreferences: {[index: string]: IUserNotificationChannelPreferences} };
 		if (!channelPreferences || typeof channelPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -1228,6 +1240,7 @@ export const notify = functions.https.onRequest(async (req, res) => {
 		if (!source || !Object.values(NOTIFICATION_SOURCE).includes(source as any)) return res.status(400).json({ error: responseMessages.invalid_headers });
 
 		const { trigger, args } = req.body;
+		functions.logger.info('notify called with: ', { source, trigger, args }, { structuredData: true });
 		if (!trigger) return res.status(400).json({ error: responseMessages.missing_params });
 		if (args && (typeof args !== 'object' || Array.isArray(args))) return res.status(400).json({ error: responseMessages.invalid_params });
 
@@ -1256,7 +1269,7 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 		if (!email || !token) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
-			const addressSnapshot = await firestoreDB.collection('addresses').where('notification_preferences.channelPreferences.email.handle', '==', email).limit(1).get();
+			const addressSnapshot = await firestoreDB.collection('addresses').where('notification_preferences.channelPreferences.email.verification_token', '==', token).where('notification_preferences.channelPreferences.email.handle', '==', email).limit(1).get();
 			if (addressSnapshot.empty) return res.status(400).json({ error: responseMessages.invalid_params });
 			const addressDoc = addressSnapshot.docs[0];
 			const addressDocData = addressDoc.data();
@@ -1280,11 +1293,14 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 		functions.logger.info('polkasafeTelegramBotCommands req', { req });
 
 		try {
-			const { message } = req.body;
-			let { text, chat } = message;
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
 
-			if (!text || !chat) {
-				const { edited_message } = req.body;
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
 				text = edited_message.text;
 				chat = edited_message.chat;
 			}
@@ -1904,11 +1920,14 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 		functions.logger.info('polkassemblyTelegramBotCommands req', { req });
 
 		try {
-			const { message } = req.body;
-			let { text, chat } = message;
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
 
-			if (!text || !chat) {
-				const { edited_message } = req.body;
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
 				text = edited_message.text;
 				chat = edited_message.chat;
 			}
@@ -1931,9 +1950,9 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 
 				To interact with this bot, you can use the following commands:
 
-				- '/add <username> <verificationToken>': Use this command to add a username to Polkassembly Bot.
+				- '/add <username><space><verificationToken>': Use this command to add a username to Polkassembly Bot.
 
-				- '/remove <username> <verificationToken>': Use this command to remove a username from Polkassembly Bot
+				- '/remove <username><space><verificationToken>': Use this command to remove a username from Polkassembly Bot
 
 				Please note that you need to replace '<username>' with the actual username you want to add or remove, and '<verificationToken>' with the token provided for verification.
 				`
@@ -1949,7 +1968,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /add <username> <verificationToken>'
+						'Invalid command. Please use the following format: /add <username><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -2016,7 +2035,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /remove <web3Address> <verificationToken>'
+						'Invalid command. Please use the following format: /remove <web3Address><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
@@ -2075,8 +2094,13 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 			}
 
 			return res.sendStatus(200);
+<<<<<<< HEAD
 		} catch (err: unknown) {
 			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
+=======
+		} catch (err:unknown) {
+			functions.logger.error('Error in polkassemblyTelegramBotCommands :', { err, stack: (err as any).stack });
+>>>>>>> origin
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -2426,5 +2450,31 @@ export const polkassemblySlackBotCommands = functions.https.onRequest(async (req
 		}
 
 		return;
+	});
+});
+
+export const updateTransactionFields = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { transactionFields } = req.body as { transactionFields: ITransactionFields };
+		if (!transactionFields || typeof transactionFields !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			addressRef.update({ ['transactionFields']: transactionFields });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateTransactionFields :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
 	});
 });

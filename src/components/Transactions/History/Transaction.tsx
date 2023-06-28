@@ -153,14 +153,14 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									note={note}
 									loading={loading}
 									amount_usd={amount_usd}
-									to={to}
+									to={String(to)}
 								/>
 								:
 								<SentInfo
 									amount={String(amount_token)}
 									amountType={token}
 									date={dayjs(created_at).format('llll')}
-									recipient={to}
+									recipient={String(to)}
 									callHash={callHash}
 									note={note}
 									from={from}

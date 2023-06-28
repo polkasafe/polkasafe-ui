@@ -11,12 +11,11 @@
     "url": "https://github.com/polkasafe/polkasafe-ui/issues"
   },
   "dependencies": {
-    "@craco/craco": "^7.1.0",
-    "@polkadot/api": "^10.7.3",
-    "@polkadot/api-augment": "^10.7.3",
-    "@polkadot/extension-dapp": "^0.46.3",
-    "@polkadot/extension-inject": "^0.46.3",
-    "@polkadot/react-identicon": "^3.4.1",
+    "@polkadot/api": "^10.9.1",
+    "@polkadot/api-augment": "^10.9.1",
+    "@polkadot/extension-dapp": "^0.46.5",
+    "@polkadot/extension-inject": "^0.46.5",
+    "@polkadot/react-identicon": "^3.5.1",
     "@polkadot/react-qr": "^3.0.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",

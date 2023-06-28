@@ -5,10 +5,12 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 import ManageMultisig from 'src/components/Settings/ManageMultisig';
 import Notifications from 'src/components/Settings/Notifications';
+import TransactionFields from 'src/components/Settings/TransactionFields';
 
 enum ETab {
 	SIGNATORIES,
-	NOTIFICATIONS
+	NOTIFICATIONS,
+	TRANSACTIONS
 }
 
 const Settings = () => {
@@ -28,7 +30,6 @@ const Settings = () => {
 						}
 					)}
 				>
-					{/* <QueueIcon /> */}
 						Signatories
 				</button>
 				<button
@@ -40,15 +41,28 @@ const Settings = () => {
 						}
 					)}
 				>
-					{/* <HistoryIcon/> */}
 						Notifications
+				</button>
+				<button
+					onClick={() => setTab(ETab.TRANSACTIONS)}
+					className={classNames(
+						'rounded-lg p-3 text-sm leading-[15px] text-white',
+						{
+							'text-primary bg-highlight': tab === ETab.TRANSACTIONS
+						}
+					)}
+				>
+						Transaction Fields
 				</button>
 			</div>
 			{
 				tab === ETab.SIGNATORIES ?
 					<ManageMultisig/>
 					:
-					<Notifications/>
+					tab === ETab.NOTIFICATIONS ?
+						<Notifications/>
+						:
+						<TransactionFields/>
 			}
 		</div>
 	);
