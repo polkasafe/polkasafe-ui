@@ -124,7 +124,7 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 	});
 });
 
-export const getConnectAddressTokenEther = functions.https.onRequest(async (req, res) => {
+export const getConnectAddressTokenEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
 		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
