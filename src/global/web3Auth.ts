@@ -10,7 +10,7 @@ import { TorusWalletAdapter } from '@web3auth/torus-evm-adapter';
 import { TorusWalletConnectorPlugin } from '@web3auth/torus-wallet-connector-plugin';
 
 // of the Apache-2.0 license. See the LICENSE file for details.
-export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY' ;
+export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY';
 export const WEB3AUTH_SECRET = '55e08332b03eda3a300c8efa461c80ddaf4acb97f4678fceb5d84fb5502e0066';
 
 export const webAuth = new Web3Auth({
@@ -27,7 +27,8 @@ export const webAuth = new Web3Auth({
 		loginMethodsOrder: ['google'],
 		theme: 'dark'
 	},
-	web3AuthNetwork: 'cyan'
+	web3AuthNetwork: 'testnet'
+
 });
 
 export const openloginAdapter = new OpenloginAdapter({
@@ -55,7 +56,7 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 		whiteLabel: {
 			logoDark: 'https://web3auth.io/images/w3a-L-Favicon-1.svg', //@TODO
 			logoLight: 'https://web3auth.io/images/w3a-D-Favicon-1.svg',
-			theme: {  colors: { primary: '#00a8ff' }, isDark: true }
+			theme: { colors: { primary: '#00a8ff' }, isDark: true }
 		}
 	}
 });
