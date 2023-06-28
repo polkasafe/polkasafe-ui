@@ -59,6 +59,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 	useEffect(() => {
 		if (userDetailsContextState.activeMultisig && ethProvider) fetchMultisigData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userDetailsContextState.activeMultisig, ethProvider]);
 
 	const fetchMultisigData = async () => {

@@ -31,6 +31,7 @@ const Balance = ({ address, className }: Props) => {
 
 	useEffect(() => {
 		if (address) fetchEthBalance(address);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address]);
 
 	return (

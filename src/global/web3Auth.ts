@@ -27,7 +27,7 @@ export const webAuth = new Web3Auth({
 		loginMethodsOrder: ['google'],
 		theme: 'dark'
 	},
-	web3AuthNetwork: 'cyan'
+	web3AuthNetwork: 'testnet'
 });
 
 export const openloginAdapter = new OpenloginAdapter({
@@ -72,7 +72,7 @@ export const metamaskAdapter = new MetamaskAdapter({
 	},
 	clientId: WEB3AUTH_CLIENT_ID,
 	sessionTime: 3600, // 1 hour in seconds
-	web3AuthNetwork: 'cyan'
+	web3AuthNetwork: 'testnet'
 });
 
 export const torusWalletAdapter = new TorusWalletAdapter({
@@ -92,5 +92,5 @@ export const options: Web3AuthOptions = {
 
 	},
 	web3AuthNetwork: 'testnet'
-
 };
+

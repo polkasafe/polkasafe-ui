@@ -68,6 +68,7 @@ const Home = () => {
 		};
 		handleNewTransaction();
 
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [web3AuthUser, ethProvider]);
 
 	useEffect(() => {

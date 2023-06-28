@@ -91,6 +91,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		};
 
 		getTxs();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ethProvider]);
 
 	const handleSubmit = async () => {
@@ -124,7 +125,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			},
 			method: 'POST'
 		}).then(res => res.json());
-		// console.log('amount in parse', ethers.utils.parseUnits(amount, 'ether').toString());
+
 	};
 
 	const AddAddressModal: FC = () => {

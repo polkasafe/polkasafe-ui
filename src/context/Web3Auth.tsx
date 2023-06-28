@@ -84,10 +84,12 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 			console.log('web3Auth running');
 			login();
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [web3Auth]);
 
 	useEffect(() => {
 		if (provider) getUserInfo(provider);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [provider]);
 
 	useEffect(() => {
