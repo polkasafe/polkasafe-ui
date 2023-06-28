@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Web3Adapter } from '@safe-global/protocol-kit';
-import { Collapse, Divider, message, Skeleton } from 'antd';
+import { Collapse, Divider, Skeleton } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { ethers } from 'ethers';
