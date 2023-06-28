@@ -6,13 +6,6 @@
 
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-<<<<<<< HEAD
-import { AutoComplete, Button, Divider, Dropdown, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
-import { DefaultOptionType } from 'antd/es/select';
-import BN from 'bn.js';
-import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-=======
 import { EthersAdapter } from '@safe-global/protocol-kit';
 import { AutoComplete, Button, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
@@ -20,7 +13,6 @@ import BN from 'bn.js';
 import classNames from 'classnames';
 import { ethers } from 'ethers';
 import React, { FC, useEffect, useState } from 'react';
->>>>>>> gnosis-testing
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -29,12 +21,8 @@ import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
-<<<<<<< HEAD
-import { EFieldType, NotificationStatus } from 'src/types';
-=======
 import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
->>>>>>> gnosis-testing
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
@@ -64,7 +52,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, transactionFields } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
-	const { web3AuthUser,ethProvider } = useGlobalWeb3Context();
+	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -100,7 +88,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
-	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{category: string, subfields: {[subfield: string]: { name: string, value: string }}}>({ category: 'none', subfields: {} });
+	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{ category: string, subfields: { [subfield: string]: { name: string, value: string } } }>({ category: 'none', subfields: {} });
 
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
@@ -140,10 +128,10 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	};
 
 	useEffect(() => {
-		if(!recipientAndAmount) return;
+		if (!recipientAndAmount) return;
 
 		recipientAndAmount.forEach((item, i) => {
-			if(!getSubstrateAddress(item.recipient) || recipientAndAmount.indexOf(recipientAndAmount.find(a => getSubstrateAddress(item.recipient) === getSubstrateAddress(a.recipient)) as IRecipientAndAmount) !== i){
+			if (!getSubstrateAddress(item.recipient) || recipientAndAmount.indexOf(recipientAndAmount.find(a => getSubstrateAddress(item.recipient) === getSubstrateAddress(a.recipient)) as IRecipientAndAmount) !== i) {
 				setValidRecipient(prev => {
 					const copyArray = [...prev];
 					copyArray[i] = false;
@@ -162,11 +150,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	useEffect(() => {
 
-		if(!api || !apiReady || !recipientAndAmount || recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero())) return;
+		if (!api || !apiReady || !recipientAndAmount || recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero())) return;
 
-		const batch = api.tx.utility.batch(recipientAndAmount.map((item) => transferKeepAlive ?  api.tx.balances.transferKeepAlive(item.recipient, item.amount.toString()) : api.tx.balances.transfer(item.recipient, item.amount.toString())));
+		const batch = api.tx.utility.batch(recipientAndAmount.map((item) => transferKeepAlive ? api.tx.balances.transferKeepAlive(item.recipient, item.amount.toString()) : api.tx.balances.transfer(item.recipient, item.amount.toString())));
 		let tx: SubmittableExtrinsic<'promise'>;
-		if(isProxy && multisig?.proxy){
+		if (isProxy && multisig?.proxy) {
 			tx = api.tx.proxy.proxy(multisig.proxy, null, batch);
 			setCallData(tx.method.toHex());
 		}
@@ -178,7 +166,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	useEffect(() => {
 		const fetchBalanceInfos = async () => {
-			if(!api || !apiReady || !address || !recipientAndAmount[0].recipient){
+			if (!api || !apiReady || !address || !recipientAndAmount[0].recipient) {
 				return;
 			}
 			setFetchBalancesLoading(true);
@@ -188,7 +176,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			setTotalDeposit(new BN(depositBase).add(new BN(depositFactor)));
 
 			//gas fee
-			if(!['westend', 'rococo', 'kusama'].includes(network)){
+			if (!['westend', 'rococo', 'kusama'].includes(network)) {
 				const txn = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAndAmount[0].recipient, amount) : api.tx.balances.transfer(recipientAndAmount[0].recipient, amount);
 				const gasInfo = await txn.paymentInfo(address);
 				setTotalGas(new BN(gasInfo.partialFee.toString()));
@@ -204,51 +192,12 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	//calculate total amount
 	useEffect(() => {
-		const total = recipientAndAmount.reduce((sum,item) => sum.add(item.amount), new BN(0));
+		const total = recipientAndAmount.reduce((sum, item) => sum.add(item.amount), new BN(0));
 		setAmount(total);
 	}, [recipientAndAmount]);
 
 	const handleSubmit = async () => {
-<<<<<<< HEAD
-		if(!api || !apiReady || !address){
-			return;
-		}
-
-		await setSigner(api, loggedInWallet);
-
-		if(!multisig || recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero()) || !amount){
-			queueNotification({
-				header: 'Error!',
-				message: 'Invalid Input.',
-				status: NotificationStatus.ERROR
-			});
-			return;
-		}
-		setLoading(true);
-		try {
-			const queueItemData = await initMultisigTransfer({
-				api,
-				initiatorAddress: address,
-				isProxy,
-				multisig,
-				network,
-				note,
-				recipientAndAmount,
-				setLoadingMessages,
-				transactionFields: transactionFieldsObject,
-				transferKeepAlive
-			});
-			setTransactionData(queueItemData);
-			setLoading(false);
-			setSuccess(true);
-		} catch (error) {
-			console.log(error);
-			setTransactionData(error);
-			setLoading(false);
-			setFailure(true);
-		}
-=======
-		if(web3AuthUser) {
+		if (web3AuthUser) {
 			const signer = ethProvider.getSigner();
 			const ethAdapter = new EthersAdapter({
 				ethers: ethProvider,
@@ -261,13 +210,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
 			console.log('yash pendingTx', pendingTxs);
 		} else {
-			if(!api || !apiReady || !address){
+			if (!api || !apiReady || !address) {
 				return;
 			}
 
 			await setSigner(api, loggedInWallet);
 
-			if(!multisig || !recipientAddress || !amount){
+			if (!multisig || !recipientAddress || !amount) {
 				queueNotification({
 					header: 'Error!',
 					message: 'Invalid Input.',
@@ -297,8 +246,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				setTransactionData(error);
 				setLoading(false);
 				setFailure(true);
-			}}
->>>>>>> gnosis-testing
+			}
+		}
 	};
 
 	const AddAddressModal = ({ defaultAddress }: { defaultAddress: string }) => {
@@ -314,7 +263,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				network
 			});
 			setAddAddressLoading(false);
-			if(newAddresses){
+			if (newAddresses) {
 				setAutoCompleteAddresses(newAddresses.map((item) => ({
 					label: <AddressComponent name={item.name} address={item.address} />,
 					value: item.address
@@ -351,7 +300,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								className="text-primary text-xs leading-[13px] font-normal"
 								htmlFor="name"
 							>
-							Name
+								Name
 							</label>
 							<Form.Item
 								name="name"
@@ -377,7 +326,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								className="text-primary text-xs leading-[13px] font-normal"
 								htmlFor="address"
 							>
-							Address
+								Address
 							</label>
 							<Form.Item
 								name="address"
@@ -393,7 +342,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							</Form.Item>
 						</div>
 						<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-							<CancelBtn onClick={() => setShowAddressModal(false)}/>
+							<CancelBtn onClick={() => setShowAddressModal(false)} />
 							<ModalBtn loading={addAddressLoading} disabled={!addAddressName || !defaultAddress} title='Add' onClick={handleAddAddress} />
 						</div>
 					</Form>
@@ -436,7 +385,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							<p>The Free Balance in your logged in account {addressBook.find((item) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
 						</section>
 							:
-							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
+							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }} />
 						}
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}
@@ -538,7 +487,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												<LineIcon className='text-5xl' />
 											</span>
 											<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
-									If the recipient account is new, the balance needs to be more than the existential deposit. Likewise if the sending account balance drops below the same value, the account will be removed from the state.
+												If the recipient account is new, the balance needs to be more than the existential deposit. Likewise if the sending account balance drops below the same value, the account will be removed from the state.
 											</p>
 										</article>
 									</div>
@@ -546,21 +495,21 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							</section>
 
 							{callData && !recipientAndAmount.some(item => item.recipient === '' || item.amount.isZero()) &&
-					<section className='mt-[15px]'>
-						<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Call Data</label>
-						<div className='flex items-center gap-x-[10px]'>
-							<article className='w-[500px]'>
-								<div
-									className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-									onClick={() => copyText(callData)}
-								>
-									{shortenAddress(callData, 10)}
-									<button className='text-primary'><CopyIcon /></button>
-								</div>
+								<section className='mt-[15px]'>
+									<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Call Data</label>
+									<div className='flex items-center gap-x-[10px]'>
+										<article className='w-[500px]'>
+											<div
+												className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
+												onClick={() => copyText(callData)}
+											>
+												{shortenAddress(callData, 10)}
+												<button className='text-primary'><CopyIcon /></button>
+											</div>
 
-							</article>
-						</div>
-					</section>
+										</article>
+									</div>
+								</section>
 							}
 
 							<section className='mt-[15px]'>
@@ -582,7 +531,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 												/>
 												<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
 													<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-													<span>{ chainProperties[network].tokenSymbol}</span>
+													<span>{chainProperties[network].tokenSymbol}</span>
 												</div>
 											</div>
 										</Form.Item>
@@ -634,8 +583,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														name={`${subfieldObject.subfieldName}`}
 														rules={[{ message: 'Required', required: subfieldObject.required }]}
 														className='border-0 outline-0 my-0 p-0'
-														// help={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required && `${subfieldObject.subfieldName} is Required.`}
-														// validateStatus={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required ? 'error' : 'success'}
+													// help={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required && `${subfieldObject.subfieldName} is Required.`}
+													// validateStatus={(!transactionFieldsObject.subfields[subfield]?.value) && subfieldObject.required ? 'error' : 'success'}
 													>
 														<Dropdown
 															trigger={['click']}
@@ -724,9 +673,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								<div className='flex items-center gap-x-[10px]'>
 									<article className='w-[500px] flex items-center gap-x-3'>
 										<p className='text-white text-sm font-normal leading-[15px]'>
-									Transfer with account keep-alive checks
+											Transfer with account keep-alive checks
 										</p>
-										<Switch checked={transferKeepAlive} onChange={checked => setTransferKeepAlive(checked)}  size='small' className='text-primary' />
+										<Switch checked={transferKeepAlive} onChange={checked => setTransferKeepAlive(checked)} size='small' className='text-primary' />
 									</article>
 									<article className='w-[412px] flex items-center'>
 										<span className='-mr-1.5 z-0'>
@@ -750,13 +699,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-<<<<<<< HEAD
-							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (!transactionFieldsObject.subfields[key]?.value) && transactionFields[category].subfields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
-=======
 							<ModalBtn disabled={false}
 								// !recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))
 								loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
->>>>>>> gnosis-testing
 						</section>
 					</Spin>
 			}
