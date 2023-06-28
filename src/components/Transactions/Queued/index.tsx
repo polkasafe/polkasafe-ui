@@ -3,15 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import dayjs from 'dayjs';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IQueueItem } from 'src/types';
 import Loader from 'src/ui-components/Loader';
-import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 
 import NoTransactionsQueued from './NoTransactionsQueued';
 import Transaction from './Transaction';
@@ -19,27 +14,18 @@ import Transaction from './Transaction';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-interface IQueued{
+interface IQueued {
 	loading: boolean
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>
 	refetch: boolean
 	setRefetch: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
-
-	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
+const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
+	const { activeMultisig, multisigAddresses, activeMultisigTxs } = useGlobalUserDetailsContext();
+	const [queuedTransactions, setQueuedTransactions] = useState<any[]>([]);
 	const location = useLocation();
-	const [amountUSD, setAmountUSD] = useState<string>('');
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-
-	useEffect(() => {
-		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
-			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
-		});
-	}, [network]);
+	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		const hash = location.hash.slice(1);
@@ -49,81 +35,37 @@ const Queued: FC<IQueued> = ({ loading, setLoading, refetch, setRefetch }) => {
 		}
 	}, [location.hash, queuedTransactions]);
 
-	const fetchQueuedTransactions = useCallback(async () => {
-		try{
-			setLoading(true);
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature || !activeMultisig) {
-				console.log('ERROR');
-				setLoading(false);
-				return;
-			}
-			else{
-
-				const getQueueTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigQueue`, {
-					body: JSON.stringify({
-						limit: 10,
-						multisigAddress: multisig?.address,
-						network,
-						page: 1
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: queueTransactions, error: queueTransactionsError } = await getQueueTransactions.json() as { data: IQueueItem[], error: string };
-
-				if(queueTransactionsError) {
-					setLoading(false);
-					return;
-				}
-
-				if(queueTransactions){
-					setQueuedTransactions(queueTransactions);
-					setLoading(false);
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, network]);
-
 	useEffect(() => {
-		fetchQueuedTransactions();
-	}, [fetchQueuedTransactions, refetch]);
+		const queue = activeMultisigTxs.filter((item: any) => (item.executed !== true && item.type !== 'fund'));
+		setQueuedTransactions(queue);
+	}, [activeMultisigTxs, refetch]);
 
-	if(loading) return <Loader size='large'/>;
+	if (loading) return <Loader size='large' />;
 
 	return (
 		<>
 			{(queuedTransactions && queuedTransactions.length > 0) ? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
+
 					return <section id={transaction.callHash} key={index}>
-						{/* <h4 className='mb-4 text-text_secondary text-xs font-normal leading-[13px] uppercase'>
-							{created_at}
-						</h4> */}
 						<Transaction
+							value={transaction.amount_token}
 							setQueuedTransactions={setQueuedTransactions}
-							date={dayjs(transaction.created_at).format('llll')}
-							status={transaction.status}
-							approvals={transaction.approvals}
+							date={dayjs(transaction.modified).format('llll')}
+							status={transaction.isExecuted ? 'Executed' : 'Approval'}
+							approvals={transaction.signatures ? transaction.signatures.map((item: any) => item.address) : []}
 							threshold={multisig?.threshold || 0}
-							callData={transaction.callData}
-							callHash={transaction.callHash}
+							callData={transaction.data}
+							callHash={transaction.txHash}
 							note={transaction.note || ''}
 							refetch={() => setRefetch(prev => !prev)}
-							amountUSD={amountUSD}
+							amountUSD={'0'}
 							numberOfTransactions={queuedTransactions.length || 0}
-							notifications={transaction?.notifications}
+							notifications={transaction?.notifications || {}}
 						/>
 					</section>;
 				})}
-			</div>: <NoTransactionsQueued/>}
+			</div> : <NoTransactionsQueued />}
 		</>
 	);
 };

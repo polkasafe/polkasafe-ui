@@ -10,22 +10,22 @@ import queueNotification from 'src/ui-components/QueueNotification';
 import getSubstrateAddress from './getSubstrateAddress';
 
 export const addToAddressBook = async ({ address, name, addressBook, network }: { address: string, name?: string, addressBook: IAddressBookItem[], network: string }) => {
-	if(!address) return;
+	if (!address) return;
 
-	if(!getSubstrateAddress(address)){
+	if (!getSubstrateAddress(address)) {
 		return;
 	}
 
-	try{
+	try {
 		const userAddress = localStorage.getItem('address');
 		const signature = localStorage.getItem('signature');
 
-		if(!userAddress || !signature) {
+		if (!userAddress || !signature) {
 			console.log('ERROR');
 			return;
 		}
-		else{
-			if(addressBook.some((item) => getSubstrateAddress(item.address) === getSubstrateAddress(address))){
+		else {
+			if (addressBook.some((item) => getSubstrateAddress(item.address) === getSubstrateAddress(address))) {
 				queueNotification({
 					header: 'Error!',
 					message: 'Address exists in Address book.',
@@ -34,7 +34,7 @@ export const addToAddressBook = async ({ address, name, addressBook, network }: 
 				return;
 			}
 
-			const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+			const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBookEth`, {
 				body: JSON.stringify({
 					address,
 					name
@@ -45,16 +45,16 @@ export const addToAddressBook = async ({ address, name, addressBook, network }: 
 
 			const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
-			if(addAddressError) {
+			if (addAddressError) {
 				return;
 			}
 
-			if(addAddressData){
+			if (addAddressData) {
 				return addAddressData;
 			}
 
 		}
-	} catch (error){
+	} catch (error) {
 		console.log('ERROR', error);
 	}
 };

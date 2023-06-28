@@ -19,7 +19,7 @@ const AllApps = () => {
 	} = useGlobalUserDetailsContext();
 
 	const multisig = multisigAddresses.find(
-		(item) =>
+		(item: any) =>
 			item.address === activeMultisig || item.proxy === activeMultisig
 	);
 	return (
@@ -28,8 +28,8 @@ const AllApps = () => {
 				{!multisigAddresses || !multisig ? (
 					<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 						<p className='text-white'>
-                            Looks Like You Don&apos;t have a Multisig. Please
-                            Create One to use our Features.
+							Looks Like You Don&apos;t have a Multisig. Please
+							Create One to use our Features.
 						</p>
 					</section>
 				) : (
@@ -37,13 +37,13 @@ const AllApps = () => {
 						<div className='bg-bg-main p-5 rounded-xl flex flex-col gap-[25px]'>
 							<div className='flex items-center mb-5'>
 								<button className='rounded-lg p-3 text-sm leading-[15px] w-[110px] text-white text-primary bg-highlight'>
-                                    All Apps
+									All Apps
 								</button>
 								<div className='ml-auto flex text-sm text-waiting font-medium gap-2'>
-                                    Want to create an interesting app?
+									Want to create an interesting app?
 									<Link rel='noreferrer' to='/contact-us'>
 										<div className='flex gap-1 text-primary'>
-                                            Contact Us
+											Contact Us
 											<ExternalLinkIcon />
 										</div>
 									</Link>

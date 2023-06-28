@@ -1,10 +1,9 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Button,Modal,UploadProps } from 'antd';
+import { Button, Modal, UploadProps } from 'antd';
 import { message, Upload } from 'antd';
 import React, { FC, useState } from 'react';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { CopyIcon, UploadBoxIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -12,8 +11,7 @@ import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const { Dragger } = Upload;
 
-const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.SetStateAction<string[]>>}) => {
-	const { network } = useGlobalApiContext();
+const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.SetStateAction<string[]>> }) => {
 	const { address } = useGlobalUserDetailsContext();
 	const [showSignatories, setShowSignatories] = useState<boolean>(false);
 	const [uploaded, setUploaded] = useState<string[]>([]);
@@ -26,23 +24,23 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 			reader.onload = e => {
 				console.log(e.target?.result);
 				const fileContent = e.target?.result as string;
-				if(!Array.isArray(JSON.parse(fileContent))){
+				if (!Array.isArray(JSON.parse(fileContent))) {
 					message.error('Please upload file in correct format.');
 					return false;
 				}
 				JSON.parse(fileContent).forEach((address: string) => {
 					const substrateAddress = getSubstrateAddress(address);
-					if(!substrateAddress){
+					if (!substrateAddress) {
 						message.error(`${address} is Invalid.`);
 						return false;
 					}
 				});
 				const uploadedSignatories = JSON.parse(fileContent)?.map((item: string) => getSubstrateAddress(item));
 				setUploaded(uploadedSignatories);
-				if(uploadedSignatories.includes(address)){
+				if (uploadedSignatories.includes(address)) {
 					setSignatories(uploadedSignatories);
 				}
-				else{
+				else {
 					setSignatories([address, ...uploadedSignatories]);
 				}
 			};
@@ -52,9 +50,9 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 			// Prevent upload
 			return true;
 		},
-		customRequest:({ file, onSuccess }) => {
+		customRequest: ({ file, onSuccess }) => {
 			setTimeout(() => {
-				if(onSuccess){
+				if (onSuccess) {
 					onSuccess(file);
 				}
 			}, 0);
@@ -96,7 +94,7 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 							className=" flex justify-between text-sm mb-3 font-normal leading-[15px] outline-0 p-3 border-2 border-dashed border-[#505050] rounded-lg text-white"
 						>
 							{item}
-							<button className='text-primary' onClick={() => copyText(item, true, network)}><CopyIcon className='w-5'/></button>
+							<button className='text-primary' onClick={() => copyText(item)}><CopyIcon className='w-5' /></button>
 						</div>
 					))}
 				</Modal>
@@ -108,7 +106,7 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 		<div className='flex flex-col'>
 			<div className='flex justify-between mb-1'>
 				<h1 className='text-primary'>Signatories List</h1>
-				{uploaded.length > 0 && <ShowSignatories/>}
+				{uploaded.length > 0 && <ShowSignatories />}
 			</div>
 			<Dragger {...props} className="w-[45vw] bg-bg-secondary rounded-md p-4 my-3">
 				<p className="ant-upload-drag-icon">
@@ -118,6 +116,7 @@ const DragDrop = ({ setSignatories }: { setSignatories: React.Dispatch<React.Set
 				<p className='text-text_secondary'>OR</p>
 				<Button className='mt-3 bg-primary text-primary border-none bg-opacity-10'>Browse</Button>
 			</Dragger></div>
-	);};
+	);
+};
 
 export default DragDrop;

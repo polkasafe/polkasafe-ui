@@ -21,18 +21,18 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 	const { network } = useGlobalApiContext();
 
 	const handleRemoveAddress = async () => {
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
 			}
-			else{
-				if(addressToRemove === address){
+			else {
+				if (addressToRemove === address) {
 					setLoading(false);
 					return;
 				}
@@ -48,7 +48,7 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 
 				const { data: removeAddressData, error: removeAddressError } = await removeAddressRes.json() as { data: any, error: string };
 
-				if(removeAddressError) {
+				if (removeAddressError) {
 
 					queueNotification({
 						header: 'Error!',
@@ -59,9 +59,9 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 					return;
 				}
 
-				if(removeAddressData){
+				if (removeAddressData) {
 					const filteredAddresses = [...addressBook].filter((item) => item.address !== addressToRemove);
-					setUserDetailsContextState(prev => {
+					setUserDetailsContextState((prev: any) => {
 						return {
 							...prev,
 							addressBook: filteredAddresses
@@ -79,7 +79,7 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -94,10 +94,10 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 				<span className='text-primary mx-1.5'>
 					{name}
 				</span>
-                from your Address Book?
+				from your Address Book?
 			</p>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn onClick={toggleVisibility} />
 				<RemoveBtn loading={loading} onClick={handleRemoveAddress} />
 			</div>
 		</Form>

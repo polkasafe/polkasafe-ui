@@ -48,14 +48,14 @@ export default async function initMultisigTransfer({
 	setLoadingMessages
 }: Args) {
 	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
-	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
+	if (!encodedInitiatorAddress) throw new Error('Invalid initiator address');
 
 	//promise to be resolved when transaction is finalized
 
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	// 2. Define relevant constants
@@ -65,18 +65,18 @@ export default async function initMultisigTransfer({
 
 	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 
 	// remove initator address from signatories
-	const otherSignatories =  encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
 	// 3. API calls - info is necessary for the timepoint
 	const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(recipientAddress, AMOUNT_TO_SEND) : api.tx.balances.transfer(recipientAddress, AMOUNT_TO_SEND);
 
 	let tx: SubmittableExtrinsic<'promise'>;
-	if(isProxy && multisig.proxy){
+	if (isProxy && multisig.proxy) {
 		tx = api.tx.proxy.proxy(multisig.proxy, null, call);
 	}
 
@@ -92,7 +92,7 @@ export default async function initMultisigTransfer({
 	return new Promise<IMultiTransferResponse>((resolve, reject) => {
 
 		// 5. for transaction from proxy address
-		if(isProxy && multisig.proxy){
+		if (isProxy && multisig.proxy) {
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, 0 as any)
 				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
@@ -170,7 +170,7 @@ export default async function initMultisigTransfer({
 								console.log('Transaction failed');
 
 								const errorModule = (event.data as any)?.dispatchError?.asModule;
-								if(!errorModule) {
+								if (!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',
@@ -219,7 +219,7 @@ export default async function initMultisigTransfer({
 				});
 			console.log(`Sending ${displayAmount} from multisig: ${multisig.proxy} to ${recipientAddress}, initiated by ${encodedInitiatorAddress}`);
 		}
-		else{
+		else {
 			//for transaction from multisig address
 			api.tx.multisig
 				.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, call.method.hash, MAX_WEIGHT as any)
@@ -298,7 +298,7 @@ export default async function initMultisigTransfer({
 								console.log('Transaction failed');
 
 								const errorModule = (event.data as any)?.dispatchError?.asModule;
-								if(!errorModule) {
+								if (!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',

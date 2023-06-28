@@ -4,27 +4,21 @@
 import Identicon from '@polkadot/react-identicon';
 import { Button, Collapse, Divider, Input, Modal, Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITxNotification } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon,CopyIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import { getMultisigInfo } from 'src/utils/getMultisigInfo';
-import { notify } from 'src/utils/notify';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
-
-import EditNote from './EditNote';
-import NotifyButton from './NotifyButton';
 
 interface ISentInfoProps {
 	amount: string;
@@ -32,9 +26,9 @@ interface ISentInfoProps {
 	date: string;
 	// time: string;
 	loading: boolean
-    approvals: string[]
-    threshold: number
-    className?: string;
+	approvals: string[]
+	threshold: number
+	className?: string;
 	callHash: string;
 	callData: string;
 	callDataString: string;
@@ -42,53 +36,23 @@ interface ISentInfoProps {
 	setCallDataString: React.Dispatch<React.SetStateAction<string>>
 	handleApproveTransaction: () => Promise<void>
 	handleCancelTransaction: () => Promise<void>
+	handleExecuteTransaction: () => Promise<void>
 	note: string
 	isProxyApproval: boolean
 	isProxyAddApproval: boolean
 	delegate_id?: string
 	isProxyRemovalApproval?: boolean
-	notifications?:ITxNotification;
+	notifications?: ITxNotification;
 	getMultiDataLoading?: boolean;
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications }) => {
-	const { api, apiReady, network } = useGlobalApiContext();
+const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+	const { network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
-	const { openModal } = useModalContext();
 	const [openCancelModal, setOpenCancelModal] = useState<boolean>(false);
-	const activeMultisigObject = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-
-	const [updatedNote, setUpdatedNote] = useState(note);
-	const [depositor, setDepositor] = useState<string>('');
-
-	useEffect(() => {
-		const getDepositor = async () => {
-			if(!api || !apiReady) return;
-			const multisigInfos = await getMultisigInfo(activeMultisigObject?.address || activeMultisig, api);
-			const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
-			setDepositor(multisigInfo?.depositor?.toString() || '');
-		};
-		getDepositor();
-	}, [activeMultisig, activeMultisigObject?.address, api, apiReady, callHash]);
-
-	const approvalReminder = async (address:string) => {
-		const res = await notify({
-			args: {
-				address: address,
-				callHash,
-				multisigAddress: activeMultisigObject?.address || activeMultisig,
-				network
-			},
-			network,
-			triggerName: 'approvalReminder'
-		});
-
-		if(res?.error){
-			throw new Error(res.error);
-		}
-	};
+	const activeMultisigObject = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const CancelTransaction: FC = () => {
 		return (
@@ -109,7 +73,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 				<div className='flex flex-col h-full'>
 					<div className='text-white'>Are you sure you want to cancel the Transaction?</div>
 					<div className='flex items-center justify-between mt-[40px]'>
-						<CancelBtn title='No' onClick={() => setOpenCancelModal(false)}/>
+						<CancelBtn title='No' onClick={() => setOpenCancelModal(false)} />
 						<RemoveBtn title='Yes, Cancel' loading={loading} onClick={() => {
 							handleCancelTransaction();
 							setOpenCancelModal(false);
@@ -124,17 +88,17 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 		<div
 			className={classNames('flex gap-x-4', className)}
 		>
-			<CancelTransaction/>
+			<CancelTransaction />
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{ recipientAddress && amount ?
+				{recipientAddress && amount ?
 					<>
 						<p
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 						>
 							<span>
-							Send
+								Send
 							</span>
 							<span
 								className='text-failure'
@@ -143,14 +107,14 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 									network,
 									value: String(amount),
 									withUnit: true
-								}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+								}) : `? ${chainProperties[network].ticker}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
 									network,
 									value: String(amount),
 									withUnit: false
 								}))).toFixed(2)} USD)</span>}
 							</span>
 							<span>
-							To:
+								To:
 							</span>
 						</p>
 						<div
@@ -163,24 +127,24 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 								<p
 									className='font-medium text-sm leading-[15px] text-white'
 								>
-									{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+									{recipientAddress ? (addressBook?.find((item: any) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
 								</p>
 								{recipientAddress &&
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span>
-								{getEncodedAddress(recipientAddress, network)}
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
-							>
-								<button onClick={() => copyText(recipientAddress, true, network)}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
-									<ExternalLinkIcon />
-								</a>
-							</span>
-						</p>}
+									<p
+										className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+									>
+										<span>
+											{getEncodedAddress(recipientAddress, network)}
+										</span>
+										<span
+											className='flex items-center gap-x-2 text-sm'
+										>
+											<button onClick={() => copyText(recipientAddress)}><CopyIcon className='hover:text-primary' /></button>
+											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddress, network)}`} target='_blank' rel="noreferrer" >
+												<ExternalLinkIcon />
+											</a>
+										</span>
+									</p>}
 							</div>
 						</div>
 					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading ? <></>
@@ -188,9 +152,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 							<span>
 								<WarningCircleIcon className='text-base' />
 							</span>
-							<p className=''>
-								Transaction was not created on Polkasafe, enter call data to fetch this data.
-							</p>
 						</section>}
 				{!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
@@ -202,7 +163,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Created at:
+						Created at:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -214,94 +175,55 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 						</span>
 					</p>
 				</div>
-				{depositor &&
-					<div
-						className='flex items-center gap-x-5 mt-3'
-					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
-						>
-								Created by:
-						</span>
-						<AddressComponent address={depositor} />
-					</div>
-				}
-				<div
-					className='flex items-center gap-x-5 mt-3'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
-							Note:
-					</span>
-					<span
-						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-					>
-						{updatedNote ?
-							<span className='text-white font-normal flex items-center flex-wrap gap-x-3'>
-								<p className='whitespace-pre'>
-									{updatedNote}
-								</p>
-								{depositor === userAddress &&
-								<button onClick={() => openModal('Edit Note', <EditNote note={updatedNote} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
-									<EditIcon className='text-primary cursor-pointer' />
-								</button>}
-							</span> :
-							depositor === userAddress &&
-							<button onClick={() => openModal('Add Note', <EditNote note={''} callHash={callHash} setUpdatedNote={setUpdatedNote} />)}>
-								<EditIcon className='text-primary cursor-pointer' />
-							</button>}
-					</span>
-				</div>
 				{showDetails &&
-				<>
-					<div
-						className='flex items-center gap-x-5 mt-3'
-					>
-						<span
-							className='text-text_secondary font-normal text-sm leading-[15px]'
+					<>
+						<div
+							className='flex items-center gap-x-5 mt-3'
 						>
+							<span
+								className='text-text_secondary font-normal text-sm leading-[15px]'
+							>
 								Txn Hash:
-						</span>
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span
-								className='text-white font-normal text-sm leading-[15px]'
+							</span>
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 							>
-								{shortenAddress(callHash, 10)}
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
-							>
-								<button onClick={() => copyText(callHash)}><CopyIcon className='hover:text-primary'/></button>
-								{/* <ExternalLinkIcon /> */}
-							</span>
-						</p>
-					</div>
-					{callData && <div className='flex items-center gap-x-5 mt-3'>
-						<span className='text-text_secondary font-normal text-sm leading-[15px]'>Call Data:</span>
-						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
-							<span className='flex items-center gap-x-2 text-sm'>
-								<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary'/></button>
-							</span>
-						</p>
-					</div>}
-					{delegate_id &&
-					<div className='flex items-center gap-x-5 mt-3'>
-						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
-							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
-						</span>
-						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-							<Identicon value={delegate_id} size={20} theme='polkadot' />
-							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
-							<span className='flex items-center gap-x-2 text-sm'>
-								<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary'/></button>
-							</span>
-						</p>
-					</div>}
-				</>}
+								<span
+									className='text-white font-normal text-sm leading-[15px]'
+								>
+									{shortenAddress(callHash, 10)}
+								</span>
+								<span
+									className='flex items-center gap-x-2 text-sm'
+								>
+									<button onClick={() => copyText(callHash)}><CopyIcon className='hover:text-primary' /></button>
+									{/* <ExternalLinkIcon /> */}
+								</span>
+							</p>
+						</div>
+						{callData && <div className='flex items-center gap-x-5 mt-3'>
+							<span className='text-text_secondary font-normal text-sm leading-[15px]'>Call Data:</span>
+							<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+								<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(callData, 10)}</span>
+								<span className='flex items-center gap-x-2 text-sm'>
+									<button onClick={() => copyText(callData)}><CopyIcon className='hover:text-primary' /></button>
+								</span>
+							</p>
+						</div>}
+						{delegate_id &&
+							<div className='flex items-center gap-x-5 mt-3'>
+								<span className='text-text_secondary font-normal text-sm leading-[15px]'>
+									{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
+								</span>
+								<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+									<Identicon value={delegate_id} size={20} theme='polkadot' />
+									<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
+									<span className='flex items-center gap-x-2 text-sm'>
+										<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary' /></button>
+									</span>
+								</p>
+							</div>}
+					</>}
 				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'
 				>
@@ -348,7 +270,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-                                Created
+								Created
 							</div>
 						</Timeline.Item>
 						<Timeline.Item
@@ -362,7 +284,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 							<div
 								className='text-white font-normal text-sm leading-[15px]'
 							>
-                                Confirmations <span className='text-text_secondary'>{approvals.length} of {threshold}</span>
+								Confirmations <span className='text-text_secondary'>{approvals.length} of {threshold}</span>
 							</div>
 						</Timeline.Item>
 						<Timeline.Item
@@ -398,14 +320,7 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 											</Timeline.Item>
 										))}
 
-										{activeMultisigObject?.signatories.filter((item) => !approvals.includes(item)).map((address, i) => {
-											let hoursDifference = undefined;
-											if(notifications?.[address]?.lastNotified){
-												const olderDate = new Date(notifications?.[address].lastNotified);
-												const currentDate = new Date();
-												const timeDifference = currentDate.getTime() - olderDate.getTime();
-												hoursDifference = timeDifference / (1000 * 60 * 60);
-											}
+										{activeMultisigObject?.signatories.filter((item: any) => !approvals.includes(item)).map((address: any, i: any) => {
 											return (
 												<Timeline.Item
 													key={i}
@@ -420,39 +335,6 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 														className='mb-3 flex items-center gap-x-4 relative'
 													>
 														<AddressComponent address={address} />
-														{depositor === userAddress && (
-															<NotifyButton address={address} onClick={approvalReminder} canNotificationSend={hoursDifference === undefined || hoursDifference > 8 }/>
-														)
-														}
-														{/* <Identicon
-															value={address}
-															size={30}
-															theme='polkadot'
-														/>
-														<div
-															className='flex flex-col gap-y-[6px]'
-														>
-															<p
-																className='font-medium text-sm leading-[15px] text-white'
-															>
-																{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
-															</p>
-															<p
-																className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-															>
-																<span>
-																	{shortenAddress(getEncodedAddress(address, network) || '')}
-																</span>
-																<span
-																	className='flex items-center gap-x-2 text-sm'
-																>
-																	<button onClick={() => copyText(address, true, network)}><CopyIcon className='hover:text-primary'/></button>
-																	<a href={`https://${network}.subscan.io/account/${getEncodedAddress(address, network)}`} target='_blank' rel="noreferrer" >
-																		<ExternalLinkIcon  />
-																	</a>
-																</span>
-															</p>
-														</div> */}
 													</div>
 												</Timeline.Item>
 											);
@@ -483,14 +365,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, getMultiDataLoading, delegate_id, 
 						</Timeline.Item>
 					</Timeline>
 					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
-						{!approvals.includes(userAddress) && <Button disabled={approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
-								Approve Transaction
+						{!approvals.includes(userAddress) ? <Button disabled={approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
+							Approve Transaction
+						</Button> : threshold === approvals.length && <Button loading={loading} onClick={handleExecuteTransaction} className={'w-full border-none text-sm font-normal bg-primary text-white'}>
+							Excute Transaction
 						</Button>}
-						{depositor === userAddress &&
-							<Button loading={loading} onClick={() => setOpenCancelModal(true)} className='w-full border-none text-white text-sm font-normal bg-failure'>
-								Cancel Transaction
-							</Button>
-						}
 					</div>
 				</div>
 			</article>

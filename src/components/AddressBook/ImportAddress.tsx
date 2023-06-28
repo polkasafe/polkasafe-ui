@@ -25,16 +25,16 @@ const ImportAdress = () => {
 	const { network } = useGlobalApiContext();
 
 	const handleAddAddress = async (address: string, name: string) => {
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
-				if(addressBook.some((item) => item.address === address)){
+			else {
+				if (addressBook.some((item: any) => item.address === address)) {
 					return;
 				}
 
@@ -49,7 +49,7 @@ const ImportAdress = () => {
 
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
-				if(addAddressError) {
+				if (addAddressError) {
 
 					queueNotification({
 						header: 'Error!',
@@ -59,8 +59,8 @@ const ImportAdress = () => {
 					return;
 				}
 
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
+				if (addAddressData) {
+					setUserDetailsContextState((prevState: any) => {
 						return {
 							...prevState,
 							addressBook: addAddressData
@@ -70,7 +70,7 @@ const ImportAdress = () => {
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -97,7 +97,7 @@ const ImportAdress = () => {
 				<DragDrop setAddresses={setAddresses} />
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={toggleVisibility}/>
+				<CancelBtn onClick={toggleVisibility} />
 				<AddBtn onClick={addImportedAddresses} loading={loading} title='Import' />
 			</div>
 		</div>

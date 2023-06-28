@@ -12,32 +12,32 @@ import shortenAddress from 'src/utils/shortenAddress';
 
 import ModalBtn from './ModalBtn';
 
-interface IAddProxySuccessScreen{
-    txnHash?: string
-    createdBy: string
-    threshold: number
-    signatories: string[]
-    onDone?: () => void
+interface IAddProxySuccessScreen {
+	txnHash?: string
+	createdBy: string
+	threshold: number
+	signatories: string[]
+	onDone?: () => void
 	successMessage?: string
 	waitMessage?: string
 }
 
-const AddProxySuccessScreen = ({ txnHash, createdBy, threshold, signatories, onDone, successMessage='Successful!', waitMessage }: IAddProxySuccessScreen) => {
+const AddProxySuccessScreen = ({ txnHash, createdBy, threshold, signatories, onDone, successMessage = 'Successful!', waitMessage }: IAddProxySuccessScreen) => {
 	const { network } = useGlobalApiContext();
 	return (
 		<div className='flex flex-col items-center'>
-			<SuccessTransactionLottie message={successMessage} waitMessage={waitMessage}/>
+			<SuccessTransactionLottie message={successMessage} waitMessage={waitMessage} />
 			<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg mb-1 mt-2 text-text_secondary'>
 				{txnHash &&
 					<div className='flex justify-between items-center'>
 						<span>Txn Hash:</span>
 						<div className='flex items-center gap-x-2'>
 							<span className='text-white'>{shortenAddress(txnHash)}</span>
-							<button onClick={() => copyText(txnHash, false, network)}>
+							<button onClick={() => copyText(txnHash)}>
 								<CopyIcon className='text-primary' />
 							</button>
 							<a href={`https://${network}.subscan.io/extrinsic/${txnHash}}`} target='_blank' rel="noreferrer" >
-								<ExternalLinkIcon  />
+								<ExternalLinkIcon />
 							</a>
 						</div>
 					</div>

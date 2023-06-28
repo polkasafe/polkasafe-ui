@@ -39,7 +39,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 			>
 				<span>
-								Received
+					Received
 				</span>
 				<span
 					className='text-success'
@@ -47,20 +47,20 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 					{amount} {amountType} ({amount_usd} USD)
 				</span>
 				<span>
-								from:
+					from:
 				</span>
 			</p>
 			<div
 				className='mt-3 flex items-center gap-x-4'
 			>
-				<Identicon size={30} value={from} theme='polkadot'  />
+				<Identicon size={30} value={from} theme='polkadot' />
 				<div
 					className='flex flex-col gap-y-[6px]'
 				>
 					<p
 						className='font-medium text-sm leading-[15px] text-white'
 					>
-						{addressBook?.find((item) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item: any) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
 					</p>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -71,7 +71,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 						<span
 							className='flex items-center gap-x-2 text-sm'
 						>
-							<button onClick={() => copyText(from, true, network)}><CopyIcon className='hover:text-primary'/></button>
+							<button onClick={() => copyText(from)}><CopyIcon className='hover:text-primary' /></button>
 							<a href={`https://${network}.subscan.io/account/${getEncodedAddress(from, network)}`} target='_blank' rel="noreferrer" >
 								<ExternalLinkIcon />
 							</a>
@@ -96,7 +96,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				<span
 					className='text-text_secondary font-normal text-sm leading-[15px]'
 				>
-								Txn Hash:
+					Txn Hash:
 				</span>
 				<p
 					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -109,7 +109,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 					<span
 						className='flex items-center gap-x-2 text-sm'
 					>
-						<button onClick={() => copyText(callHash)}><CopyIcon/></button>
+						<button onClick={() => copyText(callHash)}><CopyIcon /></button>
 						{/* <ExternalLinkIcon /> */}
 					</span>
 				</p>
@@ -121,7 +121,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Executed:
+						Executed:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
@@ -140,7 +140,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
 					>
-							Note:
+						Note:
 					</span>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'

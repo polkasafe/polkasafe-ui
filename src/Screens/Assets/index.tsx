@@ -23,18 +23,18 @@ const Assets = () => {
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 	const { network } = useGlobalApiContext();
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleGetAssets = useCallback(async () => {
-		try{
+		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !multisig) {
+			if (!address || !signature || !multisig) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 
 				setLoading(true);
 				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
@@ -48,19 +48,19 @@ const Assets = () => {
 
 				const { data, error } = await getAssestsRes.json() as { data: IAsset[], error: string };
 
-				if(error) {
+				if (error) {
 					setLoading(false);
 					return;
 				}
 
-				if(data){
+				if (data) {
 					setAssetsData(data);
 					setLoading(false);
 
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -70,7 +70,7 @@ const Assets = () => {
 		handleGetAssets();
 	}, [handleGetAssets]);
 
-	if(loading) return <Loader size='large'/>;
+	if (loading) return <Loader size='large' />;
 
 	return (
 		<div className='h-[70vh] bg-bg-main rounded-lg'>
@@ -89,7 +89,7 @@ const Assets = () => {
 						</div>
 					</div>
 					<div className='col-start-1 col-end-13 mx-5'>
-						<AssetsTable assets={ assetsData }/>
+						<AssetsTable assets={assetsData} />
 					</div>
 				</div>
 				:

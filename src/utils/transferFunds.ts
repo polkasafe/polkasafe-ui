@@ -19,11 +19,11 @@ interface Props {
 	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function transferFunds({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages } : Props) {
+export async function transferFunds({ api, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages }: Props) {
 
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: 18,
+		unit: chainProperties[network].ticker
 	});
 
 	const AMOUNT_TO_SEND = amount;
@@ -63,7 +63,7 @@ export async function transferFunds({ api, setTxnHash, network, recepientAddress
 							console.log('Transaction failed');
 
 							const errorModule = (event.data as any)?.dispatchError?.asModule;
-							if(!errorModule) {
+							if (!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',

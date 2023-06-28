@@ -6,35 +6,26 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { usePagination } from 'src/hooks/usePagination';
-// import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-// import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import Pagination from 'src/ui-components/Pagination';
-import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
 
-interface IHistory{
+interface IHistory {
 	loading: boolean
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>
-	refetch: boolean
+	refetch: boolean,
 }
 
-const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
-
-	const userAddress = localStorage.getItem('address');
-	const signature = localStorage.getItem('signature');
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-	const { network } = useGlobalApiContext();
+const History: FC<IHistory> = ({ loading }) => {
 	const location = useLocation();
-	const { currentPage, setPage, totalDocs, setTotalDocs } = usePagination();
-	const [transactions, setTransactions] = useState<ITransaction[]>();
+	const { currentPage, setPage, totalDocs } = usePagination();
+	const [transactions, setTransactions] = useState<any[]>([]);
+	const { activeMultisigTxs } = useGlobalUserDetailsContext();
+
 	useEffect(() => {
 		const hash = location.hash.slice(1);
 		const elem = document.getElementById(hash);
@@ -44,55 +35,13 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	}, [location.hash, transactions]);
 
 	useEffect(() => {
-		const getTransactions = async () => {
-			if(!userAddress || !signature || !multisig || !activeMultisig) {
-				console.log('ERROR');
-				return;
-			}
-			setLoading(true);
-			try{
-				let data:any = [];
-				let docs:number = 0;
-				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getHistoryTransactions(
-					multisig.address,
-					network,
-					multisig.proxy ? 5 : 10,
-					currentPage
-				);
-				if(multisig.proxy){
-					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
-						multisig.proxy,
-						network,
-						10 - multisigTransactions.length,
-						currentPage
-					);
-					if(proxyTransactions && !proxyError){
-						setLoading(false);
-						data = proxyTransactions;
-						docs = proxyTransactionsCount;
-					}
-				}
+		if (activeMultisigTxs) {
+			const txs = activeMultisigTxs.filter((item: any) => item.executed === true);
+			setTransactions(txs);
+		}
+	}, [activeMultisigTxs]);
 
-				if(multisigTransactions){
-					setLoading(false);
-					data = [...data, ...multisigTransactions];
-					setTransactions(data);
-					docs = docs + multisigTransactionsCount;
-					setTotalDocs(docs);
-				}
-				if(multisigError){
-					setLoading(false);
-					console.log('Error in Fetching Transactions: ', multisigError);
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		};
-		getTransactions();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, multisig, network, signature, userAddress, refetch, currentPage]);
-
-	if(loading) return <Loader size='large'/>;
+	if (loading) return <Loader size='large' />;
 
 	return (
 		<>
@@ -109,7 +58,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 						})}
 					</div>
 					:
-					<NoTransactionsHistory/>
+					<NoTransactionsHistory />
 			}
 			{totalDocs && totalDocs > 10 &&
 				<div className='flex justify-center'>

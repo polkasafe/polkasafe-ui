@@ -23,30 +23,30 @@ interface Props {
 	api: ApiPromise;
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
-    oldSignatories: string[];
-    oldThreshold: number;
-    newSignatories: string[];
-    newThreshold: number;
-    proxyAddress: string;
+	oldSignatories: string[];
+	oldThreshold: number;
+	newSignatories: string[];
+	newThreshold: number;
+	proxyAddress: string;
 	setTxnHash?: React.Dispatch<React.SetStateAction<string>>
 	oldMultisigAddress: string;
 }
 
-export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
+export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold }: Props) {
 
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	const encodedSignatories = oldSignatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 
 	const otherSignatories = encodedSignatories.filter((sig) => sig !== senderAddress);
-	const multisigResponse = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
+	const multisigResponse = _createMultisig(newSignatories, newThreshold, chainProperties[network].decimals);
 	const newMultisigAddress = getEncodedAddress(multisigResponse?.multisigAddress || '', network);
 	const addProxyTx = api.tx.proxy.addProxy(newMultisigAddress || '', 'Any', 0);
 	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, addProxyTx);
@@ -133,7 +133,7 @@ export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, set
 							console.log('Transaction failed');
 
 							const errorModule = (event.data as any)?.dispatchError?.asModule;
-							if(!errorModule) {
+							if (!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',

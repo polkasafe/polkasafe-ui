@@ -30,10 +30,10 @@ const NetworkCard: FC<INetworkCardProps> = ({ isCardToken, onClick, selectedNetw
 					'text-primary': isSelected,
 					'text-white': !isSelected
 				})}>
-					{isCardToken? chainProperties[network].tokenSymbol: network}
+					{isCardToken ? chainProperties[network].ticker : network}
 				</span>
 			</p>
-			{isSelected? <OutlineCheckIcon className='text-primary' />: null}
+			{isSelected ? <OutlineCheckIcon className='text-primary' /> : null}
 		</button>
 	);
 };

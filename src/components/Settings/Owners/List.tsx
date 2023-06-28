@@ -17,7 +17,7 @@ import styled from 'styled-components';
 
 import RemoveOwner from './Remove';
 
-const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold }: { address: string, className?: string, signatoriesLength: number,threshold: number }) => {
+const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold }: { address: string, className?: string, signatoriesLength: number, threshold: number }) => {
 	const [openRemoveSignatoryModal, setOpenRemoveSignatoryModal] = useState(false);
 	return (
 		<>
@@ -50,7 +50,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 	const { multisigAddresses, activeMultisig, addressBook, address: userAddress } = useGlobalUserDetailsContext();
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const signatories = multisig?.signatories;
 
 	return (
@@ -69,7 +69,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 			<article>
 				<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
 					<p className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
-						{addressBook.find((item) => item.address === userAddress)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook.find((item: any) => item.address === userAddress)?.name || DEFAULT_ADDRESS_NAME}
 					</p>
 					<div className='col-span-2 flex items-center'>
 						<Identicon
@@ -80,15 +80,15 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 						/>
 						<span title={userAddress} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{userAddress}</span>
 						<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-							<button className='hover:text-primary' onClick={() => copyText(userAddress, true, network)}><CopyIcon /></button>
+							<button className='hover:text-primary' onClick={() => copyText(userAddress)}><CopyIcon /></button>
 							<a href={`https://${network}.subscan.io/account/${userAddress}`} target='_blank' rel="noreferrer" >
-								<ExternalLinkIcon  />
+								<ExternalLinkIcon />
 							</a>
 						</div>
 					</div>
 					<div className='col-span-1 flex items-center gap-x-[10px]'>
 						<Button
-							onClick={() => openModal('Edit Address', <EditAddress addressToEdit={userAddress} />) }
+							onClick={() => openModal('Edit Address', <EditAddress addressToEdit={userAddress} />)}
 							className='text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8 border-none outline-none'>
 							<EditIcon className='' />
 						</Button>
@@ -97,8 +97,8 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 				<Divider className='bg-text_secondary my-0' />
 			</article>
 			{
-				signatories?.filter((item) => item !== userAddress).map((address, index) => {
-					const name = addressBook.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME;
+				signatories?.filter((item: any) => item !== userAddress).map((address: any, index: any) => {
+					const name = addressBook.find((item: any) => item.address === address)?.name || DEFAULT_ADDRESS_NAME;
 					const encodedAddress = getEncodedAddress(address, network);
 					return (
 						<article key={index}>
@@ -115,15 +115,15 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 									/>
 									<span title={encodedAddress || address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{shortenAddress(encodedAddress || address, 10)}</span>
 									<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-										<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
+										<button className='hover:text-primary' onClick={() => copyText(address)}><CopyIcon /></button>
 										<a href={`https://${network}.subscan.io/account/${encodedAddress}`} target='_blank' rel="noreferrer" >
-											<ExternalLinkIcon  />
+											<ExternalLinkIcon />
 										</a>
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center gap-x-[10px]'>
 									<Button
-										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={encodedAddress || address} />) }
+										onClick={() => openModal('Edit Address', <EditAddress addressToEdit={encodedAddress || address} />)}
 										className='text-primary border-none outline-none bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 										<EditIcon className='' />
 									</Button>
@@ -132,7 +132,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 									}
 								</div>
 							</div>
-							{signatories.length - 1 !== index? <Divider className='bg-text_secondary my-0' />: null}
+							{signatories.length - 1 !== index ? <Divider className='bg-text_secondary my-0' /> : null}
 						</article>
 					);
 				})

@@ -9,25 +9,12 @@ import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransactio
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import RemoveMultisigSVG from 'src/assets/remove-multisig.svg';
 import AddProxySuccessScreen from 'src/components/Multisig/AddProxySuccessScreen';
-import CancelBtn from 'src/components/Settings/CancelBtn';
-import AddBtn from 'src/components/Settings/ModalBtn';
 import Loader from 'src/components/UserFlow/Loader';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress, NotificationStatus } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
-import queueNotification from 'src/ui-components/QueueNotification';
-import _createMultisig from 'src/utils/_createMultisig';
-import { addNewMultiToProxy } from 'src/utils/addNewMultiToProxy';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { removeOldMultiFromProxy } from 'src/utils/removeOldMultiFromProxy';
-import { setSigner } from 'src/utils/setSigner';
 import styled from 'styled-components';
 
-interface ISignatory{
+interface ISignatory {
 	name: string
 	address: string
 }
@@ -50,14 +37,13 @@ const addRecipientHeading = () => {
 };
 
 const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: string }) => {
-	const { multisigAddresses, activeMultisig, addressBook, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
-	const { api, apiReady, network } = useGlobalApiContext();
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-	const [loading, setLoading] = useState(false);
-	const [success, setSuccess] = useState<boolean>(false);
-	const [failure, setFailure] = useState<boolean>(false);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const [txnHash, setTxnHash] = useState<string>('');
+	const { multisigAddresses, activeMultisig, addressBook, address } = useGlobalUserDetailsContext();
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const [loading] = useState(false);
+	const [success] = useState<boolean>(false);
+	const [failure] = useState<boolean>(false);
+	const [loadingMessages] = useState<string>('');
+	const [txnHash] = useState<string>('');
 	const [newThreshold, setNewThreshold] = useState<number>(multisig?.threshold || 2);
 
 	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address: '', name: '' }]);
@@ -95,113 +81,6 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 		setSignatoriesArray(copyOptionsArray);
 	};
 
-	const handleMultisigCreate = async (newSignatories: string[], newThreshold: number) => {
-		try{
-			const address = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!address || !signature || !newSignatories || !newThreshold) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-				setLoadingMessages('Creating Your Proxy.');
-				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-					body: JSON.stringify({
-						disabled: true,
-						multisigName: multisig?.name,
-						signatories: newSignatories,
-						threshold: newThreshold
-					}),
-					headers: firebaseFunctionsHeader(network, address, signature),
-					method: 'POST'
-				});
-
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
-
-				if(multisigError) {
-					return;
-				}
-
-				if(multisigData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
-							multisigSettings: {
-								...prevState.multisigSettings,
-								[multisigData.address]: {
-									deleted: false,
-									name: multisigData.name
-								}
-							}
-						};
-					});
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-		}
-	};
-
-	const changeMultisig = async () => {
-		if(!api || !apiReady ) return;
-
-		await setSigner(api, loggedInWallet);
-
-		const newSignatories = [...multisig!.signatories, ...signatoriesArray.map((item) => item.address)];
-
-		const newMultisigAddress = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
-		if(multisigAddresses.some((item) => item.address === newMultisigAddress.multisigAddress)){
-			queueNotification({
-				header: 'Multisig Exists',
-				message: 'The new edited multisig already exists in your multisigs.',
-				status: NotificationStatus.WARNING
-			});
-			return;
-		}
-
-		setLoading(true);
-		try {
-			setLoadingMessages('Please Sign The First Transaction to Add New Multisig To Proxy.');
-			await addNewMultiToProxy({
-				api,
-				network,
-				newSignatories,
-				newThreshold,
-				oldMultisigAddress: multisig?.address || activeMultisig,
-				oldSignatories: multisig?.signatories || [],
-				oldThreshold: multisig?.threshold || 2,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(address) || address,
-				setLoadingMessages,
-				setTxnHash
-			});
-			setLoadingMessages('Please Sign The Second Transaction to Remove Old Multisig From Proxy.');
-			await removeOldMultiFromProxy({
-				api,
-				multisigAddress: multisig?.address || '',
-				network,
-				newSignatories,
-				newThreshold,
-				proxyAddress: multisig?.proxy || '',
-				recepientAddress: activeMultisig,
-				senderAddress: getSubstrateAddress(address) || address,
-				setLoadingMessages
-			});
-			setSuccess(true);
-			setLoading(false);
-			await handleMultisigCreate(newSignatories, newThreshold);
-		} catch (error) {
-			console.log(error);
-			setFailure(true);
-			setLoading(false);
-			setTimeout(() => setFailure(false), 5000);
-		}
-	};
-
 	return (
 		<>
 			{success ? <AddProxySuccessScreen
@@ -214,7 +93,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 				waitMessage='All threshold signatories need to sign the Transaction to Edit the Multisig.'
 			/>
 				:
-				failure ? <FailedTransactionLottie message='Failed!'/>
+				failure ? <FailedTransactionLottie message='Failed!' />
 					:
 					<Spin spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
 						<Form
@@ -225,7 +104,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 									<img src={AddMultisigSVG} />
 									<p className='text-text_secondary'>Add New Multisig</p>
 								</div>
-								<Loader className='bg-primary h-[2px] w-[80px]'/>
+								<Loader className='bg-primary h-[2px] w-[80px]' />
 								<div className='flex flex-col text-white items-center justify-center'>
 									<img src={RemoveMultisigSVG} />
 									<p className='text-text_secondary'>Remove Old Multisig</p>
@@ -245,9 +124,9 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 												<Form.Item>
 													<label
 														className="text-primary text-xs leading-[13px] font-normal"
-													>Name {i+1}</label>
+													>Name {i + 1}</label>
 													<Input
-														placeholder={`Name ${i+1}`}
+														placeholder={`Name ${i + 1}`}
 														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 														value={signatory.name}
 														onChange={(e) => onNameChange(e, i)}
@@ -255,20 +134,20 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 												</Form.Item>
 												<Form.Item
 													className='w-full'
-													name={`Address-${i+1}`}
+													name={`Address-${i + 1}`}
 													rules={[{ required: true }]}
 												>
 													<label
 														className="text-primary text-xs leading-[13px] font-normal"
-													>Address {i+1}</label>
+													>Address {i + 1}</label>
 													<AutoComplete
 														onClick={addRecipientHeading}
-														options={addressBook.filter((item) => !signatoriesArray.some((e) => e.address === item.address) && !multisig?.signatories.includes(item.address)).map((item) => ({
+														options={addressBook.filter((item: any) => !signatoriesArray.some((e) => e.address === item.address) && !multisig?.signatories.includes(item.address)).map((item: any) => ({
 															label: item.name,
 															value: item.address
 														}))}
-														id={`Address-${i+1}`}
-														placeholder={`Address ${i+1}`}
+														id={`Address-${i + 1}`}
+														placeholder={`Address ${i + 1}`}
 														onChange={(value) => onSignatoryChange(value, i)}
 													/>
 												</Form.Item>
@@ -329,14 +208,14 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 									<p
 										className='text-text_secondary font-normal text-sm leading-[15px]'
 									>
-							out of <span className='text-white font-medium'>{(multisig?.signatories.length || 0) + signatoriesArray.length}</span> owners
+										out of <span className='text-white font-medium'>{(multisig?.signatories.length || 0) + signatoriesArray.length}</span> owners
 									</p>
 								</div>
 							</div>
-							<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+							{/* <div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 								<CancelBtn onClick={onCancel} />
 								<AddBtn onClick={changeMultisig} loading={loading} disabled={!signatoriesArray.length || signatoriesArray.some((item) => item.address === '' || multisig?.signatories.includes(item.address))} title='Add' />
-							</div>
+							</div> */}
 						</Form>
 					</Spin>}
 		</>

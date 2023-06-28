@@ -5,8 +5,9 @@
 import Identicon from '@polkadot/react-identicon';
 import { Button } from 'antd';
 import classNames from 'classnames';
-import React, { useRef,useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -14,33 +15,36 @@ import { Wallet } from 'src/types';
 import Balance from 'src/ui-components/Balance';
 import { CircleArrowDownIcon, CopyIcon, WarningRoundedIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
-import logout from 'src/utils/logout';
 import shortenAddress from 'src/utils/shortenAddress';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IAddress {
-    value: string;
-    imgSrc: string;
+	value: string;
+	imgSrc: string;
 }
 const AddressDropdown = () => {
 	const { address, addressBook, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { logout } = useGlobalWeb3Context();
 	const navigate = useNavigate();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
 
-	const handleDisconnect = () => {
-		logout();
-		setUserDetailsContextState(prevState => {
+	const handleDisconnect = async () => {
+		localStorage.removeItem('signature');
+		localStorage.removeItem('address');
+
+		await logout();
+
+		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
 				activeMultisig: localStorage.getItem('active_multisig') || '',
 				address: '',
 				addressBook: [],
-				loggedInWallet: Wallet.POLKADOT,
+				loggedInWallet: Wallet.WEB3AUTH,
 				multisigAddresses: []
 			};
 		});
@@ -48,10 +52,10 @@ const AddressDropdown = () => {
 		return navigate('/', { replace: true });
 	};
 
-	if(!address){
+	if (!address) {
 		return (
 			<Link to={'/'} className='flex items-center justify-center gap-x-2 outline-none border-none text-white bg-highlight rounded-lg p-2.5 shadow-none text-xs'>
-				<WarningRoundedIcon className='text-sm text-primary'/>
+				<WarningRoundedIcon className='text-sm text-primary' />
 				Not Connected
 			</Link>
 		);
@@ -72,7 +76,7 @@ const AddressDropdown = () => {
 						<Identicon size={15} value={address} theme='polkadot' />
 					</span>}
 					<span title={address} className='hidden md:inline-flex w-20 overflow-hidden truncate'>
-						{addressBook?.find((item) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item: any) => item.address === address)?.name || DEFAULT_ADDRESS_NAME}
 					</span>
 				</p>
 				<CircleArrowDownIcon className={classNames('hidden md:inline-flex text-sm', {
@@ -105,11 +109,11 @@ const AddressDropdown = () => {
 							theme='polkadot'
 						/>
 						<p className='text-white font-normal text-sm'>
-							{ addressBook?.find(item => item.address === address)?.name }
+							{addressBook?.find((item: any) => item.address === address)?.name}
 						</p>
 						<p className='bg-bg-secondary mb-1 w-[300px] font-normal gap-x-2 text-sm p-2 rounded-lg flex items-center justify-center'>
-							<span className='text-text_secondary'>{shortenAddress(getEncodedAddress(address, network) || address, 12)}</span>
-							<button onClick={() => copyText(getEncodedAddress(address, network) || address, true, network)}><CopyIcon className='text-base text-primary cursor-pointer'/></button>
+							<span className='text-text_secondary'>{shortenAddress(address)}</span>
+							<button onClick={() => copyText(address)}><CopyIcon className='text-base text-primary cursor-pointer' /></button>
 						</p>
 						<Balance className='ml-0' address={address} />
 					</div>
@@ -120,7 +124,7 @@ const AddressDropdown = () => {
 						</p>
 						<p className='border-t border-b border-text_secondary flex items-center text-normal text-sm justify-between w-full p-2'>
 							<span className='text-text_secondary'>Network</span>
-							<span className='text-white capitalize'>{ network }</span>
+							<span className='text-white capitalize'>{network}</span>
 						</p>
 					</div>
 					<Button onClick={handleDisconnect} className='rounded-lg outline-none border-none bg-failure bg-opacity-10 w-full flex items-center justify-center font-normal text-sm p-2 text-failure'>

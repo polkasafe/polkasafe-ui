@@ -19,15 +19,15 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const handleRemoveSafe = async () => {
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature || !multisig?.address) {
+			if (!userAddress || !signature || !multisig?.address) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
@@ -43,7 +43,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 
 			const { data: removeSafeData, error: removeSafeError } = await removeSafeRes.json() as { data: string, error: string };
 
-			if(removeSafeError) {
+			if (removeSafeError) {
 
 				queueNotification({
 					header: 'Error!',
@@ -54,16 +54,16 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 				return;
 			}
 
-			if(removeSafeData){
-				if(removeSafeData === 'Success'){
+			if (removeSafeData) {
+				if (removeSafeData === 'Success') {
 					setLoading(false);
 					const copy = [...multisigAddresses];
-					setUserDetailsContextState((prevState) => {
+					setUserDetailsContextState((prevState: any) => {
 						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig || item.proxy === activeMultisig);
-						if(newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted){
+						if (newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted) {
 							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
 						}
-						else{
+						else {
 							localStorage.removeItem('active_multisig');
 						}
 						return {
@@ -82,7 +82,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 					onCancel();
 				}
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -95,12 +95,12 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
-					{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+					{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
 				</span>
-                ?
+				?
 			</p>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={onCancel}/>
+				<CancelBtn onClick={onCancel} />
 				<RemoveBtn loading={loading} onClick={handleRemoveSafe} />
 			</div>
 		</Form>

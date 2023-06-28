@@ -4,28 +4,26 @@
 /* eslint-disable no-tabs */
 /* eslint-disable sort-keys */
 
+import { SafeInfoResponse } from '@safe-global/api-kit';
+import { Web3Adapter } from '@safe-global/protocol-kit';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { chainProperties } from 'src/global/networkConstants';
-import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { IAddressBookItem, IMultisigAddress } from 'src/types';
-import { NotificationStatus } from 'src/types';
+import { GnosisSafeService } from 'src/services';
+import { IMultisigAddress, NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import _createMultisig from 'src/utils/_createMultisig';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
 import Owners from './Owners';
 import Review from './Review';
 
-interface ISignatory{
+interface ISignatory {
 	name: string
 	address: string
 }
@@ -35,10 +33,13 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const [nameAddress, setNameAddress] = useState(true);
 	const [viewOwners, setViewOwners] = useState(true);
 	const [viewReviews, setViewReviews] = useState(true);
-	const { address, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
+
+	const [multisigInfo, setMultisigInfo] = useState<SafeInfoResponse | null>(null);
 
 	const [multisigData, setMultisigData] = useState<IMultisigAddress>();
 
@@ -46,219 +47,68 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	const [signatoriesWithName, setSignatoriesWithName] = useState<ISignatory[]>([]);
 
-	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook?.find(item => item.address === address)?.name || '' }, { address: '', name: '' }]);
+	const [signatoriesArray, setSignatoriesArray] = useState<ISignatory[]>([{ address, name: addressBook?.find((item: any) => item.address === address)?.name || '' }, { address: '', name: '' }]);
 	const [threshold, setThreshold] = useState<number>(2);
 
 	const viewNameAddress = () => {
 		setNameAddress(false);
 	};
 
-	const handleAddAddress = async (address: string, name: string) => {
-		try{
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
-					body: JSON.stringify({
-						address,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
-
-				if(addAddressError) {
-					return;
-				}
-
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							addressBook: addAddressData
-						};
-					});
-
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-	};
-
-	const handleMultisigBadge = async (signatories: string[], threshold: number, multisigName: string, network: string) => {
-		try{
-			const address = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!address || !signature) {
-				console.log('ERROR');
-				setLoading(false);
-				return;
-			}
-			else{
-				if(!signatories.includes(address)){
-					queueNotification({
-						header: 'Error!',
-						message: 'Signatories does not have your Address.',
-						status: NotificationStatus.ERROR
-					});
-					setLoading(false);
-					return;
-				}
-				let proxyAddress = null;
-				if(network !== 'astar'){
-					const response = await fetch(
-						`https://${network}.api.subscan.io/api/scan/events`,
-						{
-							body: JSON.stringify({
-								row: 1,
-								page: 0,
-								module: 'proxy',
-								call: 'PureCreated',
-								address: multisigAddress
-							}),
-							headers: SUBSCAN_API_HEADERS,
-							method: 'POST'
-						}
-					);
-
-					const responseJSON = await response.json();
-					if(responseJSON.data.count !== 0){
-						const params = JSON.parse(responseJSON.data?.events[0]?.params);
-						proxyAddress = getEncodedAddress(params[0].value, network);
-					}
-				}
-				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-					body: JSON.stringify({
-						signatories,
-						threshold,
-						multisigName,
-						proxyAddress
-					}),
-					headers: firebaseFunctionsHeader(network, address, signature),
-					method: 'POST'
-				});
-
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
-
-				if(multisigError) {
-					queueNotification({
-						header: 'Error!',
-						message: multisigError,
-						status: NotificationStatus.ERROR
-					});
-					setLoading(false);
-					return;
-				}
-
-				if(multisigData){
-					queueNotification({
-						header: 'Success!',
-						message: 'Multisig Linked',
-						status: NotificationStatus.SUCCESS
-					});
-					setLoading(false);
-					onCancel();
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							activeMultisig: multisigData.address,
-							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
-							multisigSettings: {
-								...prevState?.multisigSettings,
-								[multisigData.address]: {
-									name: multisigName,
-									deleted: false
-								}
-							}
-						};
-					});
-					const results = await Promise.allSettled(signatoriesWithName.map(
-						(signatory) => handleAddAddress(signatory.address, signatory.name)
-					));
-					results.forEach((result) => {
-						if(result.status === 'rejected'){
-							console.log('ERROR', result.reason);
-						}
-					});
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
-	};
-
 	const handleViewOwners = async () => {
-		try{
+		try {
 			setLoading(true);
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				setLoading(false);
 				return;
 			}
-			else{
+			else {
 
-				const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
-					body: JSON.stringify({
-						multisigAddress,
-						network
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
+				const signer = ethProvider.getSigner();
+
+				const web3Adapter = new Web3Adapter({
+					signerAddress: web3AuthUser!.accounts[0],
+					web3: web3Provider as any
 				});
+				const txUrl = 'https://safe-transaction-goerli.safe.global';
+				const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
-				const { data: multisigDataRes, error: multisigError } = await getMultisigDataRes.json() as { data: IMultisigAddress, error: string };
+				const info = await gnosisService.getMultisigData(multisigAddress);
+				setMultisigInfo(info);
 
-				if(multisigError) {
+				// const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
+				// 	body: JSON.stringify({
+				// 		multisigAddress,
+				// 		network
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network),
+				// 	method: 'POST'
+				// });
 
-					queueNotification({
-						header: 'Error!',
-						message: multisigError,
-						status: NotificationStatus.ERROR
-					});
+				// const { data: multisigDataRes, error: multisigError } = await getMultisigDataRes.json() as { data: IMultisigAddress, error: string };
+
+				// if(multisigError) {
+
+				// 	queueNotification({
+				// 		header: 'Error!',
+				// 		message: multisigError,
+				// 		status: NotificationStatus.ERROR
+				// 	});
+				// 	setLoading(false);
+				// 	return;
+				// }
+
+				if (info) {
 					setLoading(false);
-					return;
-				}
-
-				if(multisigDataRes){
-					setLoading(false);
-
-					setMultisigData(multisigDataRes);
-					const signatoriesArray = multisigDataRes.signatories.map((address: string) => {
-						return {
-							address: address,
-							name: ''
-						};
-					});
-					signatoriesArray.forEach((signatory) => {
-						const signatoryAddress = getEncodedAddress(signatory.address, network);
-						signatory.name = addressBook.find((item) => item.address === signatoryAddress)?.name || '';
-						signatory.address = signatoryAddress || signatory.address;
-					});
-					setSignatoriesWithName(signatoriesArray);
 					setNameAddress(false);
 					setViewOwners(false);
-
+					setSignatoriesArray(info.owners.map(address => ({ name: '', address })));
 				}
-
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
@@ -272,40 +122,41 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	const checkMultisig = (signatories: ISignatory[]) => {
 		const signatoryAddresses = signatories.map(item => item.address);
-		const response = _createMultisig(signatoryAddresses, threshold, chainProperties[network].ss58Format);
-		if(response && response.multisigAddress && getEncodedAddress(response.multisigAddress, network) === multisigAddress){
-			setMultisigData(prevState => {
-				return {
-					...prevState,
-					name: multisigName,
-					address: multisigAddress,
-					signatories: signatoryAddresses,
-					threshold,
-					network,
-					created_at: new Date()
-				};
-			});
-			setSignatoriesWithName(signatories);
-			setNameAddress(false);
-			setViewOwners(false);
-			setViewReviews(false);
-		}
-		else{
-			queueNotification({
-				header: 'Error!',
-				message: 'No Multisig found with these Signatories.',
-				status: NotificationStatus.ERROR
-			});
-		}
+
+		setMultisigData(prevState => {
+			return {
+				...prevState,
+				name: multisigName,
+				address: multisigAddress,
+				signatories: signatoryAddresses,
+				threshold,
+				network,
+				created_at: new Date()
+			};
+		});
+		setSignatoriesWithName(signatories);
+		setNameAddress(false);
+		setViewOwners(false);
+		setViewReviews(false);
+
 	};
 
-	const handleLinkMultisig = () => {
+	const handleLinkMultisig = async () => {
 		setLoading(true);
-		if(multisigData){
-			const name = multisigName ? multisigName : multisigData?.name || DEFAULT_MULTISIG_NAME;
-			handleMultisigBadge(multisigData.signatories, multisigData.threshold, name, network);
+		if (multisigData) {
+
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+				body: JSON.stringify({
+					signatories: signatoriesArray.map(item => item.address),
+					threshold,
+					multisigName,
+					proxyAddress: multisigInfo?.address
+				}),
+				headers: firebaseFunctionsHeader('goerli', localStorage.getItem('address')!, localStorage.getItem('signature')!),
+				method: 'POST'
+			});
 		}
-		else{
+		else {
 			queueNotification({
 				header: 'Error!',
 				message: 'Invalid Multisig',
@@ -317,37 +168,37 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	return (
 		<>
-			{nameAddress?
+			{nameAddress ?
 				<div>
 					<SelectNetwork />
 					<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 						<CancelBtn onClick={onCancel} />
-						<AddBtn title='Continue' onClick={viewNameAddress}/>
+						<AddBtn title='Continue' onClick={viewNameAddress} />
 					</div>
-				</div>:
+				</div> :
 				<div>
-					{viewOwners?<div>
+					{viewOwners ? <div>
 						<NameAddress multisigName={multisigName} setMultisigName={setMultisigName} multisigAddress={multisigAddress} setMultisigAddress={setMultisigAddress} />
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 							<CancelBtn onClick={onCancel} />
-							<AddBtn disabled={!multisigAddress} title='Continue' loading={loading} onClick={handleViewOwners}/>
+							<AddBtn disabled={!multisigAddress} title='Continue' loading={loading} onClick={handleViewOwners} />
 						</div>
-					</div>:<div>
-						{viewReviews?<div>
+					</div> : <div>
+						{viewReviews ? <div>
 							<Owners multisigThreshold={multisigData?.threshold} threshold={threshold} setThreshold={setThreshold} setSignatoriesArray={setSignatoriesArray} signatoriesArray={signatoriesArray} signatories={signatoriesWithName} setSignatoriesWithName={setSignatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={onCancel} />
 								{signatoriesWithName.length && multisigData?.threshold ?
-									<AddBtn title='Continue' onClick={handleViewReviews}/>
+									<AddBtn title='Continue' onClick={handleViewReviews} />
 									:
-									<AddBtn disabled={signatoriesArray.length < 2 || threshold < 2 || threshold > signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)}/>
+									<AddBtn disabled={signatoriesArray.length < 2 || threshold < 2 || threshold > signatoriesArray.length || signatoriesArray.some((item) => item.address === '')} title='Check Multisig' onClick={() => checkMultisig(signatoriesArray)} />
 								}
 							</div>
-						</div>: <div>
+						</div> : <div>
 							<Review multisigName={multisigName} multisigData={multisigData} signatories={signatoriesWithName} />
 							<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
 								<CancelBtn onClick={onCancel} />
-								<AddBtn loading={loading} title='Link Multisig' onClick={handleLinkMultisig}/>
+								<AddBtn loading={loading} title='Link Multisig' onClick={handleLinkMultisig} />
 							</div>
 						</div>}
 					</div>}
