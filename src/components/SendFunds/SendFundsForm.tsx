@@ -87,8 +87,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			});
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-			const pendingTxs = await gnosisService.getPendingTx(activeMultisig);
-			console.log('yash pendingTx', pendingTxs);
+			await gnosisService.getPendingTx(activeMultisig);
 		};
 
 		getTxs();
@@ -112,7 +111,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			to: web3AuthUser?.accounts[0],
 			txHash: safeTxHash
 		};
-		await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {
+		await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
 			body: JSON.stringify(txBody),
 			headers: {
 				'Accept': 'application/json',

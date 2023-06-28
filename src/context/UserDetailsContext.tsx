@@ -37,7 +37,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 		const address = localStorage.getItem('address');
 		const signature = localStorage.getItem('signature');
 		const fetchUserData = async () => {
-			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
 				headers: firebaseFunctionsHeader('goerli', address!, signature!),
 				method: 'POST'
 			}).then(res => res.json());

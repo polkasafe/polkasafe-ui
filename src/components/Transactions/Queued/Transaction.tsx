@@ -2,36 +2,23 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { bnToBn } from '@polkadot/util';
-import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
+import { Web3Adapter } from '@safe-global/protocol-kit';
 import { Collapse, Divider, message, Skeleton } from 'antd';
-import BN from 'bn.js';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { ethers } from 'ethers';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
-import { IMultisigAddress, IQueueItem, ITxNotification } from 'src/types';
+import { IQueueItem, ITxNotification } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
-import { approveAddProxy } from 'src/utils/approveAddProxy';
-import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
-import { approveProxy } from 'src/utils/approveProxy';
-import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
-import { cancelProxy } from 'src/utils/cancelProxy';
-import decodeCallData from 'src/utils/decodeCallData';
-import parseDecodedValue from 'src/utils/parseDecodedValue';
-import { setSigner } from 'src/utils/setSigner';
-import { createAdapter } from 'src/utils/web3';
 
 import SentInfo from './SentInfo';
 
@@ -51,25 +38,24 @@ interface ITransactionProps {
 	value: string;
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold, notifications, value }) => {
-	const [messageApi, contextHolder] = message.useMessage();
-	const navigate = useNavigate();
+const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
+	const [contextHolder] = message.useMessage();
 
-	const { activeMultisig, multisigAddresses, address, loggedInWallet } = useGlobalUserDetailsContext();
-	const [loading, setLoading] = useState(false);
-	const [success, setSuccess] = useState(false);
-	const [failure, setFailure] = useState(false);
-	const [getMultiDataLoading, setGetMultisigDataLoading] = useState(false);
-	const [loadingMessages, setLoadingMessages] = useState('');
+	const { activeMultisig, address } = useGlobalUserDetailsContext();
+	const [loading] = useState(false);
+	const [success] = useState(false);
+	const [failure] = useState(false);
+	const [getMultiDataLoading] = useState(false);
+	const [loadingMessages] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { network } = useGlobalApiContext();
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
-	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
-	const [isProxyAddApproval, setIsProxyAddApproval] = useState<boolean>(false);
-	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
+	const [isProxyApproval] = useState<boolean>(false);
+	const [isProxyAddApproval] = useState<boolean>(false);
+	const [isProxyRemovalApproval] = useState<boolean>(false);
 
 	const token = chainProperties[network].ticker;
 	const location = useLocation();

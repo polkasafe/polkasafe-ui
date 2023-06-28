@@ -106,9 +106,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						signatories.reverse() as [string],
 						threshold!);
 					if (safeAddress === '') return;
-					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
 						body: JSON.stringify({
-							signatories: ['0xe391DEE5cB0294e1e55a3Fe71F8abbe4d97235FA', '0x44468113c75e78e9937553A2834Fb4a3e261C71B', '0xCa9841d20b3B342f653b1F3b1b201dA03Dcb8FeE'],
+							signatories: signatories,
 							threshold,
 							multisigName,
 							proxyAddress: safeAddress

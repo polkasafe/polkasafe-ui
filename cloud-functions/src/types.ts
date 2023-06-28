@@ -1,3 +1,5 @@
+import { KeypairType } from '@polkadot/util-crypto/types';
+
 export interface IAddressBookItem {
 	name: string;
 	address: string;
@@ -13,8 +15,9 @@ export interface IUser {
 	email: string | null;
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
-	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	multisigSettings: { [multisigAddress: string]: IMultisigSettings };
 	notification_preferences?: IUserNotificationPreferences;
+	transactionFields?: ITransactionFields
 }
 
 export interface IUserResponse extends IUser {
@@ -35,14 +38,12 @@ export interface IMultisigAddress {
 
 export interface ChainProperties {
 	[network: string]: {
-		blockExplorer: string;
-		chainId: string;
-		chainNamespace: string;
-		decimals: number;
-		displayName: string;
-		rpcTarget: string;
-		ticker: string;
-		tickerName: string
+		ss58Format: number;
+		tokenDecimals: number;
+		tokenSymbol: string;
+		blockTime: number;
+		keyringType?: KeypairType;
+		rpcEndpoint: string;
 	};
 }
 
@@ -52,12 +53,13 @@ export interface ITransaction {
 	created_at: Date;
 	block_number: number;
 	from: string;
-	to: string;
+	to: string | string[];
 	token: string;
 	amount_usd: string;
 	amount_token: string;
 	network: string;
 	note?: string;
+	transactionFields?: { category: string, subfields: { [subfield: string]: { name: string, value: string } } }
 	notifications?: {
 		[address: string]: {
 			lastNotified: Date;
@@ -118,7 +120,7 @@ export enum CHANNEL {
 	ELEMENT = 'element',
 	SLACK = 'slack',
 	IN_APP = 'in_app'
-  }
+}
 
 export interface IUserNotificationChannelPreferences {
 	name: CHANNEL;
@@ -134,6 +136,38 @@ export interface IUserNotificationTriggerPreferences {
 }
 
 export interface IUserNotificationPreferences {
-	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
-	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
+	channelPreferences: { [index: string]: IUserNotificationChannelPreferences }
+	triggerPreferences: { [index: string]: IUserNotificationTriggerPreferences }
+}
+
+export enum EFieldType {
+	SINGLE_SELECT = 'Single-select',
+	// MULTI_SELECT = 'Multi-select',
+	TEXT = 'Text'
+	// NUMBER = 'Number',
+	// DATE = 'Date/Date-range',
+	// LINK = 'link',
+	// ATTACHMENT = 'Attachment'
+}
+
+export interface IDropdownOptions {
+	optionName: string,
+	archieved?: boolean
+}
+
+export interface ITransactionCategorySubfields {
+	[subfield: string]: {
+		subfieldName: string;
+		subfieldType: EFieldType;
+		required: boolean;
+		dropdownOptions?: IDropdownOptions[]
+	}
+}
+
+export interface ITransactionFields {
+	[field: string]: {
+		fieldName: string,
+		fieldDesc: string,
+		subfields: ITransactionCategorySubfields
+	}
 }

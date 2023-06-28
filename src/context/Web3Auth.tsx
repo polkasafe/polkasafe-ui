@@ -115,7 +115,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 			const signature = await signMessage(token, ethProvider);
 
 			if (signature) {
-				const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+				const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
 					headers: firebaseFunctionsHeader('goerli', await signer.getAddress(), signature),
 					method: 'POST'
 				}).then(res => res.json());

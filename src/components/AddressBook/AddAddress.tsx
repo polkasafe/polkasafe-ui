@@ -62,7 +62,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 					return;
 				}
 
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBookEth`, {
 					body: JSON.stringify({
 						address,
 						name
