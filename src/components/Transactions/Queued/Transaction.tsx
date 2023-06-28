@@ -39,7 +39,6 @@ interface ITransactionProps {
 }
 
 const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
-	const [contextHolder] = message.useMessage();
 
 	const { activeMultisig, address } = useGlobalUserDetailsContext();
 	const [loading] = useState(false);
@@ -72,7 +71,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 			const txUrl = 'https://safe-transaction-goerli.safe.global';
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 			const response = await gnosisService.signAndConfirmTx(callHash, activeMultisig);
-			console.log(response, 'siogn response');
 			if (response) {
 				const updateTx = {
 					signer: web3AuthUser!.accounts[0],
@@ -135,7 +133,6 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 
 	return (
 		<>
-			{contextHolder}
 
 			<Collapse
 				className='bg-bg-secondary rounded-lg p-2.5 scale-90 h-[111%] w-[111%] origin-top-left'
