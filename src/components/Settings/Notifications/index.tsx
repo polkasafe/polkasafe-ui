@@ -23,9 +23,9 @@ const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
 	const { pathname } = useLocation();
-	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(8);
-	const emailPreference = notification_preferences?.channelPreferences?.[CHANNEL.EMAIL];
+	const emailPreference = '' as any;
 	const [email, setEmail] = useState<string>(emailPreference?.handle || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(false);
@@ -41,7 +41,7 @@ const Notifications = () => {
 	const [remindersFromOthers, setReminderFromOthers] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
-	const [enabledUpdate, setEnableUpdate] = useState<boolean>(false);
+	const [enabledUpdate] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -58,49 +58,14 @@ const Notifications = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [email]);
 
-	useEffect(() => {
-		const triggerPreferences = notification_preferences?.triggerPreferences;
-		if (triggerPreferences) {
-			setNewTxn(triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false);
-			setTxnExecuted(triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false);
-			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
-			setScheduleTxn(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false);
-			setNotifyAfter(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8);
-			setReminderFromOthers(triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false);
-		}
-	}, [notification_preferences]);
-
 	const handleEnableUpdate = () => {
-		if (notification_preferences) {
-			const triggerPreferences = notification_preferences.triggerPreferences;
-			const oldPreferences = {
-				cancelledTxn: triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false,
-				newTxn: triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false,
-				notifyAfter: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8,
-				remindersFromOthers: triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false,
-				scheduleTxn: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false,
-				txnExecuted: triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false
-			};
-			const newPreferences = {
-				cancelledTxn,
-				newTxn,
-				notifyAfter,
-				remindersFromOthers,
-				scheduleTxn,
-				txnExecuted
-			};
-			if (JSON.stringify(oldPreferences) === JSON.stringify(newPreferences)) {
-				setEnableUpdate(false);
-				return;
-			}
-			setEnableUpdate(true);
-		}
+
 	};
 
 	useEffect(() => {
 		handleEnableUpdate();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers, notification_preferences]);
+	}, [cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const notifyAfterHours: MenuProps['items'] = [8, 12, 24, 48].map((hr) => {

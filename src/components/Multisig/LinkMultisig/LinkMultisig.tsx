@@ -5,7 +5,6 @@
 /* eslint-disable sort-keys */
 
 import { SafeInfoResponse } from '@safe-global/api-kit';
-import { Web3Adapter } from '@safe-global/protocol-kit';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
@@ -14,9 +13,11 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress, NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { createAdapter } from 'src/utils/web3';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
@@ -35,7 +36,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const [viewReviews, setViewReviews] = useState(true);
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
+	const { ethProvider } = useGlobalWeb3Context();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
 
@@ -68,13 +69,9 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 			else {
 
 				const signer = ethProvider.getSigner();
-
-				const web3Adapter = new Web3Adapter({
-					signerAddress: web3AuthUser!.accounts[0],
-					web3: web3Provider as any
-				});
-				const txUrl = 'https://safe-transaction-goerli.safe.global';
-				const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+				const adapter = createAdapter('web3', signer);
+				const txUrl = returnTxUrl(network);
+				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 
 				const info = await gnosisService.getMultisigData(multisigAddress);
 				setMultisigInfo(info);

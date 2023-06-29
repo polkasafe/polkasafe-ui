@@ -20,9 +20,9 @@ const TxnCard = () => {
 	const [completedTransactions, setCompletedTransactions] = useState<any>([]);
 
 	useEffect(() => {
-		const queued = activeMultisigTxs.filter((item: any) => item.executed !== true && item.type !== 'fund');
+		const queued = activeMultisigTxs?.filter((item: any) => item.executed !== true && item.type !== 'fund') || [];
 		setQueuedTransactions(queued);
-		const complete = activeMultisigTxs.filter((item: any) => item.executed === true);
+		const complete = activeMultisigTxs?.filter((item: any) => item.executed === true) || [];
 		setCompletedTransactions(complete);
 	}, [activeMultisig, activeMultisigTxs]);
 

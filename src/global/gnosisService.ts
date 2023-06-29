@@ -2,9 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-export const returnTxUrl = (network?: 'goerli') : string =>  {
-	if (network === 'goerli') {
+import { NETWORK } from './networkConstants';
+
+export const returnTxUrl = (network?: NETWORK): string => {
+	if (network === NETWORK.GOERLI) {
 		return 'https://safe-transaction-goerli.safe.global';
+	} else if (network === NETWORK.POLYGON) {
+		return 'https://safe-transaction-polygon.safe.global';
 	} else {
 		return '';
 	}

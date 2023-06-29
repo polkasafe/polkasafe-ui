@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Button, Modal, Tooltip } from 'antd';
+import { Modal } from 'antd';
 import { Spin } from 'antd';
 import { ethers } from 'ethers';
 import React, { FC, useState } from 'react';
@@ -33,8 +33,8 @@ interface IDashboardCard {
 	isOnchain: boolean
 }
 
-const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, openTransactionModal, setOpenTransactionModal }: IDashboardCard) => {
-	const { activeMultisig, multisigAddresses, multisigSettings, isProxy, setUserDetailsContextState, activeMultisigData } = useGlobalUserDetailsContext();
+const DashboardCard = ({ className, setNewTxn, transactionLoading, openTransactionModal, setOpenTransactionModal }: IDashboardCard) => {
+	const { activeMultisig, multisigAddresses, activeMultisigData } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { openModal } = useModalContext();
 
@@ -96,6 +96,8 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 		);
 	};
 
+	console.log('active myltisig', activeMultisigData);
+
 	return (
 		<>
 			<h2 className="text-base font-bold text-white mb-2">Overview</h2>
@@ -111,24 +113,18 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					<div className='flex gap-x-3 items-center'>
 						<div className='relative'>
 							<Identicon
-								className={`border-2 rounded-full bg-transparent ${hasProxy && isProxy ? 'border-[#FF79F2]' : 'border-primary'} p-1.5`}
+								className={'border-2 rounded-full bg-transparent border-primary p-1.5'}
 								value={activeMultisig}
 								size={50}
 								theme='polkadot'
 							/>
-							<div className={`${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'} text-sm rounded-lg absolute -bottom-0 left-[16px] px-2`}>
+							<div className={' bg-primary text-white text-sm rounded-lg absolute -bottom-0 left-[16px] px-2'}>
 								{currentMultisig?.threshold}/{currentMultisig?.signatories.length}
 							</div>
 						</div>
 						<div>
 							<div className='text-base font-bold text-white flex items-center gap-x-2'>
-								{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}
-								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
-								{hasProxy &&
-									<Tooltip title='Switch Account'>
-										<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState((prev: any) => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' /></Button>
-									</Tooltip>
-								}
+								{currentMultisig?.name}
 							</div>
 							<div className="flex text-xs">
 								<div title={activeMultisig && getEncodedAddress(activeMultisig, network) || ''} className=' font-normal text-text_secondary'>{activeMultisig && shortenAddress(getEncodedAddress(activeMultisig, network) || '')}</div>
@@ -149,12 +145,12 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					</div>
 					<div>
 						<div className='text-white'>ETH</div>
-						<div className='font-bold text-lg text-primary'>{!activeMultisigData.safeBalance ? <Spin size='default' /> : ethers.utils.formatEther(activeMultisigData.safeBalance.toString()).split('').slice(0, 5).join('')}</div>
+						<div className='font-bold text-lg text-primary'>{!activeMultisigData?.safeBalance ? <Spin size='default' /> : ethers.utils.formatEther(activeMultisigData.safeBalance.toString()).split('').slice(0, 5).join('')}</div>
 					</div>
 					<div>
 						<div className='text-white'>USD Amount</div>
 						<div className='font-bold text-lg text-primary'>
-							{activeMultisigData.assetBalance ? <Spin size='default' /> : 0}
+							{0}
 
 						</div>
 					</div>

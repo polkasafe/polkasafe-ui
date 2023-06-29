@@ -4,12 +4,13 @@
 
 import '@polkadot/api-augment';
 
-import React, { useContext,  useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { NETWORK } from 'src/global/networkConstants';
 import getNetwork from 'src/utils/getNetwork';
 
 export interface ApiContextType {
-	network: string;
-	setNetwork: React.Dispatch<React.SetStateAction<string>>
+	network: NETWORK;
+	setNetwork: React.Dispatch<React.SetStateAction<NETWORK>>
 }
 
 export const ApiContext: React.Context<ApiContextType> = React.createContext(
@@ -21,7 +22,7 @@ export interface ApiContextProviderProps {
 }
 
 export function ApiContextProvider({ children }: ApiContextProviderProps): React.ReactElement {
-	const [network, setNetwork] = useState(getNetwork());
+	const [network, setNetwork] = useState<NETWORK>(getNetwork());
 
 	return (
 		<ApiContext.Provider value={{ network, setNetwork }}>

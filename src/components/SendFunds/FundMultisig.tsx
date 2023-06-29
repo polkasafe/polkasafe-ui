@@ -43,7 +43,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 		<>
 			{success ? <TransactionSuccessScreen
 				successMessage='Transaction Successful!'
-				amount={ethers.utils.formatEther(amount)}
+				amount={amount}
 				sender={selectedSender}
 				recipient={activeMultisig}
 				created_at={new Date()}

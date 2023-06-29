@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Button, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -12,26 +11,29 @@ import ConnectWallet from 'src/components/Home/ConnectWallet';
 import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalletWrapper';
 import NewUserModal from 'src/components/Home/ConnectWallet/NewUserModal';
 import DashboardCard from 'src/components/Home/DashboardCard';
-import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalWeb3Context } from 'src/context';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
-import { CHANNEL, NotificationStatus } from 'src/types';
+import { NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { createAdapter } from 'src/utils/web3';
 import styled from 'styled-components';
 
 const Home = () => {
-	const { address, notification_preferences, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
+	const { address, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	const [hasProxy] = useState<boolean>(true);
 	const [proxyNotInDb] = useState<boolean>(false);
 	const [proxyInProcess] = useState<boolean>(false);
 
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
+	const { network } = useGlobalApiContext();
 
 	const [transactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(true);
@@ -50,12 +52,9 @@ const Home = () => {
 
 			if (web3AuthUser) {
 				const signer = ethProvider?.getSigner();
-				const ethAdapter = new EthersAdapter({
-					ethers: ethProvider!,
-					signerOrProvider: signer
-				});
-				const txUrl = 'https://safe-transaction-goerli.safe.global';
-				const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+				const adapter = createAdapter('eth', signer);
+				const txUrl = returnTxUrl(network);
+				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 
 				const safeData = await gnosisService.getSafeCreationInfo(activeMultisig);
 
@@ -101,7 +100,7 @@ const Home = () => {
 				address ?
 					<>
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
-						{multisigAddresses
+						{multisigAddresses.length > 0
 							//&& multisigAddresses.filter((multisig) => multisig.network === network &&
 							//!multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0
 							?
@@ -125,9 +124,7 @@ const Home = () => {
 											:
 											<></>
 								}
-								{!notification_preferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified &&
-									<EmailBadge />
-								}
+
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
 										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={() => { }} />

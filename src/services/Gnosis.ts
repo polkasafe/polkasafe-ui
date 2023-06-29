@@ -4,8 +4,7 @@
 
 import SafeApiKit, { AllTransactionsListResponse, OwnerResponse, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
 import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
-import { SafeMultisigTransactionResponse, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
-import { ContractReceipt } from 'ethers';
+import { SafeMultisigTransactionResponse, SafeTransactionDataPartial, TransactionResult } from '@safe-global/safe-core-sdk-types';
 
 export class GnosisSafeService {
 	ethAdapter: any;
@@ -139,7 +138,7 @@ export class GnosisSafeService {
 		}
 	};
 
-	executeTx = async (txHash: string, multisig: string): Promise<ContractReceipt | undefined> => {
+	executeTx = async (txHash: string, multisig: string): Promise<TransactionResult | undefined> => {
 		try {
 			console.log('execute receipt', 'running', txHash, multisig);
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
@@ -150,6 +149,7 @@ export class GnosisSafeService {
 			const res = await executeTxResponse.transactionResponse?.wait();
 
 			console.log('execute receipt executeTxResponse res', res);
+			return executeTxResponse;
 		} catch (err) {
 			console.log('error from executeTx', err);
 			return undefined;

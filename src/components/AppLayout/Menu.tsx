@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const location = useLocation();
@@ -70,7 +70,7 @@ const Menu: FC<Props> = ({ className }) => {
 	}
 
 	useEffect(() => {
-		const filteredMutisigs = multisigAddresses?.filter((multisig: any) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled) || [];
+		const filteredMutisigs = multisigAddresses?.filter((multisig: any) => multisig.network === network) || [];
 		const multi = filteredMutisigs?.find((multisig: any) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 		if (multi) {
 			if (!multi.proxy) {
@@ -90,16 +90,15 @@ const Menu: FC<Props> = ({ className }) => {
 	}, [multisigAddresses, network]);
 
 	useEffect(() => {
-		const active = multisigAddresses.find((item: any) => item.address === selectedMultisigAddress || item.proxy === selectedMultisigAddress);
-		localStorage.setItem('active_multisig', active?.proxy && isProxy ? active.proxy : selectedMultisigAddress);
+		localStorage.setItem('active_multisig', selectedMultisigAddress);
 		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
-				activeMultisig: active?.proxy && isProxy ? active.proxy : selectedMultisigAddress
+				activeMultisig: selectedMultisigAddress
 			};
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [multisigAddresses, selectedMultisigAddress, isProxy]);
+	}, [multisigAddresses, selectedMultisigAddress]);
 
 	const AddMultisigModal: FC = () => {
 		return (
@@ -163,7 +162,7 @@ const Menu: FC<Props> = ({ className }) => {
 			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-3 text-white list-none'>
-						{multisigAddresses.filter((multisig: any) => (!multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig: any) => {
+						{multisigAddresses.filter((multisig: any) => !multisig.disabled).map((multisig: any) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
@@ -183,7 +182,7 @@ const Menu: FC<Props> = ({ className }) => {
 										size={23}
 										theme={'polkadot'}
 									/>
-									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
+									<span className='truncate'>{multisig.name}</span>
 								</button>
 							</li>;
 						})}

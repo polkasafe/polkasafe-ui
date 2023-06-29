@@ -23,13 +23,13 @@ export enum ENotificationStatus {
 
 const Notification = () => {
 	const { network } = useGlobalApiContext();
-	const { address, setUserDetailsContextState, notifiedTill } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState(true);
 	const [notifications, setNotifications] = useState<INotification[]>([]);
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
-	const unreadNotificationAvailable = !notifications.length ? undefined : notifications.filter(({ created_at }) => notifiedTill && dayjs(notifiedTill).isAfter(created_at) ? false : true);
+	const unreadNotificationAvailable = !notifications.length ? undefined : notifications.filter(({ created_at }) => dayjs().isAfter(created_at) ? false : true);
 
 	const getNotifications = useCallback(async () => {
 		if (!address) return;

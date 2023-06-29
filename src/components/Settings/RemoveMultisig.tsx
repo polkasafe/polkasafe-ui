@@ -15,7 +15,7 @@ import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
-	const { activeMultisig, multisigAddresses, multisigSettings, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const { network } = useGlobalApiContext();
 
@@ -60,7 +60,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 					const copy = [...multisigAddresses];
 					setUserDetailsContextState((prevState: any) => {
 						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig || item.proxy === activeMultisig);
-						if (newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted) {
+						if (newMutlisigArray && newMutlisigArray[0]?.address) {
 							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
 						}
 						else {
@@ -95,7 +95,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
-					{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+					{multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
 				</span>
 				?
 			</p>

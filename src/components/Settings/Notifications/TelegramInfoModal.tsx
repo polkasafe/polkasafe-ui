@@ -11,7 +11,7 @@ import copyText from 'src/utils/copyText';
 const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL) => Promise<string | undefined> }) => {
 
 	const [loading, setLoading] = React.useState(false);
-	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const handleGenerateToken = async () => {
 		setLoading(true);
@@ -48,18 +48,18 @@ const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANN
 				<li className='list-inside leading-[35px] mb-5'>
 					Send this command to the chat with the bot:
 					<div className='flex items-center justify-between'>
-						<span onClick={() => copyText(`/add ${address} ${notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || ''}`)} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
+						{/* <span onClick={() => copyText(`/add ${address} ${notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || ''}`)} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 							<CopyIcon /> /add {'<web3Address>'} {'<verificationToken>'}
-						</span>
+						</span> */}
 						<PrimaryButton loading={loading} onClick={handleGenerateToken} className='bg-primary text-white font-normal'>Generate Token</PrimaryButton>
 					</div>
-					{notification_preferences?.channelPreferences?.[`${CHANNEL.TELEGRAM}`]?.verification_token &&
+					{/* {notification_preferences?.channelPreferences?.[`${CHANNEL.TELEGRAM}`]?.verification_token &&
 						<div className='flex items-center justify-between mt-3'>
 							<span>Verification Token: </span>
 							<span onClick={() => copyText(notification_preferences?.channelPreferences?.[`${CHANNEL.TELEGRAM}`]?.verification_token || '')} className='px-2 cursor-pointer mx-2 rounded-md bg-bg-secondary text-primary border border-solid border-text_secondary'>
 								<CopyIcon /> {notification_preferences?.channelPreferences?.[`${CHANNEL.TELEGRAM}`]?.verification_token}
 							</span>
-						</div>}
+						</div>} */}
 				</li>
 				<li className='list-inside'>
 					(Optional) Send this command to get help:

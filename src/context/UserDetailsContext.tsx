@@ -7,6 +7,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { UserDetailsContextType, Wallet } from 'src/types';
 
+import { useGlobalApiContext } from './ApiContext';
 import { useGlobalWeb3Context } from './Web3Auth';
 
 const initialUserDetailsContext: UserDetailsContextType = {
@@ -21,7 +22,7 @@ const initialUserDetailsContext: UserDetailsContextType = {
 	}
 };
 
-export const UserDetailsContext: React.Context<any> = createContext(initialUserDetailsContext);
+export const UserDetailsContext: React.Context<UserDetailsContextType> = createContext(initialUserDetailsContext);
 
 export function useGlobalUserDetailsContext() {
 	return useContext(UserDetailsContext);
@@ -32,19 +33,23 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	const [activeMultisigTxs, setActiveMultisigTxs] = useState<any[]>([]);
 	const [activeMultisigData, setActiveMultisigData] = useState<any>({});
 	const { ethProvider } = useGlobalWeb3Context();
+	const { network } = useGlobalApiContext();
 
 	useEffect(() => {
 		const address = localStorage.getItem('address');
 		const signature = localStorage.getItem('signature');
 		const fetchUserData = async () => {
 			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
-				headers: firebaseFunctionsHeader('goerli', address!, signature!),
+				headers: firebaseFunctionsHeader(network, address!, signature!),
 				method: 'POST'
 			}).then(res => res.json());
+
+			if (data?.multisigAddresses.length > 0) localStorage.setItem('activeMultisig', data?.multisigAddresses[0].address);
 
 			setUserDetailsContextState((prevState) => {
 				return {
 					...prevState,
+					activeMultisig: data?.multisigAddresses.length > 0 ? data?.multisigAddresses[0].address : '',
 					address: data?.address,
 					addressBook: data?.addressBook || [],
 					createdAt: data?.created_at,
@@ -54,8 +59,8 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			});
 		};
 
-		if (address && address) fetchUserData();
-	}, []);
+		if (address) fetchUserData();
+	}, [network]);
 
 	useEffect(() => {
 		if (userDetailsContextState.activeMultisig && ethProvider) fetchMultisigData();

@@ -5,7 +5,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AssetsTable from 'src/components/Assets/AssetsTable';
-import MultisigDropdown from 'src/components/Assets/MultisigDropdown';
 // import DropDown from 'src/components/Assets/DropDown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -18,8 +17,7 @@ import Loader from 'src/ui-components/Loader';
 const Assets = () => {
 
 	const [loading, setLoading] = useState<boolean>(false);
-	const { address, activeMultisig, isProxy, multisigAddresses } = useGlobalUserDetailsContext();
-	const [activeAddress, setActiveAddress] = useState<'Proxy' | 'Multisig'>(isProxy ? 'Proxy' : 'Multisig');
+	const { address, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
 	const { network } = useGlobalApiContext();
 
@@ -39,7 +37,7 @@ const Assets = () => {
 				setLoading(true);
 				const getAssestsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAssetsForAddress`, {
 					body: JSON.stringify({
-						address: activeAddress === 'Proxy' ? multisig.proxy : multisig.address,
+						address: multisig.address,
 						network
 					}),
 					headers: firebaseFunctionsHeader(network),
@@ -64,7 +62,7 @@ const Assets = () => {
 			console.log('ERROR', error);
 			setLoading(false);
 		}
-	}, [activeAddress, multisig, network]);
+	}, [multisig, network]);
 
 	useEffect(() => {
 		handleGetAssets();
@@ -80,7 +78,6 @@ const Assets = () => {
 						<div className="flex items-center justify-between">
 							<div className='flex items-end gap-x-4'>
 								<h2 className="text-base font-bold text-white mt-3 ml-5">Tokens</h2>
-								{multisig && multisig?.proxy && <MultisigDropdown activeAddress={activeAddress} setActiveAddress={setActiveAddress} />}
 							</div>
 							{/* <div className='flex items-center justify-center mr-5 mt-3'>
 						<p className='text-text_secondary mx-2'>Currency:</p>

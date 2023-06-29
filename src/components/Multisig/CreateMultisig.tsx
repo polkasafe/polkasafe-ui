@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Form, Input, InputNumber, Modal, Spin, Switch } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
@@ -18,6 +17,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
@@ -25,6 +25,7 @@ import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { createAdapter } from 'src/utils/web3';
 
 import AddAddress from '../AddressBook/AddAddress';
 import DragDrop from '../Multisig/DragDrop';
@@ -90,23 +91,19 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 			const signature = localStorage.getItem('signature');
 
 			if (!address || !signature) {
-				console.log('ERROR');
 				return;
 			}
 			else {
 				if (web3AuthUser) {
 					const signer = ethProvider.getSigner();
-					const ethAdapter = new EthersAdapter({
-						ethers: ethProvider,
-						signerOrProvider: signer
-					});
-					const txUrl = 'https://safe-transaction-goerli.safe.global';
-					const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+					const adapter = createAdapter('eth', ethProvider);
+					const txUrl = returnTxUrl(network);
+					const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 					const safeAddress = await gnosisService.createSafe(
-						signatories.reverse() as [string],
+						signatories as [string],
 						threshold!);
 					if (safeAddress === '') return;
-					await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
+					const { data: multisigData, error: multisigError } = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
 						body: JSON.stringify({
 							signatories: signatories,
 							threshold,
@@ -114,9 +111,38 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 							proxyAddress: safeAddress
 
 						}),
-						headers: firebaseFunctionsHeader('goerli', address, signature),
+						headers: firebaseFunctionsHeader(network, address, signature),
 						method: 'POST'
-					});
+					}).then(res => res.json());
+
+					if (multisigError) {
+						queueNotification({
+							header: 'Error!',
+							message: multisigError,
+							status: NotificationStatus.ERROR
+						});
+						setLoading(false);
+						setFailure(true);
+						return;
+					}
+
+					if (multisigData) {
+						if (multisigAddresses?.some((item: any) => item.address === multisigData.address && !item.disabled)) {
+							queueNotification({
+								header: 'Multisig Exist!',
+								message: 'Please try adding a different multisig.',
+								status: NotificationStatus.WARNING
+							});
+							setLoading(false);
+							return;
+						}
+						queueNotification({
+							header: 'Success!',
+							message: `Your Multisig ${multisigName} has been created successfully!`,
+							status: NotificationStatus.SUCCESS
+						});
+						setCreateMultisigData(multisigData);
+					}
 				} else {
 					setLoading(true);
 					setLoadingMessages('Creating Your Multisig.');

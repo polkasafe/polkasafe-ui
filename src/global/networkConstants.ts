@@ -4,13 +4,16 @@
 
 import { CHAIN_NAMESPACES } from '@web3auth/base';
 import ethereumLogo from 'src/assets/eth.png';
+import polygonLogo from 'src/assets/polygon.png';
 import { ChainPropType } from 'src/types';
 
 export enum NETWORK {
-	GOERLI = 'goerli'
+	GOERLI = 'goerli',
+	POLYGON = 'polygon'
 }
 export const tokenSymbol = {
-	GOERLI: 'GOER'
+	GOERLI: 'GOER',
+	POLYGON: 'MATIC'
 };
 
 export const chainProperties: ChainPropType = {
@@ -24,5 +27,16 @@ export const chainProperties: ChainPropType = {
 		rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
 		ticker: 'ETH',
 		tickerName: 'GoerliETH'
+	},
+	[NETWORK.POLYGON]: {
+		blockExplorer: 'https://polygonscan.com/',
+		chainId: '0x89',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		decimals: 18,
+		displayName: 'Polygon',
+		logo: polygonLogo,
+		rpcTarget: 'https://polygon-rpc.com/',
+		ticker: 'MATIC',
+		tickerName: 'Matic'
 	}
 };

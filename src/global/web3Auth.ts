@@ -1,6 +1,9 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+// Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
 
 import { CHAIN_NAMESPACES } from '@web3auth/base';
 import { MetamaskAdapter } from '@web3auth/metamask-adapter';
@@ -9,15 +12,22 @@ import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import { TorusWalletAdapter } from '@web3auth/torus-evm-adapter';
 import { TorusWalletConnectorPlugin } from '@web3auth/torus-wallet-connector-plugin';
 
+import { chainProperties, NETWORK } from './networkConstants';
+
 // of the Apache-2.0 license. See the LICENSE file for details.
-export const WEB3AUTH_CLIENT_ID = 'BH8sHfDKFOSXJ8tPR6kZF7SUOvo2tC0qUSbGYtDD94NWAS4VN1kixaHKFJdPIESuihOucUtSFB8rryaRxe0CskY';
-export const WEB3AUTH_SECRET = '55e08332b03eda3a300c8efa461c80ddaf4acb97f4678fceb5d84fb5502e0066';
+export const WEB3AUTH_CLIENT_ID = 'BBfZ90Z0u4b_o6dDVe5S9KBOoV7SuYE6RqEf9YYQAv78d0zrcQXi6r0r8KofVUamwCDqzpi885y4MaS7jLzFVpc';
+export const WEB3AUTH_SECRET = '720cee4d131652a8fef38f644d5905b259d5518ac0bd9d5da3ad72fd8847cf06';
 
 export const webAuth = new Web3Auth({
 	chainConfig: {
-		chainId: '0x1',
+		blockExplorer: 'https://polygonscan.com/',
+		chainId: '0x89',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		rpcTarget: 'https://rpc.ankr.com/eth' // @TODO change this to infura node
+		decimals: 18,
+		displayName: 'Polygon',
+		rpcTarget: 'https://polygon-rpc.com/',
+		ticker: 'MATIC',
+		tickerName: 'Matic'
 	},
 	clientId: WEB3AUTH_CLIENT_ID!,
 	uiConfig: {
@@ -27,7 +37,7 @@ export const webAuth = new Web3Auth({
 		loginMethodsOrder: ['google'],
 		theme: 'dark'
 	},
-	web3AuthNetwork: 'testnet'
+	web3AuthNetwork: 'mainnet'
 });
 
 export const openloginAdapter = new OpenloginAdapter({
@@ -61,18 +71,18 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 
 export const metamaskAdapter = new MetamaskAdapter({
 	chainConfig: {
-		blockExplorer: 'https://goerli.etherscan.io',
-		chainId: '0x5',
+		blockExplorer: 'https://polygonscan.com/',
+		chainId: '0x89',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
 		decimals: 18,
-		displayName: 'Goerli',
-		rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
-		ticker: 'ETH',
-		tickerName: 'Goerli'
+		displayName: 'Polygon',
+		rpcTarget: 'https://polygon-rpc.com/',
+		ticker: 'MATIC',
+		tickerName: 'Matic'
 	},
 	clientId: WEB3AUTH_CLIENT_ID,
 	sessionTime: 3600, // 1 hour in seconds
-	web3AuthNetwork: 'testnet'
+	web3AuthNetwork: 'mainnet'
 });
 
 export const torusWalletAdapter = new TorusWalletAdapter({
@@ -81,9 +91,14 @@ export const torusWalletAdapter = new TorusWalletAdapter({
 
 export const options: Web3AuthOptions = {
 	chainConfig: {
-		chainId: '0x5',
+		blockExplorer: 'https://polygonscan.com/',
+		chainId: '0x89',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		rpcTarget: 'https://rpc.ankr.com/eth_goerli'
+		decimals: 18,
+		displayName: 'Polygon',
+		rpcTarget: 'https://polygon-rpc.com/',
+		ticker: 'MATIC',
+		tickerName: 'Matic'
 	},
 	clientId: WEB3AUTH_CLIENT_ID,
 	uiConfig: {
@@ -91,6 +106,13 @@ export const options: Web3AuthOptions = {
 		theme: 'dark'
 
 	},
-	web3AuthNetwork: 'testnet'
+	web3AuthNetwork: 'mainnet'
 };
 
+export const returnChainConfig = (network: NETWORK) => {
+	if (network === NETWORK.GOERLI) {
+		return chainProperties[NETWORK.GOERLI];
+	} else if (network === NETWORK.POLYGON) {
+		chainProperties[NETWORK.POLYGON];
+	}
+};

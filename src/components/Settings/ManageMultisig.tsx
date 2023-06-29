@@ -46,7 +46,7 @@ const ManageMultisig = () => {
 										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-[#FF79F2] text-highlight'}>Proxy</div>
 										<div className='flex items-center text-text_secondary'>
 											{shortenAddress(multisig?.proxy || '', 10)}
-											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy)}><CopyIcon /></button>
+											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy!)}><CopyIcon /></button>
 											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.proxy || '', network)}`} target='_blank' rel="noreferrer" >
 												<ExternalLinkIcon />
 											</a>
@@ -54,11 +54,11 @@ const ManageMultisig = () => {
 									</div>
 								</div>
 								{/* <AddNewOwnerBtn disabled={!multisig?.proxy} /> */}
-							</section> :
-							network !== 'astar' &&
-							<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-								<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
-							</section>
+							</section> : <></>
+							// network !== 'astar' &&
+							// <section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+							// <p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
+							// </section>
 						}
 						<section>
 							<ListOwners disabled={!multisig?.proxy} />

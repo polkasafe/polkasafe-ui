@@ -36,7 +36,7 @@ const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
 	}, [location.hash, queuedTransactions]);
 
 	useEffect(() => {
-		const queue = activeMultisigTxs.filter((item: any) => (item.executed !== true && item.type !== 'fund'));
+		const queue = activeMultisigTxs?.filter((item: any) => (item.executed !== true && item.type !== 'fund')) || [];
 		setQueuedTransactions(queue);
 	}, [activeMultisigTxs, refetch]);
 

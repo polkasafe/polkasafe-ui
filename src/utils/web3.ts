@@ -4,19 +4,16 @@
 
 import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
 
-export const createAdapter = (type: 'web3' | 'eth', provider: any, network?: 'goerli'): EthersAdapter | Web3Adapter | null => {
-	if (network === 'goerli') {
-		if (type === 'web3') {
-			return new Web3Adapter({
-				web3: provider
-			});
-		} else {
-			return new EthersAdapter({
-				ethers: provider,
-				signerOrProvider: provider.getSigner()
-			});
-		}
+export const createAdapter = (type: 'web3' | 'eth', provider: any): EthersAdapter | Web3Adapter | null => {
+	if (type === 'web3') {
+		return new Web3Adapter({
+			web3: provider
+		});
 	} else {
-		return null;
+		return new EthersAdapter({
+			ethers: provider,
+			signerOrProvider: provider.getSigner()
+		});
 	}
+
 };

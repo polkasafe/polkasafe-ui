@@ -9,15 +9,17 @@ import { NETWORK } from 'src/global/networkConstants';
  *
  */
 
-export default function getNetwork() {
-	const defaultNetwork = NETWORK.GOERLI;
-	let network = localStorage.getItem('network') || defaultNetwork;
+export default function getNetwork(): NETWORK {
+	const defaultNetwork = NETWORK.POLYGON;
+	let network = localStorage.getItem('network') as NETWORK || defaultNetwork;
 
 	const possibleNetworks = Object.values(network);
 
 	if (!possibleNetworks.includes(network)) {
 		network = defaultNetwork;
 	}
+
+	localStorage.setItem('network', network);
 
 	return network;
 }

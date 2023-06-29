@@ -14,6 +14,7 @@ import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { chainProperties } from 'src/global/networkConstants';
 import { GnosisSafeService } from 'src/services';
 import { IQueueItem, ITxNotification } from 'src/types';
@@ -63,19 +64,18 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const handleApproveTransaction = async () => {
 		try {
 			const signer = ethProvider.getSigner();
-
 			const web3Adapter = new Web3Adapter({
 				signerAddress: web3AuthUser!.accounts[0],
 				web3: web3Provider as any
 			});
-			const txUrl = 'https://safe-transaction-goerli.safe.global';
+			const txUrl = returnTxUrl(network);
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 			const response = await gnosisService.signAndConfirmTx(callHash, activeMultisig);
 			if (response) {
 				const updateTx = {
 					signer: web3AuthUser!.accounts[0],
 					txHash: callHash,
-					txSignature: response?.signature
+					txSignature: response
 				};
 				await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransaction`, {
 					body: JSON.stringify(updateTx),
@@ -100,31 +100,33 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const handleExecuteTransaction = async () => {
 		try {
 			const signer = ethProvider.getSigner();
-
 			const web3Adapter = new Web3Adapter({
 				signerAddress: web3AuthUser!.accounts[0],
 				web3: web3Provider as any
 			});
-			const txUrl = 'https://safe-transaction-goerli.safe.global';
+			const txUrl = returnTxUrl(network);
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 			const response = await gnosisService.executeTx(callHash, activeMultisig);
 			const completeTx = {
 				receipt: response || {},
 				txHash: callHash
 			};
-			await fetch(`${FIREBASE_FUNCTIONS_URL}/completeTransaction`, {
-				body: JSON.stringify(completeTx),
-				headers: {
-					'Accept': 'application/json',
-					'Acess-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-signature': localStorage.getItem('signature')!,
-					'x-source': 'polkasafe'
-				},
-				method: 'POST'
-			}).then(res => res.json());
+			if (response) {
+				await fetch(`${FIREBASE_FUNCTIONS_URL}/completeTransaction`, {
+					body: JSON.stringify(completeTx),
+					headers: {
+						'Accept': 'application/json',
+						'Acess-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+						'x-address': web3AuthUser!.accounts[0],
+						'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+						'x-network': network,
+						'x-signature': localStorage.getItem('signature')!,
+						'x-source': 'polkasafe'
+					},
+					method: 'POST'
+				}).then(res => res.json());
+			}
 
 		} catch (error) {
 			console.log(error);

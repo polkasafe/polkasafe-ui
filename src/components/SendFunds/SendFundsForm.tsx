@@ -4,13 +4,13 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
+import { Web3Adapter } from '@safe-global/protocol-kit';
 import { AutoComplete, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import { ethers } from 'ethers';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
@@ -18,6 +18,7 @@ import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
@@ -78,53 +79,40 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [fetchBalancesLoading] = useState<boolean>(false);
 
-	useEffect(() => {
-		const getTxs = async () => {
-			const signer = ethProvider.getSigner();
-			const ethAdapter = new EthersAdapter({
-				ethers: ethProvider,
-				signerOrProvider: signer
-			});
-			const txUrl = 'https://safe-transaction-goerli.safe.global';
-			const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
-			await gnosisService.getPendingTx(activeMultisig);
-		};
-
-		getTxs();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ethProvider]);
-
 	const handleSubmit = async () => {
 		const signer = ethProvider.getSigner();
 		const web3Adapter = new Web3Adapter({
 			signerAddress: web3AuthUser!.accounts[0],
 			web3: web3Provider as any
 		});
-		const txUrl = 'https://safe-transaction-goerli.safe.global';
+		const txUrl = returnTxUrl(network);
 		const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
 		const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser!.accounts[0], ethers.utils.parseUnits(amount, 'ether').toString(), web3AuthUser!.accounts[0]);
 
-		const txBody = {
-			amount_token: ethers.utils.parseUnits(amount, 'ether').toString(),
-			data: '0x00',
-			safeAddress: activeMultisig,
-			to: web3AuthUser?.accounts[0],
-			txHash: safeTxHash
-		};
-		await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
-			body: JSON.stringify(txBody),
-			headers: {
-				'Accept': 'application/json',
-				'Acess-Control-Allow-Origin': '*',
-				'Content-Type': 'application/json',
-				'x-address': web3AuthUser!.accounts[0],
-				'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-				'x-signature': localStorage.getItem('signature')!,
-				'x-source': 'polkasafe'
-			},
-			method: 'POST'
-		}).then(res => res.json());
+		if (safeTxHash) {
+			const txBody = {
+				amount_token: ethers.utils.parseUnits(amount, 'ether').toString(),
+				data: '0x00',
+				safeAddress: activeMultisig,
+				to: web3AuthUser?.accounts[0],
+				txHash: safeTxHash
+			};
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
+				body: JSON.stringify(txBody),
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': web3AuthUser!.accounts[0],
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-network': network,
+					'x-signature': localStorage.getItem('signature')!,
+					'x-source': 'polkasafe'
+				},
+				method: 'POST'
+			}).then(res => res.json());
+		}
 
 	};
 

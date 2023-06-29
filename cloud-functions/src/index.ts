@@ -81,10 +81,48 @@ export const addTransactionEth = functions.https.onRequest(async (req, res) => {
 				amount_token: String(amount_token),
 				txHash,
 				network,
-				note: note || ''
+				note: note || '',
+				type: 'transaction'
 			};
 
 			const transactionRef = firestoreDB.collection('transactions').doc(String(txHash));
+			await transactionRef.set(newTransaction);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addFundEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
+
+		const { receipt, safeAddress } = req.body;
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			// const usdValue = await fetchTokenUSDValue(network);
+			const newTransaction = {
+				receipt,
+				type: 'fund',
+				safeAddress,
+				network
+			};
+
+			const transactionRef = firestoreDB.collection('transactions').doc(String(receipt.hash));
 			await transactionRef.set(newTransaction);
 
 			return res.status(200).json({ data: responseMessages.success });
@@ -308,6 +346,27 @@ export const getConnectAddressTokenEth = functions.https.onRequest(async (req, r
 	});
 });
 
+export const getMultisigsByNetwork = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const network = String(req.get('x-network'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+
+		if (!network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		return await getMultisigAddressesByAddressEth(address, network);
+	});
+});
+
 export const getMultisigDataByMultisigAddressEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const network = String(req.get('x-network'));
@@ -392,8 +451,8 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
 		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
-
-		const multisigAddresses = await getMultisigAddressesByAddress(address);
+		const network = String(req.get('x-network'));
+		const multisigAddresses = await getMultisigAddressesByAddressEth(address, network);
 
 		const addressRef = firestoreDB.collection('addresses').doc(address);
 		const doc = await addressRef.get();
@@ -478,6 +537,21 @@ const verifyEthSignature = async (address: string, signature: string, message: s
 	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
 	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
 	return isValid;
+};
+
+const getMultisigAddressesByAddressEth = async (address: string, network: string) => {
+	const multisigAddresses = await admin
+		.firestore()
+		.collection('multisigAddresses')
+		.where('signatories', 'array-contains', address)
+		.where('network', '==', network)
+		.get();
+
+	return multisigAddresses.docs.map((doc) => ({
+		...doc.data(),
+		created_at: doc.data().created_at.toDate(),
+		updated_at: doc.data().updated_at?.toDate() || doc.data().created_at.toDate()
+	})) as IMultisigAddress[];
 };
 
 const corsHandler = cors({ origin: true });

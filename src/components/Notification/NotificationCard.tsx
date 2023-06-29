@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import dayjs from 'dayjs';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
 import { INotification } from 'src/types';
 import { ArrowDownLeftIcon } from 'src/ui-components/CustomIcons';
@@ -14,9 +13,8 @@ import { ArrowDownLeftIcon } from 'src/ui-components/CustomIcons';
 import { ENotificationStatus } from '.';
 
 const NotificationCard: FC<INotification> = ({ message, created_at, link, network }) => {
-	const { notifiedTill } = useGlobalUserDetailsContext();
 
-	const status = notifiedTill && dayjs(notifiedTill).isAfter(created_at) ? ENotificationStatus.READ : ENotificationStatus.UNREAD;
+	const status = '' as any;
 	return (
 		<Link to={link || '#'} className={classNames('flex items-center gap-x-4 rounded-lg p-3', {
 			'bg-highlight': status === ENotificationStatus.UNREAD
@@ -29,7 +27,7 @@ const NotificationCard: FC<INotification> = ({ message, created_at, link, networ
 				<span className='flex gap-x-2'>
 					<p className='text-xs font-normal text-text_secondary'>
 						<span>{dayjs(created_at).format('D-MM-YY')} </span>
-					at
+						at
 						<span> {dayjs(created_at).format('HH:mm')}</span>
 					</p>
 					<p className='text-xs font-normal text-text_secondary'><img className='rounded-full' height={14} width={14} src={chainProperties[network]?.logo} /></p>
