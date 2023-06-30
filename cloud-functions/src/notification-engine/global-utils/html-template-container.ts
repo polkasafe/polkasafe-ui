@@ -43,8 +43,9 @@ export const htmlTemplateContainer = (source: NOTIFICATION_SOURCE, content: stri
 			<div class="content-container">
 				${content}
 				<br/><br/>
-				You can deactivate this notification in your <a href="${notificationSettingsLink}">notification settings</a>.<br />
-				${source.charAt(0).toUpperCase()}${source.slice(1)} Team
+				Thanks,<br />
+				${source.charAt(0).toUpperCase()}${source.slice(1)} Team<br/><br/>
+				<small><a href="${notificationSettingsLink}">Unsubscribe</a></small>
 			</div>
 		</body>
 	</html>
