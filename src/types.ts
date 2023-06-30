@@ -54,11 +54,11 @@ export interface IDropdownOptions{
 export enum EFieldType{
 	SINGLE_SELECT = 'Single-select',
 	// MULTI_SELECT = 'Multi-select',
-	TEXT = 'Text'
+	TEXT = 'Text',
 	// NUMBER = 'Number',
 	// DATE = 'Date/Date-range',
 	// LINK = 'link',
-	// ATTACHMENT = 'Attachment'
+	ATTACHMENT = 'Attachment'
 }
 
 export interface ITransactionCategorySubfields{

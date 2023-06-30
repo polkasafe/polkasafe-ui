@@ -56,8 +56,8 @@ const ManageMultisig = () => {
 						</section>
 						<section className='flex items-center justify-between flex-col gap-5 md:flex-row mb-6'>
 							<div className='flex-1 flex items-center gap-x-3'>
-								{Object.keys(transactionFields).filter(field => field !== 'none').map(field => <Button onClick={() => setCategory(field)} className={` border border-solid ${category === field ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields[field].fieldName}</Button>)}
-								<Button onClick={() => setCategory('none')} className={` border border-solid ${category === 'none' ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields['none'].fieldName}</Button>
+								{Object.keys(transactionFields).filter(field => field !== 'none').map(field => <Button onClick={() => setCategory(field)} className={` border border-solid ${category === field ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields[field]?.fieldName}</Button>)}
+								<Button onClick={() => setCategory('none')} className={` border border-solid ${category === 'none' ? 'border-primary text-primary bg-highlight' : 'text-text_secondary border-text_secondary'} rounded-xl px-[10px] py-1`} key='field'>{transactionFields['none']?.fieldName}</Button>
 							</div>
 							<AddCustomFieldModal/>
 						</section>

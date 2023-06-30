@@ -100,7 +100,7 @@ const DeleteField = ({ onCancel, subfield, category }: { onCancel: () => void, c
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to delete
 				<span className='text-primary mx-1.5'>
-					{transactionFields[category].subfields?.[subfield].subfieldName}
+					{transactionFields[category]?.subfields?.[subfield].subfieldName}
 				</span>
                 ?
 			</p>
