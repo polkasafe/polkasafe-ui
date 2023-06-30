@@ -37,7 +37,6 @@ export default async function newProposalCreated(args: Args) {
 
 	let SUB_TRIGGER = '';
 	let trackName = '';
-	// TODO: Aleem / Mridul => Need to add a check for args === firebase_args.
 	switch (firestorePostType) {
 	case EPAProposalType.REFERENDUM_V2:
 		trackName = getTrackName(network, Number(track), false);

@@ -21,11 +21,12 @@ export default async function getTemplateRender(
 	if (args.length > 0 && !isValidTemplateArgs(options, args)) throw Error(`Invalid arguments for trigger template : ${trigger}`);
 
 	const htmlMessage = ejs.render(template, options);
-	const textMessage = convert(htmlMessage);
 
 	const bodyStartIndex = htmlMessage.indexOf('<body>') + 6;
 	const bodyEndIndex = htmlMessage.indexOf('</body>');
 	const bodyHtml = htmlMessage.substring(bodyStartIndex, bodyEndIndex);
+
+	const textMessage = convert(bodyHtml);
 
 	const turndownService = new TurndownService();
 	const markdownMessage = turndownService.turndown(bodyHtml);
