@@ -2,7 +2,6 @@ import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
 import { EPAProposalType, IPAPostComment, IPAUser, IPACommentReply, EMentionType } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
@@ -53,21 +52,20 @@ export default async function newReplyAdded(args: Args) {
 	const commentAuthorNotificationPreferences: IUserNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs(commentAuthorData.notification_preferences, network);
 	if (!commentAuthorNotificationPreferences) return;
 
-	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
 	const converter = new showdown.Converter();
 	const replyHTML = converter.makeHtml(replyDocData.content);
 
-	const subject = triggerTemplate.subject;
-	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-		...args,
-		authorUsername: replyAuthorData.username,
-		commentUrl,
-		content: replyHTML,
-		domain: `https://${network}.polkassembly.io`,
-		username: commentAuthorData.username
-	});
+	const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+		SOURCE,
+		TRIGGER_NAME,
+		{
+			...args,
+			authorUsername: replyAuthorData.username,
+			commentUrl,
+			content: replyHTML,
+			domain: `https://${network}.polkassembly.io`,
+			username: commentAuthorData.username
+		});
 
 	const notificationServiceInstance = new NotificationService(
 		SOURCE,

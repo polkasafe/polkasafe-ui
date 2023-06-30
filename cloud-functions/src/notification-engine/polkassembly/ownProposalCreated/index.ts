@@ -2,7 +2,6 @@ import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
 import { EPAProposalType, IPAUser } from '../_utils/types';
 import { paUserRef } from '../_utils/paFirestoreRefs';
@@ -63,18 +62,17 @@ export default async function ownProposalCreated(args: Args) {
 
 	const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
-	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
 	const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
-	const subject = triggerTemplate.subject;
-	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-		...args,
-		username: proposerUserData.username,
-		link,
-		postType: postTypeName
-	});
+	const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+		SOURCE,
+		TRIGGER_NAME,
+		{
+			...args,
+			username: proposerUserData.username,
+			link,
+			postType: postTypeName
+		});
 
 	const notificationServiceInstance = new NotificationService(
 		SOURCE,

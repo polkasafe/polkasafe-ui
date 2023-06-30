@@ -25,10 +25,14 @@ export default async function verifyEmail(args: Args) {
 	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-		...args,
-		verifyUrl
-	});
+	const { htmlMessage, markdownMessage, textMessage } = await getTemplateRender(
+		SOURCE,
+		TRIGGER_NAME,
+		{
+			...args,
+			verifyUrl
+		}
+	);
 
 	const pseudoNotificationPreferences: IUserNotificationPreferences = {
 		triggerPreferences: {},

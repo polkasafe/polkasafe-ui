@@ -2,7 +2,6 @@ import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
 import { EPAProposalType, IPAUser } from '../_utils/types';
 import getPostTypeNameFromPostType from '../_utils/getPostTypeNameFromPostType';
@@ -38,7 +37,6 @@ export default async function newProposalCreated(args: Args) {
 
 	let SUB_TRIGGER = '';
 	let trackName = '';
-	// TODO: Aleem / Mridul => Need to add a check for args === firebase_args.
 	switch (firestorePostType) {
 	case EPAProposalType.REFERENDUM_V2:
 		trackName = getTrackName(network, Number(track), false);
@@ -75,24 +73,23 @@ export default async function newProposalCreated(args: Args) {
 
 		const link = `https://${network}.polkassembly.io/${getSinglePostLinkFromProposalType(firestorePostType as EPAProposalType)}/${postId}`;
 
-		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
 		const networkRef = firestore_db.collection('networks').doc(network);
 
 		const postDoc = await networkRef.collection('post_types').doc(firestorePostType as EPAProposalType).collection('posts').doc(String(postId)).get();
 		const postDocData = postDoc.data();
 		const postTypeName = getPostTypeNameFromPostType(firestorePostType as EPAProposalType);
 
-		const subject = triggerTemplate.subject;
-		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-			...args,
-			username: subscriberData.username,
-			link,
-			postType: postTypeName,
-			title: postDocData?.title || 'Untitled',
-			track: trackName
-		});
+		const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+			SOURCE,
+			TRIGGER_NAME,
+			{
+				...args,
+				username: subscriberData.username,
+				link,
+				postType: postTypeName,
+				title: postDocData?.title || 'Untitled',
+				track: trackName
+			});
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
