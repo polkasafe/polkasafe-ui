@@ -41,8 +41,6 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	// 2. Set relevant vars
 	const ZERO_WEIGHT = new Uint8Array(0);
 	let WEIGHT: any = ZERO_WEIGHT;
-	let AMOUNT_TO_SEND: string;
-	let displayAmount: string;
 
 	// remove approving address address from signatories
 	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
@@ -53,18 +51,10 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== getEncodedAddress(approvingAddress, network));
 	if(!callDataHex) return;
 
-	if(callDataHex && amount && recipientAddress) {
-		AMOUNT_TO_SEND = amount.toString();
-		displayAmount = formatBalance(AMOUNT_TO_SEND);
-
-		const callData = api.createType('Call', callDataHex);
-		const { weight } = await calcWeight(callData, api);
-		WEIGHT = weight;
-
-		// invalid call data for this call hash
-		if (!callData.hash.eq(callHash)) return;
-
-	}
+	const callData = api.createType('Call', callDataHex);
+	const { weight } = await calcWeight(callData, api);
+	WEIGHT = weight;
+	if (!callData.hash.eq(callHash)) return;
 
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
@@ -235,7 +225,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 				});
 		}
 
-		console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
+		// console.log(`Sending ${displayAmount} from ${multisig.address} to ${recipientAddress}`);
 		console.log(`Submitted values: asMulti(${multisig.threshold}, otherSignatories: ${JSON.stringify(otherSignatories, null, 2)}, ${multisigInfo?.when}, ${callHash}, ${WEIGHT})\n`);
 	});
 }
