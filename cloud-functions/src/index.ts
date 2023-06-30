@@ -289,6 +289,41 @@ export const createMultisigEth = functions.https.onRequest(async (req, res) => {
 	});
 });
 
+export const addSignatoriesEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const multisig = String(req.get('x-multisig'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+		const multisigDoc = await multisigColl.doc(multisig).get();
+
+		if (multisigDoc.exists) return res.status(400).json({ error: responseMessages.multisig_does_not_exists });
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
+		const addressData = doc.data();
+
+		const { newSignatory } = req.body;
+		const signatories = multisigDoc.data()?.signatories || [];
+
+		const isValid = await verifyEthSignature(address, signature!, addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		await multisigColl.doc(multisig).update({
+			signatories: [
+				...signatories,
+				newSignatory
+			]
+		});
+	});
+});
+
 export const getConnectAddressTokenEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');

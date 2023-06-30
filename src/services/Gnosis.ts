@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import SafeApiKit, { AllTransactionsListResponse, OwnerResponse, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
-import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
+import Safe, { AddOwnerTxParams, RemoveOwnerTxParams, SafeAccountConfig, SafeFactory, SwapOwnerTxParams } from '@safe-global/protocol-kit';
 import { SafeMultisigTransactionResponse, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 import { ContractReceipt } from 'ethers';
 
@@ -141,15 +141,75 @@ export class GnosisSafeService {
 
 	executeTx = async (txHash: string, multisig: string): Promise<ContractReceipt | undefined> => {
 		try {
-			console.log('execute receipt', 'running', txHash, multisig);
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
 			const safeTransaction = await this.safeService.getTransaction(txHash);
-			console.log('execute receipt', 'running 1', safeTransaction);
 			const executeTxResponse = await safeSdk.executeTransaction(safeTransaction);
-			console.log('execute receipt executeTxResponse', executeTxResponse);
-			const res = await executeTxResponse.transactionResponse?.wait();
+			await executeTxResponse.transactionResponse?.wait();
+		} catch (err) {
+			console.log('error from executeTx', err);
+			return undefined;
+		}
+	};
 
-			console.log('execute receipt executeTxResponse res', res);
+	addOwner = async (newOwner: string, multisig: string, threshold?: number): Promise<ContractReceipt | undefined> => {
+		try {
+			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
+			const params: AddOwnerTxParams = {
+				ownerAddress: newOwner,
+				threshold
+			};
+			const safeTransaction = await safeSdk.createAddOwnerTx(params);
+			const txResponse = await safeSdk.executeTransaction(safeTransaction);
+			console.log(txResponse);
+			return await txResponse.transactionResponse?.wait();
+		} catch (err) {
+			console.log('error from executeTx', err);
+			return undefined;
+		}
+	};
+
+	removeOwner = async (oldOwner: string, multisig: string, threshold?: number): Promise<ContractReceipt | undefined> => {
+		try {
+			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
+			const params: RemoveOwnerTxParams = {
+				ownerAddress: oldOwner,
+				threshold
+			};
+			const safeTransaction = await safeSdk.createRemoveOwnerTx(params);
+			const txResponse = await safeSdk.executeTransaction(safeTransaction);
+			console.log(txResponse);
+			return await txResponse.transactionResponse?.wait();
+		} catch (err) {
+			console.log('error from executeTx', err);
+			return undefined;
+		}
+	};
+
+	swapOwner = async (oldOwner: string, newOwner: string, multisig: string): Promise<ContractReceipt | undefined> => {
+		try {
+			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
+			const params: SwapOwnerTxParams = {
+				newOwnerAddress: newOwner,
+				oldOwnerAddress: oldOwner
+
+			};
+			const safeTransaction = await safeSdk.createSwapOwnerTx(params);
+			const txResponse = await safeSdk.executeTransaction(safeTransaction);
+			console.log(txResponse);
+			return await txResponse.transactionResponse?.wait();
+		} catch (err) {
+			console.log('error from executeTx', err);
+			return undefined;
+		}
+	};
+
+	changeThreshold = async (newThreshold: number, multisig: string): Promise<ContractReceipt | undefined> => {
+		try {
+			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
+			const safeTransaction = await safeSdk.createChangeThresholdTx(newThreshold);
+			const txResponse = await safeSdk.executeTransaction(safeTransaction);
+			console.log(txResponse);
+			return await txResponse.transactionResponse?.wait();
 		} catch (err) {
 			console.log('error from executeTx', err);
 			return undefined;

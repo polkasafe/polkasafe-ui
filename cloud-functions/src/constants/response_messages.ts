@@ -11,6 +11,7 @@ export const responseMessages = {
 	min_singatories: 'Minimum number of signatories is 2.',
 	invalid_threshold: 'Threshold should be a number less than or equal to the number of signatories.',
 	multisig_exists: 'Multisig already exists. Please try linking it.',
+	multisig_does_not_exists: 'Multisig does not exists.',
 	multisig_create_error: 'Error while creating multisig.',
 	onchain_multisig_fetch_error: 'Error while fetching multisig from chain.',
 	multisig_not_found: 'Multisig not found.',
