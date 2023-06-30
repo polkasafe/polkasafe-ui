@@ -3,7 +3,6 @@ import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 import { CHANNEL, IUserNotificationPreferences, NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { v4 as uuidv4 } from 'uuid';
 import validator from 'validator';
 
@@ -43,14 +42,14 @@ export default async function verifyEmail(args: Args) {
 			}
 		};
 
-		const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-		if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
-		const subject = triggerTemplate.subject;
-		const { htmlMessage, markdownMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-			...args,
-			token
-		});
+		const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+			SOURCE,
+			TRIGGER_NAME,
+			{
+				...args,
+				token
+			}
+		);
 
 		await addressDoc.ref.update({
 			notification_preferences: updatedNotificationPreferences
