@@ -88,7 +88,8 @@ export default async function newProposalCreated(args: Args) {
 				link,
 				postType: postTypeName,
 				title: postDocData?.title || 'Untitled',
-				track: trackName
+				track: trackName,
+				postId
 			});
 
 		const notificationServiceInstance = new NotificationService(
