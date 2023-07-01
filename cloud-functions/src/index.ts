@@ -48,9 +48,12 @@ import sendDiscordMessage from './notification-engine/global-utils/sendDiscordMe
 import sendSlackMessage from './notification-engine/global-utils/sendSlackMessage';
 import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
+import formidable from 'formidable-serverless';
+import fs from 'fs';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
+const logger = functions.logger;
 
 const corsHandler = cors({ origin: true });
 
@@ -2337,6 +2340,92 @@ export const updateTransactionFields = functions.https.onRequest(async (req, res
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in updateTransactionFields :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addAttachment = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+		if (req.method !== 'POST') return res.status(400).send('Invalid request method.');
+
+		const TWO_MB = 2 * 1024 * 1024;
+
+		const form = new formidable.IncomingForm();
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			form.parse(req, async (err: any, fields: any, files: any) => {
+				if (err) {
+					logger.info(err || 'Error parsing form data');
+					res.status(400).send('Invalid form data in request.');
+					return;
+				}
+
+				const { tx_hash = null, field_key = null } = fields;
+				if (!tx_hash || !field_key) return res.status(400).send('Invalid form data in request. Missing tx_hash or field_key.');
+
+				const { file = null } = files;
+				if (!file) return res.status(400).send('Invalid form data in request. Missing file.');
+
+				const { name: fileName, type: fileType = null, size: fileSize = null, path: filePath } = file;
+				if (!file || !fileType || !fileSize) return res.status(400).send('Invalid form data in request. Missing file.');
+
+				const validFileTypes: string[] = ['image/jpeg', 'image/png', 'application/pdf'];
+				if (!validFileTypes.includes(fileType) || fileSize > TWO_MB) return res.status(400).send('Invalid file format or size');
+
+				const { firebase_admin: polkasafeFirebaseAdmin } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+				const polkasafeStorageBucket = polkasafeFirebaseAdmin.storage().bucket('polkasafe-a8042.appspot.com');
+
+				const fileRef = polkasafeStorageBucket.file(`attachments/${substrateAddress}/${tx_hash}/${field_key}/${fileName}`);
+
+				try {
+					const fileBuffer = await fs.promises.readFile(filePath);
+
+					await fileRef.save(fileBuffer, {
+						metadata: {
+							contentType: fileType
+						}
+					});
+
+					await fs.promises.unlink(filePath);
+
+					const expirationDate = new Date();
+					expirationDate.setFullYear(expirationDate.getFullYear() + 500); // i hope we have flying space cars and the cure for my fear of flying space cars by then
+
+					const [fileUrl] = await fileRef.getSignedUrl({
+						version: 'v2', // v4 doesn't support expiry time for more than 7 days
+						action: 'read',
+						expires: expirationDate
+					});
+
+					await firestoreDB.collection('transactions').doc(tx_hash).set({
+						transactionFields: {
+							subfields: {
+								[field_key]: {
+									value: fileUrl
+								}
+							}
+						}
+					}, { merge: true });
+
+					return res.status(200).json({ url: fileUrl });
+				} catch (error) {
+					logger.error('File upload failed for :', { tx_hash, error }, { structuredData: true });
+					res.status(500).send({ error: responseMessages.internal });
+					return;
+				}
+			});
+
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in addAttachment :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

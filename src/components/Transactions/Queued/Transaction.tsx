@@ -237,7 +237,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		setLoading(true);
 		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
+			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
 				return;
 			}
 			if(decodedCallData?.args?.proxy_type){
