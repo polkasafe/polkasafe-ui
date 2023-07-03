@@ -9,9 +9,9 @@ import { ITransaction } from 'src/types';
 
 import formatBnBalance from './formatBnBalance';
 
-type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'id' | 'token'> & { amount: BN};
+type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'id' | 'token'> & { amount: BN, transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}};
 
-export async function addNewTransaction ({ amount, network, block_number, callData, callHash, from, to, note } : Args): Promise<{data?: ITransaction, error: string} | any> {
+export async function addNewTransaction ({ amount, transactionFields, network, block_number, callData, callHash, from, to, note } : Args): Promise<{data?: ITransaction, error: string} | any> {
 
 	const newTransactionData: Omit<Args, 'amount'> & { amount_token: Number} = {
 		amount_token: Number(formatBnBalance(amount, { numberAfterComma: 3, withThousandDelimitor: false, withUnit: false }, network)),
@@ -21,7 +21,8 @@ export async function addNewTransaction ({ amount, network, block_number, callDa
 		from,
 		network,
 		note,
-		to
+		to,
+		transactionFields
 	};
 
 	const setTransactionResponse = await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransaction`, {

@@ -2,7 +2,6 @@ import { NotificationService } from '../../NotificationService';
 import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
 import { IPSMultisigAddress, IPSMultisigSettings, IPSUser } from '../_utils/types';
 import { Timestamp as FirestoreTimestamp } from 'firebase-admin/firestore';
 import getMultisigQueueByAddress from '../../../utlils/getMultisigQueueByAddress';
@@ -18,10 +17,6 @@ interface IMultisigQueueResponse {
 
 export default async function scheduledApprovalReminder() {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
-
-	const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-	const subject = triggerTemplate.subject;
 
 	// 1. fetch all users who have this trigger enabled
 	const usersSnapshot = await firestore_db.collection('addresses').where(`notification_preferences.triggerPreferences.${TRIGGER_NAME}.enabled`, '==', true).get();
@@ -93,14 +88,19 @@ export default async function scheduledApprovalReminder() {
 		}
 
 		// 5. send notifications for all multisigs in a single notification
-		const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-			multisigDataArr: pendingTxMultisigs
-		});
+		const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+			SOURCE,
+			TRIGGER_NAME,
+			{
+				multisigDataArr: pendingTxMultisigs
+			}
+		);
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
 			TRIGGER_NAME,
 			htmlMessage,
+			markdownMessage,
 			textMessage,
 			subject
 		);

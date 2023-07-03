@@ -99,7 +99,6 @@ export const GlobalStyle = createGlobalStyle`
 
 	.ant-form-item-explain-error {
 		margin-top: 0.3em !important;
-		margin-bottom: 1em !important;
 	}
 
 	.ant-switch {
@@ -236,5 +235,12 @@ export const GlobalStyle = createGlobalStyle`
 	.overflow-y-auto:hover::-webkit-scrollbar-thumb,
 	.overflow-auto:hover::-webkit-scrollbar-thumb{
 		background: linear-gradient(white,#AFCFFF) !important;
+	}
+
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
 	}
 `;

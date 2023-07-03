@@ -25,10 +25,14 @@ export default async function undoEmailChange(args: Args) {
 	if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
 
 	const subject = triggerTemplate.subject;
-	const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, {
-		...args,
-		undoUrl
-	});
+	const { htmlMessage, markdownMessage, textMessage } = await getTemplateRender(
+		SOURCE,
+		TRIGGER_NAME,
+		{
+			...args,
+			undoUrl
+		}
+	);
 
 	const pseudoNotificationPreferences: IUserNotificationPreferences = {
 		triggerPreferences: {},
@@ -47,6 +51,7 @@ export default async function undoEmailChange(args: Args) {
 		SOURCE,
 		TRIGGER_NAME,
 		htmlMessage,
+		markdownMessage,
 		textMessage,
 		subject
 	);

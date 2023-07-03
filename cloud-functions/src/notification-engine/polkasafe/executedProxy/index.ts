@@ -3,8 +3,6 @@ import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import getSubstrateAddress from '../../global-utils/getSubstrateAddress';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
-import getTriggerTemplate from '../../global-utils/getTriggerTemplate';
-import isValidTemplateArgs from '../../global-utils/isValidTemplateArgs';
 import getMultisigData from '../_utils/getMultisigData';
 import getPSUser from '../_utils/getPSUser';
 import { IPSMultisigSettings } from '../_utils/types';
@@ -45,30 +43,27 @@ export default async function executedProxy(args: Args) {
 		if (addressData) {
 			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
 			const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, address);
-			const { deleted = false, name: userMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings;
+			const { deleted = false, name: userMultisigName = defaultMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings || {};
 
 			if (deleted || !notification_preferences) continue; // skip if multisig is deleted or user has no notification preferences
 
-			const triggerTemplate = await getTriggerTemplate(firestore_db, SOURCE, TRIGGER_NAME);
-			if (!triggerTemplate) throw Error(`Template not found for trigger: ${TRIGGER_NAME}`);
-
 			const link = `/transactions?tab=Queue#${callHash}&network=${network}&multisigAddress=${multisigAddress}`;
 
-			const subject = triggerTemplate.subject;
-			const templateArgValues = {
-				...args,
-				multisigName: userMultisigName || defaultMultisigName,
-				link: `https://app.polkasafe.xyz${link}`
-			};
-
-			if (triggerTemplate.args.length > 0 && !isValidTemplateArgs(templateArgValues, triggerTemplate.args)) throw Error(`Invalid arguments for trigger template : ${TRIGGER_NAME}`);
-
-			const { htmlMessage, textMessage } = getTemplateRender(triggerTemplate.template, templateArgValues);
+			const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
+				SOURCE,
+				TRIGGER_NAME,
+				{
+					...args,
+					multisigName: userMultisigName || defaultMultisigName,
+					link: `https://app.polkasafe.xyz${link}`
+				}
+			);
 
 			const notificationServiceInstance = new NotificationService(
 				SOURCE,
 				TRIGGER_NAME,
 				htmlMessage,
+				markdownMessage,
 				textMessage,
 				subject,
 				{

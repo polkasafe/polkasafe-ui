@@ -31,6 +31,8 @@ import { setSigner } from 'src/utils/setSigner';
 import SentInfo from './SentInfo';
 
 interface ITransactionProps {
+	totalAmount?: string
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	status: 'Approval' | 'Cancelled' | 'Executed';
 	date: string;
 	approvals: string[];
@@ -45,7 +47,7 @@ interface ITransactionProps {
 	notifications?:ITxNotification;
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold, notifications }) => {
+const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmount, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold, notifications }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const navigate = useNavigate();
 
@@ -64,6 +66,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
 	const [isProxyAddApproval, setIsProxyAddApproval] = useState<boolean>(false);
 	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
+	const [customTx, setCustomTx] = useState<boolean>(false);
 
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
@@ -136,6 +139,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args && !decodedCallData?.args?.calls && !decodedCallData?.args?.call?.args?.calls ){
+			setCustomTx(true);
+		}
 	}, [decodedCallData, multisig, multisigAddresses, network]);
 
 	const handleApproveTransaction = async () => {
@@ -150,7 +156,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 		setLoading(true);
 		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
+			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
+				setOpenLoadingModal(false);
 				return;
 			}
 			if(decodedCallData?.args?.proxy_type){
@@ -184,7 +191,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 			}
 			else{
 				await approveMultisigTransfer({
-					amount: network === 'astar' ? bnToBn(decodedCallData.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
+					amount: network === 'astar' ? bnToBn(decodedCallData.args.calls?.[0]?.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || decodedCallData?.args?.calls?.[0]?.args.value || decodedCallData?.args?.call?.args?.calls?.[0]?.args?.value || 0),
 					api,
 					approvingAddress: address,
 					callDataHex: callDataString,
@@ -192,7 +199,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 					multisig,
 					network,
 					note: note || '',
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
+					recipientAddress: decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.[0]?.args.dest?.id || decodedCallData?.args?.call?.args?.calls?.[0]?.args.dest?.id || '',
 					setLoadingMessages
 				});
 			}
@@ -230,7 +237,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 		setLoading(true);
 		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
+			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
 				return;
 			}
 			if(decodedCallData?.args?.proxy_type){
@@ -308,10 +315,10 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 									</span>
 
 									<span>
-										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
+										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : customTx ? 'Custom Transaction' : 'Sent'}
 									</span>
 								</p>
-								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
+								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && !customTx &&
 							<p className='col-span-2 flex items-center gap-x-[6px]'>
 								<ParachainIcon src={chainProperties[network].logo} />
 								<span
@@ -321,7 +328,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 										network,
 										value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
 										withUnit: true
-									}) : `? ${token}`}
+									}) : totalAmount ? `${totalAmount} ${token}` : `? ${token}`}
 								</span>
 							</p>
 								}
@@ -356,7 +363,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 						<Divider className='bg-text_secondary my-5' />
 
 						<SentInfo
-							amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || ''}
+							amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || decodedCallData?.args?.calls?.map((item: any) => item?.args?.value) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.value) || ''}
 							amountUSD={amountUSD}
 							callHash={callHash}
 							callDataString={callDataString}
@@ -366,7 +373,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							threshold={threshold}
 							loading={loading}
 							getMultiDataLoading={getMultiDataLoading}
-							recipientAddress={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id}
+							recipientAddress={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.map((item: any) => item?.args?.dest?.id) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.dest?.id)}
 							setCallDataString={setCallDataString}
 							handleApproveTransaction={handleApproveTransaction}
 							handleCancelTransaction={handleCancelTransaction}
@@ -376,6 +383,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							delegate_id={decodedCallData?.args?.call?.args?.delegate?.id}
 							isProxyRemovalApproval={isProxyRemovalApproval}
 							notifications={notifications}
+							transactionFields={transactionFields}
+							customTx={customTx}
 						/>
 
 					</div>
