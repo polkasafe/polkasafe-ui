@@ -36,12 +36,19 @@ import styled from 'styled-components';
 
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
+import UploadAttachment from './UploadAttachment';
 
 interface ISendFundsFormProps {
 	onCancel?: () => void;
 	className?: string;
 	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>
 	defaultSelectedAddress?: string
+}
+
+export interface ISubfieldAndAttachment {
+	[subfield: string]: {
+		file: any
+	}
 }
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
@@ -88,6 +95,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [category, setCategory] = useState<string>('none');
 
+	const [subfieldAttachments, setSubfieldAttachments] = useState<ISubfieldAndAttachment>({});
+
 	const onRecipientChange = (value: string, i: number) => {
 		setRecipientAndAmount((prevState) => {
 			const copyArray = [...prevState];
@@ -120,6 +129,10 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		copyOptionsArray.splice(i, 1);
 		setRecipientAndAmount(copyOptionsArray);
 	};
+
+	useEffect(() => {
+		setTransactionFieldsObject({ category, subfields: {} });
+	}, [category]);
 
 	useEffect(() => {
 		if(!recipientAndAmount) return;
@@ -209,6 +222,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		try {
 			const queueItemData = await initMultisigTransfer({
 				api,
+				attachments: subfieldAttachments,
 				initiatorAddress: address,
 				isProxy,
 				multisig,
@@ -595,30 +609,34 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														</Dropdown>
 													</Form.Item>
 													:
-													<Form.Item
-														name={subfield}
-														rules={[{ message: 'Required', required: subfieldObject.required }]}
-														className='border-0 outline-0 my-0 p-0'
-													>
-														<div className='flex items-center h-[40px]'>
-															<Input
-																placeholder={`${subfieldObject.subfieldName}`}
-																className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
-																id={subfield}
-																value={transactionFieldsObject.subfields[subfield]?.value}
-																onChange={(e) => setTransactionFieldsObject(prev => ({
-																	category: transactionFields[category].fieldName,
-																	subfields: {
-																		...prev.subfields,
-																		[subfield]: {
-																			name: subfieldObject.subfieldName,
-																			value: e.target.value
+													subfieldObject.subfieldType === EFieldType.ATTACHMENT
+														?
+														<UploadAttachment setSubfieldAttachments={setSubfieldAttachments} subfield={subfield} />
+														:
+														<Form.Item
+															name={subfield}
+															rules={[{ message: 'Required', required: subfieldObject.required }]}
+															className='border-0 outline-0 my-0 p-0'
+														>
+															<div className='flex items-center h-[40px]'>
+																<Input
+																	placeholder={`${subfieldObject.subfieldName}`}
+																	className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
+																	id={subfield}
+																	value={transactionFieldsObject.subfields[subfield]?.value}
+																	onChange={(e) => setTransactionFieldsObject(prev => ({
+																		category: transactionFields[category].fieldName,
+																		subfields: {
+																			...prev.subfields,
+																			[subfield]: {
+																				name: subfieldObject.subfieldName,
+																				value: e.target.value
+																			}
 																		}
-																	}
-																}))}
-															/>
-														</div>
-													</Form.Item>}
+																	}))}
+																/>
+															</div>
+														</Form.Item>}
 											</article>
 										</div>
 									</section>
@@ -679,7 +697,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (!transactionFieldsObject.subfields[key]?.value) && transactionFields[category].subfields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (transactionFields[category].subfields[key].subfieldType === EFieldType.ATTACHMENT ? (transactionFields[category].subfields[key].required && !subfieldAttachments[key]?.file) :  (!transactionFieldsObject.subfields[key]?.value && transactionFields[category].subfields[key].required)))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 						</section>
 					</Spin>
 			}

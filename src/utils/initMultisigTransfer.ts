@@ -5,11 +5,13 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { formatBalance } from '@polkadot/util/format';
 import BN from 'bn.js';
+import { ISubfieldAndAttachment } from 'src/components/SendFunds/SendFundsForm';
 import { chainProperties } from 'src/global/networkConstants';
 import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
+import { addAttachment } from './addAttachment';
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
@@ -38,6 +40,7 @@ interface Args {
 	isProxy?: boolean,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>,
 	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
+	attachments?: ISubfieldAndAttachment
 }
 
 export default async function initMultisigTransfer({
@@ -50,7 +53,8 @@ export default async function initMultisigTransfer({
 	note,
 	transferKeepAlive,
 	setLoadingMessages,
-	transactionFields
+	transactionFields,
+	attachments
 }: Args) {
 	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
 	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
@@ -68,7 +72,7 @@ export default async function initMultisigTransfer({
 	const amounts = recipientAndAmount.map((o) => o.amount);
 	const totalAmount = amounts.reduce((sum,item) => sum.add(item), new BN(0));
 	const displayAmount = formatBalance(totalAmount);
-	const recipientAddresses = recipientAndAmount.map((item) => item.recipient);
+	const recipientAddresses = recipientAndAmount.map((item) => getEncodedAddress(item.recipient, network) || item.recipient);
 
 	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
@@ -83,7 +87,7 @@ export default async function initMultisigTransfer({
 	const transferCalls: any[] = [];
 	for(const item of recipientAndAmount){
 		const AMOUNT_TO_SEND = item.amount.toString();
-		const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(item.recipient, AMOUNT_TO_SEND) : api.tx.balances.transfer(item.recipient, AMOUNT_TO_SEND);
+		const call = transferKeepAlive ? api.tx.balances.transferKeepAlive(getEncodedAddress(item.recipient, network) || item.recipient, AMOUNT_TO_SEND) : api.tx.balances.transfer(getEncodedAddress(item.recipient, network) || item.recipient, AMOUNT_TO_SEND);
 		transferCalls.push(call);
 	}
 
@@ -109,7 +113,7 @@ export default async function initMultisigTransfer({
 		if(isProxy && multisig.proxy){
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, 0 as any)
-				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events, dispatchError }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
@@ -133,6 +137,32 @@ export default async function initMultisigTransfer({
 
 						const block = await api.rpc.chain.getBlock(blockHash);
 						const blockNumber = block.block.header.number.toNumber();
+
+						if (dispatchError) {
+							if (dispatchError.isModule) {
+							// for module errors, we have the section indexed, lookup
+								const decoded = api.registry.findMetaError(dispatchError.asModule);
+								const { docs, name, method, section } = decoded;
+
+								console.log(`${section}.${name}: ${docs.join(' ')}`);
+
+								queueNotification({
+									header: `Error! ${section}.${method}`,
+									message: `${docs.join(' ')}`,
+									status: NotificationStatus.ERROR
+								});
+
+								reject({
+									callData: tx.method.toHex(),
+									callHash: tx.method.hash.toHex(),
+									created_at: new Date(),
+									error: `Error: ${section}.${method}\n${docs.join(' ')}`
+								});
+							} else {
+							// Other, CannotLookup, BadOrigin, no extra info
+								console.log(dispatchError.toString());
+							}
+						}
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
@@ -173,6 +203,17 @@ export default async function initMultisigTransfer({
 									to: recipientAddresses,
 									transactionFields
 								});
+
+								if(attachments){
+									for(const attachment of Object.keys(attachments)){
+										await addAttachment({
+											callHash: tx.method.hash.toHex(),
+											file: attachments[attachment].file,
+											network,
+											subfield: attachment
+										});
+									}
+								}
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,
@@ -237,7 +278,7 @@ export default async function initMultisigTransfer({
 		else{
 		//for transaction from multisig address
 			api.tx.multisig.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, transferBatchCall.method.hash, MAX_WEIGHT as any)
-				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events, dispatchError }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
@@ -261,6 +302,32 @@ export default async function initMultisigTransfer({
 
 						const block = await api.rpc.chain.getBlock(blockHash);
 						const blockNumber = block.block.header.number.toNumber();
+
+						if (dispatchError) {
+							if (dispatchError.isModule) {
+							// for module errors, we have the section indexed, lookup
+								const decoded = api.registry.findMetaError(dispatchError.asModule);
+								const { docs, name, method, section } = decoded;
+
+								console.log(`${section}.${name}: ${docs.join(' ')}`);
+
+								queueNotification({
+									header: `Error! ${section}.${method}`,
+									message: `${docs.join(' ')}`,
+									status: NotificationStatus.ERROR
+								});
+
+								reject({
+									callData: tx.method.toHex(),
+									callHash: tx.method.hash.toHex(),
+									created_at: new Date(),
+									error: `Error: ${section}.${method}\n${docs.join(' ')}`
+								});
+							} else {
+							// Other, CannotLookup, BadOrigin, no extra info
+								console.log(dispatchError.toString());
+							}
+						}
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
@@ -301,6 +368,20 @@ export default async function initMultisigTransfer({
 									to: recipientAddresses,
 									transactionFields
 								});
+
+								if(attachments){
+									console.log('in');
+									for(const attachment of Object.keys(attachments)){
+										console.log('in for');
+										const res = await addAttachment({
+											callHash: transferBatchCall.method.hash.toHex(),
+											file: attachments[attachment].file,
+											network,
+											subfield: attachment
+										});
+										console.log('res', res);
+									}
+								}
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,

@@ -5,7 +5,9 @@ export const networks = {
 	POLKADOT: 'polkadot',
 	KUSAMA: 'kusama',
 	WESTEND: 'westend',
-	ROCOCO: 'rococo'
+	ROCOCO: 'rococo',
+	STATEMINT: 'assethub-polkadot',
+	STATEMINE: 'assethub-kusama'
 };
 
 export const chainProperties: ChainProperties = {
@@ -43,9 +45,23 @@ export const chainProperties: ChainProperties = {
 	},
 	[networks.ASTAR]: {
 		blockTime: 12000,
-		rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
+		rpcEndpoint: 'wss://astar-rpc.dwellir.com',
 		ss58Format: 5,
 		tokenDecimals: 18,
 		tokenSymbol: 'ASTR'
+	},
+	[networks.STATEMINT]: {
+		blockTime: 6000,
+		rpcEndpoint: 'wss://statemint.api.onfinality.io/public-ws',
+		ss58Format: 0,
+		tokenDecimals: 10,
+		tokenSymbol: 'DOT'
+	},
+	[networks.STATEMINE]: {
+		blockTime: 6000,
+		rpcEndpoint: 'wss://statemine.api.onfinality.io/public-ws',
+		ss58Format: 2,
+		tokenDecimals: 12,
+		tokenSymbol: 'KSM'
 	}
 };

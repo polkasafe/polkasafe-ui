@@ -22,6 +22,9 @@ interface Props {
 }
 
 export async function cancelProxy ({ api, approvingAddress, callHash, multisig, network, setLoadingMessages }: Props) {
+
+	const encodedInitiatorAddress = getEncodedAddress(approvingAddress, network) || approvingAddress;
+
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -34,7 +37,7 @@ export async function cancelProxy ({ api, approvingAddress, callHash, multisig, 
 		if(!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
-	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
 	// 3. Retrieve and unwrap the timepoint
 	const info = await api.query.multisig.multisigs(multisig.address, callHash);
@@ -46,7 +49,7 @@ export async function cancelProxy ({ api, approvingAddress, callHash, multisig, 
 
 		api.tx.multisig
 			.cancelAsMulti(multisig.threshold, otherSignatories, TIME_POINT, callHash)
-			.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					setLoadingMessages('Transaction invalid');

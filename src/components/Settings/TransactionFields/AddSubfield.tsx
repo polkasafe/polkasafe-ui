@@ -24,7 +24,7 @@ const AddSubfield = ({ className, onCancel, category }: { className?: string, on
 	const { network } = useGlobalApiContext();
 	const { setUserDetailsContextState, transactionFields } = useGlobalUserDetailsContext();
 
-	const fieldTypeOptions: ItemType[] = Object.values(EFieldType).map((key) => ({
+	const fieldTypeOptions: ItemType[] = Object.values(EFieldType).filter(key => key !== EFieldType.ATTACHMENT).map((key) => ({
 		key: key,
 		label: <span className='text-white'>{key}</span>
 	}));

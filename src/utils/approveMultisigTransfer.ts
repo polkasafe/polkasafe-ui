@@ -32,6 +32,9 @@ interface Args {
 }
 
 export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
+
+	const encodedInitiatorAddress = getEncodedAddress(approvingAddress, network) || approvingAddress;
+
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
@@ -48,7 +51,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		if(!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
-	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== getEncodedAddress(approvingAddress, network));
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 	if(!callDataHex) return;
 
 	const callData = api.createType('Call', callDataHex);
@@ -76,7 +79,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		if (numApprovals < multisig.threshold - 1) {
 			api.tx.multisig
 				.approveAsMulti(multisig.threshold, otherSignatories, multisigInfo.when, callHash, ZERO_WEIGHT)
-				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						setLoadingMessages('Transaction invalid');
@@ -124,7 +127,7 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 		} else {
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, multisigInfo.when, callDataHex, WEIGHT as any)
-				.signAndSend(approvingAddress, async ({ status, txHash, events }) => {
+				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						setLoadingMessages('Transaction invalid');

@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import assethubLogo from 'src/assets/parachains-logos/assethub-logo.png';
 import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
@@ -14,6 +15,8 @@ export const networks = {
 	KUSAMA: 'kusama',
 	POLKADOT: 'polkadot',
 	ROCOCO: 'rococo',
+	STATEMINE: 'statemine',
+	STATEMINT: 'assethub-polkadot',
 	WESTEND: 'westend'
 };
 
@@ -75,6 +78,26 @@ export const chainProperties: ChainPropType = {
 		ss58Format: 5,
 		tokenDecimals: 18,
 		tokenSymbol: tokenSymbol.ASTR
+	},
+	[networks.STATEMINT]: {
+		blockTime: 6000,
+		chainId: 0,
+		existentialDeposit: '0.1000',
+		logo: assethubLogo,
+		rpcEndpoint: 'wss://statemint.api.onfinality.io/public-ws',
+		ss58Format: 0,
+		tokenDecimals: 10,
+		tokenSymbol: tokenSymbol.DOT
+	},
+	[networks.STATEMINE]: {
+		blockTime: 6000,
+		chainId: 0,
+		existentialDeposit: '0.000033333333',
+		logo: assethubLogo,
+		rpcEndpoint: 'wss://statemine.api.onfinality.io/public-ws',
+		ss58Format: 2,
+		tokenDecimals: 12,
+		tokenSymbol: tokenSymbol.KSM
 	}
 
 };
