@@ -30,6 +30,7 @@ import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer, { IRecipientAndAmount } from 'src/utils/initMultisigTransfer';
+import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
@@ -381,6 +382,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 							:
 							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
 						}
+						{amount.gt((new BN(multisigBalance)).sub(inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0])) && <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+							<WarningCircleIcon />
+							<p>The Multisig Balance will Drop below its Existential Deposit and it won&apos;t be onchain anymore, you may also lose your assets in it.</p>
+						</section>
+						}
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 							form={form}
@@ -697,7 +703,18 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (transactionFields[category].subfields[key].subfieldType === EFieldType.ATTACHMENT ? (transactionFields[category].subfields[key].required && !subfieldAttachments[key]?.file) :  (!transactionFieldsObject.subfields[key]?.value && transactionFields[category].subfields[key].required)))} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+							<ModalBtn disabled={
+								recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance)))
+								|| (transferKeepAlive && amount.gt((new BN(multisigBalance)).sub(inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0])))
+								|| amount.gt(new BN(multisigBalance))
+								|| validRecipient.includes(false)
+								|| initiatorBalance.lt(totalDeposit.add(totalGas))
+								|| Object.keys(transactionFields[category].subfields).some((key) => (transactionFields[category].subfields[key].subfieldType === EFieldType.ATTACHMENT ? (transactionFields[category].subfields[key].required && !subfieldAttachments[key]?.file) :  (!transactionFieldsObject.subfields[key]?.value && transactionFields[category].subfields[key].required)))}
+							loading={loading}
+							onClick={handleSubmit}
+							className='w-[250px]'
+							title='Make Transaction'
+							/>
 						</section>
 					</Spin>
 			}

@@ -14,7 +14,7 @@ type Args = Omit<ITransaction, 'created_at' | 'amount_usd' | 'amount_token' | 'i
 export async function addNewTransaction ({ amount, transactionFields, network, block_number, callData, callHash, from, to, note } : Args): Promise<{data?: ITransaction, error: string} | any> {
 
 	const newTransactionData: Omit<Args, 'amount'> & { amount_token: Number} = {
-		amount_token: Number(formatBnBalance(amount, { numberAfterComma: 3, withThousandDelimitor: false, withUnit: false }, network)),
+		amount_token: Number(formatBnBalance(amount, { numberAfterComma: 4, withThousandDelimitor: false, withUnit: false }, network)),
 		block_number,
 		callData,
 		callHash,
