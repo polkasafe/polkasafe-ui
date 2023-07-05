@@ -46,7 +46,7 @@ export const chainProperties: ChainProperties = {
 	},
 	[networks.ASTAR]: {
 		blockTime: 12000,
-		rpcEndpoint: 'wss://astar-rpc.dwellir.com',
+		rpcEndpoint: 'wss://astar-rpc.dwellir.com/',
 		ss58Format: 5,
 		tokenDecimals: 18,
 		tokenSymbol: 'ASTR'
