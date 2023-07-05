@@ -77,7 +77,7 @@ export const chainProperties: ChainPropType = {
 		chainId: 0,
 		existentialDeposit: '0.000000000001',
 		logo: astarLogo,
-		rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
+		rpcEndpoint: 'wss://astar-rpc.dwellir.com/',
 		ss58Format: 5,
 		tokenDecimals: 18,
 		tokenSymbol: tokenSymbol.ASTR
