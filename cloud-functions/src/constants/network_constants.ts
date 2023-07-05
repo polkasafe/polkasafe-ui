@@ -2,6 +2,7 @@ import { ChainProperties } from '../types';
 
 export const networks = {
 	ASTAR: 'astar',
+	ALEPHZERO: 'alephzero',
 	POLKADOT: 'polkadot',
 	KUSAMA: 'kusama',
 	WESTEND: 'westend',
@@ -63,5 +64,12 @@ export const chainProperties: ChainProperties = {
 		ss58Format: 2,
 		tokenDecimals: 12,
 		tokenSymbol: 'KSM'
+	},
+	[networks.ALEPHZERO]: {
+		blockTime: 1000,
+		rpcEndpoint: 'wss://ws.azero.dev/',
+		ss58Format: 42,
+		tokenDecimals: 12,
+		tokenSymbol: 'AZERO'
 	}
 };

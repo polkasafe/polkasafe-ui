@@ -101,7 +101,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				senderAddress: getSubstrateAddress(userAddress) || userAddress,
 				setLoadingMessages
 			});
-			if(network === 'astar'){
+			if(['astar', 'alephzero'].includes(network)){
 				createProxy(multisigData, false);
 			}
 			else{
