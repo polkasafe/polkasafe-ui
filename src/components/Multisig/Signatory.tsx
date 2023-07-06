@@ -70,8 +70,9 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			});
 		};
 		fetchBalances();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ api, apiReady, addressBook]);
+	}, [api, apiReady, addressBook, addresses]);
+
+	console.log(addresses);
 
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);

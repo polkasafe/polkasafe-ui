@@ -4,7 +4,6 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util/format';
-import { sortAddresses } from '@polkadot/util-crypto';
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 import { NotificationStatus } from 'src/types';
@@ -12,6 +11,7 @@ import queueNotification from 'src/ui-components/QueueNotification';
 
 import { addNewTransaction } from './addNewTransaction';
 import { calcWeight } from './calcWeight';
+import getEncodedAddress from './getEncodedAddress';
 import { IMultiTransferResponse } from './initMultisigTransfer';
 import { notify } from './notify';
 import sendNotificationToAddresses from './sendNotificationToAddresses';
@@ -31,6 +31,8 @@ interface Props {
 
 export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
 
+	const encodedInitiatorAddress = getEncodedAddress(senderAddress, network) || senderAddress;
+
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
@@ -39,7 +41,14 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 	const AMOUNT_TO_SEND = amount.toNumber();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
 
-	const otherSignatories = sortAddresses(signatories.filter((sig) => sig !== senderAddress));
+	// remove approving address address from signatories
+	const encodedSignatories =  signatories.sort().map((signatory) => {
+		const encodedSignatory = getEncodedAddress(signatory, network);
+		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		return encodedSignatory;
+	});
+
+	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 	const proxyTx = api.tx.proxy.createPure('Any', 0, new Date().getMilliseconds());
 	const transferTx = api.tx.balances.transferKeepAlive(recepientAddress, AMOUNT_TO_SEND);
 
@@ -55,7 +64,7 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 
 		api.tx.utility
 			.batchAll([transferTx, multiSigProxyCall])
-			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
+			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					setLoadingMessages('Transaction invalid');
@@ -164,6 +173,6 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 					status: NotificationStatus.ERROR
 				});
 			});
-		console.log(`Sending ${displayAmount} from ${senderAddress} to ${recepientAddress}`);
+		console.log(`Sending ${displayAmount} from ${encodedInitiatorAddress} to ${recepientAddress}`);
 	});
 }

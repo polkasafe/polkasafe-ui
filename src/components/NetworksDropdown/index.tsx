@@ -61,7 +61,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 						'ml-[10px] hidden md:inline-flex capitalize',
 						titleClassName
 					)}>
-						{isCardToken? chainProperties[network].tokenSymbol: network}
+						{isCardToken? chainProperties[network].tokenSymbol: network === 'assethub-polkadot' ? 'Statemint' : network === 'assethub-kusama' ? 'Statemine' : network}
 					</span>
 				</p>
 				<CircleArrowDownIcon className='hidden md:inline-flex text-sm text-primary'/>

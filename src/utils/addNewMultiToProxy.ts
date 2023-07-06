@@ -34,6 +34,8 @@ interface Props {
 
 export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, setTxnHash, api, network, recepientAddress, senderAddress, setLoadingMessages, oldSignatories, oldThreshold, newSignatories, newThreshold } : Props) {
 
+	const encodedInitiatorAddress = getEncodedAddress(senderAddress, network) || senderAddress;
+
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
@@ -45,7 +47,7 @@ export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, set
 		return encodedSignatory;
 	});
 
-	const otherSignatories = encodedSignatories.filter((sig) => sig !== senderAddress);
+	const otherSignatories = encodedSignatories.filter((sig) => sig !== encodedInitiatorAddress);
 	const multisigResponse = _createMultisig(newSignatories, newThreshold, chainProperties[network].ss58Format);
 	const newMultisigAddress = getEncodedAddress(multisigResponse?.multisigAddress || '', network);
 	const addProxyTx = api.tx.proxy.addProxy(newMultisigAddress || '', 'Any', 0);
@@ -60,7 +62,7 @@ export async function addNewMultiToProxy({ proxyAddress, oldMultisigAddress, set
 
 		api.tx.multisig
 			.asMulti(oldThreshold, otherSignatories, null, proxyTx, MAX_WEIGHT as any)
-			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
+			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					setLoadingMessages('Transaction invalid');

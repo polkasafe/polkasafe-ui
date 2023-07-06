@@ -4,9 +4,9 @@
 
 const NOTIFICATION_ENGINE_API_KEY = '47c058d8-2ddc-421e-aeb5-e2aa99001949';
 
-export const firebaseFunctionsHeader = (network: string, address?: string, signature?: string) => ({
+export const firebaseFunctionsHeader = (network: string, address?: string, signature?: string, contentType?: string) => ({
 	'Accept': 'application/json',
-	'Content-Type': 'application/json',
+	'Content-Type': contentType || 'application/json',
 	'x-address': address || localStorage.getItem('address') || '',
 	'x-api-key': NOTIFICATION_ENGINE_API_KEY,
 	'x-network': network || localStorage.getItem('network') || '',
