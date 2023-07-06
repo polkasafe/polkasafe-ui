@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import alephzeroLogo from 'src/assets/parachains-logos/aleph-zero-logo.jpeg';
+// import alephzeroLogo from 'src/assets/parachains-logos/aleph-zero-logo.jpeg';
 import assethubLogo from 'src/assets/parachains-logos/assethub-logo.png';
 import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
@@ -12,7 +12,7 @@ import westendLogo from 'src/assets/parachains-logos/westend-logo.png';
 import { ChainPropType } from 'src/types';
 
 export const networks = {
-	ALEPHZERO: 'alephzero',
+	// ALEPHZERO: 'alephzero',
 	ASTAR: 'astar',
 	KUSAMA: 'kusama',
 	POLKADOT: 'polkadot',
@@ -24,7 +24,7 @@ export const networks = {
 
 export const tokenSymbol = {
 	ASTR: 'ASTR',
-	AZERO: 'AZERO',
+	// AZERO: 'AZERO',
 	DOT: 'DOT',
 	KSM: 'KSM',
 	ROC: 'ROC',
@@ -101,16 +101,16 @@ export const chainProperties: ChainPropType = {
 		ss58Format: 2,
 		tokenDecimals: 12,
 		tokenSymbol: tokenSymbol.KSM
-	},
-	[networks.ALEPHZERO]: {
-		blockTime: 1000,
-		chainId: 0,
-		existentialDeposit: '0.0000000005',
-		logo: alephzeroLogo,
-		rpcEndpoint: 'wss://ws.azero.dev/',
-		ss58Format: 42,
-		tokenDecimals: 12,
-		tokenSymbol: tokenSymbol.AZERO
 	}
+	// [networks.ALEPHZERO]: {
+	// blockTime: 1000,
+	// chainId: 0,
+	// existentialDeposit: '0.0000000005',
+	// logo: alephzeroLogo,
+	// rpcEndpoint: 'wss://ws.azero.dev/',
+	// ss58Format: 42,
+	// tokenDecimals: 12,
+	// tokenSymbol: tokenSymbol.AZERO
+	// }
 
 };
