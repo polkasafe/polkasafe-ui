@@ -385,6 +385,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 							notifications={notifications}
 							transactionFields={transactionFields}
 							customTx={customTx}
+							decodedCallData={decodedCallData}
 						/>
 
 					</div>

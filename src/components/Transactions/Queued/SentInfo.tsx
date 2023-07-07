@@ -23,6 +23,7 @@ import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
+import ArgumentsTable from './ArgumentsTable';
 import EditNote from './EditNote';
 import NotifyButton from './NotifyButton';
 
@@ -50,10 +51,11 @@ interface ISentInfoProps {
 	isProxyRemovalApproval?: boolean
 	notifications?:ITxNotification;
 	getMultiDataLoading?: boolean;
-	customTx?:boolean
+	customTx?:boolean;
+	decodedCallData: any
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -354,6 +356,19 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 				</div>
 				{showDetails &&
 				<>
+					{delegate_id &&
+					<div className='flex items-center gap-x-5 justify-between mt-3'>
+						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
+							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
+						</span>
+						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+							<Identicon value={delegate_id} size={20} theme='polkadot' />
+							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
+							<span className='flex items-center gap-x-2 text-sm'>
+								<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary'/></button>
+							</span>
+						</p>
+					</div>}
 					<div
 						className='flex items-center gap-x-5 justify-between mt-3'
 					>
@@ -387,19 +402,23 @@ const SentInfo: FC<ISentInfoProps> = ({ note, transactionFields, getMultiDataLoa
 							</span>
 						</p>
 					</div>}
-					{delegate_id &&
-					<div className='flex items-center gap-x-5 justify-between mt-3'>
-						<span className='text-text_secondary font-normal text-sm leading-[15px]'>
-							{isProxyAddApproval ? 'Multisig to Add' : isProxyRemovalApproval ? 'Multisig to Remove' : ''}:
-						</span>
-						<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-							<Identicon value={delegate_id} size={20} theme='polkadot' />
-							<span className='text-white font-normal text-sm leading-[15px]'> {shortenAddress(delegate_id, 10)}</span>
-							<span className='flex items-center gap-x-2 text-sm'>
-								<button onClick={() => copyText(delegate_id)}><CopyIcon className='hover:text-primary'/></button>
-							</span>
-						</p>
-					</div>}
+					{decodedCallData && customTx &&
+					<div className='mt-5 table-view'>
+						<table cellSpacing={0} cellPadding={0} className='w-full'>
+							<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
+								<span className='col-span-1'>
+									Name
+								</span>
+								<span className='col-span-3'>
+									Value
+								</span>
+							</article>
+							<tbody className='border-l border-r border-solid border-bg-secondary'>
+								<ArgumentsTable argumentsJSON={decodedCallData?.args} />
+							</tbody>
+						</table>
+					</div>
+					}
 				</>}
 				{/* <div
 					className='flex items-center justify-between gap-x-5 mt-3'
