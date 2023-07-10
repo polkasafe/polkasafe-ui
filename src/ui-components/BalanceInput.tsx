@@ -13,7 +13,7 @@ import { inputToBn } from 'src/utils/inputToBn';
 interface Props{
 	className?: string
 	label?: string
-	fromBalance?: string
+	fromBalance?: string | BN
 	onChange: (balance: BN) => void
 	placeholder?: string
 	defaultValue?: string

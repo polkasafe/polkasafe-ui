@@ -40,7 +40,8 @@ interface Args {
 	isProxy?: boolean,
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>,
 	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
-	attachments?: ISubfieldAndAttachment
+	attachments?: ISubfieldAndAttachment,
+	tip: BN
 }
 
 export default async function initMultisigTransfer({
@@ -54,7 +55,8 @@ export default async function initMultisigTransfer({
 	transferKeepAlive,
 	setLoadingMessages,
 	transactionFields,
-	attachments
+	attachments,
+	tip
 }: Args) {
 	const encodedInitiatorAddress = getEncodedAddress(initiatorAddress, network);
 	if(!encodedInitiatorAddress) throw new Error('Invalid initiator address');
@@ -113,7 +115,7 @@ export default async function initMultisigTransfer({
 		if(isProxy && multisig.proxy){
 			api.tx.multisig
 				.asMulti(multisig.threshold, otherSignatories, TIME_POINT, tx, 0 as any)
-				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events, dispatchError }) => {
+				.signAndSend(encodedInitiatorAddress, { tip }, async ({ status, txHash, events, dispatchError }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
@@ -278,7 +280,7 @@ export default async function initMultisigTransfer({
 		else{
 		//for transaction from multisig address
 			api.tx.multisig.approveAsMulti(multisig.threshold, otherSignatories, TIME_POINT, transferBatchCall.method.hash, MAX_WEIGHT as any)
-				.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events, dispatchError }) => {
+				.signAndSend(encodedInitiatorAddress, { tip }, async ({ status, txHash, events, dispatchError }) => {
 					if (status.isInvalid) {
 						console.log('Transaction invalid');
 						// messageApi.error('Transaction invalid');
