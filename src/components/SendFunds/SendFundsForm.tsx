@@ -88,6 +88,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [initiatorBalance, setInitiatorBalance] = useState<BN>(new BN(0));
 
+	const [tip, setTip] = useState<BN>(new BN(0));
+
 	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
 	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{category: string, subfields: {[subfield: string]: { name: string, value: string }}}>({ category: 'none', subfields: {} });
@@ -231,6 +233,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				note,
 				recipientAndAmount,
 				setLoadingMessages,
+				tip,
 				transactionFields: transactionFieldsObject,
 				transferKeepAlive
 			});
@@ -536,6 +539,24 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 											</div>
 										</Form.Item>
 									</article>
+								</div>
+							</section>
+
+							<section className='mt-[15px]'>
+								<div className='flex items-center gap-x-[10px]'>
+									<div className='w-[500px]'>
+										<BalanceInput placeholder='1' label='Tip' fromBalance={initiatorBalance} onChange={(balance) => setTip(balance)} />
+									</div>
+									<div>
+										<article className='w-[412px] flex items-center'>
+											<span className='-mr-1.5 z-0'>
+												<LineIcon className='text-5xl' />
+											</span>
+											<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
+												Add Tip in your Transaction to make the Transaction Faster.
+											</p>
+										</article>
+									</div>
 								</div>
 							</section>
 
