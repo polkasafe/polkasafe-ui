@@ -131,6 +131,10 @@ export type ChainPropType = {
 export interface IAddressBookItem {
 	name: string;
 	address: string;
+	email?: string;
+	discord?: string;
+	telegram?: string;
+	roles?: string[]
 }
 
 interface IMultisigSettings {
