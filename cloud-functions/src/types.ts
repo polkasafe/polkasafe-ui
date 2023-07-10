@@ -3,6 +3,10 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 export interface IAddressBookItem {
 	name: string;
 	address: string;
+	email?: string,
+	roles?: string[],
+	discord?: string,
+	telegram?: string
 }
 
 export interface IMultisigSettings {
