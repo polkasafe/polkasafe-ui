@@ -745,7 +745,9 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
-		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if ( !block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		if (amount_token && isNaN(amount_token)) return res.status(400).json({ error: 'Invalid Amount' });
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
@@ -755,10 +757,10 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				block_number: Number(block_number),
 				from,
-				to,
+				to: to || '',
 				token: chainProperties[network].tokenSymbol,
-				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
-				amount_token: String(amount_token),
+				amount_usd: (usdValue && amount_token) ? `${Number(amount_token) * usdValue}` : '',
+				amount_token: String(amount_token) || '',
 				network,
 				note: note || '',
 				transactionFields: transactionFields || {}
@@ -2426,6 +2428,40 @@ export const addAttachment = functions.https.onRequest(async (req, res) => {
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in addAttachment :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// SDK - Error Collection
+export const addToErrorLogs = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		const multisigAddress = req.get('x-multisig-address');
+		const network = String(req.get('x-network'));
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+			const substrateMultiAddress = getSubstrateAddress(String(multisigAddress));
+
+			const { error, tx } = req.body;
+			if (!error || !tx ) return res.status(400).json({ error: responseMessages.missing_params });
+
+			const errorDocRef = firestoreDB.collection('sdk_errors').doc();
+			const created_at = Date.now();
+
+			await errorDocRef.set({
+				address: substrateAddress,
+				multisigAddress: substrateMultiAddress,
+				error: error,
+				tx: tx,
+				network: network,
+				created_at
+			});
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in creating Error log:', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
