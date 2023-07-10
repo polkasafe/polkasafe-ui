@@ -68,6 +68,8 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
 	const [customTx, setCustomTx] = useState<boolean>(false);
 
+	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
 	const hash = location.hash.slice(1);
@@ -86,6 +88,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
+		setTxnParams({ method: `${data.extrinsicFn?.method}(${data.extrinsicFn?.toJSON().args.map((item: any) => item.name)})`, section:  `${data.extrinsicFn?.section}` });
 
 		// store callData in BE
 		(async () => {
@@ -139,7 +142,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
-		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args && !decodedCallData?.args?.calls && !decodedCallData?.args?.call?.args?.calls ){
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args && !decodedCallData?.args?.calls && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.call?.args?.calls?.[0]?.args ){
 			setCustomTx(true);
 		}
 	}, [decodedCallData, multisig, multisigAddresses, network]);
@@ -386,6 +389,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 							transactionFields={transactionFields}
 							customTx={customTx}
 							decodedCallData={decodedCallData}
+							txnParams={txnParams}
 						/>
 
 					</div>

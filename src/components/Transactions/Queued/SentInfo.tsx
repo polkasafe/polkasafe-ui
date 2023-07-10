@@ -52,10 +52,11 @@ interface ISentInfoProps {
 	notifications?:ITxNotification;
 	getMultiDataLoading?: boolean;
 	customTx?:boolean;
-	decodedCallData: any
+	decodedCallData: any;
+	txnParams: any
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
+const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
@@ -402,22 +403,37 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, transactionFields
 							</span>
 						</p>
 					</div>}
-					{decodedCallData && customTx &&
-					<div className='mt-5 table-view'>
-						<table cellSpacing={0} cellPadding={0} className='w-full'>
-							<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
-								<span className='col-span-1'>
+					{callData && txnParams && customTx && decodedCallData &&
+					<>
+						<Divider className='border-bg-secondary text-text_secondary my-5' orientation='left'>Decoded Call</Divider>
+						<div className='flex items-center gap-x-5 justify-between'>
+							<span className='text-text_secondary font-normal text-sm leading-[15px]'>Section:</span>
+							<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+								<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.section}</span>
+							</p>
+						</div>
+						<div className='flex items-center gap-x-5 justify-between mt-3'>
+							<span className='text-text_secondary font-normal text-sm leading-[15px]'>Method:</span>
+							<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+								<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.method}</span>
+							</p>
+						</div>
+						<div className='mt-5 table-view'>
+							<table cellSpacing={0} cellPadding={0} className='w-full'>
+								<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
+									<span className='col-span-1'>
 									Name
-								</span>
-								<span className='col-span-3'>
+									</span>
+									<span className='col-span-3'>
 									Value
-								</span>
-							</article>
-							<tbody className='border-l border-r border-solid border-bg-secondary'>
-								<ArgumentsTable argumentsJSON={decodedCallData?.args} />
-							</tbody>
-						</table>
-					</div>
+									</span>
+								</article>
+								<tbody className='border-l border-r border-solid border-bg-secondary'>
+									<ArgumentsTable argumentsJSON={decodedCallData?.args} />
+								</tbody>
+							</table>
+						</div>
+					</>
 					}
 				</>}
 				{/* <div
