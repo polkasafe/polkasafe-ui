@@ -4,3 +4,4 @@
 export const DEFAULT_MULTISIG_NAME = 'Untitled Multisig';
 export const DEFAULT_USER_ADDRESS_NAME = 'My Address';
 export const DEFAULT_ADDRESS_NAME = 'Untitled Address';
+export const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
