@@ -133,45 +133,46 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transa
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{ recipientAddress && amount ?
-					(typeof recipientAddress === 'string') ?
-						<>
-							<p
-								className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-							>
-								<span>
+				{ isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading || customTx ? <></> :
+					recipientAddress && amount && !customTx ?
+						(typeof recipientAddress === 'string') ?
+							<>
+								<p
+									className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+								>
+									<span>
 							Send
-								</span>
-								<span
-									className='text-failure'
-								>
-									{amount ? parseDecodedValue({
-										network,
-										value: String(amount),
-										withUnit: true
-									}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
-										network,
-										value: String(amount),
-										withUnit: false
-									}))).toFixed(2)} USD)</span>}
-								</span>
-								<span>
-							To:
-								</span>
-							</p>
-							<div
-								className='mt-3 flex items-center gap-x-4'
-							>
-								{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
-								<div
-									className='flex flex-col gap-y-[6px]'
-								>
-									<p
-										className='font-medium text-sm leading-[15px] text-white'
+									</span>
+									<span
+										className='text-failure'
 									>
-										{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
-									</p>
-									{recipientAddress &&
+										{amount ? parseDecodedValue({
+											network,
+											value: String(amount),
+											withUnit: true
+										}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+											network,
+											value: String(amount),
+											withUnit: false
+										}))).toFixed(2)} USD)</span>}
+									</span>
+									<span>
+							To:
+									</span>
+								</p>
+								<div
+									className='mt-3 flex items-center gap-x-4'
+								>
+									{recipientAddress && <Identicon size={30} theme='polkadot' value={recipientAddress} />}
+									<div
+										className='flex flex-col gap-y-[6px]'
+									>
+										<p
+											className='font-medium text-sm leading-[15px] text-white'
+										>
+											{recipientAddress ? (addressBook?.find((item) => item.address === recipientAddress)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+										</p>
+										{recipientAddress &&
 										<p
 											className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 										>
@@ -187,49 +188,49 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transa
 												</a>
 											</span>
 										</p>}
+									</div>
 								</div>
-							</div>
-						</>
-						:
-						<div className='flex flex-col gap-y-1' >
-							{Array.isArray(recipientAddress) && recipientAddress.map((item, i) => (
-								<>
-									<p
-										className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-									>
-										<span>
+							</>
+							:
+							<div className='flex flex-col gap-y-1' >
+								{Array.isArray(recipientAddress) && recipientAddress.map((item, i) => (
+									<>
+										<p
+											className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+										>
+											<span>
 											Send
-										</span>
-										<span
-											className='text-failure'
-										>
-											{amount[i] ? parseDecodedValue({
-												network,
-												value: String(amount[i]),
-												withUnit: true
-											}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount[i] && <span>({(Number(amountUSD) * Number(parseDecodedValue({
-												network,
-												value: String(amount[i]),
-												withUnit: false
-											}))).toFixed(2)} USD)</span>}
-										</span>
-										<span>
-											To:
-										</span>
-									</p>
-									<div
-										className='mt-3 flex items-center gap-x-4'
-									>
-										{item && <Identicon size={30} theme='polkadot' value={item} />}
-										<div
-											className='flex flex-col gap-y-[6px]'
-										>
-											<p
-												className='font-medium text-sm leading-[15px] text-white'
+											</span>
+											<span
+												className='text-failure'
 											>
-												{recipientAddress ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
-											</p>
-											{recipientAddress &&
+												{amount[i] ? parseDecodedValue({
+													network,
+													value: String(amount[i]),
+													withUnit: true
+												}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount[i] && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+													network,
+													value: String(amount[i]),
+													withUnit: false
+												}))).toFixed(2)} USD)</span>}
+											</span>
+											<span>
+											To:
+											</span>
+										</p>
+										<div
+											className='mt-3 flex items-center gap-x-4'
+										>
+											{item && <Identicon size={30} theme='polkadot' value={item} />}
+											<div
+												className='flex flex-col gap-y-[6px]'
+											>
+												<p
+													className='font-medium text-sm leading-[15px] text-white'
+												>
+													{recipientAddress ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+												</p>
+												{recipientAddress &&
 											<p
 												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 											>
@@ -245,13 +246,12 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transa
 													</a>
 												</span>
 											</p>}
+											</div>
 										</div>
-									</div>
-									{recipientAddress.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
-								</>
-							))}
-						</div>
-					: isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading || customTx ? <></>
+										{recipientAddress.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
+									</>
+								))}
+							</div>
 						:
 						<section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
 							<span>
