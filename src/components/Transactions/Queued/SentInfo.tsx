@@ -620,11 +620,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transa
 						</Timeline.Item>
 					</Timeline>
 					<div className='w-full mt-3 flex flex-col gap-y-2 items-center'>
-						{!approvals.includes(userAddress) && <Button disabled={approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(userAddress) || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
+						{!approvals.includes(userAddress) && <Button disabled={approvals.includes(userAddress) || !decodedCallData || (approvals.length === threshold - 1 && !callDataString)} loading={loading} onClick={handleApproveTransaction} className={`w-full border-none text-sm font-normal ${approvals.includes(userAddress) || !decodedCallData || (approvals.length === threshold - 1 && !callDataString) ? 'bg-highlight text-text_secondary' : 'bg-primary text-white'}`}>
 								Approve Transaction
 						</Button>}
 						{depositor === userAddress &&
-							<Button loading={loading} onClick={() => setOpenCancelModal(true)} className='w-full border-none text-white text-sm font-normal bg-failure'>
+							<Button disabled={!callDataString || !decodedCallData} loading={loading} onClick={() => setOpenCancelModal(true)} className={`w-full border-none text-white text-sm font-normal bg-failure ${(!callDataString || !decodedCallData) && 'bg-opacity-10 text-text_secondary'}`}>
 								Cancel Transaction
 							</Button>
 						}
