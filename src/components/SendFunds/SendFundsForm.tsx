@@ -547,16 +547,14 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 									<div className='w-[500px]'>
 										<BalanceInput placeholder='1' label='Tip' fromBalance={initiatorBalance} onChange={(balance) => setTip(balance)} />
 									</div>
-									<div>
-										<article className='w-[412px] flex items-center'>
-											<span className='-mr-1.5 z-0'>
-												<LineIcon className='text-5xl' />
-											</span>
-											<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
-												Add Tip in your Transaction to make the Transaction Faster.
-											</p>
-										</article>
-									</div>
+									<article className='w-[412px] flex items-center'>
+										<span className='-mr-1.5 z-0'>
+											<LineIcon className='text-5xl' />
+										</span>
+										<p className='p-3 w-full bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>
+												Speed up transactions by including a Tip.
+										</p>
+									</article>
 								</div>
 							</section>
 
