@@ -27,6 +27,8 @@
     "@xstyled/styled-components": "^3.7.0",
     "antd": "^5.0.4",
     "classnames": "^2.3.2",
+    "ethers": "^6.6.2",
+    "formidable-serverless": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-lottie-player": "^1.5.4",
