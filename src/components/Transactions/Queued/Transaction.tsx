@@ -36,9 +36,10 @@ interface ITransactionProps {
 	numberOfTransactions: number;
 	notifications?: ITxNotification;
 	value: string;
+	type: string
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
+const Transaction: FC<ITransactionProps> = ({ note, type, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
 
 	const { activeMultisig, address } = useGlobalUserDetailsContext();
 	const [loading] = useState(false);
@@ -161,7 +162,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 									</span>
 
 									<span>
-										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
+										{type === 'add_signatories' ? 'Add Owner' : 'Sent'}
 									</span>
 								</p>
 								<p className='col-span-2 flex items-center gap-x-[6px]'>

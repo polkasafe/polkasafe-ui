@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { ArrowRightOutlined } from '@ant-design/icons';
-import { EthersAdapter, Web3Adapter } from '@safe-global/protocol-kit';
+import { Web3Adapter } from '@safe-global/protocol-kit';
 import { Form, Input, Modal } from 'antd';
 import React, { FC, useState } from 'react';
 import Details from 'src/components/Settings/Details';
@@ -43,18 +43,23 @@ const ManageMultisig = () => {
 		});
 		const txUrl = 'https://safe-transaction-goerli.safe.global';
 		const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
-		const res = await gnosisService.addOwner(signatory, activeMultisig);
-		console.log('res addOwner', res);
-		await fetch(`${FIREBASE_FUNCTIONS_URL}/addSignatoriesEth`, {
-			body: JSON.stringify({
-				newSignatory: signatory
-			}),
-			headers: {
-				...firebaseFunctionsHeader('goerli', address!, signature!),
-				'x-multisig': activeMultisig
-			},
-			'method': 'POST'
-		});
+		const txHash = await gnosisService.addOwner(signatory, activeMultisig);
+
+		// await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
+		// 	body: JSON.stringify({
+		// 		amount_token: 0,
+		// 		data: '',
+		// 		safeAddress: activeMultisig,
+		// 		to: activeMultisig,
+		// 		txHash,
+		// 		type: 'add_signatories'
+		// 	}),
+		// 	headers: {
+		// 		...firebaseFunctionsHeader('goerli', address!, signature!),
+		// 		'x-multisig': activeMultisig
+		// 	},
+		// 	'method': 'POST'
+		// });
 	};
 
 	const AddSignatoriesModal: FC = () => {

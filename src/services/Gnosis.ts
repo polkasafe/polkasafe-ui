@@ -4,8 +4,12 @@
 
 import SafeApiKit, { AllTransactionsListResponse, OwnerResponse, SafeCreationInfoResponse, SafeInfoResponse, SignatureResponse } from '@safe-global/api-kit';
 import Safe, { AddOwnerTxParams, RemoveOwnerTxParams, SafeAccountConfig, SafeFactory, SwapOwnerTxParams } from '@safe-global/protocol-kit';
-import { SafeMultisigTransactionResponse, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
+import { SafeMultisigTransactionResponse, SafeTransaction, SafeTransactionData, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 import { ContractReceipt } from 'ethers';
+
+(BigInt.prototype as any).toJSON = function () {
+	return this.toString();
+};
 
 export class GnosisSafeService {
 	ethAdapter: any;
@@ -151,19 +155,25 @@ export class GnosisSafeService {
 		}
 	};
 
-	addOwner = async (newOwner: string, multisig: string, threshold?: number): Promise<ContractReceipt | undefined> => {
+	addOwner = async (newOwner: string, multisig: string, threshold?: number): Promise<string | undefined> => {
 		try {
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
 			const params: AddOwnerTxParams = {
 				ownerAddress: newOwner,
 				threshold
 			};
-			const safeTransaction = await safeSdk.createAddOwnerTx(params);
-			const txResponse = await safeSdk.executeTransaction(safeTransaction);
-			console.log(txResponse);
-			return await txResponse.transactionResponse?.wait();
+			const safeTx = await safeSdk.createAddOwnerTx(params);
+			const signedSafeTransaction = await safeSdk.signTransaction(safeTx);
+			console.log(signedSafeTransaction, 'signedSafeTransaction');
+			// await this.safeService.confirmTransaction(hash, signature.data);
+			const txResponse = await safeSdk.executeTransaction(signedSafeTransaction);
+			await txResponse.transactionResponse?.wait();
+			console.log(txResponse, 'txResponse');
+
+			return '';
+
 		} catch (err) {
-			console.log('error from executeTx', err);
+			console.log('error from addOwner', err);
 			return undefined;
 		}
 	};
@@ -180,7 +190,7 @@ export class GnosisSafeService {
 			console.log(txResponse);
 			return await txResponse.transactionResponse?.wait();
 		} catch (err) {
-			console.log('error from executeTx', err);
+			console.log('error from removeOwner', err);
 			return undefined;
 		}
 	};
@@ -198,7 +208,7 @@ export class GnosisSafeService {
 			console.log(txResponse);
 			return await txResponse.transactionResponse?.wait();
 		} catch (err) {
-			console.log('error from executeTx', err);
+			console.log('error from swapOwner', err);
 			return undefined;
 		}
 	};
@@ -211,7 +221,7 @@ export class GnosisSafeService {
 			console.log(txResponse);
 			return await txResponse.transactionResponse?.wait();
 		} catch (err) {
-			console.log('error from executeTx', err);
+			console.log('error from changeThreshold', err);
 			return undefined;
 		}
 	};

@@ -60,6 +60,7 @@ const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
 							note={transaction.note || ''}
 							refetch={() => setRefetch(prev => !prev)}
 							amountUSD={'0'}
+							type={transaction.type || ''}
 							numberOfTransactions={queuedTransactions.length || 0}
 							notifications={transaction?.notifications || {}}
 						/>

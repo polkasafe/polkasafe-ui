@@ -60,7 +60,7 @@ export const addTransactionEth = functions.https.onRequest(async (req, res) => {
 		const network = String(req.get('x-network'));
 		const address = String(req.get('x-address'));
 
-		const { amount_token, safeAddress, data, txHash, to, note } = req.body;
+		const { amount_token, safeAddress, data, txHash, to, note, type } = req.body;
 
 		const addressRef = firestoreDB.collection('addresses').doc(address);
 		const doc = await addressRef.get();
@@ -81,7 +81,8 @@ export const addTransactionEth = functions.https.onRequest(async (req, res) => {
 				amount_token: String(amount_token),
 				txHash,
 				network,
-				note: note || ''
+				note: note || '',
+				type
 			};
 
 			const transactionRef = firestoreDB.collection('transactions').doc(String(txHash));
