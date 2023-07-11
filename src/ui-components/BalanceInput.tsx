@@ -33,7 +33,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 			return;
 		}
 
-		const [balance, isValid] = inputToBn(`${network === 'astar' ? value.toFixed(13) : value}`, network, false);
+		const [balance, isValid] = inputToBn(`${['astar', 'alephzero'].includes(network) ? value.toFixed(13) : value}`, network, false);
 		setIsValidInput(isValid);
 
 		if(isValid){
