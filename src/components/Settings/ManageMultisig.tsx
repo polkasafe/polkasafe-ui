@@ -56,7 +56,7 @@ const ManageMultisig = () => {
 								</div>
 								<AddNewOwnerBtn disabled={!multisig?.proxy} />
 							</section> :
-							!['astar', 'alephzero'].includes(network) &&
+							!['alephzero'].includes(network) &&
 							<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 								<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 							</section>

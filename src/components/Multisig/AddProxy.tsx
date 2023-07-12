@@ -7,7 +7,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Spin } from 'antd';
 import BN from 'bn.js';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -50,20 +50,33 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 
 	const [txnHash, setTxnHash] = useState<string>('');
 
+	const [multisigBalance, setMultisigBalance] = useState<BN>(new BN(0));
+	const [reservedProxyDeposit, setReservedProxyDeposit] = useState<BN>(new BN(0));
+
+	useEffect(() => {
+		if (!api || !apiReady || !activeMultisig) return;
+
+		api.query?.system?.account(activeMultisig).then(res => {
+			const balanceStr = res?.data?.free;
+			setMultisigBalance(balanceStr);
+		}).catch(e => console.error(e));
+
+		setReservedProxyDeposit((api.consts.proxy.proxyDepositFactor as unknown as BN)
+			.muln(1)
+			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN));
+	}, [activeMultisig, api, apiReady]);
+
 	const createProxy = async () => {
 		if(!api || !apiReady ) return;
 
 		await setSigner(api, loggedInWallet);
 
-		const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
-			.muln(1)
-			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
-
 		setLoading(true);
-		setLoadingMessages(`A Base Amount (${formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.`);
+		console.log(formatBnBalance(reservedProxyDeposit, { numberAfterComma: 7, withUnit: true }, network));
+		setLoadingMessages(multisigBalance.lt(reservedProxyDeposit) ? `A Base Amount (${formatBnBalance(reservedProxyDeposit.sub(multisigBalance), { numberAfterComma: 3, withUnit: true }, network)}) will be transfered to Multisig to Create a Proxy.` : 'Proxy Creation in Progress');
 		try {
 			await transferAndProxyBatchAll({
-				amount: reservedProxyDeposit,
+				amount: multisigBalance.lt(reservedProxyDeposit) ? reservedProxyDeposit.sub(multisigBalance) : new BN(0),
 				api,
 				multisigAddress: multisig?.address || activeMultisig,
 				network,
@@ -165,7 +178,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 							<span>
 								<WarningCircleIcon className='text-base' />
 							</span>
-							<p>A small fees would be deducted from the sender account and approval would be required from threshold signatories to create a proxy.</p>
+							<p>A small deposit of ({formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) should be present in your Multisig account and approval would be required from threshold signatories to Create a Proxy.</p>
 						</section>
 
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>

@@ -44,6 +44,23 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
+		if(!api || !apiReady) return;
+		if(queuedTransactions.some((transaction) => {
+			let decodedCallData = null;
+			if(transaction.callData) {
+				const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
+				if(!error && data) {
+					decodedCallData = data.extrinsicCall?.toJSON();
+				}
+			}
+			return decodedCallData && decodedCallData?.args?.proxy_type;
+		})){
+			setProxyInProcess(true);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [api, apiReady, queuedTransactions]);
+
+	useEffect(() => {
 		const getTransactions = async () => {
 			if(!userAddress || !signature || !activeMultisig) return;
 
@@ -152,7 +169,6 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 								}
 
 								const isProxyApproval = decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id);
-								setProxyInProcess(decodedCallData && decodedCallData?.args?.proxy_type);
 
 								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
 								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;

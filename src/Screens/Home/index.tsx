@@ -51,7 +51,7 @@ const Home = ({ className }: { className?: string }) => {
 
 	useEffect(() => {
 		const fetchProxyData = async () => {
-			if(!multisig || ['astar', 'alephzero'].includes(network)) return;
+			if(!multisig || ['alephzero'].includes(network)) return;
 			const response = await fetch(
 				`https://${network}.api.subscan.io/api/scan/events`,
 				{
@@ -164,7 +164,7 @@ const Home = ({ className }: { className?: string }) => {
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
 							<section>
-								{!['astar', 'alephzero'].includes(network) && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
+								{!['alephzero'].includes(network) && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
 									<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
 										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
 										<AddProxyModal/>
