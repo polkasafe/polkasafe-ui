@@ -6,10 +6,9 @@ import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
+import { IAddressBookItem } from 'src/types';
 
-import { IAddress } from './AddressTable';
-
-const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
+const ExportAdress = ({ addresses }: { addresses: IAddressBookItem[] }) => {
 	const { toggleVisibility } = useModalContext();
 	const downloadFile = ({ data, fileName, fileType }: { data: any, fileName: string, fileType: string }) => {
 		// Create a blob with the data we want to download as a file
@@ -41,12 +40,12 @@ const ExportAdress = ({ addresses }: { addresses: IAddress[] }) => {
 
 	const exportToCsv = () => {
 		// Headers for each column
-		const headers = ['Name,Address'];
+		const headers = ['Name,Address,Email,Discord,Telegram,Roles'];
 
 		// Convert users data to a csv
 		const usersCsv = addresses.reduce((acc, user) => {
-			const { name, address } = user;
-			acc.push([name, address].join(','));
+			const { name, address, email, discord, telegram, roles } = user;
+			acc.push([name, address, email || '-', discord || '-', telegram || '-', roles && roles.length ? roles.join(',') : '-'].join(','));
 			return acc;
 		}, ['']);
 

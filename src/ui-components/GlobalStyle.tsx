@@ -254,5 +254,38 @@ export const GlobalStyle = createGlobalStyle`
 
 	.ant-select-arrow {
 		color: #1573FE !important;
+		color: white !important;
+	}
+	.ant-select-dropdown .ant-select-item-option-state{
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	.ant-spin-nested-loading .ant-spin-blur{
+		opacity: 0 !important;
+	}
+	.ant-spin-nested-loading .ant-spin-blur::after{
+		opacity: 1 !important;
+	}
+
+	.ant-table-wrapper .ant-table-thead >tr>th {
+		background: #24272E !important;
+		color: #8B8B8B !important;
+		border: none !important;
+	}
+
+	.ant-table-wrapper .ant-table-container table>thead>tr:first-child th:first-child {
+		border-start-start-radius: 8px !important;
+		border-end-start-radius: 8px !important;
+	}
+
+	.ant-table-wrapper .ant-table-container table>thead>tr:first-child th:last-child {
+		border-end-end-radius: 8px !important;
+		border-start-end-radius: 8px !important;
+	}
+
+	.ant-table-wrapper .ant-table-tbody >tr >td {
+		border-color: #8B8B8B !important;
+		border-radius: 0 !important;
 	}
 `;

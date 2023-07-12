@@ -14,10 +14,11 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { ExternalLinkIcon, SearchIcon } from 'src/ui-components/CustomIcons';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
-const AddressBook = () => {
+import styled from 'styled-components';
+const AddressBook = ({ className }: { className?: string }) => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const { addressBook } = useGlobalUserDetailsContext();
-	const filteredData = addressBook.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
+	const filteredData = addressBook.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()) || item.roles?.includes(searchTerm));
 	const { openModal } = useModalContext();
 	const userAddress = localStorage.getItem('address');
 	return (
@@ -34,7 +35,7 @@ const AddressBook = () => {
 							<div className='flex mr-3'>
 								<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Import Address Book', <ImportAdress/>) }><ImportArrowIcon/>Import</Button>
 								<Button className='flex items-center justify-center bg-highlight text-primary mr-2 mt-4 border-none' onClick={() => openModal('Export Address Book', <ExportAdress addresses={filteredData} />) }><ExportArrowIcon/>Export</Button>
-								<Button className='flex items-center justify-center bg-primary text-white mr-2 mt-4 border-none' onClick={() => openModal('Add Address', <AddAdress/>)}><AddBoxIcon/> Add Address</Button>
+								<Button className='flex items-center justify-center bg-primary text-white mr-2 mt-4 border-none' onClick={() => openModal('Add Address', <AddAdress className={className} />)}><AddBoxIcon/> Add Address</Button>
 							</div>
 						</div>
 					</div>
@@ -50,4 +51,34 @@ const AddressBook = () => {
 	);
 };
 
-export default AddressBook;
+export default styled(AddressBook)`
+
+	.ant-select-selector {
+		border: none !important;
+		padding: 8px 10px;
+		box-shadow: none !important;
+		background-color: #24272E !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	.ant-select-multiple .ant-select-selection-item {
+		border: none !important;
+		background: #1573FE !important;
+		border-radius: 5px !important;
+		color: white !important;
+		margin-inline-end: 10px !important;
+	}
+
+`;
