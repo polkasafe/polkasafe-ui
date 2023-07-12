@@ -118,7 +118,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					return;
 				}
 				let proxyAddress = null;
-				if(!['astar', 'alephzero'].includes(network)){
+				if(!['alephzero'].includes(network)){
 					const response = await fetch(
 						`https://${network}.api.subscan.io/api/scan/events`,
 						{

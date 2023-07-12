@@ -26,7 +26,7 @@ const AddNewOwnerBtn = ({ className, disabled }: { className?: string, disabled?
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Owners</h3>}
 				open={openAddOwnerModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90 origin-center`}
 			>
 				<AddOwner onCancel={() => setOpenAddOwnerModal(false)} />
 			</Modal>

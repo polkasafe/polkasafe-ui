@@ -38,7 +38,7 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 		unit: chainProperties[network].tokenSymbol
 	});
 
-	const AMOUNT_TO_SEND = amount.toNumber();
+	const AMOUNT_TO_SEND = amount.toString();
 	const displayAmount = formatBalance(AMOUNT_TO_SEND); // 2.0000 WND
 
 	// remove approving address address from signatories
@@ -60,10 +60,11 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 
 	let blockHash = '';
 
+	const batchTx = amount.isZero() ? api.tx.utility.batchAll([multiSigProxyCall]) : api.tx.utility.batchAll([transferTx, multiSigProxyCall]);
+
 	return new Promise<IMultiTransferResponse>((resolve, reject) => {
 
-		api.tx.utility
-			.batchAll([transferTx, multiSigProxyCall])
+		batchTx
 			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
@@ -112,14 +113,10 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 								created_at: new Date()
 							});
 
-							const reservedProxyDeposit = (api.consts.proxy.proxyDepositFactor as unknown as BN)
-								.muln(1)
-								.iadd(api.consts.proxy.proxyDepositBase as unknown as BN);
-
 							// store data to BE
 							// created_at should be set by BE for server time, amount_usd should be fetched by BE
 							addNewTransaction({
-								amount: reservedProxyDeposit,
+								amount: amount,
 								block_number: blockNumber,
 								callData: proxyTx.method.toHex(),
 								callHash: proxyTx.method.hash.toHex(),
@@ -173,6 +170,9 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 					status: NotificationStatus.ERROR
 				});
 			});
-		console.log(`Sending ${displayAmount} from ${encodedInitiatorAddress} to ${recepientAddress}`);
+
+		if(!amount.isZero()){
+			console.log(`Sending ${displayAmount} from ${encodedInitiatorAddress} to ${recepientAddress}`);
+		}
 	});
 }
