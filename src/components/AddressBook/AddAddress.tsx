@@ -2,8 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Form, Input, message,Select } from 'antd';
+import { Form, Input, message,Select, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
+import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -24,22 +25,19 @@ interface IMultisigProps {
 	setAddAddress?: React.Dispatch<React.SetStateAction<string>>
 }
 
-const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress }) => {
+const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress, className }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
 
 	const [address, setAddress] = useState<string>(addAddress || '');
+	const [addressValid, setAddressValid] = useState<boolean>(true);
 	const [name, setName] = useState<string>('');
-	const [email, setEmail] = useState<string | null>();
+	const [email, setEmail] = useState<string>('');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [roles, setRoles] = useState<string[]>([]);
 	const [discord, setDiscord] = useState<string>('');
 	const [telegram, setTelegram] = useState<string>('');
 
-	const roleOptions = [{
-		label: <span className='p-1 rounded-md text-white bg-primary'>Role</span>,
-		value: 'role'
-	}];
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const { addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
@@ -54,8 +52,16 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 				setEmailValid(false);
 			}
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [email]);
+
+	useEffect(() => {
+		if(getSubstrateAddress(address)){
+			setAddressValid(true);
+		}
+		else {
+			setAddressValid(false);
+		}
+	}, [address]);
 
 	const handleAddAddress = async () => {
 		if(!address || !name) return;
@@ -151,145 +157,148 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	return (
 		<>
 			{contextHolder}
-
-			<Form
-				className='my-0 w-[560px]'
-			>
-				<div className="flex flex-col gap-y-3">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="name"
-					>
-						Name*
-					</label>
-					<Form.Item
-						name="name"
-						rules={[
-							{
-								message: 'Required',
-								required: true
-							}
-						]}
-						className='border-0 outline-0 my-0 p-0'
-					>
-						<Input
-							placeholder="Give the address a name"
-							className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							id="name"
-							onChange={(e) => setName(e.target.value)}
-							value={name}
-						/>
-					</Form.Item>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="address"
-					>
-						Address*
-					</label>
-					<Form.Item
-						name="address"
-						rules={[]}
-						className='border-0 outline-0 my-0 p-0'
-					>
-						<Input
-							placeholder="Unique Address"
-							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							id="address"
-							defaultValue={addAddress || ''}
-							onChange={(e) => setAddress(e.target.value)}
-							value={address}
-						/>
-					</Form.Item>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="email-address"
-					>
-						Email
-					</label>
-					<Form.Item
-						name="email"
-						className='border-0 outline-0 my-0 p-0'
-						help={email && !emailValid && 'Please enter a valid Email.'}
-						validateStatus={email && !emailValid ? 'error' : 'success'}
-					>
-						<Input
-							type='email'
-							placeholder="Email"
-							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							id="email-address"
-							onChange={(e) => setEmail(e.target.value)}
-							value={address}
-						/>
-					</Form.Item>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="discord"
-					>
-						Discord
-					</label>
-					<Form.Item
-						name="discord"
-						className='border-0 outline-0 my-0 p-0'
-					>
-						<Input
-							placeholder="Discord"
-							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							id="discord"
-							onChange={(e) => setDiscord(e.target.value)}
-							value={discord}
-						/>
-					</Form.Item>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-						htmlFor="telegram"
-					>
-						Telegram
-					</label>
-					<Form.Item
-						name="telegram"
-						className='border-0 outline-0 my-0 p-0'
-					>
-						<Input
-							placeholder="Telegram"
-							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							id="telegram"
-							onChange={(e) => setTelegram(e.target.value)}
-							value={telegram}
-						/>
-					</Form.Item>
-				</div>
-				<div className="flex flex-col gap-y-3 mt-5">
-					<label
-						className="text-primary text-xs leading-[13px] font-normal"
-					>
-						Role
-					</label>
-					<Form.Item
-						name="role"
-						className='border-0 outline-0 my-0 p-0'
-					>
-						<Select
-							mode="tags"
-							className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-							onChange={(value) => setRoles(value)}
-							tokenSeparators={[',']}
-							options={roleOptions}
-						/>
-					</Form.Item>
-				</div>
+			<Spin spinning={loading} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
+				<Form
+					className={`${className} my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}
+				>
+					<div className="flex flex-col gap-y-3">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="name"
+						>
+							Name*
+						</label>
+						<Form.Item
+							name="name"
+							rules={[
+								{
+									message: 'Required',
+									required: true
+								}
+							]}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Give the address a name"
+								className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="name"
+								onChange={(e) => setName(e.target.value)}
+								value={name}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="address"
+						>
+							Address*
+						</label>
+						<Form.Item
+							name="address"
+							rules={[{ message: 'Address Required', required: true }]}
+							validateStatus={(address && !addressValid) ? 'error' : 'success'}
+							help={address && !addressValid && 'Please enter a valid address'}
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Unique Address"
+								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="address"
+								defaultValue={addAddress || ''}
+								onChange={(e) => setAddress(e.target.value)}
+								value={address}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="email-address"
+						>
+							Email
+						</label>
+						<Form.Item
+							name="email"
+							className='border-0 outline-0 my-0 p-0'
+							help={email && !emailValid && 'Please enter a valid Email.'}
+							validateStatus={email && !emailValid ? 'error' : 'success'}
+						>
+							<Input
+								type='email'
+								placeholder="Email"
+								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="email-address"
+								onChange={(e) => setEmail(e.target.value)}
+								value={email}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="discord"
+						>
+							Discord
+						</label>
+						<Form.Item
+							name="discord"
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Discord"
+								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="discord"
+								onChange={(e) => setDiscord(e.target.value)}
+								value={discord}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+							htmlFor="telegram"
+						>
+							Telegram
+						</label>
+						<Form.Item
+							name="telegram"
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Input
+								placeholder="Telegram"
+								className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+								id="telegram"
+								onChange={(e) => setTelegram(e.target.value)}
+								value={telegram}
+							/>
+						</Form.Item>
+					</div>
+					<div className="flex flex-col gap-y-3 mt-5">
+						<label
+							className="text-primary text-xs leading-[13px] font-normal"
+						>
+							Role
+						</label>
+						<Form.Item
+							name="role"
+							className='border-0 outline-0 my-0 p-0'
+						>
+							<Select
+								mode="tags"
+								onChange={(value) => setRoles(value)}
+								tokenSeparators={[',']}
+								placeholder='Add Roles'
+								notFoundContent={false}
+							/>
+						</Form.Item>
+					</div>
+				</Form>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
-					<AddBtn loading={loading} disabled={!name || !address || (!!email && !emailValid)} title='Add' onClick={handleAddAddress} />
+					<AddBtn loading={loading} disabled={!name || !address || !addressValid || (!!email && !emailValid)} title='Add' onClick={handleAddAddress} />
 				</div>
-			</Form>
+			</Spin>
 		</>
 	);
 };
