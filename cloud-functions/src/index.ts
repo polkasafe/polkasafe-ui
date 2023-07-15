@@ -16,7 +16,8 @@ import {
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
 	IUserNotificationChannelPreferences,
-	ITransactionFields } from './types';
+	ITransactionFields
+} from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -51,13 +52,481 @@ import scheduledApprovalReminder from './notification-engine/polkasafe/scheduled
 import formidable from 'formidable-serverless';
 import fs from 'fs';
 
+import { ethers } from 'ethers';
+
 admin.initializeApp();
 const firestoreDB = admin.firestore();
 const logger = functions.logger;
 
 const corsHandler = cors({ origin: true });
 
-const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
+// EVM CFs
+
+export const addTransactionEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+		const address = String(req.get('x-address'));
+
+		const { amount_token, safeAddress, data, txHash, to, note, type } = req.body;
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			// const usdValue = await fetchTokenUSDValue(network);
+			const newTransaction = {
+				data,
+				created_at: new Date(),
+				safeAddress,
+				to,
+				amount_token: String(amount_token),
+				txHash,
+				network,
+				note: note || '',
+				type
+			};
+
+			const transactionRef = firestoreDB.collection('transactions').doc(String(txHash));
+			await transactionRef.set(newTransaction);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const updateTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = String(req.get('x-address'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		const { txSignature, signer, txHash } = req.body;
+
+		try {
+			const query = firestoreDB.collection('transactions').doc(txHash);
+			const doc = await query.get();
+			const signatures = doc.data()?.signatures || [];
+
+			if (doc.exists) {
+				if (!signatures.map((item: any) => item.address).includes(signer)) {
+					query.update({
+						signatures: [
+							...signatures,
+							{
+								siganture: txSignature,
+								address: signer
+							}
+						]
+					});
+				}
+			}
+
+			return res.status(200).json({ message: 'updated' });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const completeTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = String(req.get('x-address'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		const { receipt, txHash } = req.body;
+
+		try {
+			const query = firestoreDB.collection('transactions').doc(txHash);
+			const doc = await query.get();
+
+			if (doc.exists) {
+				query.update({
+					receipt,
+					executed: true
+				});
+			}
+
+			return res.status(200).json({ message: 'updated' });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getAllTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = String(req.get('x-address'));
+		const multisigAddress = String(req.get('x-multisig'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			const query = firestoreDB.collection('transactions')
+				.where('safeAddress', '==', multisigAddress);
+			const querySnapshot = await query.get();
+
+			const transactionsArray = querySnapshot.docs.map((doc) => doc.data());
+
+			return res.status(200).json({ data: transactionsArray });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getAllMultisigsBySignatory = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = String(req.get('x-address'));
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const isValid = await verifyEthSignature(address || '', signature || '', addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			const query = firestoreDB.collection('multisigAddresses').where('signatories', 'array-contains', address);
+			const querySnapshot = await query.get();
+
+			const multisigArray = querySnapshot.docs.map((doc) => doc.data());
+
+			return res.status(200).json({ data: multisigArray });
+		} catch (err: unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const createMultisigEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const { signatories, threshold, multisigName, proxyAddress, disabled } = req.body;
+
+		if (!signatories || !threshold || !multisigName) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		if (!Array.isArray(signatories) || signatories.length < 2) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		if (isNaN(threshold) || Number(threshold) > signatories.length) {
+			return res.status(400).json({ error: responseMessages.invalid_threshold });
+		}
+
+		// check if signatories contain duplicate addresses
+		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
+
+		const isValid = await verifyEthSignature(address, signature!, addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		if (proxyAddress) {
+			const multisigDoc = await multisigColl.doc(proxyAddress).get();
+
+			if (multisigDoc.exists) return res.status(400).json({ error: responseMessages.invalid_params });
+
+			const multisigDocument = {
+				address: proxyAddress,
+				created_at: new Date(),
+				disabled: disabled || false,
+				name: multisigName,
+				network,
+				signatories,
+				threshold,
+				updated_at: new Date()
+			};
+			await multisigColl.doc(proxyAddress).set(multisigDocument);
+
+			return;
+		}
+		return;
+	});
+});
+
+export const addSignatoriesEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const multisig = String(req.get('x-multisig'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+		const multisigDoc = await multisigColl.doc(multisig).get();
+
+		if (multisigDoc.exists) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const { newSignatory } = req.body;
+		const signatories = multisigDoc.data()?.signatories || [];
+
+		const isValid = await verifyEthSignature(address, signature!, addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		await multisigColl.doc(multisig).update({
+			signatories: [
+				...signatories,
+				newSignatory
+			]
+		});
+	});
+});
+
+export const getConnectAddressTokenEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const token = `<Bytes>polkasafe-login-${uuidv4()}</Bytes>`;
+
+			const addressRef = firestoreDB.collection('addresses').doc(address);
+			await addressRef.set({ address, token }, { merge: true });
+			return res.status(200).json({ data: token });
+		} catch (err: unknown) {
+			functions.logger.error('Error in getConnectAddressTokenEth :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getMultisigDataByMultisigAddressEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const network = String(req.get('x-network'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		const multisigColl = firestoreDB.collection('multisigAddresses');
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		const multisigRef = await multisigColl.doc(multisigAddress).get();
+		if (multisigRef.exists) {
+			const data = multisigRef.data();
+			return res.status(200).json({
+				data: {
+					...data,
+					created_at: data?.created_at.toDate(),
+					updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
+				}
+			});
+		}
+		return;
+	});
+});
+
+export const addToAddressBookEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const network = String(req.get('x-network'));
+
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		const { name, address: addressToAdd } = req.body;
+		if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const addressDoc = {
+			...doc.data(),
+			created_at: doc.data()?.created_at.toDate()
+		} as IUser;
+		const addressBook = addressDoc.addressBook || [];
+
+		const isValid = await verifyEthSignature(address, signature!, addressData?.token);
+		if (!isValid) return res.status(400).json({ error: 'something went wrong' });
+
+		try {
+			const addressIndex = addressBook.findIndex((a) => a.address == addressToAdd);
+			if (addressIndex > -1) {
+				addressBook[addressIndex] = { name, address: addressToAdd };
+				await addressRef.set({ addressBook }, { merge: true });
+				return res.status(200).json({ data: addressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
+			}
+
+			const newAddressBook = [...addressBook, { name, address: addressToAdd }];
+			await addressRef.set({ addressBook: newAddressBook }, { merge: true });
+			return res.status(200).json({ data: newAddressBook });
+		} catch (err) {
+			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const connectAddressEth = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const substrateAddress = getSubstrateAddress(String(req.get('x-address')));
+		const address: string = substrateAddress !== '' ? substrateAddress : req.get('x-address') || '';
+
+		const multisigAddresses = await getMultisigAddressesByAddress(address);
+
+		const addressRef = firestoreDB.collection('addresses').doc(address);
+		const doc = await addressRef.get();
+
+		if (!doc.exists) return res.status(404).json({ error: responseMessages.invalid_params });
+		const addressData = doc.data();
+
+		try {
+			const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
+				channelPreferences: {
+					[CHANNEL.IN_APP]: {
+						name: CHANNEL.IN_APP,
+						enabled: true,
+						handle: address,
+						verified: true
+					}
+				},
+				triggerPreferences: {}
+			};
+
+			const data = addressData;
+			if (data && data.created_at) {
+				const addressDoc = {
+					...data,
+					created_at: data?.created_at.toDate()
+				} as IUser;
+
+				const resUser: IUserResponse = {
+					address: address,
+					email: addressDoc.email,
+					created_at: addressDoc.created_at,
+					addressBook: addressDoc.addressBook,
+					multisigAddresses: multisigAddresses.map((item) => (
+						{
+							...item,
+							signatories: item.signatories
+						})),
+					multisigSettings: addressDoc.multisigSettings,
+					notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES
+				};
+
+				res.status(200).json({ data: resUser });
+				if (addressDoc.notification_preferences) return;
+
+				// set default notification preferences if not set
+				await addressRef?.update({ notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES });
+				return;
+			}
+
+			const newAddress: IAddressBookItem = {
+				name: DEFAULT_USER_ADDRESS_NAME,
+				address: address
+			};
+
+			// else create a new user document
+			const newUser: IUser = {
+				address: address,
+				created_at: new Date(),
+				email: null,
+				addressBook: [newAddress],
+				multisigSettings: {},
+				notification_preferences: DEFAULT_NOTIFICATION_PREFERENCES
+			};
+
+			const newUserResponse: IUserResponse = {
+				...newUser,
+				multisigAddresses: []
+			};
+
+			await addressRef?.set(newUser, { merge: true });
+			return res.status(200).json({ data: newUserResponse });
+		} catch (err: unknown) {
+			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+const verifyEthSignature = async (address: string, signature: string, message: string): Promise<boolean> => {
+	const messageBytes = ethers.toUtf8Bytes(message);
+
+	const recoveredAddress = ethers.verifyMessage(messageBytes, signature);
+	const isValid = recoveredAddress.toLowerCase() === address.toLowerCase();
+	return isValid;
+};
+
+// EVM CFs
+
+const isValidRequest = async (address?: string, signature?: string, network?: string): Promise<{ isValid: boolean, error: string }> => {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
 	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_headers };
 	if (!Object.values(networks).includes(network)) return { isValid: false, error: responseMessages.invalid_network };
@@ -67,7 +536,7 @@ const isValidRequest = async (address?:string, signature?:string, network?:strin
 	return { isValid: true, error: '' };
 };
 
-const isValidSignature = async (signature:string, address:string) => {
+const isValidSignature = async (signature: string, address: string) => {
 	try {
 		await cryptoWaitReady();
 		const hexPublicKey = u8aToHex(decodeAddress(address));
@@ -82,7 +551,7 @@ const isValidSignature = async (signature:string, address:string) => {
 	}
 };
 
-const getMultisigAddressesByAddress = async (address:string) => {
+const getMultisigAddressesByAddress = async (address: string) => {
 	const multisigAddresses = await admin
 		.firestore()
 		.collection('multisigAddresses')
@@ -109,7 +578,7 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			await addressRef.set({ address: substrateAddress, token }, { merge: true });
 			return res.status(200).json({ data: token });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getConnectAddressToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -128,7 +597,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
-			const DEFAULT_NOTIFICATION_PREFERENCES : IUserNotificationPreferences = {
+			const DEFAULT_NOTIFICATION_PREFERENCES: IUserNotificationPreferences = {
 				channelPreferences: {
 					[CHANNEL.IN_APP]: {
 						name: CHANNEL.IN_APP,
@@ -159,7 +628,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						created_at: addressDoc.created_at,
 						addressBook: addressDoc.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })),
 						multisigAddresses: multisigAddresses.map((item) => (
-							{ ...item,
+							{
+								...item,
 								signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[network].ss58Format))
 							})),
 						multisigSettings: addressDoc.multisigSettings,
@@ -182,7 +652,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			};
 
 			// else create a new user document
-			const newUser:IUser = {
+			const newUser: IUser = {
 				address: String(substrateAddress),
 				created_at: new Date(),
 				email: null,
@@ -198,7 +668,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 			await addressRef.set(newUser, { merge: true });
 			return res.status(200).json({ data: newUserResponse });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in connectAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -244,7 +714,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addToAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -286,7 +756,7 @@ export const removeFromAddressBook = functions.https.onRequest(async (req, res) 
 				}
 			}
 			return res.status(400).json({ error: responseMessages.invalid_params });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in removeFromAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -357,7 +827,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			if (multisigDoc.exists) {
 				const multisigDocData = multisigDoc.data();
 
-				const resData: {[key:string]: any} = {
+				const resData: { [key: string]: any } = {
 					...multisigDocData,
 					name: multisigName,
 					created_at: multisigDocData?.created_at?.toDate(),
@@ -414,7 +884,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			const newMultisigWithEncodedSignatories = {
 				...newMultisig,
-				signatories: newMultisig.signatories.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format)) };
+				signatories: newMultisig.signatories.map((signatory: string) => encodeAddress(signatory, chainProperties[network].ss58Format))
+			};
 
 			if (proxyAddress) {
 				newMultisig.proxy = proxyAddress;
@@ -440,7 +911,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			}, { merge: true });
 
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in createMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -468,11 +939,13 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
 			if (multisigRef.exists) {
 				const data = multisigRef.data();
-				return res.status(200).json({ data: {
-					...data,
-					created_at: data?.created_at.toDate(),
-					updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
-				} });
+				return res.status(200).json({
+					data: {
+						...data,
+						created_at: data?.created_at.toDate(),
+						updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
+					}
+				});
 			}
 
 			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
@@ -497,7 +970,7 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 				await newMultisigRef.set(newMultisig);
 			}
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -536,7 +1009,7 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 
 			await firestoreBatch.commit();
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -565,7 +1038,7 @@ export const getAssetsForAddress = functions.https.onRequest(async (req, res) =>
 			const assetsRef = firestoreDB.collection('assets').doc(addressToFetch);
 			assetsRef.set({ assets: assetsArr });
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getTransactionsForMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -582,7 +1055,7 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { multisigAddress } = req.body;
-		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!multisigAddress) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -602,7 +1075,7 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 
 			functions.logger.info('Deleted multisig ', encodedMultisigAddress, ' for user ', substrateAddress);
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in deleteMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -619,7 +1092,7 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { review, rating } = req.body;
-		if (isNaN(rating) || Number(rating) <= 0 || Number(rating) > 5 ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (isNaN(rating) || Number(rating) <= 0 || Number(rating) > 5) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -633,7 +1106,7 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 			await feedbackRef.set(newFeedback);
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addFeedback :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -643,7 +1116,7 @@ export const addFeedback = functions.https.onRequest(async (req, res) => {
 export const addContactFormResponse = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const { name, email, message } = req.body;
-		if (!name || !email || !message ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!name || !email || !message) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const contactFormResponseRef = firestoreDB.collection('contactFormResponses').doc();
@@ -656,7 +1129,7 @@ export const addContactFormResponse = functions.https.onRequest(async (req, res)
 			await contactFormResponseRef.set(newContactFormResponse);
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addContactFormResponse :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -673,7 +1146,7 @@ export const updateEmail = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { email } = req.body;
-		if (!email ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!email) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -682,7 +1155,7 @@ export const updateEmail = functions.https.onRequest(async (req, res) => {
 			addressRef.update({ email: String(email) });
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in updateEmail :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -728,7 +1201,7 @@ export const getMultisigQueue = functions.https.onRequest(async (req, res) => {
 
 			// await firestoreBatch.commit();
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getMultisigQueue :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -745,7 +1218,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
-		if (!block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (!block_number || !callHash || !from || !network) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
@@ -768,7 +1241,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 			await transactionRef.set(newTransaction);
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -785,7 +1258,7 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { address: mutisigAddress, name } = req.body;
-		if (!mutisigAddress || !name ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!mutisigAddress || !name) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -810,7 +1283,7 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 			}
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in renameMultisig :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -827,7 +1300,7 @@ export const sendNotification = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { addresses, link, message, type } = req.body;
-		if (!addresses || !Array.isArray(addresses) || !message || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (!addresses || !Array.isArray(addresses) || !message || !network) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const newNotificationRef = firestoreDB.collection('notifications').doc();
@@ -845,7 +1318,7 @@ export const sendNotification = functions.https.onRequest(async (req, res) => {
 			await newNotificationRef.set(newNotification);
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in sendNotification :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -877,7 +1350,7 @@ export const getNotifications = functions.https.onRequest(async (req, res) => {
 			} as INotification));
 
 			return res.status(200).json({ data: notifications });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getNotifications :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -902,7 +1375,7 @@ export const getNotificationPreferencesForAddress = functions.https.onRequest(as
 			const addressData = addressDoc.data() as IUser;
 
 			return res.status(200).json({ data: addressData.notification_preferences || null });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getNotificationPreferencesForAddress :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -919,7 +1392,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 		if (!isValid) return res.status(400).json({ error });
 
 		const { callHash, multisigAddress, note } = req.body;
-		if (!callHash || !note ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!callHash || !note) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -946,7 +1419,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 			}
 
 			return res.status(400).json({ error: responseMessages.invalid_params });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in updateTransactionNote :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -963,14 +1436,14 @@ export const getTransactionNote = functions.https.onRequest(async (req, res) => 
 		if (!isValid) return res.status(400).json({ error });
 
 		const { callHash } = req.body;
-		if (!callHash ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!callHash) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			const txRef = firestoreDB.collection('transactions').doc(callHash);
 			const txDoc = await txRef.get();
 
 			return res.status(200).json({ data: txDoc.exists ? (txDoc.data() as ITransaction).note || '' : '' });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getTransactionNote :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1002,7 +1475,7 @@ export const addAppsAlertRecipient = functions.https.onRequest(async (req, res) 
 			}, { merge: true });
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addAppsAlertRecipient :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1019,7 +1492,7 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 		if (!isValid) return res.status(400).json({ error });
 
 		const { callHash, callData } = req.body;
-		if (!callHash || !callData || !network ) return res.status(400).json({ error: responseMessages.missing_params });
+		if (!callHash || !callData || !network) return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
 			if (!Object.values(networks).includes(network)) return res.status(400).json({ error: responseMessages.invalid_params });
@@ -1039,7 +1512,7 @@ export const setTransactionCallData = functions.https.onRequest(async (req, res)
 			txRef.set({ callData: String(callData) }, { merge: true });
 
 			return res.status(200).json({ error: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in setTransactionCallData :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1055,7 +1528,7 @@ export const updateNotificationTriggerPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { triggerPreferences } = req.body as { triggerPreferences: {[index: string]: IUserNotificationTriggerPreferences} };
+		const { triggerPreferences } = req.body as { triggerPreferences: { [index: string]: IUserNotificationTriggerPreferences } };
 		if (!triggerPreferences ||
 			typeof triggerPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
@@ -1066,7 +1539,7 @@ export const updateNotificationTriggerPreferences = functions.https.onRequest(as
 			addressRef.update({ ['notification_preferences.triggerPreferences']: triggerPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in updateNotificationTriggerPreferences :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1082,7 +1555,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { channelPreferences } = req.body as { channelPreferences: {[index: string]: IUserNotificationChannelPreferences} };
+		const { channelPreferences } = req.body as { channelPreferences: { [index: string]: IUserNotificationChannelPreferences } };
 		if (!channelPreferences || typeof channelPreferences !== 'object') return res.status(400).json({ error: responseMessages.missing_params });
 
 		try {
@@ -1092,7 +1565,7 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 			addressRef.update({ ['notification_preferences.channelPreferences']: channelPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in updateNotificationChannelPreferences :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1119,7 +1592,7 @@ export const notify = functions.https.onRequest(async (req, res) => {
 			await callNotificationTrigger(source as NOTIFICATION_SOURCE, trigger, args);
 
 			return res.status(200).json({ data: 'Notification(s) sent successfully.' });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in notify :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1152,7 +1625,7 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 			} else {
 				return res.status(400).json({ error: responseMessages.invalid_params });
 			}
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in verifyEmail :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1161,7 +1634,7 @@ export const verifyEmail = functions.https.onRequest(async (req, res) => {
 
 export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		functions.logger.info('polkasafeTelegramBotCommands req', { req } );
+		functions.logger.info('polkasafeTelegramBotCommands req', { req });
 
 		try {
 			const { message = null, edited_message = null } = req.body;
@@ -1241,7 +1714,7 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 				// check if the verification token is valid
 				const addressData = addressRef.data() as IPSUser;
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token) {
-				// Sending a reply to the user
+					// Sending a reply to the user
 					await bot.sendMessage(
 						chat.id,
 						'No verification token found.'
@@ -1319,7 +1792,7 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 				// check if the verification token is valid
 				const addressData = addressRef.data() as IPSUser;
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token) {
-				// Sending a reply to the user
+					// Sending a reply to the user
 					await bot.sendMessage(
 						chat.id,
 						'No verification token found.'
@@ -1361,7 +1834,7 @@ export const polkasafeTelegramBotCommands = functions.https.onRequest(async (req
 			}
 
 			return res.sendStatus(200);
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkasafeTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1524,7 +1997,7 @@ export const polkasafeDiscordBotCommands = functions.https.onRequest(async (req,
 			}
 
 			return res.status(200).end();
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkasafeDiscordBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1595,7 +2068,7 @@ export const registerPolkasafeDiscordBotCommands = functions.https.onRequest(asy
 			console.log('Successfully registered application (/) commands.');
 
 			return res.status(200).send('Commands registered successfully.');
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1638,7 +2111,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 
 				// check if the verification token is valid
 				if (!addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token) {
-				// Sending a reply to the user
+					// Sending a reply to the user
 					await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'No verification token found. Please generate a new token from Polkasafe and try again.');
 					return;
 				} else if (addressData.notification_preferences?.channelPreferences?.[CHANNEL.SLACK]?.verification_token === verificationToken) {
@@ -1728,7 +2201,7 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 					return;
 				}
 			}
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkasafeSlackBotCommands :', { err, stack: (err as any).stack });
 			if (!res.headersSent) res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1777,7 +2250,7 @@ export const getChannelVerifyToken = functions.https.onRequest(async (req, res) 
 			}
 
 			return res.status(200).json({ data: token });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in getChannelVerifyToken :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -1788,7 +2261,7 @@ export const getChannelVerifyToken = functions.https.onRequest(async (req, res) 
 
 export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		functions.logger.info('polkassemblyTelegramBotCommands req', { req } );
+		functions.logger.info('polkassemblyTelegramBotCommands req', { req });
 
 		try {
 			const { message = null, edited_message = null } = req.body;
@@ -1965,7 +2438,7 @@ export const polkassemblyTelegramBotCommands = functions.https.onRequest(async (
 			}
 
 			return res.sendStatus(200);
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkassemblyTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -2117,7 +2590,7 @@ export const polkassemblyDiscordBotCommands = functions.https.onRequest(async (r
 			}
 
 			return res.status(200).end();
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkassemblyDiscordBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -2188,7 +2661,7 @@ export const registerPolkassemblyDiscordBotCommands = functions.https.onRequest(
 			console.log('Successfully registered application (/) commands.');
 
 			return res.status(200).send('Commands registered successfully.');
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in telegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -2310,7 +2783,7 @@ export const polkassemblySlackBotCommands = functions.https.onRequest(async (req
 				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Username removed successfully. You will not receive notifications on this chat anymore.');
 				return;
 			}
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in polkassemblySlackBotCommands :', { err, stack: (err as any).stack });
 			if (!res.headersSent) res.status(500).json({ error: responseMessages.internal });
 		}
@@ -2338,7 +2811,7 @@ export const updateTransactionFields = functions.https.onRequest(async (req, res
 			addressRef.update({ ['transactionFields']: transactionFields });
 
 			return res.status(200).json({ data: responseMessages.success });
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in updateTransactionFields :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
@@ -2424,7 +2897,7 @@ export const addAttachment = functions.https.onRequest(async (req, res) => {
 			});
 
 			return;
-		} catch (err:unknown) {
+		} catch (err: unknown) {
 			functions.logger.error('Error in addAttachment :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
