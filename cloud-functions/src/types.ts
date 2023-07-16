@@ -177,3 +177,19 @@ export interface ITransactionFields{
 		subfields: ITransactionCategorySubfields
 	}
 }
+
+export interface ISharedAddressBookRecord {
+	name: string,
+	address: string,
+	email?: string,
+	discord?: string,
+	telegram?: string,
+	roles?: string[]
+}
+
+export interface ISharedAddressBooks {
+	records: {
+		[address: string]: ISharedAddressBookRecord
+	},
+	multisig: string
+}

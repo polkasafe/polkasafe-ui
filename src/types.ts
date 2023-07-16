@@ -229,3 +229,19 @@ export enum NotificationStatus {
 	WARNING = 'warning',
 	INFO = 'info'
   }
+
+export interface ISharedAddressBookRecord {
+	name: string,
+	address: string,
+	email?: string,
+	discord?: string,
+	telegram?: string,
+	roles?: string[]
+}
+
+export interface ISharedAddressBooks {
+	records: {
+		[address: string]: ISharedAddressBookRecord
+	},
+	multisig: string
+}

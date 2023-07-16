@@ -3,13 +3,18 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { Drawer, Layout } from 'antd';
 import { Badge } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longIframe from 'src/assets/long-iframe.svg';
 import shortIframe from 'src/assets/short-iframe.svg';
+import { initialActiveMultisigContext, useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
+import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { ISharedAddressBooks } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
@@ -28,6 +33,8 @@ export interface IRouteInfo {
 
 const AppLayout = ({ className }: {className?: string}) => {
 	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { setActiveMultisigContextState } = useActiveMultisigContext();
+	const { network } = useGlobalApiContext();
 	const { iframeVisibility, setIframeVisibility } = useGlobalDAppContext();
 	const [sideDrawer, setSideDrawer] = useState(false);
 	const [multisigChanged, setMultisigChanged] = useState(false);
@@ -38,6 +45,40 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
 	const hideSlider = iframeState && isAppsPage;
+
+	const getSharedAddressBook = useCallback(async () => {
+		if(!localStorage.getItem('signature') || !localStorage.getItem('address')) return;
+
+		setMultisigChanged(true);
+		const getSharedAddressBookRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getSharedAddressBook`, {
+			body: JSON.stringify({
+				multisigAddress: activeMultisig
+			}),
+			headers: firebaseFunctionsHeader(network),
+			method: 'POST'
+		});
+
+		const { data: sharedAddressBookData, error: sharedAddressBookError } = await getSharedAddressBookRes.json() as { data: ISharedAddressBooks, error: string };
+
+		if(!sharedAddressBookError && sharedAddressBookData){
+			console.log(sharedAddressBookData);
+			setActiveMultisigContextState((prevState) => {
+				return {
+					...prevState,
+					multisig: sharedAddressBookData.multisig,
+					records: sharedAddressBookData.records
+				};
+			});
+		}else {
+			setActiveMultisigContextState(initialActiveMultisigContext);
+		}
+		setLoading(false);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeMultisig, network]);
+
+	useEffect(() => {
+		getSharedAddressBook();
+	}, [getSharedAddressBook]);
 
 	useEffect(() => {
 		setMultisigChanged(true);
