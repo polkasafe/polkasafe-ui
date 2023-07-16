@@ -16,7 +16,9 @@ import {
 	IUserResponse,
 	IUserNotificationTriggerPreferences,
 	IUserNotificationChannelPreferences,
-	ITransactionFields } from './types';
+	ITransactionFields,
+	ISharedAddressBookRecord,
+	ISharedAddressBooks } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -2426,6 +2428,70 @@ export const addAttachment = functions.https.onRequest(async (req, res) => {
 			return;
 		} catch (err:unknown) {
 			functions.logger.error('Error in addAttachment :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const updateSharedAddressBook = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { name, address: addressToAdd, multisigAddress, email, discord, telegram, roles } = req.body;
+		if (!name || !addressToAdd || !multisigAddress) return res.status(400).json({ error: responseMessages.missing_params });
+		const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
+		const substrateMultisigAddress = getSubstrateAddress(String(multisigAddress));
+		if (!substrateAddressToAdd || !substrateMultisigAddress) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const updatedAddressEntry: ISharedAddressBookRecord = {
+				name,
+				address: addressToAdd,
+				email,
+				discord,
+				telegram,
+				roles
+			};
+
+			const addressRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
+			addressRef.update({ [`records.${substrateAddressToAdd}`]: updatedAddressEntry });
+			addressRef.update({ ['multisig']: substrateMultisigAddress });
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateSharedAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getSharedAddressBook = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress ) return res.status(400).json({ error: responseMessages.missing_params });
+
+		const substrateMultisigAddress = getSubstrateAddress(String(multisigAddress));
+		if (!substrateMultisigAddress) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
+			const addressBookDoc = await addressBookRef.get();
+
+			return res.status(200).json({ data: addressBookDoc.exists ? (addressBookDoc.data() as ISharedAddressBooks).records || {} : {} });
+		} catch (err:unknown) {
+			functions.logger.error('Error in getSharedAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

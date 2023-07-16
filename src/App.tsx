@@ -9,6 +9,7 @@ import { styledTheme } from 'src/themes/styledTheme';
 import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
+import { ActiveMultisigProvider } from './context/ActiveMultisigContext';
 import { ApiContextProvider } from './context/ApiContext';
 import { CurrencyContextProvider } from './context/CurrencyContext';
 import { DAppContextProvider } from './context/DAppContext';
@@ -25,12 +26,14 @@ function App() {
 					<ApiContextProvider>
 						<CurrencyContextProvider>
 							<UserDetailsProvider>
-								<DAppContextProvider>
-									<GlobalStyle/>
-									<ModalContextProvider>
-										<AppLayout />
-									</ModalContextProvider>
-								</DAppContextProvider>
+								<ActiveMultisigProvider>
+									<DAppContextProvider>
+										<GlobalStyle/>
+										<ModalContextProvider>
+											<AppLayout />
+										</ModalContextProvider>
+									</DAppContextProvider>
+								</ActiveMultisigProvider>
 							</UserDetailsProvider>
 						</CurrencyContextProvider>
 					</ApiContextProvider>
