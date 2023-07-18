@@ -27,9 +27,11 @@ interface ISentInfoProps {
 	loading?: boolean
 	amount_usd: number
 	from: string
+	section?:string
+	method?:string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading, section, method }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
@@ -41,51 +43,55 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				<p
-					className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-				>
-					<span>
+				{!(Boolean(section) && Boolean(method)) &&
+				<>
+					<p
+						className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+					>
+						<span>
 							Sent
-					</span>
-					<span
-						className='text-failure'
-					>
-						{amount} {amountType} ({amount_usd} USD)
-					</span>
-					<span>
+						</span>
+						<span
+							className='text-failure'
+						>
+							{amount} {amountType} ({amount_usd} USD)
+						</span>
+						<span>
 							to:
-					</span>
-				</p>
-				<div
-					className='mt-3 flex items-center gap-x-4'
-				>
-					<Identicon size={30} value={recipient} theme='polkadot'  />
+						</span>
+					</p>
 					<div
-						className='flex flex-col gap-y-[6px]'
+						className='mt-3 flex items-center gap-x-4'
 					>
-						<p
-							className='font-medium text-sm leading-[15px] text-white'
+						<Identicon size={30} value={recipient} theme='polkadot'  />
+						<div
+							className='flex flex-col gap-y-[6px]'
 						>
-							{addressBook?.find((item) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
-						</p>
-						<p
-							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-						>
-							<span>
-								{getEncodedAddress(recipient, network)}
-							</span>
-							<span
-								className='flex items-center gap-x-2 text-sm'
+							<p
+								className='font-medium text-sm leading-[15px] text-white'
 							>
-								<button onClick={() => copyText(recipient, true, network)}><CopyIcon className='hover:text-primary'/></button>
-								<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
-									<ExternalLinkIcon />
-								</a>
-							</span>
-						</p>
+								{addressBook?.find((item) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
+							</p>
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+							>
+								<span>
+									{getEncodedAddress(recipient, network)}
+								</span>
+								<span
+									className='flex items-center gap-x-2 text-sm'
+								>
+									<button onClick={() => copyText(recipient, true, network)}><CopyIcon className='hover:text-primary'/></button>
+									<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
+										<ExternalLinkIcon />
+									</a>
+								</span>
+							</p>
+						</div>
 					</div>
-				</div>
-				<Divider className='bg-text_secondary my-5' />
+					<Divider className='bg-text_secondary my-5' />
+				</>
+				}
 				<div
 					className='flex items-center gap-x-7 mb-3'
 				>
@@ -138,6 +144,46 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						</span>
 					</p>
 				</div>
+				{ Boolean(section) && Boolean(method) &&
+					<>
+						<div
+							className='flex items-center gap-x-5 mt-3'
+						>
+							<span
+								className='text-text_secondary font-normal text-sm leading-[15px]'
+							>
+									Section:
+							</span>
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+							>
+								<span
+									className='text-white font-normal text-sm leading-[15px]'
+								>
+									{section}
+								</span>
+							</p>
+						</div>
+						<div
+							className='flex items-center gap-x-5 mt-3'
+						>
+							<span
+								className='text-text_secondary font-normal text-sm leading-[15px]'
+							>
+								Method:
+							</span>
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+							>
+								<span
+									className='text-white font-normal text-sm leading-[15px]'
+								>
+									{method}
+								</span>
+							</p>
+						</div>
+					</>
+				}
 				{loading ? <Spin className='mt-3'/> : note &&
 					<div
 						className='flex items-center gap-x-5 mt-3'

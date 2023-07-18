@@ -12,6 +12,13 @@ interface IResponse {
 	count: number;
 }
 
+const CHECKS = {
+	STATUS:{
+		EXECUTED:'Executed'
+	},
+	TRANSFER_KEEP_ALIVE:'transfer_keep_alive'
+};
+
 export default async function getHistoryTransactions(
 	multisigAddress: string,
 	network: string,
@@ -36,9 +43,44 @@ export default async function getHistoryTransactions(
 			method: 'POST'
 		});
 
-		const response = await data.json();
-
 		const transactions: ITransaction[] = [];
+
+		const customTransactions = await fetch(`https://${network}.api.subscan.io/api/scan/multisigs`, {
+			body: JSON.stringify({
+				'account': multisigAddress,
+				'currency': 'token',
+				'page': page - 1 || 0, // pages start from 0
+				'row': entries || 1
+			}),
+			headers: SUBSCAN_API_HEADERS,
+			method: 'POST'
+		});
+
+		const otherTransactions: any = await customTransactions.json();
+
+		if (otherTransactions.data && otherTransactions.data.multisig?.length) {
+			for (const transaction of otherTransactions.data.multisig) {
+				if((transaction.call_module_function !== CHECKS.TRANSFER_KEEP_ALIVE || transaction.call_module_function !== CHECKS.TRANSFER_KEEP_ALIVE) && transaction.status === CHECKS.STATUS.EXECUTED){
+					const newTransaction: ITransaction = {
+						amount_token: Number(transaction.amount || 0),
+						amount_usd: Number(transaction.usd_amount || 0),
+						block_number: Number(transaction.block_num || 0),
+						callHash: transaction.call_hash,
+						created_at: dayjs(transaction.block_timestamp * 1000).toDate(),
+						from: transaction.account_display.address,
+						id: transaction.call_hash,
+						method: transaction.call_module_function,
+						network: network,
+						section: transaction.call_module,
+						to: transaction.to,
+						token: transaction.asset_symbol
+					};
+					transactions.push(newTransaction);
+				}
+			}
+		}
+
+		const response = await data.json();
 
 		if (response.data && response.data.transfers?.length) {
 			for (const transfer of response.data.transfers) {
