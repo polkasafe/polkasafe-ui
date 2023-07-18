@@ -396,7 +396,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 							isProxyRemovalApproval={isProxyRemovalApproval}
 							notifications={notifications}
 							transactionFields={transactionFields}
-							customTx={true}
+							customTx={customTx}
 							decodedCallData={decodedCallData}
 							txnParams={txnParams}
 						/>
