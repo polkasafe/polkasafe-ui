@@ -93,7 +93,6 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		if(callDataFunc?.section === 'proxy'){
 			const func:any = data.extrinsicCall?.args[2].toHuman();
 			callDataFunc = func.args?.calls[0];
-			console.log(func.args?.calls[0].section);
 		}
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
