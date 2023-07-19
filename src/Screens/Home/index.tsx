@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Button, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -22,7 +23,6 @@ import { GnosisSafeService } from 'src/services';
 import { NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { createAdapter } from 'src/utils/web3';
 import styled from 'styled-components';
 
 const Home = () => {
@@ -50,9 +50,12 @@ const Home = () => {
 		const handleNewTransaction = async () => {
 			if (!activeMultisig) return;
 
-			if (web3AuthUser) {
+			if (web3AuthUser && ethProvider) {
 				const signer = ethProvider?.getSigner();
-				const adapter = createAdapter('eth', signer);
+				const adapter = new EthersAdapter({
+					ethers: ethProvider,
+					signerOrProvider: ethProvider.getSigner()
+				});
 				const txUrl = returnTxUrl(network);
 				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 
@@ -69,30 +72,6 @@ const Home = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [web3AuthUser, ethProvider]);
-
-	useEffect(() => {
-		if (!isOnchain) {
-			queueNotification({
-				className: 'bg-bg-secondary border-2 border-solid border-primary text-white',
-				closeIcon: (
-					<div
-						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-					>
-						<OutlineCloseIcon className='text-primary w-2 h-2' />
-					</div>
-				),
-				header: <span className='text-waiting'>No Existential Deposit</span>,
-				message: <div className=''>
-					<p>Please Add Existential Deposit to your Multisig to make it Onchain.</p>
-					<div className='flex justify-end w-full'>
-						<Button onClick={() => { setOpenTransactionModal(true); notification.destroy(); }} size='small' className='text-xs text-white bg-primary border-none outline-none'>Add Existential Deposit</Button>
-					</div>
-				</div>,
-				placement: 'bottomRight',
-				status: NotificationStatus.WARNING
-			});
-		}
-	}, [isOnchain]);
 
 	return (
 		<>

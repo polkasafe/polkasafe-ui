@@ -5,6 +5,7 @@
 /* eslint-disable sort-keys */
 
 import { SafeInfoResponse } from '@safe-global/api-kit';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import React, { useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
@@ -17,7 +18,6 @@ import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
 import { IMultisigAddress, NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { createAdapter } from 'src/utils/web3';
 
 import NameAddress from '../LinkMultisig/NameAddress';
 import SelectNetwork from '../LinkMultisig/SelectNetwork';
@@ -67,14 +67,18 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 				return;
 			}
 			else {
-
 				const signer = ethProvider.getSigner();
-				const adapter = createAdapter('web3', signer);
+				const adapter = new EthersAdapter({
+					ethers: ethProvider,
+					signerOrProvider: signer
+				});
 				const txUrl = returnTxUrl(network);
 				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 
 				const info = await gnosisService.getMultisigData(multisigAddress);
 				setMultisigInfo(info);
+
+				console.log('info', info);
 
 				// const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
 				// 	body: JSON.stringify({
@@ -102,6 +106,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					setLoading(false);
 					setNameAddress(false);
 					setViewOwners(false);
+					setThreshold(info.threshold);
 					setSignatoriesArray(info.owners.map(address => ({ name: '', address })));
 				}
 			}
@@ -141,26 +146,54 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const handleLinkMultisig = async () => {
 		setLoading(true);
 		if (multisigData) {
+			try {
 
-			await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-				body: JSON.stringify({
-					signatories: signatoriesArray.map(item => item.address),
-					threshold,
-					multisigName,
-					proxyAddress: multisigInfo?.address
-				}),
-				headers: firebaseFunctionsHeader('goerli', localStorage.getItem('address')!, localStorage.getItem('signature')!),
-				method: 'POST'
-			});
-		}
-		else {
+				await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+					body: JSON.stringify({
+						signatories: signatoriesArray.map(item => item.address),
+						threshold,
+						multisigName,
+						proxyAddress: multisigInfo?.address
+					}),
+					headers: firebaseFunctionsHeader('goerli', localStorage.getItem('address')!, localStorage.getItem('signature')!),
+					method: 'POST'
+				});
+
+				const signer = ethProvider.getSigner();
+				const adapter = new EthersAdapter({
+					ethers: ethProvider,
+					signerOrProvider: signer
+				});
+				const txUrl = returnTxUrl(network);
+				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
+
+				const pendingTx = await gnosisService.getPendingTx(multisigInfo!.address);
+				const completedTx = await gnosisService.getAllCompletedTx(multisigInfo!.address);
+				console.log('completedTx', completedTx, pendingTx);
+
+				queueNotification({
+					header: 'Success!',
+					message: 'Multisig Linked Successfully.',
+					status: NotificationStatus.SUCCESS
+				});
+			} catch (err) {
+				console.log(err);
+				queueNotification({
+					header: 'Error!',
+					message: 'Invalid Multisig',
+					status: NotificationStatus.ERROR
+				});
+
+			}
+		} else {
 			queueNotification({
 				header: 'Error!',
 				message: 'Invalid Multisig',
 				status: NotificationStatus.ERROR
 			});
-			setLoading(false);
 		}
+
+		setLoading(false);
 	};
 
 	return (

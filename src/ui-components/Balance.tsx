@@ -37,7 +37,7 @@ const Balance = ({ address, className }: Props) => {
 	return (
 		<div className={`bg-highlight rounded-lg px-[10px] py-[6px] ml-auto font-normal text-xs leading-[13px] flex items-center justify-center ${className}`}>
 			<span className='text-primary mr-2'>Balance: </span>
-			<span className='text-white'>{ethers.utils.parseUnits(balance.toString(), 'ether').toString()}</span>
+			<span className='text-white'>{parseFloat(balance).toFixed(3)}</span>
 		</div>
 	);
 };

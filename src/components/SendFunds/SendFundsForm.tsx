@@ -27,7 +27,6 @@ import BalanceInput from 'src/ui-components/BalanceInput';
 import { LineIcon, OutlineCloseIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
-import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
@@ -49,7 +48,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [note, setNote] = useState<string>('');
-	const [loading] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState('0');
 	const [recipientAddress, setRecipientAddress] = useState(defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
@@ -58,7 +57,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			value: account.address
 		}))
 	);
-	const [success] = useState(false);
+	const [success, setSuccess] = useState(false);
 	const [failure] = useState(false);
 
 	const [form] = Form.useForm();
@@ -71,48 +70,68 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 
-	const [totalDeposit] = useState<BN>(new BN(0));
-
-	const [totalGas] = useState<BN>(new BN(0));
-
-	const [initiatorBalance] = useState<BN>(new BN(0));
-
-	const [fetchBalancesLoading] = useState<boolean>(false);
-
 	const handleSubmit = async () => {
-		const signer = ethProvider.getSigner();
-		const web3Adapter = new Web3Adapter({
-			signerAddress: web3AuthUser!.accounts[0],
-			web3: web3Provider as any
-		});
-		const txUrl = returnTxUrl(network);
-		const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+		setLoading(true);
+		try {
+			const signer = ethProvider.getSigner();
+			const web3Adapter = new Web3Adapter({
+				signerAddress: web3AuthUser!.accounts[0],
+				web3: web3Provider as any
+			});
+			const txUrl = returnTxUrl(network);
+			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
 
-		const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser!.accounts[0], ethers.utils.parseUnits(amount, 'ether').toString(), web3AuthUser!.accounts[0]);
+			const safeTxHash = await gnosisService.createSafeTx(activeMultisig, web3AuthUser!.accounts[0], ethers.utils.parseUnits(amount, 'ether').toString(), web3AuthUser!.accounts[0]);
 
-		if (safeTxHash) {
-			const txBody = {
-				amount_token: ethers.utils.parseUnits(amount, 'ether').toString(),
-				data: '0x00',
-				safeAddress: activeMultisig,
-				to: web3AuthUser?.accounts[0],
-				txHash: safeTxHash
-			};
-			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
-				body: JSON.stringify(txBody),
-				headers: {
-					'Accept': 'application/json',
-					'Acess-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'x-address': web3AuthUser!.accounts[0],
-					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
-					'x-network': network,
-					'x-signature': localStorage.getItem('signature')!,
-					'x-source': 'polkasafe'
-				},
-				method: 'POST'
-			}).then(res => res.json());
+			if (safeTxHash) {
+				const txBody = {
+					amount_token: ethers.utils.parseUnits(amount, 'ether').toString(),
+					data: '0x00',
+					note,
+					safeAddress: activeMultisig,
+					to: web3AuthUser?.accounts[0],
+					txHash: safeTxHash,
+					type: 'sent'
+				};
+				const { error: multisigError } = await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
+					body: JSON.stringify(txBody),
+					headers: {
+						'Accept': 'application/json',
+						'Acess-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+						'x-address': web3AuthUser!.accounts[0],
+						'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+						'x-network': network,
+						'x-signature': localStorage.getItem('signature')!,
+						'x-source': 'polkasafe'
+					},
+					method: 'POST'
+				}).then(res => res.json());
+				if (multisigError) {
+					queueNotification({
+						header: 'Error.',
+						message: 'Please try again.',
+						status: NotificationStatus.ERROR
+					});
+				}
+				setSuccess(true);
+				queueNotification({
+					header: 'Success',
+					message: 'New Transaction Created.',
+					status: NotificationStatus.SUCCESS
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			setNewTxn?.(prev => !prev);
+			onCancel?.();
+			queueNotification({
+				header: 'Error.',
+				message: 'Please try again.',
+				status: NotificationStatus.ERROR
+			});
 		}
+		setLoading(true);
 
 	};
 
@@ -243,13 +262,13 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						created_at={new Date()}
 					/> :
 					<Spin wrapperClassName={className} spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
-						{initiatorBalance.lte(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+						{/* {initiatorBalance.lte(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 							<WarningCircleIcon />
 							<p>The balance in your logged in account {addressBook.find((item: any) => item.address === address)?.name} is less than the Minimum Deposit({formatBnBalance(totalDeposit.add(totalGas), { numberAfterComma: 3, withUnit: true }, network)}) required to create a Transaction.</p>
 						</section>
 							:
 							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }} />
-						}
+						} */}
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}
 							form={form}
@@ -367,7 +386,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								</div>
 							</section>
 
-							<section className='mt-[15px]'>
+							{/* <section className='mt-[15px]'>
 								<div className='flex items-center gap-x-[10px]'>
 									<article className='w-[500px] flex items-center gap-x-3'>
 										<p className='text-white text-sm font-normal leading-[15px]'>
@@ -383,7 +402,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										</p>
 									</article>
 								</div>
-							</section>
+							</section> */}
 
 							{/* <section className='mt-4 max-w-[500px] text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg font-normal text-xs leading-[13px] flex items-center gap-x-[11px]'>
 						<span>
@@ -397,7 +416,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-							<ModalBtn disabled={false}
+							<ModalBtn disabled={amount === '0' || !recipientAddress}
 								// !recipientAddress || !validRecipient || amount.isZero() || amount.gte(new BN(multisigBalance)) || initiatorBalance.lt(totalDeposit.add(totalGas))
 								loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 						</section>

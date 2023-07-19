@@ -27,6 +27,7 @@ const NetworksDropdown: FC<INetworksDropdownProps> = ({ className, isCardToken, 
 	const isMouseEnter = useRef(false);
 
 	const handleSetNetwork = async (networkToSet: string) => {
+		console.log('networkToSet', networkToSet);
 		localStorage.setItem('network', networkToSet);
 		setNetwork(networkToSet as any);
 		toggleVisibility(false);

@@ -37,12 +37,12 @@ const RemoveAddress = ({ addressToRemove, name }: { addressToRemove: string, nam
 					return;
 				}
 
-				const removeAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/removeFromAddressBook`, {
+				const removeAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/removeFromAddressBookEth`, {
 					body: JSON.stringify({
 						address: addressToRemove,
 						name
 					}),
-					headers: firebaseFunctionsHeader(network),
+					headers: firebaseFunctionsHeader(network, userAddress, signature),
 					method: 'POST'
 				});
 

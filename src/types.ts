@@ -130,7 +130,8 @@ export interface IMultisigAddress {
 	updated_at?: Date;
 	threshold: number;
 	proxy?: string
-	disabled?: boolean
+	disabled?: boolean;
+	type?: 'fund' | 'sent'
 }
 
 export interface IUserResponse extends IUser {
@@ -166,7 +167,7 @@ export interface IQueueItem {
 export interface ITransaction {
 	callData?: string;
 	callHash: string;
-	created_at: Date;
+	created_at: any;
 	block_number: number;
 	from: string;
 	to: string;
@@ -180,7 +181,8 @@ export interface ITransaction {
 		[address: string]: {
 			lastNotified: Date;
 		}
-	}
+	},
+	type?: string
 }
 
 export interface INotification {

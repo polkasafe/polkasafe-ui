@@ -28,7 +28,6 @@ const BalanceInput = ({ className, label = '', onChange, placeholder = '', defau
 					className='border-0 outline-0 my-0 p-0'
 					name="balance"
 					rules={[{ required: true }]}
-					help={'Please input a valid value'}
 				>
 					<div className='flex items-center h-[40px]'>
 						<Input

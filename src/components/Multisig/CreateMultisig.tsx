@@ -86,6 +86,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 	};
 
 	const handleMultisigCreate = async () => {
+		setLoading(true);
 		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
@@ -94,104 +95,69 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 				return;
 			}
 			else {
-				if (web3AuthUser) {
-					const signer = ethProvider.getSigner();
-					const adapter = createAdapter('eth', ethProvider);
-					const txUrl = returnTxUrl(network);
-					const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
-					const safeAddress = await gnosisService.createSafe(
-						signatories as [string],
-						threshold!);
-					if (safeAddress === '') return;
-					const { data: multisigData, error: multisigError } = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
-						body: JSON.stringify({
-							signatories: signatories,
-							threshold,
-							multisigName,
-							proxyAddress: safeAddress
 
-						}),
-						headers: firebaseFunctionsHeader(network, address, signature),
-						method: 'POST'
-					}).then(res => res.json());
+				const signer = ethProvider.getSigner();
+				const adapter = createAdapter('eth', ethProvider);
+				const txUrl = returnTxUrl(network);
+				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
+				const safeAddress = await gnosisService.createSafe(
+					signatories as [string],
+					threshold!);
+				if (safeAddress === '') return;
+				const { data: multisigData, error: multisigError } = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
+					body: JSON.stringify({
+						signatories: signatories,
+						threshold,
+						multisigName,
+						safeAddress: '0x123'
 
-					if (multisigError) {
-						queueNotification({
-							header: 'Error!',
-							message: multisigError,
-							status: NotificationStatus.ERROR
-						});
-						setLoading(false);
-						setFailure(true);
-						return;
-					}
+					}),
+					headers: firebaseFunctionsHeader(network, address, signature),
+					method: 'POST'
+				}).then(res => res.json());
 
-					if (multisigData) {
-						if (multisigAddresses?.some((item: any) => item.address === multisigData.address && !item.disabled)) {
-							queueNotification({
-								header: 'Multisig Exist!',
-								message: 'Please try adding a different multisig.',
-								status: NotificationStatus.WARNING
-							});
-							setLoading(false);
-							return;
-						}
-						queueNotification({
-							header: 'Success!',
-							message: `Your Multisig ${multisigName} has been created successfully!`,
-							status: NotificationStatus.SUCCESS
-						});
-						setCreateMultisigData(multisigData);
-					}
-				} else {
-					setLoading(true);
-					setLoadingMessages('Creating Your Multisig.');
-					const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-						body: JSON.stringify({
-							signatories,
-							threshold,
-							multisigName
-						}),
-						headers: firebaseFunctionsHeader(network, address, signature),
-						method: 'POST'
+				if (multisigError) {
+					queueNotification({
+						header: 'Error!',
+						message: multisigError,
+						status: NotificationStatus.ERROR
 					});
+					setLoading(false);
+					setFailure(true);
+					return;
+				}
 
-					const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress };
-
-					if (multisigError) {
+				if (multisigData) {
+					if (multisigAddresses?.some((item: any) => item.address === multisigData.address && !item.disabled)) {
 						queueNotification({
-							header: 'Error!',
-							message: multisigError,
-							status: NotificationStatus.ERROR
+							header: 'Multisig Exist!',
+							message: 'Please try adding a different multisig.',
+							status: NotificationStatus.WARNING
 						});
 						setLoading(false);
-						setFailure(true);
 						return;
 					}
-
-					if (multisigData) {
-						if (multisigAddresses?.some((item: any) => item.address === multisigData.address && !item.disabled)) {
-							queueNotification({
-								header: 'Multisig Exist!',
-								message: 'Please try adding a different multisig.',
-								status: NotificationStatus.WARNING
-							});
-							setLoading(false);
-							return;
-						}
-						queueNotification({
-							header: 'Success!',
-							message: `Your Multisig ${multisigName} has been created successfully!`,
-							status: NotificationStatus.SUCCESS
-						});
-						setCreateMultisigData(multisigData);
-					}
-
+					queueNotification({
+						header: 'Success!',
+						message: `Your Multisig ${multisigName} has been created successfully!`,
+						status: NotificationStatus.SUCCESS
+					});
+					setCreateMultisigData(multisigData);
 				}
+
 			}
 		} catch (error) {
 			console.log('ERROR', error);
+			setFailure(true);
+
+			queueNotification({
+				header: 'Something went wrong.',
+				message: 'Please try again with different addresses.',
+				status: NotificationStatus.ERROR
+			});
+
 		}
+		setLoading(false);
 	};
 
 	const AddAddressModal: FC = () => {
@@ -275,11 +241,11 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 										<Search addAddress={addAddress} setAddAddress={setAddAddress} />
 										<AddAddressModal />
 									</div> : null}
-									<div className='flex flex-col items-end justify-center absolute top-1 right-1 z-50'>
+									{/* <div className='flex flex-col items-end justify-center absolute top-1 right-1 z-50'>
 										<div className='flex items-center justify-center mb-2'>
 											<p className='mx-2 text-white'>Upload JSON file with signatories</p><Switch size='small' onChange={(checked) => setUploadSignatoriesJson(checked)} />
 										</div>
-									</div>
+									</div> */}
 								</div>
 								<Form.Item
 									name="signatories"
@@ -337,7 +303,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						</div>
 					</div>
 				</Form>
-			</Spin>
+			</Spin >
 		</>
 	);
 };

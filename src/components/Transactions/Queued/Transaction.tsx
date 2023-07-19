@@ -42,11 +42,11 @@ interface ITransactionProps {
 const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
 
 	const { activeMultisig, address } = useGlobalUserDetailsContext();
-	const [loading] = useState(false);
-	const [success] = useState(false);
-	const [failure] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [success, setSuccess] = useState(false);
+	const [failure, setFailure] = useState(false);
 	const [getMultiDataLoading] = useState(false);
-	const [loadingMessages] = useState('');
+	const [loadingMessages, setLoadingMessage] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { network } = useGlobalApiContext();
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
@@ -62,6 +62,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const hash = location.hash.slice(1);
 
 	const handleApproveTransaction = async () => {
+		setLoading(true);
 		try {
 			const signer = ethProvider.getSigner();
 			const web3Adapter = new Web3Adapter({
@@ -90,14 +91,20 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
+				setSuccess(true);
+				setLoadingMessage('Transaction Signed Successfully.');
 			}
 
 		} catch (error) {
 			console.log(error);
+			setFailure(true);
+			setLoadingMessage('Something went wrong! Please try again.');
 		}
+		setLoading(false);
 	};
 
 	const handleExecuteTransaction = async () => {
+		setLoading(true);
 		try {
 			const signer = ethProvider.getSigner();
 			const web3Adapter = new Web3Adapter({
@@ -126,11 +133,16 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
+				setSuccess(true);
+				setLoadingMessage('Transaction Executed Successfully.');
 			}
 
 		} catch (error) {
 			console.log(error);
+			setFailure(true);
+			setLoadingMessage('Something went wrong! Please try again.');
 		}
+		setLoading(false);
 	};
 
 	return (

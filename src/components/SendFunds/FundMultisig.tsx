@@ -11,10 +11,13 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
+import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
 import TransactionSuccessScreen from './TransactionSuccessScreen';
@@ -25,9 +28,9 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 
 	const { sendNativeToken } = useGlobalWeb3Context();
 
-	const [selectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
+	const [selectedSender] = useState(addressBook[0].address);
 	const [amount, setAmount] = useState('0');
-	const [loading] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure] = useState(false);
 	const [loadingMessages] = useState<string>('');
@@ -35,8 +38,38 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
 
 	const handleSubmit = async () => {
-		await sendNativeToken(activeMultisig, ethers.utils.parseUnits(amount, 'ether'));
-		setSuccess(true);
+		setLoading(true);
+		try {
+			const { transactionHash, to } = await sendNativeToken(activeMultisig, ethers.utils.parseUnits(amount, 'ether'));
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
+				body: JSON.stringify({
+					amount_token: ethers.utils.parseUnits(amount.toString(), 'ether').toString(),
+					// eslint-disable-next-line sort-keys
+					from: selectedSender, safeAddress: activeMultisig, data: '', txHash: transactionHash, to, note: '', type: 'fund', executed: true
+
+				}),
+				headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
+				method: 'POST'
+			}).then(res => res.json());
+			queueNotification({
+				header: 'Success!',
+				message: 'You have successfully completed the transaction. ',
+				status: NotificationStatus.SUCCESS
+			});
+			setSuccess(true);
+		} catch (err) {
+			console.log('error from handleSubmit sendNativeToken', err);
+			setNewTxn?.(prev => !prev);
+			onCancel();
+			queueNotification({
+				header: 'Error!',
+				message: 'Please try again',
+				status: NotificationStatus.ERROR
+			});
+
+		}
+
+		setLoading(false);
 	};
 
 	return (
@@ -50,7 +83,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 				txnHash={txnHash}
 				onDone={() => {
 					setNewTxn?.(prev => !prev);
-					onCancel();
+
 				}}
 			/>
 				: failure ? <FailedTransactionLottie message='Failed!' />
@@ -133,7 +166,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
 									<ModalBtn
-										disabled={false}
+										disabled={amount == '0'}
 										loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>

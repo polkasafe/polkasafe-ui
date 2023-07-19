@@ -92,7 +92,7 @@ const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLo
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{recipientAddress && amount ?
+				{recipientAddress && amount &&
 					<>
 						<p
 							className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
@@ -147,15 +147,10 @@ const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLo
 									</p>}
 							</div>
 						</div>
-					</> : isProxyApproval || isProxyAddApproval || isProxyRemovalApproval || getMultiDataLoading ? <></>
-						: <section className='w-full text-waiting bg-waiting bg-opacity-10 p-3 rounded-lg flex items-center gap-x-[11px]'>
-							<span>
-								<WarningCircleIcon className='text-base' />
-							</span>
-						</section>}
-				{!callData &&
+					</>}
+				{/* {!callData &&
 					<Input size='large' placeholder='Enter Call Data.' className='w-full my-2 text-sm font-normal leading-[15px] border-0 outline-0 placeholder:text-[#505050] bg-bg-secondary rounded-md text-white' onChange={(e) => setCallDataString(e.target.value)} />
-				}
+				} */}
 				{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && <Divider className='bg-text_secondary my-5' />}
 				<div
 					className='flex items-center gap-x-5 mt-3'
@@ -373,7 +368,7 @@ const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLo
 					</div>
 				</div>
 			</article>
-		</div>
+		</div >
 	);
 };
 

@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
 import { Divider, Spin } from 'antd';
+import { ethers } from 'ethers';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -44,7 +45,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				<span
 					className='text-success'
 				>
-					{amount} {amountType} ({amount_usd} USD)
+					{ethers.utils.formatEther(amount)}
 				</span>
 				<span>
 					from:
@@ -60,13 +61,13 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 					<p
 						className='font-medium text-sm leading-[15px] text-white'
 					>
-						{addressBook?.find((item: any) => item.address === from)?.name || DEFAULT_ADDRESS_NAME}
+						{addressBook?.find((item: any) => item.address === from)?.name || from}
 					</p>
 					<p
 						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 					>
 						<span>
-							{getEncodedAddress(from, network)}
+							{from}
 						</span>
 						<span
 							className='flex items-center gap-x-2 text-sm'

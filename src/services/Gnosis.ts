@@ -19,7 +19,7 @@ export class GnosisSafeService {
 
 	}
 
-	createSafe = async (owners: [string], threshold: number): Promise<string> => {
+	createSafe = async (owners: [string], threshold: number): Promise<string | undefined> => {
 		try {
 			const safeAccountConfig: SafeAccountConfig = {
 				owners,
@@ -38,7 +38,6 @@ export class GnosisSafeService {
 			return safeAddress;
 		} catch (err) {
 			console.log('error from createSafe', err);
-			return '';
 		}
 	};
 
