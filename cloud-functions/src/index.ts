@@ -2457,10 +2457,10 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 					[substrateAddressToAdd]: {
 						name,
 						address: addressToAdd,
-						email,
-						discord,
-						telegram,
-						roles
+						email: email || '',
+						discord: discord || '',
+						telegram: telegram || '',
+						roles: roles || []
 					}
 				},
 				multisig: substrateMultisigAddress

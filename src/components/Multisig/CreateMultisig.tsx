@@ -11,19 +11,21 @@ import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_USER_ADDRESS_NAME } from 'src/global/default';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress, ISharedAddressBooks } from 'src/types';
+import { IMultisigAddress, ISharedAddressBookRecord } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
@@ -43,8 +45,9 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
-	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState, address: userAddress, addressBook, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
+	const { setActiveMultisigContextState } = useActiveMultisigContext();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -65,56 +68,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 
 	const [createMultisigData, setCreateMultisigData] = useState<IMultisigAddress>({} as any);
 
-	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
-		if(!address || !name) return;
-
-		if(!getSubstrateAddress(address)){
-			return;
-		}
-
-		try{
-
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
-					body: JSON.stringify({
-						address,
-						multisigAddress,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
-
-				if(addAddressError) {
-
-					queueNotification({
-						header: 'Error!',
-						message: addAddressError,
-						status: NotificationStatus.ERROR
-					});
-					return;
-				}
-
-				if(addAddressData){
-					console.log(addAddressData);
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-		}
-	};
-
 	const createProxy = (multisigData: IMultisigAddress, create: boolean) => {
 		setUserDetailsContextState((prevState) => {
 			return {
@@ -130,6 +83,24 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				}
 			};
 		});
+		const records: { [address: string]: ISharedAddressBookRecord } = {};
+		multisigData.signatories.forEach((signatory) => {
+			const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory));
+			const substrateSignatory = getSubstrateAddress(signatory) || signatory;
+			records[substrateSignatory] = {
+				address: signatory,
+				name: data?.name || DEFAULT_ADDRESS_NAME,
+				email: data?.email,
+				discord: data?.discord,
+				telegram: data?.telegram,
+				roles: data?.roles
+			};
+		});
+		setActiveMultisigContextState(prev => ({
+			...prev,
+			records,
+			multisig: multisigData.address
+		}));
 		onCancel?.();
 		if(create){
 			openModal('Create Proxy', <AddProxy onCancel={() => toggleVisibility()} />);
@@ -218,7 +189,19 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						status: NotificationStatus.SUCCESS
 					});
 					const results = await Promise.allSettled(signatories.map(
-						(item) => handleAddAddress(item, DEFAULT_USER_ADDRESS_NAME, multisigData.address)
+						(signatory) => {
+							const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory));
+							return addToSharedAddressBook({
+								address: signatory,
+								name: data?.name || DEFAULT_ADDRESS_NAME,
+								multisigAddress: multisigData.address,
+								email: data?.email,
+								discord: data?.discord,
+								telegram: data?.telegram,
+								roles: data?.roles,
+								network
+							});
+						}
 					));
 					results.forEach((result) => {
 						if(result.status === 'rejected'){

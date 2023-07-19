@@ -72,8 +72,6 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 		fetchBalances();
 	}, [api, apiReady, addressBook, addresses]);
 
-	console.log(addresses);
-
 	const dragStart = (event:any) => {
 		event.dataTransfer.setData('text', event.target.id);
 	};

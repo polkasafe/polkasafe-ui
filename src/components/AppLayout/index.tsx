@@ -32,7 +32,7 @@ export interface IRouteInfo {
 }
 
 const AppLayout = ({ className }: {className?: string}) => {
-	const { activeMultisig } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { setActiveMultisigContextState } = useActiveMultisigContext();
 	const { network } = useGlobalApiContext();
 	const { iframeVisibility, setIframeVisibility } = useGlobalDAppContext();
@@ -41,6 +41,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const [iframeState, setIframeState] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
@@ -52,7 +53,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 		setMultisigChanged(true);
 		const getSharedAddressBookRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getSharedAddressBook`, {
 			body: JSON.stringify({
-				multisigAddress: activeMultisig
+				multisigAddress: multisig?.proxy ? multisig.proxy : multisig?.address
 			}),
 			headers: firebaseFunctionsHeader(network),
 			method: 'POST'
@@ -61,7 +62,6 @@ const AppLayout = ({ className }: {className?: string}) => {
 		const { data: sharedAddressBookData, error: sharedAddressBookError } = await getSharedAddressBookRes.json() as { data: ISharedAddressBooks, error: string };
 
 		if(!sharedAddressBookError && sharedAddressBookData){
-			console.log(sharedAddressBookData);
 			setActiveMultisigContextState(sharedAddressBookData as any);
 		}else {
 			setActiveMultisigContextState(initialActiveMultisigContext);
