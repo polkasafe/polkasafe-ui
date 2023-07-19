@@ -17,19 +17,25 @@ import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { CHANNEL, NotificationStatus } from 'src/types';
+import { CHANNEL, ISharedAddressBooks, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
 const Home = ({ className }: { className?: string }) => {
-	const { address, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
+	const { address: userAddress, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
+	const { records } = useActiveMultisigContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	const [openProxyModal, setOpenProxyModal] = useState(false);
@@ -76,6 +82,14 @@ const Home = ({ className }: { className?: string }) => {
 				const proxyAddress = getEncodedAddress(params[0].value, network);
 				if(proxyAddress){
 					setProxyNotInDb(true);
+					const results = await Promise.allSettled(multisig.signatories.map(
+						(item) => handleAddAddress(item, records[item].name || DEFAULT_ADDRESS_NAME, proxyAddress)
+					));
+					results.forEach((result) => {
+						if(result.status === 'rejected'){
+							console.log('ERROR', result.reason);
+						}
+					});
 				}
 			}
 		};
@@ -86,6 +100,7 @@ const Home = ({ className }: { className?: string }) => {
 			setHasProxy(false);
 			fetchProxyData();
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [multisig, network]);
 
 	useEffect(() => {
@@ -132,6 +147,56 @@ const Home = ({ className }: { className?: string }) => {
 		}
 	}, [isOnchain]);
 
+	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
+		if(!address || !name) return;
+
+		if(!getSubstrateAddress(address)){
+			return;
+		}
+
+		try{
+
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
+					body: JSON.stringify({
+						address,
+						multisigAddress,
+						name
+					}),
+					headers: firebaseFunctionsHeader(network),
+					method: 'POST'
+				});
+
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
+
+				if(addAddressError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addAddressError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
+
+				if(addAddressData){
+					console.log(addAddressData);
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
+
 	const AddProxyModal: React.FC = () => {
 		return (
 			<>
@@ -159,7 +224,7 @@ const Home = ({ className }: { className?: string }) => {
 	return (
 		<>
 			{
-				address ?
+				userAddress ?
 					<>
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?

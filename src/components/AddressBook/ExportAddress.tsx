@@ -6,9 +6,9 @@ import React from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
 import { useModalContext } from 'src/context/ModalContext';
-import { IAddressBookItem } from 'src/types';
+import { ISharedAddressBookRecord } from 'src/types';
 
-const ExportAdress = ({ addresses }: { addresses: IAddressBookItem[] }) => {
+const ExportAdress = ({ records }: { records: { [address: string]: ISharedAddressBookRecord } }) => {
 	const { toggleVisibility } = useModalContext();
 	const downloadFile = ({ data, fileName, fileType }: { data: any, fileName: string, fileType: string }) => {
 		// Create a blob with the data we want to download as a file
@@ -31,7 +31,7 @@ const ExportAdress = ({ addresses }: { addresses: IAddressBookItem[] }) => {
 	const exportToJson = () => {
 		// e.preventDefault();
 		downloadFile({
-			data: JSON.stringify(addresses),
+			data: JSON.stringify(records),
 			fileName: 'address-book.json',
 			fileType: 'text/json'
 		});
@@ -43,8 +43,8 @@ const ExportAdress = ({ addresses }: { addresses: IAddressBookItem[] }) => {
 		const headers = ['Name,Address,Email,Discord,Telegram,Roles'];
 
 		// Convert users data to a csv
-		const usersCsv = addresses.reduce((acc, user) => {
-			const { name, address, email, discord, telegram, roles } = user;
+		const usersCsv = Object.keys(records).reduce((acc, a) => {
+			const { name, address, email, discord, telegram, roles } = records[a];
 			acc.push([name, address, email || '-', discord || '-', telegram || '-', roles && roles.length ? roles.join(',') : '-'].join(','));
 			return acc;
 		}, ['']);
@@ -61,7 +61,7 @@ const ExportAdress = ({ addresses }: { addresses: IAddressBookItem[] }) => {
 		<div className='flex flex-col w-[560px]'>
 			<div className="flex items-left justify-left">
 				<p className='mr-2 text-white'>You are about to export a JSON file with</p>
-				<div className='bg-highlight text-primary px-2 rounded-md'>{addresses.length} address book entries</div>
+				<div className='bg-highlight text-primary px-2 rounded-md'>{Object.keys(records).length} address book entries</div>
 			</div>
 			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 				<CancelBtn onClick={toggleVisibility}/>

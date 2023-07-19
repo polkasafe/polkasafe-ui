@@ -14,7 +14,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { IAddressBookItem, IMultisigAddress } from 'src/types';
+import { IMultisigAddress, ISharedAddressBooks } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
@@ -54,8 +54,15 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 		setNameAddress(false);
 	};
 
-	const handleAddAddress = async (address: string, name: string) => {
+	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
+		if(!address || !name) return;
+
+		if(!getSubstrateAddress(address)){
+			return;
+		}
+
 		try{
+
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
@@ -65,35 +72,35 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 			}
 			else{
 
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
 					body: JSON.stringify({
 						address,
+						multisigAddress,
 						name
 					}),
 					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
 
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
 
 				if(addAddressError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addAddressError,
+						status: NotificationStatus.ERROR
+					});
 					return;
 				}
 
 				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							addressBook: addAddressData
-						};
-					});
-
+					console.log(addAddressData);
 				}
 
 			}
 		} catch (error){
 			console.log('ERROR', error);
-			setLoading(false);
 		}
 	};
 
@@ -186,7 +193,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						};
 					});
 					const results = await Promise.allSettled(signatoriesWithName.map(
-						(signatory) => handleAddAddress(signatory.address, signatory.name)
+						(signatory) => handleAddAddress(signatory.address, signatory.name, multisigData.address)
 					));
 					results.forEach((result) => {
 						if(result.status === 'rejected'){

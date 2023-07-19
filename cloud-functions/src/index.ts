@@ -17,7 +17,6 @@ import {
 	IUserNotificationTriggerPreferences,
 	IUserNotificationChannelPreferences,
 	ITransactionFields,
-	ISharedAddressBookRecord,
 	ISharedAddressBooks } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
@@ -2449,22 +2448,67 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 		if (!substrateAddressToAdd || !substrateMultisigAddress) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			const updatedAddressEntry: ISharedAddressBookRecord = {
-				name,
-				address: addressToAdd,
-				email,
-				discord,
-				telegram,
-				roles
+			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
+			const addressBookDoc = await addressBookRef.get();
+			const addressBookData = addressBookDoc.data() as ISharedAddressBooks;
+			const updatedAddressEntry: ISharedAddressBooks = {
+				records: {
+					...addressBookData?.records,
+					[substrateAddressToAdd]: {
+						name,
+						address: addressToAdd,
+						email,
+						discord,
+						telegram,
+						roles
+					}
+				},
+				multisig: substrateMultisigAddress
 			};
 
-			const addressRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
-			addressRef.update({ [`records.${substrateAddressToAdd}`]: updatedAddressEntry });
-			addressRef.update({ ['multisig']: substrateMultisigAddress });
+			await addressBookRef.set({ ...updatedAddressEntry }, { merge: true });
 
-			return res.status(200).json({ data: responseMessages.success });
+			return res.status(200).json({ data: updatedAddressEntry });
 		} catch (err:unknown) {
 			functions.logger.error('Error in updateSharedAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const removeFromSharedAddressBook = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { address: addresssToRemove, multisigAddress } = req.body;
+		if (!addresssToRemove || !multisigAddress) return res.status(400).json({ error: responseMessages.missing_params });
+		const substrateAddressToRemove = getSubstrateAddress(String(addresssToRemove));
+		const substrateMultisigAddress = getSubstrateAddress(String(multisigAddress));
+		if (!substrateAddressToRemove || !substrateMultisigAddress) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
+			const addressBookDoc = await addressBookRef.get();
+			const addressBookData = addressBookDoc.data() as ISharedAddressBooks;
+			const updatedAddressEntry: ISharedAddressBooks = {
+				...addressBookData,
+				records: {
+					...addressBookData?.records
+				}
+			};
+
+			delete updatedAddressEntry.records[substrateAddressToRemove];
+
+			await addressBookRef.update({ records: updatedAddressEntry.records });
+
+			return res.status(200).json({ data: updatedAddressEntry });
+		} catch (err:unknown) {
+			functions.logger.error('Error in removeFromSharedAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -2489,7 +2533,7 @@ export const getSharedAddressBook = functions.https.onRequest(async (req, res) =
 			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
 			const addressBookDoc = await addressBookRef.get();
 
-			return res.status(200).json({ data: addressBookDoc.exists ? (addressBookDoc.data() as ISharedAddressBooks).records || {} : {} });
+			return res.status(200).json({ data: addressBookDoc.exists ? (addressBookDoc.data() as ISharedAddressBooks) || {} : {} });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getSharedAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });

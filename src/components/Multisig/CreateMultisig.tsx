@@ -14,10 +14,11 @@ import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_USER_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress } from 'src/types';
+import { IMultisigAddress, ISharedAddressBooks } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -63,6 +64,56 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const [form] = Form.useForm();
 
 	const [createMultisigData, setCreateMultisigData] = useState<IMultisigAddress>({} as any);
+
+	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
+		if(!address || !name) return;
+
+		if(!getSubstrateAddress(address)){
+			return;
+		}
+
+		try{
+
+			const userAddress = localStorage.getItem('address');
+			const signature = localStorage.getItem('signature');
+
+			if(!userAddress || !signature) {
+				console.log('ERROR');
+				return;
+			}
+			else{
+
+				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
+					body: JSON.stringify({
+						address,
+						multisigAddress,
+						name
+					}),
+					headers: firebaseFunctionsHeader(network),
+					method: 'POST'
+				});
+
+				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
+
+				if(addAddressError) {
+
+					queueNotification({
+						header: 'Error!',
+						message: addAddressError,
+						status: NotificationStatus.ERROR
+					});
+					return;
+				}
+
+				if(addAddressData){
+					console.log(addAddressData);
+				}
+
+			}
+		} catch (error){
+			console.log('ERROR', error);
+		}
+	};
 
 	const createProxy = (multisigData: IMultisigAddress, create: boolean) => {
 		setUserDetailsContextState((prevState) => {
@@ -165,6 +216,14 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						header: 'Success!',
 						message: `Your Multisig ${multisigName} has been created successfully!`,
 						status: NotificationStatus.SUCCESS
+					});
+					const results = await Promise.allSettled(signatories.map(
+						(item) => handleAddAddress(item, DEFAULT_USER_ADDRESS_NAME, multisigData.address)
+					));
+					results.forEach((result) => {
+						if(result.status === 'rejected'){
+							console.log('ERROR', result.reason);
+						}
 					});
 					setCreateMultisigData(multisigData);
 					await addExistentialDeposit(multisigData);

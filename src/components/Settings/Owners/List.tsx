@@ -77,6 +77,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					emailToEdit={emailToEdit}
 					rolesToEdit={rolesToEdit}
 					telegramToEdit={telegramToEdit}
+					shared={false}
 				/>
 			</Modal>
 		</>
@@ -124,7 +125,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 						</div>
 					</div>
 					<div className='col-span-1 flex items-center gap-x-[10px]'>
-						<EditAddressModal addressToEdit={userAddressObject?.address || ''} nameToEdit={userAddressObject?.name} emailToEdit={userAddressObject?.email} discordToEdit={userAddressObject?.discord} telegramToEdit={userAddressObject?.telegram} rolesToEdit={userAddressObject?.roles}  />
+						<EditAddressModal className={className} addressToEdit={userAddressObject?.address || ''} nameToEdit={userAddressObject?.name} emailToEdit={userAddressObject?.email} discordToEdit={userAddressObject?.discord} telegramToEdit={userAddressObject?.telegram} rolesToEdit={userAddressObject?.roles}  />
 					</div>
 				</div>
 				<Divider className='bg-text_secondary my-0' />
