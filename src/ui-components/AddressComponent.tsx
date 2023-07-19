@@ -4,6 +4,7 @@
 import Identicon from '@polkadot/react-identicon';
 import { Badge } from 'antd';
 import React from 'react';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -26,6 +27,7 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30, onlyAddr
 
 	const { network } = useGlobalApiContext();
 	const { addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
+	const { records } = useActiveMultisigContext();
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
@@ -92,7 +94,7 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30, onlyAddr
 					<div
 						className='font-medium text-sm flex text-white'
 					>
-						{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || DEFAULT_ADDRESS_NAME}
+						{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || records?.[getSubstrateAddress(address) || address]?.name || DEFAULT_ADDRESS_NAME}
 					</div>
 					<div
 						className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'

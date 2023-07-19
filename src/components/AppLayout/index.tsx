@@ -62,17 +62,11 @@ const AppLayout = ({ className }: {className?: string}) => {
 
 		if(!sharedAddressBookError && sharedAddressBookData){
 			console.log(sharedAddressBookData);
-			setActiveMultisigContextState((prevState) => {
-				return {
-					...prevState,
-					multisig: sharedAddressBookData.multisig,
-					records: sharedAddressBookData.records
-				};
-			});
+			setActiveMultisigContextState(sharedAddressBookData as any);
 		}else {
 			setActiveMultisigContextState(initialActiveMultisigContext);
 		}
-		setLoading(false);
+		setMultisigChanged(false);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeMultisig, network]);
 
@@ -81,10 +75,6 @@ const AppLayout = ({ className }: {className?: string}) => {
 	}, [getSharedAddressBook]);
 
 	useEffect(() => {
-		setMultisigChanged(true);
-		setTimeout(() => {
-			setMultisigChanged(false);
-		}, 500);
 		setLoading(true);
 	}, [activeMultisig]);
 
@@ -184,7 +174,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 
 					) : (
 						<>
-							<Content className='bg-bg-secondary p-[30px] rounded-lg'>
+							<Content className='bg-bg-secondary p-[30px] max-w-[100%] lg:max-w-[calc(100%-180px)] rounded-lg'>
 								{multisigChanged ? (
 									<Loader size='large' />
 								) : (
