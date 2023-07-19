@@ -21,14 +21,12 @@ import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { CHANNEL, ISharedAddressBooks, NotificationStatus } from 'src/types';
+import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
@@ -83,7 +81,16 @@ const Home = ({ className }: { className?: string }) => {
 				if(proxyAddress){
 					setProxyNotInDb(true);
 					const results = await Promise.allSettled(multisig.signatories.map(
-						(item) => handleAddAddress(item, records[item].name || DEFAULT_ADDRESS_NAME, proxyAddress)
+						(item) => addToSharedAddressBook({
+							address: item,
+							name: records[item].name || DEFAULT_ADDRESS_NAME,
+							multisigAddress: proxyAddress,
+							email: records[item].email,
+							discord: records[item].discord,
+							telegram: records[item].telegram,
+							roles: records[item].roles,
+							network
+						})
 					));
 					results.forEach((result) => {
 						if(result.status === 'rejected'){
@@ -146,56 +153,6 @@ const Home = ({ className }: { className?: string }) => {
 			});
 		}
 	}, [isOnchain]);
-
-	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
-		if(!address || !name) return;
-
-		if(!getSubstrateAddress(address)){
-			return;
-		}
-
-		try{
-
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
-					body: JSON.stringify({
-						address,
-						multisigAddress,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
-
-				if(addAddressError) {
-
-					queueNotification({
-						header: 'Error!',
-						message: addAddressError,
-						status: NotificationStatus.ERROR
-					});
-					return;
-				}
-
-				if(addAddressData){
-					console.log(addAddressData);
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-		}
-	};
 
 	const AddProxyModal: React.FC = () => {
 		return (

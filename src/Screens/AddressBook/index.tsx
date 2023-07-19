@@ -4,7 +4,7 @@
 
 import { Button } from 'antd';
 import { Input } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddAdress from 'src/components/AddressBook/AddAddress';
 import AddressTable from 'src/components/AddressBook/AddressTable';
@@ -29,17 +29,26 @@ const AddressBook = ({ className }: { className?: string }) => {
 	const { records } = useActiveMultisigContext();
 	const [tab, setTab] = useState<ETab>(ETab.SHARED);
 	const personalAddressBookFiltered = addressBook.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
-	const sharedAddressBookFiltered: { [address: string]: ISharedAddressBookRecord } = {};
-	Object.keys(records).filter(address => records[address]?.name.toLowerCase().includes(searchTerm.toLowerCase())|| records[address]?.address.toLowerCase().includes(searchTerm.toLowerCase()) || records[address]?.roles?.includes(searchTerm)).forEach((address) => {
-		sharedAddressBookFiltered[address] = {
-			address: records[address].address,
-			discord: records[address]?.discord,
-			email: records[address]?.email,
-			name: records[address].name,
-			roles: records[address]?.roles,
-			telegram: records[address]?.telegram
-		};
-	});
+	const [sharedAddressBookFiltered, setSharedAddressBookFiltered] = useState<{ [address: string]: ISharedAddressBookRecord }>({} as any);
+	useEffect(() => {
+		if(!records) return;
+		Object.keys(records)?.filter(address => records[address]?.name.toLowerCase().includes(searchTerm.toLowerCase())|| records[address]?.address.toLowerCase().includes(searchTerm.toLowerCase()) || records[address]?.roles?.includes(searchTerm)).forEach((address) => {
+			setSharedAddressBookFiltered(prev => {
+				return {
+					...prev,
+					[address]: {
+						address: records[address]?.address,
+						discord: records[address]?.discord,
+						email: records[address]?.email,
+						name: records[address].name,
+						roles: records[address]?.roles,
+						telegram: records[address]?.telegram
+					}
+
+				};
+			});
+		});
+	}, [records, searchTerm, sharedAddressBookFiltered]);
 	const { openModal } = useModalContext();
 	const userAddress = localStorage.getItem('address');
 	return (

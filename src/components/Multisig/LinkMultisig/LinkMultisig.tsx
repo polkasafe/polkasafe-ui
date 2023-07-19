@@ -9,15 +9,16 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
+import { DEFAULT_ADDRESS_NAME,DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { IMultisigAddress, ISharedAddressBooks } from 'src/types';
+import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
+import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
@@ -52,56 +53,6 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	const viewNameAddress = () => {
 		setNameAddress(false);
-	};
-
-	const handleAddAddress = async (address: string, name: string, multisigAddress: string) => {
-		if(!address || !name) return;
-
-		if(!getSubstrateAddress(address)){
-			return;
-		}
-
-		try{
-
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateSharedAddressBook`, {
-					body: JSON.stringify({
-						address,
-						multisigAddress,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: ISharedAddressBooks, error: string };
-
-				if(addAddressError) {
-
-					queueNotification({
-						header: 'Error!',
-						message: addAddressError,
-						status: NotificationStatus.ERROR
-					});
-					return;
-				}
-
-				if(addAddressData){
-					console.log(addAddressData);
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-		}
 	};
 
 	const handleMultisigBadge = async (signatories: string[], threshold: number, multisigName: string, network: string) => {
@@ -193,7 +144,19 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 						};
 					});
 					const results = await Promise.allSettled(signatoriesWithName.map(
-						(signatory) => handleAddAddress(signatory.address, signatory.name, multisigData.address)
+						(signatory) => {
+							const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory.address));
+							return addToSharedAddressBook({
+								address: signatory.address,
+								name: signatory.name || data?.name || DEFAULT_ADDRESS_NAME,
+								multisigAddress: multisigData.address,
+								email: data?.email,
+								discord: data?.discord,
+								telegram: data?.telegram,
+								roles: data?.roles,
+								network
+							});
+						}
 					));
 					results.forEach((result) => {
 						if(result.status === 'rejected'){
