@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import alephzeroLogo from 'src/assets/parachains-logos/aleph-zero-logo.jpeg';
-import assethubLogo from 'src/assets/parachains-logos/assethub-logo.png';
+import assethubLogo from 'src/assets/parachains-logos/assethub-logo.svg';
 import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';

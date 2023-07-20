@@ -64,7 +64,7 @@ const Details = () => {
 				</div>
 				<div className='flex items-center justify-between gap-x-5 mt-5'>
 					<span>Blockchain:</span>
-					<span className='text-white capitalize'>{network === 'assethub-polkadot' ? 'Statemint' : network === 'assethub-kusama' ? 'Statemine' : network}</span>
+					<span className='text-white capitalize'>{network}</span>
 				</div>
 				{activeMultisig &&
 					<div className='flex items-center justify-between gap-x-5 mt-7'>
