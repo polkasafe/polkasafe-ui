@@ -7,6 +7,7 @@ import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { useRef,useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -25,6 +26,7 @@ interface IAddress {
 }
 const AddressDropdown = () => {
 	const { address, addressBook, loggedInWallet, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { setActiveMultisigContextState } = useActiveMultisigContext();
 	const { network } = useGlobalApiContext();
 	const navigate = useNavigate();
 
@@ -44,6 +46,11 @@ const AddressDropdown = () => {
 				multisigAddresses: []
 			};
 		});
+		setActiveMultisigContextState(prev => ({
+			...prev,
+			multisig: '',
+			records: {} as any
+		}));
 		toggleVisibility(false);
 		return navigate('/', { replace: true });
 	};

@@ -50,6 +50,7 @@ const NewUserModal = ({ open, onCancel }: INewUserModal) => {
 				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
 
 				if(addAddressError) {
+					console.log(addAddressError);
 					return;
 				}
 

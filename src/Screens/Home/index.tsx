@@ -131,7 +131,7 @@ const Home = ({ className }: { className?: string }) => {
 	}, [activeMultisig, api, apiReady, network, multisig, newTxn]);
 
 	useEffect(() => {
-		if(!isOnchain){
+		if(!isOnchain && userAddress && activeMultisig){
 			queueNotification({
 				className:'bg-bg-secondary border-2 border-solid border-primary text-white',
 				closeIcon: (
@@ -152,7 +152,7 @@ const Home = ({ className }: { className?: string }) => {
 				status: NotificationStatus.WARNING
 			});
 		}
-	}, [isOnchain]);
+	}, [activeMultisig, isOnchain, userAddress]);
 
 	const AddProxyModal: React.FC = () => {
 		return (

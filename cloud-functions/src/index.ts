@@ -218,7 +218,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
-			const { name, address: addressToAdd, roles, email, discord, telegram } = req.body;
+			const { name, address: addressToAdd, roles=[], email='', discord='', telegram='' } = req.body;
 			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
 			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });

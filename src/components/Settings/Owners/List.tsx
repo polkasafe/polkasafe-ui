@@ -5,6 +5,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Button, Divider, Modal } from 'antd';
 import React, { useState } from 'react';
 import EditAddress from 'src/components/AddressBook/Edit';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
@@ -86,6 +87,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 
 const ListOwners = ({ className, disabled }: { className?: string, disabled?: boolean }) => {
 	const { network } = useGlobalApiContext();
+	const { records } = useActiveMultisigContext();
 	const { multisigAddresses, activeMultisig, addressBook, address: userAddress } = useGlobalUserDetailsContext();
 	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const signatories = multisig?.signatories;
@@ -106,7 +108,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 			</article>
 			<article>
 				<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
-					<p className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
+					<p className='sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
 						{userAddressObject?.name || DEFAULT_ADDRESS_NAME}
 					</p>
 					<div className='col-span-2 flex items-center'>
@@ -137,8 +139,8 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 					return (
 						<article key={index}>
 							<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
-								<p className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
-									{addressObject?.name || DEFAULT_ADDRESS_NAME}
+								<p className='sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
+									{addressObject?.name || records?.[address]?.name || DEFAULT_ADDRESS_NAME}
 								</p>
 								<div className='col-span-2 flex items-center'>
 									<Identicon
@@ -177,33 +179,5 @@ export default styled(ListOwners)`
 	}
 	.ant-spin-nested-loading .ant-spin-blur::after{
 		opacity: 1 !important;
-	}
-
-	.ant-select-selector {
-		border: none !important;
-		padding: 8px 10px;
-		box-shadow: none !important;
-		background-color: #24272E !important;
-	}
-
-	.ant-select {
-		height: 40px !important;
-	}
-	.ant-select-selection-search {
-		inset: 0 !important;
-	}
-	.ant-select-selection-placeholder{
-		color: #505050 !important;
-		z-index: 100;
-		display: flex !important;
-		align-items: center !important;
-	}
-
-	.ant-select-multiple .ant-select-selection-item {
-		border: none !important;
-		background: #1573FE !important;
-		border-radius: 5px !important;
-		color: white !important;
-		margin-inline-end: 10px !important;
 	}
 `;
