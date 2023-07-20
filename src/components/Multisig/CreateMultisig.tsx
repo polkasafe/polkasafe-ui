@@ -43,7 +43,7 @@ interface IMultisigProps {
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }) => {
 	const { setUserDetailsContextState, address: userAddress, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
+	const { ethProvider } = useGlobalWeb3Context();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -52,11 +52,12 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 	const [threshold, setThreshold] = useState<number | null>(2);
 	const [signatories, setSignatories] = useState<string[]>([userAddress]);
 	const { openModal, toggleVisibility } = useModalContext();
+	const { fetchUserData } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [success] = useState<boolean>(false);
 	const [failure, setFailure] = useState<boolean>(false);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
+	const [loadingMessages] = useState<string>('');
 	const [addAddress, setAddAddress] = useState<string>('');
 	const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
 	const [cancelCreateProxy, setCancelCreateProxy] = useState<boolean>(false);
@@ -109,7 +110,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						signatories: signatories,
 						threshold,
 						multisigName,
-						safeAddress: '0x123'
+						safeAddress: safeAddress
 
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
@@ -143,6 +144,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						status: NotificationStatus.SUCCESS
 					});
 					setCreateMultisigData(multisigData);
+					fetchUserData();
 				}
 
 			}

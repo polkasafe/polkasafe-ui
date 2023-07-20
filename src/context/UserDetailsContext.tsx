@@ -35,30 +35,30 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	const { ethProvider } = useGlobalWeb3Context();
 	const { network } = useGlobalApiContext();
 
+	const address = localStorage.getItem('address');
+	const signature = localStorage.getItem('signature');
+	const fetchUserData = async () => {
+		const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+			headers: firebaseFunctionsHeader(network, address!, signature!),
+			method: 'POST'
+		}).then(res => res.json());
+
+		if (data?.multisigAddresses.length > 0) localStorage.setItem('activeMultisig', data?.multisigAddresses[0].address);
+
+		setUserDetailsContextState((prevState) => {
+			return {
+				...prevState,
+				activeMultisig: data?.multisigAddresses.length > 0 ? data?.multisigAddresses[0].address : '',
+				address: data?.address,
+				addressBook: data?.addressBook || [],
+				createdAt: data?.created_at,
+				loggedInWallet: Wallet.WEB3AUTH,
+				multisigAddresses: data?.multisigAddresses
+			};
+		});
+	};
+
 	useEffect(() => {
-		const address = localStorage.getItem('address');
-		const signature = localStorage.getItem('signature');
-		const fetchUserData = async () => {
-			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
-				headers: firebaseFunctionsHeader(network, address!, signature!),
-				method: 'POST'
-			}).then(res => res.json());
-
-			if (data?.multisigAddresses.length > 0) localStorage.setItem('activeMultisig', data?.multisigAddresses[0].address);
-
-			setUserDetailsContextState((prevState) => {
-				return {
-					...prevState,
-					activeMultisig: data?.multisigAddresses.length > 0 ? data?.multisigAddresses[0].address : '',
-					address: data?.address,
-					addressBook: data?.addressBook || [],
-					createdAt: data?.created_at,
-					loggedInWallet: Wallet.WEB3AUTH,
-					multisigAddresses: data?.multisigAddresses
-				};
-			});
-		};
-
 		if (address) fetchUserData();
 	}, [network]);
 
@@ -92,7 +92,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	};
 
 	return (
-		<UserDetailsContext.Provider value={{ activeMultisigData, activeMultisigTxs, ...userDetailsContextState, setUserDetailsContextState }}>
+		<UserDetailsContext.Provider value={{ activeMultisigData, activeMultisigTxs, fetchMultisigData, fetchUserData, ...userDetailsContextState, setUserDetailsContextState }}>
 			{children}
 		</UserDetailsContext.Provider>
 	);

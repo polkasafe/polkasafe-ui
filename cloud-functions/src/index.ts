@@ -127,7 +127,7 @@ export const addLinkTransactionsEth = functions.https.onRequest(async (req, res)
 					network,
 					note: note || '',
 					type,
-					executed: executed ? true : false
+					executed: true
 				};
 			});
 			const newTransaction = {

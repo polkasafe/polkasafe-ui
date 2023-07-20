@@ -49,6 +49,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 	const [loadingMessages, setLoadingMessage] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
 	const { network } = useGlobalApiContext();
+	const { fetchMultisigData } = useGlobalUserDetailsContext();
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
@@ -91,6 +92,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
+				fetchMultisigData();
 				setSuccess(true);
 				setLoadingMessage('Transaction Signed Successfully.');
 			}
@@ -133,6 +135,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
+				fetchMultisigData();
 				setSuccess(true);
 				setLoadingMessage('Transaction Executed Successfully.');
 			}

@@ -84,26 +84,6 @@ const Home = () => {
 							//!multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0
 							?
 							<section>
-								{!isOnchain ?
-									<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-										<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
-										<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
-									</section>
-									:
-									proxyNotInDb ?
-										<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-											<p className='text-white'>Your Proxy has been Created.</p>
-											<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
-										</section>
-										:
-										proxyInProcess && !hasProxy ?
-											<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-												<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
-											</section>
-											:
-											<></>
-								}
-
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
 										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={() => { }} />

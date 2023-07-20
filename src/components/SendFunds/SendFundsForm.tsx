@@ -43,7 +43,7 @@ interface ISendFundsFormProps {
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
 
-	const { activeMultisig, addressBook, address } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, address, fetchMultisigData } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
@@ -107,6 +107,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					},
 					method: 'POST'
 				}).then(res => res.json());
+				console.log('multisigError', multisigError);
 				if (multisigError) {
 					queueNotification({
 						header: 'Error.',
@@ -115,6 +116,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					});
 				}
 				setSuccess(true);
+				fetchMultisigData();
 				queueNotification({
 					header: 'Success',
 					message: 'New Transaction Created.',
