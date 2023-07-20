@@ -114,7 +114,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className, setTab, tab }) => {
 	const { openModal } = useModalContext();
 	const { network } = useGlobalApiContext();
-	const { address: userAddress } = useGlobalUserDetailsContext();
+	const { address: userAddress, activeMultisig } = useGlobalUserDetailsContext();
 
 	interface DataType {
 		key: React.Key;
@@ -313,7 +313,10 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 			<div className='text-sm font-medium overflow-y-auto'>
 				{
 					tab === ETab.SHARED ?
-						<Table columns={columns} pagination={false} dataSource={sharedAddressBookData} scroll={{ x: 1000, y: 400 }} />
+						!activeMultisig ? <section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+							<p className='text-white'>Looks Like You Don&apos;t have a Multisig. Please Create One to add Addresses in Shared Address book.</p>
+						</section> :
+							<Table columns={columns} pagination={false} dataSource={sharedAddressBookData} scroll={{ x: 1000, y: 400 }} />
 						:
 						<Table columns={columns} pagination={false} dataSource={personalAddressBookData} scroll={{ x: 1000, y: 400 }} />
 				}
@@ -328,33 +331,5 @@ export default styled(AddressTable)`
 	}
 	.ant-spin-nested-loading .ant-spin-blur::after{
 		opacity: 1 !important;
-	}
-
-	.ant-select-selector {
-		border: none !important;
-		padding: 8px 10px;
-		box-shadow: none !important;
-		background-color: #24272E !important;
-	}
-
-	.ant-select {
-		height: 40px !important;
-	}
-	.ant-select-selection-search {
-		inset: 0 !important;
-	}
-	.ant-select-selection-placeholder{
-		color: #505050 !important;
-		z-index: 100;
-		display: flex !important;
-		align-items: center !important;
-	}
-
-	.ant-select-multiple .ant-select-selection-item {
-		border: none !important;
-		background: #1573FE !important;
-		border-radius: 5px !important;
-		color: white !important;
-		margin-inline-end: 10px !important;
 	}
 `;

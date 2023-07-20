@@ -16,6 +16,7 @@ import { IAddressBookItem, ISharedAddressBooks } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import styled from 'styled-components';
 
 const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolean, className?: string, onCancel: () => void, confirm: () => Promise<void>}) => {
 	return (
@@ -52,7 +53,7 @@ const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolea
 
 const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, onlyName }: { onlyName?: boolean, className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[], onCancel: () => void, shared: boolean }) => {
 	const [loading, setLoading] = useState<boolean>(false);
-	const { activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { setActiveMultisigContextState } = useActiveMultisigContext();
 	const [newName, setNewName] = useState<string>(nameToEdit || '');
 	const [email, setEmail] = useState<string>(emailToEdit || '');
@@ -62,6 +63,8 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 	const [telegram, setTelegram] = useState<string>(telegramToEdit || '');
 	const { network } = useGlobalApiContext();
 	const [openConfirmationModal, setOpenConfirmationModal] = useState<boolean>(false);
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(email){
@@ -157,7 +160,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 						address: addressToEdit,
 						discord,
 						email,
-						multisigAddress: activeMultisig,
+						multisigAddress: multisig?.proxy ? multisig.proxy : activeMultisig,
 						name: newName,
 						roles,
 						telegram
@@ -315,6 +318,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 								>
 									<Select
 										mode="tags"
+										className={className}
 										onChange={(value) => setRoles(value)}
 										tokenSeparators={[',']}
 										placeholder='Add Roles'
@@ -335,4 +339,34 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 	);
 };
 
-export default EditAddress;
+export default styled(EditAddress)`
+
+	.ant-select-selector {
+		border: none !important;
+		padding: 8px 10px;
+		box-shadow: none !important;
+		background-color: #24272E !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	.ant-select-multiple .ant-select-selection-item {
+		border: none !important;
+		background: #1573FE !important;
+		border-radius: 5px !important;
+		color: white !important;
+		margin-inline-end: 10px !important;
+	}
+
+`;

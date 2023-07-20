@@ -18,6 +18,7 @@ import { IAddressBookItem, ISharedAddressBooks, NotificationStatus } from 'src/t
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
+import styled from 'styled-components';
 
 interface IMultisigProps {
 	className?: string
@@ -29,6 +30,7 @@ interface IMultisigProps {
 const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress, className }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
+	const { addressBook, activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [address, setAddress] = useState<string>(addAddress || '');
 	const [addressValid, setAddressValid] = useState<boolean>(true);
@@ -38,12 +40,13 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	const [roles, setRoles] = useState<string[]>([]);
 	const [discord, setDiscord] = useState<string>('');
 	const [telegram, setTelegram] = useState<string>('');
-	const [shared, setShared] = useState<boolean>(true);
+	const [shared, setShared] = useState<boolean>(activeMultisig ? true : false);
 
 	const [loading, setLoading] = useState<boolean>(false);
 
-	const { addressBook, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { setActiveMultisigContextState, records } = useActiveMultisigContext();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(email){
@@ -189,7 +192,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						address,
 						discord,
 						email,
-						multisigAddress: activeMultisig,
+						multisigAddress: multisig?.proxy ? multisig.proxy : activeMultisig,
 						name,
 						roles,
 						telegram
@@ -212,7 +215,6 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 				}
 
 				if(addAddressData){
-					console.log(addAddressData);
 
 					setActiveMultisigContextState((prevState) => {
 						return {
@@ -252,15 +254,15 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 			{contextHolder}
 			<Spin spinning={loading} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
 				<Form
-					className={`${className} my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}
+					className={`${className} add-address my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}
 				>
-					<section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+					{activeMultisig && <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 						<WarningCircleIcon />
 						<div>
 							<p className='mb-1'>This will update the Address book for every signatory, if you want to add only in your personal Address book, then deselect</p>
 							<Checkbox className='text-white m-0 [&>span>span]:border-primary' checked={shared} onChange={(e) => setShared(e.target.checked)} >Save for All</Checkbox>
 						</div>
-					</section>
+					</section>}
 					<div className="flex flex-col gap-y-3">
 						<label
 							className="text-primary text-xs leading-[13px] font-normal"
@@ -386,6 +388,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						>
 							<Select
 								mode="tags"
+								className={className}
 								onChange={(value) => setRoles(value)}
 								tokenSeparators={[',']}
 								placeholder='Add Roles'
@@ -403,4 +406,33 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	);
 };
 
-export default AddAddress;
+export default styled(AddAddress)`
+
+	.ant-select-selector {
+		border: none !important;
+		padding: 8px 10px;
+		box-shadow: none !important;
+		background-color: #24272E !important;
+	}
+
+	.ant-select {
+		height: 40px !important;
+	}
+	.ant-select-selection-search {
+		inset: 0 !important;
+	}
+	.ant-select-selection-placeholder{
+		color: #505050 !important;
+		z-index: 100;
+		display: flex !important;
+		align-items: center !important;
+	}
+
+	.ant-select-multiple .ant-select-selection-item {
+		border: none !important;
+		background: #1573FE !important;
+		border-radius: 5px !important;
+		color: white !important;
+		margin-inline-end: 10px !important;
+	}
+`;

@@ -288,4 +288,12 @@ export const GlobalStyle = createGlobalStyle`
 		border-color: #8B8B8B !important;
 		border-radius: 0 !important;
 	}
+
+	.ant-tooltip .ant-tooltip-inner {
+		background-color: #24272E !important;
+	}
+
+	.ant-tooltip {
+		--antd-arrow-background-color: #24272E !important;
+	}
 `;

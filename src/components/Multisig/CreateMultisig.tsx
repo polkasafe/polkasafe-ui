@@ -224,7 +224,21 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				<PrimaryButton onClick={() => setShowAddressModal(true)} className='bg-primary text-white w-fit'>
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
-				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
+				<Modal
+					onCancel={() => setShowAddressModal(false)}
+					open={showAddressModal}
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setShowAddressModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Address</h3>}
+					className={'w-auto md:min-w-[500px] scale-90'}
+				>
 					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
 				</Modal>
 			</>
