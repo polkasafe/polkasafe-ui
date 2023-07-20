@@ -88,7 +88,13 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-		setTxnParams({ method: `${data.extrinsicFn?.method}(${data.extrinsicFn?.toJSON().args.map((item: any) => item.name)})`, section:  `${data.extrinsicFn?.section}` });
+
+		let callDataFunc = data.extrinsicFn;
+		if(callDataFunc?.section === 'proxy'){
+			const func:any = data.extrinsicCall?.args[2].toHuman();
+			callDataFunc = func.args?.calls[0];
+		}
+		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 		// store callData in BE
 		(async () => {

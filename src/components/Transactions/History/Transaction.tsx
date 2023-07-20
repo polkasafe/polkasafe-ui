@@ -22,7 +22,7 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, section, method }) => {
 	const { network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
@@ -92,7 +92,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					>
 						<p className='col-span-3 flex items-center gap-x-3'>
 							{
-								type === 'Sent'?
+								type === 'Sent' || Boolean(section) && Boolean(method) ?
 									<span
 										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
 									>
@@ -106,11 +106,11 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									</span>
 							}
 							<span>
-								{type}
+								{Boolean(section) && Boolean(method) ? 'Custom Transaction' : type}
 							</span>
 						</p>
 						<p className='col-span-2 flex items-center gap-x-[6px]'>
-							<ParachainIcon src={chainProperties[network].logo} />
+							{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
 							<span
 								className={classNames(
 									'font-normal text-xs leading-[13px] text-failure',
@@ -119,7 +119,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									}
 								)}
 							>
-								{type === 'Sent'? '-': '+'}{amount_token} {token}
+								{type === 'Sent' || !(amount_token) ? '-': '+'} { Boolean(amount_token) && amount_token} {Boolean(amount_token) && token}
 							</span>
 						</p>
 						<p className='col-span-2'>
@@ -143,19 +143,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					<div>
 						<Divider className='bg-text_secondary my-5' />
 						{
-							type === 'Received'?
-								<ReceivedInfo
-									amount={String(amount_token)}
-									amountType={token}
-									date={dayjs(created_at).format('llll')}
-									from={from}
-									callHash={callHash}
-									note={note}
-									loading={loading}
-									amount_usd={amount_usd}
-									to={String(to)}
-								/>
-								:
+							Boolean(section) && Boolean(method) ?
 								<SentInfo
 									amount={String(amount_token)}
 									amountType={token}
@@ -166,7 +154,34 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									from={from}
 									loading={loading}
 									amount_usd={amount_usd}
+									section={section}
+									method={method}
 								/>
+								:
+								type === 'Received'?
+									<ReceivedInfo
+										amount={String(amount_token)}
+										amountType={token}
+										date={dayjs(created_at).format('llll')}
+										from={from}
+										callHash={callHash}
+										note={note}
+										loading={loading}
+										amount_usd={amount_usd}
+										to={String(to)}
+									/>
+									:
+									<SentInfo
+										amount={String(amount_token)}
+										amountType={token}
+										date={dayjs(created_at).format('llll')}
+										recipient={String(to)}
+										callHash={callHash}
+										note={note}
+										from={from}
+										loading={loading}
+										amount_usd={amount_usd}
+									/>
 						}
 					</div>
 				</Collapse.Panel>
