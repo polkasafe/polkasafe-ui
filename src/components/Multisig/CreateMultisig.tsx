@@ -25,7 +25,6 @@ import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
@@ -187,26 +186,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 						header: 'Success!',
 						message: `Your Multisig ${multisigName} has been created successfully!`,
 						status: NotificationStatus.SUCCESS
-					});
-					const results = await Promise.allSettled(signatories.map(
-						(signatory) => {
-							const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory));
-							return addToSharedAddressBook({
-								address: signatory,
-								name: data?.name || DEFAULT_ADDRESS_NAME,
-								multisigAddress: multisigData.address,
-								email: data?.email,
-								discord: data?.discord,
-								telegram: data?.telegram,
-								roles: data?.roles,
-								network
-							});
-						}
-					));
-					results.forEach((result) => {
-						if(result.status === 'rejected'){
-							console.log('ERROR', result.reason);
-						}
 					});
 					setCreateMultisigData(multisigData);
 					await addExistentialDeposit(multisigData);

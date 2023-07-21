@@ -17,7 +17,8 @@ import {
 	IUserNotificationTriggerPreferences,
 	IUserNotificationChannelPreferences,
 	ITransactionFields,
-	ISharedAddressBooks } from './types';
+	ISharedAddressBooks,
+	ISharedAddressBookRecord } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -26,7 +27,7 @@ import getOnChainMultisigMetaData from './utlils/getOnChainMultisigMetaData';
 import getTransactionsByAddress from './utlils/getTransactionsByAddress';
 import _getAssetsForAddress from './utlils/_getAssetsForAddress';
 import { chainProperties, networks } from './constants/network_constants';
-import { DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
+import { DEFAULT_ADDRESS_NAME, DEFAULT_MULTISIG_NAME, DEFAULT_USER_ADDRESS_NAME } from './constants/defaults';
 import { responseMessages } from './constants/response_messages';
 import getMultisigQueueByAddress from './utlils/getMultisigQueueByAddress';
 import fetchTokenUSDValue from './utlils/fetchTokenUSDValue';
@@ -439,6 +440,25 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 					[encodedMultisigAddress]: newMultisigSettings
 				}
 			}, { merge: true });
+
+			const addressBookRef = newMultisig.proxy ? firestoreDB.collection('addressBooks').doc(`${proxyAddress}_${network}`) : firestoreDB.collection('addressBooks').doc(`${multisigAddress}_${network}`);
+			const records: { [address: string]: ISharedAddressBookRecord } = {} as any;
+			substrateSignatories.forEach((signatory) => {
+				records[signatory] = {
+					name: DEFAULT_ADDRESS_NAME,
+					address: signatory,
+					email: '',
+					discord: '',
+					telegram: '',
+					roles: []
+				};
+			});
+			const updatedAddressEntry: ISharedAddressBooks = {
+				records,
+				multisig: newMultisig.proxy ? proxyAddress : multisigAddress
+			};
+
+			await addressBookRef.set({ ...updatedAddressEntry }, { merge: true });
 
 			return;
 		} catch (err:unknown) {

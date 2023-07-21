@@ -17,15 +17,12 @@ import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
-import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 import { CHANNEL, NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
-import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
@@ -33,7 +30,6 @@ import styled from 'styled-components';
 const Home = ({ className }: { className?: string }) => {
 	const { address: userAddress, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
-	const { records } = useActiveMultisigContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	const [openProxyModal, setOpenProxyModal] = useState(false);
@@ -80,23 +76,6 @@ const Home = ({ className }: { className?: string }) => {
 				const proxyAddress = getEncodedAddress(params[0].value, network);
 				if(proxyAddress){
 					setProxyNotInDb(true);
-					const results = await Promise.allSettled(multisig.signatories.map(
-						(item) => addToSharedAddressBook({
-							address: item,
-							name: records[item].name || DEFAULT_ADDRESS_NAME,
-							multisigAddress: proxyAddress,
-							email: records[item].email,
-							discord: records[item].discord,
-							telegram: records[item].telegram,
-							roles: records[item].roles,
-							network
-						})
-					));
-					results.forEach((result) => {
-						if(result.status === 'rejected'){
-							console.log('ERROR', result.reason);
-						}
-					});
 				}
 			}
 		};
