@@ -9,7 +9,7 @@ import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME,DEFAULT_MULTISIG_NAME } from 'src/global/default';
+import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -18,7 +18,6 @@ import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
-import { addToSharedAddressBook } from 'src/utils/addToSharedAddressBook';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
@@ -142,26 +141,6 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 								}
 							}
 						};
-					});
-					const results = await Promise.allSettled(signatoriesWithName.map(
-						(signatory) => {
-							const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory.address));
-							return addToSharedAddressBook({
-								address: signatory.address,
-								name: signatory.name || data?.name || DEFAULT_ADDRESS_NAME,
-								multisigAddress: multisigData.address,
-								email: data?.email,
-								discord: data?.discord,
-								telegram: data?.telegram,
-								roles: data?.roles,
-								network
-							});
-						}
-					));
-					results.forEach((result) => {
-						if(result.status === 'rejected'){
-							console.log('ERROR', result.reason);
-						}
 					});
 				}
 
