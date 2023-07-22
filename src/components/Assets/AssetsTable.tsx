@@ -4,6 +4,8 @@
 import styled from '@xstyled/styled-components';
 import { Divider, Modal } from 'antd';
 import React, { FC, useState } from 'react';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { IAsset } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
@@ -19,6 +21,7 @@ interface IAssetsProps {
 const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 
 	const TransactionModal: FC = () => {
 		return (
@@ -74,7 +77,7 @@ const AssetsTable: FC<IAssetsProps> = ({ assets, className }) => {
 										{balance_token} {symbol}
 									</p>
 									<p title={balance_usd} className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-xs sm:text-sm'>
-										{balance_usd ? balance_usd : '-'}
+										{balance_usd ? <>{(Number(balance_usd) * Number(currencyPrice)).toFixed(2)} {currencyProperties[currency].symbol}</> : '-'}
 									</p>
 									<PrimaryButton onClick={() => setOpenTransactionModal(true)} className='bg-primary text-white w-fit'>
 										<p className='font-normal text-sm'>Send</p>
