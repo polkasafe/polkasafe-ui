@@ -9,7 +9,7 @@ import { currencies, currencyProperties } from 'src/global/currencyConstants';
 import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
 
 export const CurrencyFlag: FC<{ src: string, className?:string }> = ({ src, className }) => {
-	return <img className={`${className} block rounded-sm`} height={20} width={20} src={src} alt="Currency Flag" />;
+	return <img className={`${className} block rounded-sm`} height={10} width={20} src={src} alt="Currency Flag" />;
 };
 
 const ChangeCurrency = ({ className }: { className?: string }) => {
