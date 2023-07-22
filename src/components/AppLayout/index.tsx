@@ -134,7 +134,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 						trigger={null}
 						collapsible={false}
 						collapsed={true}
-						className={`hidden overflow-y-hidden bg-bg-main sidebar lg:block top-0 bottom-0 left-0 h-screen fixed w-full max-w-[180px] absolute z-10 ${!hideSlider ?'left-0' :'left-[-300px]'}`}
+						className={`hidden overflow-y-hidden bg-bg-main sidebar lg:block top-0 bottom-0 left-0 h-screen fixed w-full max-w-[180px] z-10 ${!hideSlider ?'left-0' :'left-[-300px]'}`}
 					>
 						<Menu />
 					</Sider>
