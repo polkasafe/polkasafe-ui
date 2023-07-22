@@ -4,6 +4,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
+import { currencies, currencySymbol } from './global/currencyConstants';
 import { networks, tokenSymbol } from './global/networkConstants';
 
 export enum CHANNEL {
@@ -126,6 +127,18 @@ export interface ChainProps {
 
 export type ChainPropType = {
     [index: string]: ChainProps;
+};
+
+export type Currency = typeof currencies[keyof typeof currencies];
+export type CurrencySymbol = typeof currencySymbol[keyof typeof currencySymbol];
+
+export interface CurrencyProps {
+    'logo'?: any;
+    'symbol': CurrencySymbol;
+}
+
+export type CurrencyPropType = {
+    [index: string]: CurrencyProps;
 };
 
 export interface IAddressBookItem {

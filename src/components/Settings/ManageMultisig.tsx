@@ -14,6 +14,8 @@ import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 
+import ChangeCurrency from './ChangeCurrency';
+
 const ManageMultisig = () => {
 
 	const { multisigAddresses, activeMultisig, address: userAddress } = useGlobalUserDetailsContext();
@@ -76,6 +78,9 @@ const ManageMultisig = () => {
 				<Feedback />
 			</section>
 		</div>}
+			<div className='mt-[30px] flex gap-x-[30px]'>
+				<ChangeCurrency/>
+			</div>
 		</div>
 	);
 };
