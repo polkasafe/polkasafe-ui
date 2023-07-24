@@ -36,38 +36,6 @@ export const ActiveMultisigProvider = ({ children }: React.PropsWithChildren<{}>
 
 	const [activeMultisigContextState, setActiveMultisigContextState] = useState<IActiveMultisigContext>(initialActiveMultisigContext);
 
-	// const getSharedAddressBook = useCallback(async () => {
-	// 	if(!localStorage.getItem('signature') || !localStorage.getItem('address')) return;
-
-	// 	setLoading(true);
-	// 	const getSharedAddressBookRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getSharedAddressBook`, {
-	// 		headers: firebaseFunctionsHeader(network),
-	// 		body: JSON.stringify({
-	// 			multisigAddress: activeMultisig
-	// 		}),
-	// 		method: 'POST'
-	// 	});
-
-	// 	const { data: sharedAddressBookData, error: sharedAddressBookError } = await getSharedAddressBookRes.json() as { data: ISharedAddressBooks, error: string };
-
-	// 	if(!sharedAddressBookError && sharedAddressBookData){
-	// 		setActiveMultisigContextState((prevState) => {
-	// 			return {
-	// 				...prevState,
-	// 				records: sharedAddressBookData.records,
-	// 				multisig: sharedAddressBookData.multisig
-	// 			};
-	// 		});
-	// 	}else {
-	// 		setActiveMultisigContextState(initialActiveMultisigContext);
-	// 	}
-	// 	setLoading(false);
-	// }, [activeMultisig, network]);
-
-	// useEffect(() => {
-	// 	getSharedAddressBook();
-	// }, [getSharedAddressBook]);
-
 	return (
 		<ActiveMultisigContext.Provider value={{ ...activeMultisigContextState, setActiveMultisigContextState }}>
 			{children}

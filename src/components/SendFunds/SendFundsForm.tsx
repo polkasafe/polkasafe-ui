@@ -293,7 +293,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		};
 		return (
 			<>
-				<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>
 				<Modal
 					centered
 					title={<h3 className='text-white mb-8 text-lg font-semibold'>Add Address</h3>}
@@ -441,6 +440,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										<div className='flex flex-col gap-y-3 mb-2'>
 											{recipientAndAmount.map(({ recipient }, i) => (
 												<article key={recipient} className='w-[500px] flex items-start gap-x-2'>
+													<AddAddressModal defaultAddress={recipient} />
 													<div className='w-[55%]'>
 														<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
 														<Form.Item
@@ -470,7 +470,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 																		filterOption={(inputValue, options) => {
 																			return inputValue && options?.value ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
 																		}}
-																		notFoundContent={validRecipient[i] && <AddAddressModal defaultAddress={recipient} />}
+																		notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
 																		options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => r.recipient && item.value && getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
 																		id='recipient'
 																		placeholder="Send to Address.."
