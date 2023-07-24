@@ -5,7 +5,9 @@ import Identicon from '@polkadot/react-identicon';
 import { Divider, Spin } from 'antd';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -30,6 +32,7 @@ interface IReceivedInfoProps {
 const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { currency } = useGlobalCurrencyContext();
 
 	return (
 		<article
@@ -44,7 +47,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				<span
 					className='text-success'
 				>
-					{amount} {amountType} ({amount_usd} USD)
+					{amount} {amountType} ({amount_usd.toFixed(2)} {currencyProperties[currency].symbol})
 				</span>
 				<span>
 								from:

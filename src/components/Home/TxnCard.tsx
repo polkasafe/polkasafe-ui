@@ -73,7 +73,8 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					activeMultisig,
 					network,
 					10,
-					1
+					1,
+					currency
 				);
 				if(error){
 					setHistoryLoading(false);
@@ -89,7 +90,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 			}
 		};
 		getTransactions();
-	}, [activeMultisig, network, signature, userAddress, newTxn]);
+	}, [activeMultisig, network, signature, userAddress, newTxn, currency]);
 
 	useEffect(() => {
 		const getQueue = async () => {
@@ -269,7 +270,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 										<div>
 											{sent ? <h1 className='text-md text-failure'>-{transaction.amount_token} {transaction.token}</h1>
 												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
-											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd} USD</p>
+											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd.toFixed(2)} {currencyProperties[currency].symbol}</p>
 										</div>
 									</Link>
 								);

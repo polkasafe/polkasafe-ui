@@ -10,7 +10,7 @@ import { Currency } from 'src/types';
  */
 
 export default function getCurrency(): Currency {
-	const defaultCurrency = currencies.EURO;
+	const defaultCurrency = currencies.UNITED_STATES_DOLLAR;
 	let currency = localStorage.getItem('currency') || defaultCurrency;
 
 	const possibleCurrencies = Object.values(currencies);

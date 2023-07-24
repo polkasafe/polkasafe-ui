@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import dayjs from 'dayjs';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 
 import { ITransaction } from '../types';
@@ -23,7 +24,8 @@ export default async function getHistoryTransactions(
 	multisigAddress: string,
 	network: string,
 	entries: number,
-	page: number
+	page: number,
+	currency: string
 ): Promise<IResponse> {
 	const returnValue: IResponse = {
 		count: 0,
@@ -84,9 +86,15 @@ export default async function getHistoryTransactions(
 
 		if (response.data && response.data.transfers?.length) {
 			for (const transfer of response.data.transfers) {
+				const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/historical?apikey=${process.env.REACT_APP_CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}&date=${dayjs(transfer.block_timestamp * 1000).format('YYYY-MM-DD')}`, {
+					method: 'GET'
+				});
+				const responseJSON = await fetchPriceRes.json();
+				const currencyPrice = responseJSON.data?.[currencyProperties[currency].symbol]?.value;
+
 				const newTransaction: ITransaction = {
 					amount_token: Number(transfer.amount),
-					amount_usd: Number(transfer.usd_amount),
+					amount_usd: Number(transfer.usd_amount) * Number(currencyPrice),
 					block_number: Number(transfer.block_num),
 					callHash: transfer.hash,
 					created_at: dayjs(transfer.block_timestamp * 1000).toDate(),

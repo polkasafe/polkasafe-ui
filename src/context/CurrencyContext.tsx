@@ -28,7 +28,7 @@ export function CurrencyContextProvider({ children }: CurrencyContextProviderPro
 
 	useEffect(() => {
 		const fetchCurrencyPrice = async () => {
-			const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=cur_live_l1nqZEMPRPXMlrsRL27FfAGPB2DrPUY8bRLSrxjx&currencies=${currencyProperties[currency].symbol}`, {
+			const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${process.env.REACT_APP_CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}`, {
 				method: 'GET'
 			});
 			const currencyPrice = await fetchPriceRes.json();

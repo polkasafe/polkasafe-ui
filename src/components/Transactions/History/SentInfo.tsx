@@ -6,7 +6,9 @@ import { Divider, Spin, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -34,6 +36,7 @@ interface ISentInfoProps {
 const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading, section, method }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { currency } = useGlobalCurrencyContext();
 	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
 
 	return (
@@ -54,7 +57,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						<span
 							className='text-failure'
 						>
-							{amount} {amountType} ({amount_usd} USD)
+							{amount} {amountType} ({amount_usd.toFixed(2)} {currencyProperties[currency].symbol})
 						</span>
 						<span>
 							to:
