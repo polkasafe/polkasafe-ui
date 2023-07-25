@@ -12,16 +12,14 @@ jobs:
       - run: npm install -g yarn
       - run: yarn install --immutable --immutable-cache --check-cache && yarn build
       - name: create env file
-        run: |
-          touch .env
-          echo REACT_APP_ENV=${{ secrets.REACT_APP_ENV }} >> .env
-          echo REACT_APP_FIREBASE_CONFIG=${{ secrets.REACT_APP_FIREBASE_CONFIG }} >> .env
-          echo REACT_APP_FIREBASE_FUNCTIONS_URL=${{ secrets.REACT_APP_FIREBASE_FUNCTIONS_URL }} >> .env
-          echo REACT_APP_FIREBASE_FUNCTIONS_URL_DEV=${{ secrets.REACT_APP_FIREBASE_FUNCTIONS_URL_DEV }} >> .env
-          echo NOTIFICATION_ENGINE_API_KEY=${{ secrets.NOTIFICATION_ENGINE_API_KEY }} >> .env
-          echo REACT_APP_CURRENCY_API_KEY_DEV=${{ secrets.REACT_APP_CURRENCY_API_KEY_DEV }} >> .env
-          echo REACT_APP_CURRENCY_API_KEY_PROD=${{ secrets.REACT_APP_CURRENCY_API_KEY_PROD }} >> .env
-          cat .env
+        env:
+          REACT_APP_ENV: ${{ secrets.REACT_APP_ENV }}
+          REACT_APP_FIREBASE_CONFIG: ${{ secrets.REACT_APP_FIREBASE_CONFIG }}
+          REACT_APP_FIREBASE_FUNCTIONS_URL: ${{ secrets.REACT_APP_FIREBASE_FUNCTIONS_URL }}
+          REACT_APP_FIREBASE_FUNCTIONS_URL_DEV: ${{ secrets.REACT_APP_FIREBASE_FUNCTIONS_URL_DEV }}
+          NOTIFICATION_ENGINE_API_KEY: ${{ secrets.NOTIFICATION_ENGINE_API_KEY }}
+          REACT_APP_CURRENCY_API_KEY_DEV: ${{ secrets.REACT_APP_CURRENCY_API_KEY_DEV }}
+          REACT_APP_CURRENCY_API_KEY_PROD: ${{ secrets.REACT_APP_CURRENCY_API_KEY_PROD }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
