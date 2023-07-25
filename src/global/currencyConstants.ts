@@ -10,6 +10,7 @@ import chfLogo from 'src/assets/currency-flags/chf.svg';
 import eurLogo from 'src/assets/currency-flags/eur.svg';
 import gbpLogo from 'src/assets/currency-flags/gbp.svg';
 import inrLogo from 'src/assets/currency-flags/inr.png';
+import jpyLogo from 'src/assets/currency-flags/jpy.png';
 import usdLogo from 'src/assets/currency-flags/usd.svg';
 import { CurrencyPropType } from 'src/types';
 
@@ -19,6 +20,7 @@ export const currencies = {
 	EURO: 'Euro',
 	SWISS_FRANC: 'Swiss Franc',
 	UNITED_ARAB_EMIRATES_DIRHAM: 'United Arab Emirates Dirham',
+	JAPANESE_YEN: 'Japanese Yen',
 	AUSTRALIAN_DOLLAR: 'Australian Dollar',
 	CANADIAN_DOLLAR: 'Canadian Dollar',
 	INDIAN_RUPEE: 'Indian Rupee'
@@ -30,6 +32,7 @@ export const currencySymbol = {
 	EUR: 'EUR',
 	CHF: 'CHF',
 	AED: 'AED',
+	JPY: 'JPY',
 	AUD: 'AUD',
 	CAD: 'CAD',
 	INR: 'INR'
@@ -55,6 +58,10 @@ export const currencyProperties: CurrencyPropType = {
 	[currencies.UNITED_ARAB_EMIRATES_DIRHAM]: {
 		logo: aedLogo,
 		symbol: currencySymbol.AED
+	},
+	[currencies.JAPANESE_YEN]: {
+		logo: jpyLogo,
+		symbol: currencySymbol.JPY
 	},
 	[currencies.AUSTRALIAN_DOLLAR]: {
 		logo: audLogo,
