@@ -11,6 +11,11 @@ import { ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 
 import AppCard from './AppCard';
 
+const currentApps = [
+	{ description:'One Stop Shop For All Substrate Addresses And Balances', name: 'Sub ID' },
+	{ description:'The most unified platform to discuss and vote on governance proposals, motions and referandas', name: 'Polkassembly' }
+];
+
 const AllApps = () => {
 	const {
 		multisigAddresses,
@@ -50,7 +55,7 @@ const AllApps = () => {
 								</div>
 							</div>
 							<section className='flex flex-col gap-4 md:flex-row'>
-								<AppCard />
+								{currentApps.map(app => <AppCard key={app.name} {...app}/>)}
 							</section>
 						</div>
 					</>

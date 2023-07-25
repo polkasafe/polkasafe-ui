@@ -3,11 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 import React from 'react';
 import subid from 'src/assets/subid.svg';
-import { useGlobalDAppContext } from 'src/context/DAppContext';
+import { Apps, useGlobalDAppContext } from 'src/context/DAppContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { networks } from 'src/global/networkConstants';
 import { ArrowRightIcon } from 'src/ui-components/CustomIcons';
-const AppModal = () => {
+const AppModal = ({ name, description }: { name: string, description: string }) => {
 	const { setIframeVisibility } = useGlobalDAppContext();
 	const { closeModal } = useModalContext();
 	return (
@@ -17,8 +17,8 @@ const AppModal = () => {
 				<div className='flex flex-col overflow-auto w-[110%]'>
 					<img src={subid} alt="" height='70' width='70' />
 					<div className='mt-3'>
-						<div className="text-3xl text-white font-semibold">Sub ID</div>
-						<div className='mt-2 text-[#8B8B8B] font-medium text-14 leading-tight font-archivo'>One Stop Shop For All Substrate Addresses And Balances</div>
+						<div className="text-3xl text-white font-semibold">{name}</div>
+						<div className='mt-2 text-[#8B8B8B] font-medium text-14 leading-tight font-archivo max-w-[450px]'>{description}</div>
 					</div>
 					<div className='mt-5 flex flex-col gap-3'>
 						<div className='text-[#8B8B8B] font-medium text-base text-14 leading-tight font-archivo'>Available networks</div>
@@ -31,7 +31,7 @@ const AppModal = () => {
 					<button className='mt-10 text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-1 cursor-pointer'
 						onClick={() => {
 							closeModal();
-							setIframeVisibility(true);
+							setIframeVisibility(name === 'Polkassembly' ? Apps.POLKASSEMBLY : name === 'Sub ID' ? Apps.SUB_ID : null);
 						}}
 					>
 						<span className='font-medium text-xs'>Open app</span>
