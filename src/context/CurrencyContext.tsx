@@ -5,7 +5,8 @@
 import '@polkadot/api-augment';
 
 import React, { useContext, useEffect, useState } from 'react';
-import { currencyProperties } from 'src/global/currencyConstants';
+import { CURRENCY_API_KEY } from 'src/global/currencyApiKey';
+import { currencies, currencyProperties, currencySymbol } from 'src/global/currencyConstants';
 import getCurrency from 'src/utils/getCurrency';
 
 export interface CurrencyContextType {
@@ -24,18 +25,31 @@ export interface CurrencyContextProviderProps {
 
 export function CurrencyContextProvider({ children }: CurrencyContextProviderProps): React.ReactElement {
 	const [currency, setCurrency] = useState<string>(getCurrency());
-	const [currencyPrice, setCurrencyPrice] = useState<string>('');
+	const [currencyPrice, setCurrencyPrice] = useState<string>('1');
+
+	const [allCurrencyPrices, setAllCurrencyPrices] = useState<{[symbol: string]: { code: string, value: number }}>({});
 
 	useEffect(() => {
 		const fetchCurrencyPrice = async () => {
-			const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${process.env.REACT_APP_CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}`, {
+			const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${CURRENCY_API_KEY}&currencies=${[...Object.values(currencySymbol)]}`, {
 				method: 'GET'
 			});
 			const currencyPrice = await fetchPriceRes.json();
-			setCurrencyPrice(currencyPrice.data[currencyProperties[currency].symbol].value);
+			if(currencyPrice.data){
+				setAllCurrencyPrices(currencyPrice.data);
+			}
 		};
 		fetchCurrencyPrice();
-	}, [currency]);
+	}, []);
+
+	useEffect(() => {
+		if(Object.keys(allCurrencyPrices).length > 0){
+			setCurrencyPrice(allCurrencyPrices[currencyProperties[currency].symbol]?.value?.toString());
+		}
+		else {
+			setCurrency(currencies.UNITED_STATES_DOLLAR);
+		}
+	}, [allCurrencyPrices, currency]);
 
 	return (
 		<CurrencyContext.Provider value={{ currency, currencyPrice, setCurrency }}>

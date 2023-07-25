@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import dayjs from 'dayjs';
+import { CURRENCY_API_KEY } from 'src/global/currencyApiKey';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
 
@@ -62,10 +63,15 @@ export default async function getHistoryTransactions(
 
 		if (otherTransactions.data && otherTransactions.data.multisig?.length) {
 			for (const transaction of otherTransactions.data.multisig) {
+				const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/historical?apikey=${CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}&date=${dayjs(transaction.block_timestamp * 1000).format('YYYY-MM-DD')}`, {
+					method: 'GET'
+				});
+				const responseJSON = await fetchPriceRes.json();
+				const currencyPrice = responseJSON.data?.[currencyProperties[currency].symbol]?.value || '1';
 				if((transaction.call_module_function !== CHECKS.TRANSFER_KEEP_ALIVE || transaction.call_module_function !== CHECKS.TRANSFER_KEEP_ALIVE) && transaction.status === CHECKS.STATUS.EXECUTED){
 					const newTransaction: ITransaction = {
 						amount_token: Number(transaction.amount || 0),
-						amount_usd: Number(transaction.usd_amount || 0),
+						amount_usd: Number(transaction.usd_amount || 0) * Number(currencyPrice),
 						block_number: Number(transaction.block_num || 0),
 						callHash: transaction.call_hash,
 						created_at: dayjs(transaction.block_timestamp * 1000).toDate(),
@@ -86,11 +92,11 @@ export default async function getHistoryTransactions(
 
 		if (response.data && response.data.transfers?.length) {
 			for (const transfer of response.data.transfers) {
-				const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/historical?apikey=${process.env.REACT_APP_CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}&date=${dayjs(transfer.block_timestamp * 1000).format('YYYY-MM-DD')}`, {
+				const fetchPriceRes = await fetch(`https://api.currencyapi.com/v3/historical?apikey=${CURRENCY_API_KEY}&currencies=${currencyProperties[currency].symbol}&date=${dayjs(transfer.block_timestamp * 1000).format('YYYY-MM-DD')}`, {
 					method: 'GET'
 				});
 				const responseJSON = await fetchPriceRes.json();
-				const currencyPrice = responseJSON.data?.[currencyProperties[currency].symbol]?.value;
+				const currencyPrice = responseJSON.data?.[currencyProperties[currency].symbol]?.value || '1';
 
 				const newTransaction: ITransaction = {
 					amount_token: Number(transfer.amount),
