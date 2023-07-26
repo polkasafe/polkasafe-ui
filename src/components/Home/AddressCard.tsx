@@ -59,7 +59,7 @@ const AddressCard = ({ className }: { className?: string }) => {
 					))}
 				</div>
 				<div className='w-full mt-5 flex justify-center'>
-					<PrimaryButton className='w-[90%] flex items-center justify-center bg-highlight py-4 2xl:py-5' onClick={() => openModal('Add Address', <AddAdress className={className} />)}>
+					<PrimaryButton secondary className='w-[90%] flex items-center justify-center py-4 2xl:py-5' onClick={() => openModal('Add Address', <AddAdress className={className} />)}>
 						<img className='group-hover:fill-white' src={AddAddrIcon} alt="add"/>
 						<p className='px-2 text-primary'>Add Address</p>
 					</PrimaryButton>

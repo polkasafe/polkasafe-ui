@@ -96,7 +96,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const TransactionModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-primary text-white'>
+				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
 					New Transaction
 				</PrimaryButton>
 				<Modal
@@ -127,7 +127,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const FundMultisigModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-highlight text-primary '>
+				<PrimaryButton secondary onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 '>
 					<WalletIcon /> Fund Multisig
 				</PrimaryButton>
 				<Modal

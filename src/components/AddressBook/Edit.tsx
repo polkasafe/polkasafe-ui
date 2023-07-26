@@ -31,7 +31,7 @@ const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolea
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'></h3>}
 				open={open}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
@@ -212,7 +212,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 			<Spin spinning={loading && !onlyName} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
 				<EditAddressModal onCancel={() => setOpenConfirmationModal(false)} open={openConfirmationModal} confirm={handleSharedAddressBookUpdate}  />
 				<Form
-					className={`${className} my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}
+					className={`${className} my-0 w-[560px] max-h-[75vh] py-1 px-2 overflow-y-auto`}
 					disabled={loading}
 				>
 					<div className="flex flex-col gap-y-3">
@@ -332,7 +332,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 				</Form>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<CancelBtn loading={loading} onClick={onCancel}/>
-					<AddBtn loading={loading} onClick={shared ? () => setOpenConfirmationModal(true) : handlePersonalAddressBookUpdate} title='Save' />
+					<AddBtn disabled={!newName || (!!email && !emailValid) || (onlyName && newName === nameToEdit)} loading={loading} onClick={shared ? () => setOpenConfirmationModal(true) : handlePersonalAddressBookUpdate} title='Save' />
 				</div>
 			</Spin>
 		</>

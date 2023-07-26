@@ -4,7 +4,6 @@
 
 import { Button } from 'antd';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
-import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 
 interface Props {
@@ -15,11 +14,17 @@ interface Props {
 	loading?: boolean;
 	disabled?: boolean;
 	icon?: ReactNode;
+	secondary?: boolean
 }
 
-const PrimaryButton = ({ className, children, onClick, size, loading, disabled, icon }: Props) => {
+const PrimaryButton = ({ className, children, onClick, size, loading, disabled, icon, secondary }: Props) => {
 	return (
-		<Button icon={icon} disabled={disabled} size={size} loading={loading} className={classNames('flex items-center border-none outline-none shadow-md rounded-lg bg-purple_secondary text-blue_primary font-medium text-xs md:font-bold md:text-sm', className)} onClick={onClick}>
+		<Button
+			icon={icon}
+			disabled={disabled}
+			size={size}
+			loading={loading}
+			className={`flex items-center border-none outline-none shadow-md rounded-lg font-medium text-xs md:font-bold md:text-sm ${disabled ? 'bg-highlight text-text_secondary' : secondary ? 'bg-highlight text-primary' : 'bg-primary text-white'} ${className}`} onClick={onClick}>
 			{children}
 		</Button>
 	);

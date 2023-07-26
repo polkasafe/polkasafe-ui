@@ -5,11 +5,12 @@
 import { SwapOutlined } from '@ant-design/icons';
 import { Badge, Tooltip } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
-import { IAddressBookItem } from 'src/types';
 import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
@@ -34,25 +35,46 @@ interface ISignatoryProps{
 
 const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISignatoryProps) => {
 
-	const { address, addressBook } = useGlobalUserDetailsContext();
+	const { address: userAddress, addressBook } = useGlobalUserDetailsContext();
+	const { records } = useActiveMultisigContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 	const { accounts } = useGetWalletAccounts();
 
 	const [addWalletAddress, setAddWalletAddress] = useState<boolean>(false);
 
 	const [addresses, setAddresses] = useState<ISignature[]>([]);
+	const [filteredAddresses, setFilteredAddresses] = useState<ISignature[]>([]);
 
 	useEffect(() => {
-		setAddresses(addressBook?.filter((item, i) => i !== 0 && (filterAddress ? (item.address.includes(filterAddress, 0) || item.name.includes(filterAddress, 0)) : true)).map((item: IAddressBookItem, i: number) => ({
-			address: item.address,
-			key: i+1,
-			name: item.name
-		})));
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [addressBook]);
+		const allAddresses: ISignature[] = [];
+		if(records){
+			Object.keys(records).forEach((address, i) => {
+				const personal = addressBook.find(item => getSubstrateAddress(item.address) === getSubstrateAddress(address));
+				if(address !== getSubstrateAddress(userAddress)) {
+					allAddresses.push({ address: getEncodedAddress(address, network) || address, key: i, name: records[address]?.name || personal?.name || DEFAULT_ADDRESS_NAME });
+				}
+			});
+		}
+		addressBook
+			.filter(item => getSubstrateAddress(item.address) !== getSubstrateAddress(userAddress) && !Object.keys(records).includes(getSubstrateAddress(item.address) || item.address))
+			.forEach((item, i) => {
+				allAddresses.push({ address: getEncodedAddress(item.address, network) || item.address, key: i, name: item.name });
+			});
+
+		setAddresses(allAddresses);
+		setFilteredAddresses(allAddresses);
+
+	}, [addressBook, network, records, userAddress]);
 
 	useEffect(() => {
-		if(!api || !apiReady){
+		if(!addresses){
+			return;
+		}
+		setFilteredAddresses(addresses.filter(item => filterAddress ? (item.address.includes(getEncodedAddress(filterAddress, network) || filterAddress, 0) || item.name.includes(filterAddress, 0)) : true));
+	}, [addresses, filterAddress, network]);
+
+	useEffect(() => {
+		if(!api || !apiReady || !addresses){
 			return;
 		}
 		const fetchBalances = async () => {
@@ -172,7 +194,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 				<div id='div1' className="flex flex-col my-2 w-1/2 mr-1 cursor-grab" onDrop={dropReturn} onDragOver={dragOver}>
 					<h1 className='text-primary mt-3 mb-2'>Available Signatory</h1>
 					<div id={`drop1${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-4 rounded-lg my-1 h-[30vh] overflow-y-auto'>
-						{addresses.length > 0 ? addresses.map((address) => {
+						{filteredAddresses.length > 0 ? filteredAddresses.map((address) => {
 							const lowBalance = address.balance && (Number(address.balance) < Number(inputToBn(`${chainProperties[network].existentialDeposit}`, network)[0]) || Number(address.balance) === 0);
 							return (
 								<p onClick={signatories.includes(address.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(address.address, network) || ''} id={`${address.key}-${address.address}`} key={`${address.key}-${address.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white flex items-center gap-x-2' draggable onDragStart={dragStart}>
@@ -182,7 +204,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 											<div className='text-text_secondary text-xs'>
 												<div className='text-bold text-sm text-white mb-3'>Insufficient Balance</div>
 												<div>This account does not have sufficient balance in their account to sign the transaction for creation of proxy</div>
-												<div className='mt-2 text-primary'><a href='https://polkadot.js.org/apps/#/accounts' target='_blank' rel="noreferrer">Send Funds</a></div>
+												{/* <div className='mt-2 text-primary'><a href='https://polkadot.js.org/apps/#/accounts' target='_blank' rel="noreferrer">Send Funds</a></div> */}
 											</div>
 										}>
 											<WarningCircleIcon className='text-base' />
@@ -198,7 +220,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 							// </Tooltip>
 							<>
 								<div className='text-sm text-text_secondary'>Addresses imported directly from your Polkadot.js wallet</div>
-								{accounts.filter((item) => item.address !== getEncodedAddress(address, network)).map((account, i) => (
+								{accounts.filter((item) => item.address !== getEncodedAddress(userAddress, network)).map((account, i) => (
 									<p onClick={signatories.includes(getSubstrateAddress(account.address) || account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
 								))}
 							</>
@@ -209,7 +231,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
 					<div id={`drop2${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto cursor-grab' onDrop={drop} onDragOver={dragOver}>
-						<p title={getEncodedAddress(address, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white cursor-default flex items-center gap-x-2'>{addressBook[0]?.name} <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge status='success' /></Tooltip></p>
+						<p title={getEncodedAddress(userAddress, network) || ''} id={`0-${signatories[0]}`} key={`0-${signatories[0]}`} className='bg-bg-main p-2 m-1 rounded-md text-white cursor-default flex items-center gap-x-2'>{addressBook[0]?.name} <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge status='success' /></Tooltip></p>
 					</div>
 				</div>
 			</div>
