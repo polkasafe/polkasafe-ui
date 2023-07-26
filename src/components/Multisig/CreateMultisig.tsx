@@ -25,6 +25,7 @@ import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
@@ -46,7 +47,7 @@ interface IMultisigProps {
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
 	const { setUserDetailsContextState, address: userAddress, addressBook, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
-	const { setActiveMultisigContextState } = useActiveMultisigContext();
+	const { records, setActiveMultisigContextState } = useActiveMultisigContext();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -200,7 +201,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const AddAddressModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setShowAddressModal(true)} className='bg-primary text-white w-fit'>
+				<PrimaryButton disabled={!addAddress || !getSubstrateAddress(addAddress) || Object.keys(records).includes(getSubstrateAddress(addAddress) || addAddress) || addressBook.some(item => item.address === getEncodedAddress(addAddress, network))} onClick={() => setShowAddressModal(true)}>
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
 				<Modal

@@ -4,7 +4,6 @@
 
 import Identicon from '@polkadot/react-identicon';
 import { Badge, Button, Dropdown, Modal, Table, Tooltip } from 'antd';
-// import getEncodedAddress from 'src/utils/getEncodedAddress';
 import type { ColumnsType } from 'antd/es/table';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
@@ -13,10 +12,11 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { IAddressBookItem, ISharedAddressBookRecord } from 'src/types';
-import { CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
+import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -71,15 +71,23 @@ const TransactionModal = ({ className, defaultAddress }: { className?: string, d
 	);
 };
 
-const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, onlyName }: { onlyName?: boolean, shared: boolean, className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
+const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, onlyName, personalToShared }: { personalToShared?: boolean, onlyName?: boolean, shared: boolean, className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
 	const [openEditModal, setOpenEditModal] = useState<boolean>(false);
 	return (
 		<>
-			<button
-				onClick={() => setOpenEditModal(true)}
-				className={`text-primary ${!onlyName && 'bg-highlight'} flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8`}>
-				<EditIcon />
-			</button>
+			{personalToShared ?
+				<Tooltip title={'Add To Shared Address Book'}>
+					<button onClick={() => setOpenEditModal(true)}>
+						<AddIcon className='text-primary'/>
+					</button>
+				</Tooltip>
+				:
+				<button
+					onClick={() => setOpenEditModal(true)}
+					className={`text-primary ${!onlyName && 'bg-highlight'} flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8`}>
+					<EditIcon />
+				</button>
+			}
 			<Modal
 				centered
 				footer={false}
@@ -90,7 +98,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{onlyName ? 'Edit Name' : 'Edit Address'}</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{onlyName ? 'Edit Name' : personalToShared ? 'Add to Shared Address Book' : 'Edit Address'}</h3>}
 				open={openEditModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
@@ -146,7 +154,7 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 			dataIndex: 'email',
 			key: 'email',
 			title: 'Email',
-			width: 200
+			width: 250
 		},
 		{
 			dataIndex: 'discord',
@@ -164,7 +172,7 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 			dataIndex: 'roles',
 			key: 'roles',
 			title: 'Roles',
-			width: 250
+			width: 300
 		},
 		{
 			dataIndex: 'actions',
@@ -180,7 +188,7 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 		const personal = personalAddresses.find((item) => item.address === encodedAddress);
 		return ({
 			actions: <div className=' flex items-center justify-right gap-x-[10px]'>
-				<EditAddressModal shared={true} className={className} addressToEdit={encodedAddress} nameToEdit={records[address]?.name} discordToEdit={records[address]?.discord} emailToEdit={records[address]?.email} rolesToEdit={records[address]?.roles} telegramToEdit={records[address]?.telegram} />
+				<EditAddressModal shared={true} className={className} addressToEdit={encodedAddress} nameToEdit={records[address]?.name || personal?.name} discordToEdit={records[address]?.discord} emailToEdit={records[address]?.email} rolesToEdit={records[address]?.roles} telegramToEdit={records[address]?.telegram} />
 				{encodedAddress !== userAddress &&
 		<button
 			onClick={() => openModal('Remove Address', <RemoveAddress shared addressToRemove={encodedAddress} name={records[address]?.name} />) }
@@ -214,11 +222,11 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 			roles: <div className=' flex items-center gap-x-2'>{
 				records[address] && records[address]?.roles && records[address].roles!.length > 0 ?
 					<>
-						{records[address].roles?.slice(0,2).map((role, i) => <span key={i} className='bg-primary rounded-lg text-white py-1 px-3 max-w-[80px] truncate'>{role}</span>)}
+						{records[address].roles?.slice(0,2).map((role, i) => <span key={i} className='bg-primary bg-opacity-10 border border-solid border-primary text-primary rounded-lg py-1 px-3 max-w-[120px] truncate'>{role}</span>)}
 						{records[address]?.roles!.length > 2 &&
 					<Dropdown menu={{ items: records[address]?.roles?.slice(2).map((role, i) => ({
 						key: i,
-						label: <span key={i} className='bg-primary rounded-lg text-xs text-white py-1 px-3'>{role}</span>
+						label: <span key={i} className='bg-primary bg-opacity-10 border border-solid border-primary text-primary rounded-lg py-1 px-3'>{role}</span>
 					})) }}>
 						<span className='cursor-pointer py-1.5 px-3 rounded-full bg-primary'>+{records[address]?.roles!.length - 2}</span>
 					</Dropdown>
@@ -259,8 +267,13 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 		discord: <div className='truncate'>{discord || '-'}</div>,
 		email: <div className='truncate'>{email || '-'}</div>,
 		key: address,
-		name: <p title={name} className='sm:w-auto overflow-hidden text-ellipsis flex items-center text-base'>
-			{name} {address === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
+		name: <p title={name} className='sm:w-auto overflow-hidden text-ellipsis flex items-center text-base flex justify-between items-center'>
+			<div className='flex items-center'>
+				{name} {address === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
+			</div>
+			{!Object.keys(records).includes(getSubstrateAddress(address)|| address) &&
+				<EditAddressModal className={className} addressToEdit={address} nameToEdit={name} discordToEdit={discord} emailToEdit={email} rolesToEdit={roles} telegramToEdit={telegram} personalToShared shared />
+			}
 		</p>,
 		roles: <div className=' flex items-center gap-x-2'>{
 			roles && roles.length ?
