@@ -8,7 +8,7 @@ import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longIframe from 'src/assets/long-iframe.svg';
 import shortIframe from 'src/assets/short-iframe.svg';
-import { useGlobalDAppContext } from 'src/context/DAppContext';
+import { Apps, useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import Loader from 'src/ui-components/Loader';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
@@ -34,8 +34,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const [iframeState, setIframeState] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
-
-	const IframeUrl= `https://sub.id/${getSubstrateAddress(activeMultisig)}`;
+	const [IframeUrl, setIframeUrl]= useState('');
 	const isAppsPage = window.location.pathname.split('/').pop()  === 'apps';
 	const hideSlider = iframeState && isAppsPage;
 
@@ -45,7 +44,10 @@ const AppLayout = ({ className }: {className?: string}) => {
 			setMultisigChanged(false);
 		}, 500);
 		setLoading(true);
-	}, [activeMultisig]);
+		if(iframeVisibility === Apps.SUB_ID){
+			setIframeUrl( `https://sub.id/${getSubstrateAddress(activeMultisig)}`);
+		}
+	}, [activeMultisig, iframeVisibility]);
 
 	useEffect(() => {
 		if(isAppsPage)
@@ -66,8 +68,8 @@ const AppLayout = ({ className }: {className?: string}) => {
 
 	return (
 		<Layout className={className}>
-			<NavHeader setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} showSubmenu={iframeVisibility && isAppsPage} onClick={() => {
-				setIframeVisibility(false);
+			<NavHeader setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} showSubmenu={Boolean(iframeVisibility) && isAppsPage} onClick={() => {
+				setIframeVisibility(null);
 				setIframeState(false);
 				setLoading(true);
 			}}/>

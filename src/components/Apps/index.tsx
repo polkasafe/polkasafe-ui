@@ -13,7 +13,8 @@ import AppCard from './AppCard';
 
 const currentApps = [
 	{ description:'One Stop Shop For All Substrate Addresses And Balances', name: 'Sub ID' },
-	{ description:'The most unified platform to discuss and vote on governance proposals, motions and referandas', name: 'Polkassembly' }
+	{ description:'The most unified platform to discuss and vote on governance proposals, motions and referandas', name: 'Polkassembly' },
+	{ description:'Astar Network is a blockchain that aims to become Polkadot\'s "smart contract hub" and serves as a parachain for Polkadot', name: 'Astar' }
 ];
 
 const AllApps = () => {

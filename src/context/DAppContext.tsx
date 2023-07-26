@@ -18,6 +18,7 @@ export const DAppContext: React.Context<DAppContextType> = React.createContext(
 export enum Apps {
 	POLKASSEMBLY='polkassembly',
 	SUB_ID='sub_id',
+	ASTAR='astar'
 }
 
 export function DAppContextProvider({
