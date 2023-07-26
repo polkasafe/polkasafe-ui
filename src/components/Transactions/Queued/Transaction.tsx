@@ -68,6 +68,8 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
 	const [customTx, setCustomTx] = useState<boolean>(false);
 
+	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+
 	const token = chainProperties[network].tokenSymbol;
 	const location = useLocation();
 	const hash = location.hash.slice(1);
@@ -86,6 +88,13 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
+
+		let callDataFunc = data.extrinsicFn;
+		if(callDataFunc?.section === 'proxy'){
+			const func:any = data.extrinsicCall?.args[2].toHuman();
+			callDataFunc = func.args?.calls[0];
+		}
+		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 		// store callData in BE
 		(async () => {
@@ -139,7 +148,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 			setGetMultisigDataLoading(true);
 			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
 		}
-		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args && !decodedCallData?.args?.calls && !decodedCallData?.args?.call?.args?.calls ){
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest ){
 			setCustomTx(true);
 		}
 	}, [decodedCallData, multisig, multisigAddresses, network]);
@@ -157,6 +166,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		setOpenLoadingModal(true);
 		try {
 			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
+				setLoading(false);
 				setOpenLoadingModal(false);
 				return;
 			}
@@ -238,6 +248,8 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		setOpenLoadingModal(true);
 		try {
 			if(!decodedCallData?.args && ((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.call?.args?.calls && !decodedCallData?.args?.calls && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id)) ){
+				setLoading(false);
+				setOpenLoadingModal(false);
 				return;
 			}
 			if(decodedCallData?.args?.proxy_type){
@@ -385,6 +397,8 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 							notifications={notifications}
 							transactionFields={transactionFields}
 							customTx={customTx}
+							decodedCallData={decodedCallData}
+							txnParams={txnParams}
 						/>
 
 					</div>

@@ -29,6 +29,8 @@ interface Props {
 
 export async function removeOldMultiFromProxy({ multisigAddress, recepientAddress, proxyAddress, api, network, senderAddress, setLoadingMessages, newSignatories, newThreshold } : Props) {
 
+	const encodedInitiatorAddress = getEncodedAddress(senderAddress, network) || senderAddress;
+
 	formatBalance.setDefaults({
 		decimals: chainProperties[network].tokenDecimals,
 		unit: chainProperties[network].tokenSymbol
@@ -40,7 +42,7 @@ export async function removeOldMultiFromProxy({ multisigAddress, recepientAddres
 		return encodedSignatory;
 	});
 
-	const otherSignatories = encodedSignatories.filter((sig) => sig !== senderAddress);
+	const otherSignatories = encodedSignatories.filter((sig) => sig !== encodedInitiatorAddress);
 	const removeProxyTx = api.tx.proxy.removeProxy(multisigAddress, 'Any', 0);
 	const proxyTx = api.tx.proxy.proxy(proxyAddress, null, removeProxyTx);
 
@@ -53,7 +55,7 @@ export async function removeOldMultiFromProxy({ multisigAddress, recepientAddres
 
 		api.tx.multisig
 			.asMulti(newThreshold, otherSignatories, null, proxyTx, MAX_WEIGHT as any)
-			.signAndSend(senderAddress, async ({ status, txHash, events }) => {
+			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');
 					setLoadingMessages('Transaction invalid');

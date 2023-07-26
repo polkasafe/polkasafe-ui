@@ -217,7 +217,7 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
-			const { name, address: addressToAdd } = req.body;
+			const { name, address: addressToAdd, roles, email, discord, telegram } = req.body;
 			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
 			const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
 			if (!substrateAddressToAdd) return res.status(400).json({ error: responseMessages.invalid_params });
@@ -234,12 +234,12 @@ export const addToAddressBook = functions.https.onRequest(async (req, res) => {
 				// check if address already exists in address book
 				const addressIndex = addressBook.findIndex((a) => a.address == substrateAddressToAdd);
 				if (addressIndex > -1) {
-					addressBook[addressIndex] = { name, address: substrateAddressToAdd };
+					addressBook[addressIndex] = { name, address: substrateAddressToAdd, roles, email, discord, telegram };
 					await addressRef.set({ addressBook }, { merge: true });
 					return res.status(200).json({ data: addressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 				}
 
-				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd }];
+				const newAddressBook = [...addressBook, { name, address: substrateAddressToAdd, roles, email, discord, telegram }];
 				await addressRef.set({ addressBook: newAddressBook }, { merge: true });
 				return res.status(200).json({ data: newAddressBook.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[network].ss58Format) })) });
 			}
@@ -745,7 +745,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		if (!isValid) return res.status(400).json({ error });
 
 		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
-		if (isNaN(amount_token) || !block_number || !callHash || !from || !network || !to ) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (!block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const usdValue = await fetchTokenUSDValue(network);
@@ -755,10 +755,10 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 				created_at: new Date(),
 				block_number: Number(block_number),
 				from,
-				to,
+				to: to || '',
 				token: chainProperties[network].tokenSymbol,
 				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
-				amount_token: String(amount_token),
+				amount_token: String(amount_token) || '',
 				network,
 				note: note || '',
 				transactionFields: transactionFields || {}

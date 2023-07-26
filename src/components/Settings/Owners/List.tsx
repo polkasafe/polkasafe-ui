@@ -38,7 +38,7 @@ const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold
 					</button>}
 				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Remove Signatory</h3>}
 				open={openRemoveSignatoryModal}
-				className={`${className} w-auto md:min-w-[500px]`}
+				className={`${className} w-auto md:min-w-[500px] scale-90 origin-center`}
 			>
 				<RemoveOwner onCancel={() => setOpenRemoveSignatoryModal(false)} oldSignatoriesLength={signatoriesLength} oldThreshold={threshold} addressToRemove={address} />
 			</Modal>

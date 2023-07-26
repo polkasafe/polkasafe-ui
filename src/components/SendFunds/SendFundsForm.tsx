@@ -30,18 +30,26 @@ import formatBnBalance from 'src/utils/formatBnBalance';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import initMultisigTransfer, { IRecipientAndAmount } from 'src/utils/initMultisigTransfer';
+import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
+import UploadAttachment from './UploadAttachment';
 
 interface ISendFundsFormProps {
 	onCancel?: () => void;
 	className?: string;
 	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>
 	defaultSelectedAddress?: string
+}
+
+export interface ISubfieldAndAttachment {
+	[subfield: string]: {
+		file: any
+	}
 }
 
 const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
@@ -80,6 +88,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const [initiatorBalance, setInitiatorBalance] = useState<BN>(new BN(0));
 
+	const [tip, setTip] = useState<BN>(new BN(0));
+
 	const [fetchBalancesLoading, setFetchBalancesLoading] = useState<boolean>(false);
 
 	const [transactionFieldsObject, setTransactionFieldsObject] = useState<{category: string, subfields: {[subfield: string]: { name: string, value: string }}}>({ category: 'none', subfields: {} });
@@ -87,6 +97,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 
 	const [category, setCategory] = useState<string>('none');
+
+	const [subfieldAttachments, setSubfieldAttachments] = useState<ISubfieldAndAttachment>({});
 
 	const onRecipientChange = (value: string, i: number) => {
 		setRecipientAndAmount((prevState) => {
@@ -120,6 +132,10 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		copyOptionsArray.splice(i, 1);
 		setRecipientAndAmount(copyOptionsArray);
 	};
+
+	useEffect(() => {
+		setTransactionFieldsObject({ category, subfields: {} });
+	}, [category]);
 
 	useEffect(() => {
 		if(!recipientAndAmount) return;
@@ -209,6 +225,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		try {
 			const queueItemData = await initMultisigTransfer({
 				api,
+				attachments: subfieldAttachments,
 				initiatorAddress: address,
 				isProxy,
 				multisig,
@@ -216,6 +233,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				note,
 				recipientAndAmount,
 				setLoadingMessages,
+				tip,
 				transactionFields: transactionFieldsObject,
 				transferKeepAlive
 			});
@@ -366,6 +384,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</section>
 							:
 							<Skeleton className={`${!fetchBalancesLoading && 'opacity-0'}`} active paragraph={{ rows: 0 }}/>
+						}
+						{amount.gt((new BN(multisigBalance)).sub(inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0])) && <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
+							<WarningCircleIcon />
+							<p>The Multisig Balance will Drop below its Existential Deposit and it won&apos;t be onchain anymore, you may also lose your assets in it.</p>
+						</section>
 						}
 						<Form
 							className={classNames('max-h-[68vh] overflow-y-auto px-2')}
@@ -519,6 +542,22 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 								</div>
 							</section>
 
+							<section className='mt-[15px]'>
+								<div className='flex items-center gap-x-[10px]'>
+									<div className='w-[500px]'>
+										<BalanceInput placeholder='1' label='Tip' fromBalance={initiatorBalance} onChange={(balance) => setTip(balance)} />
+									</div>
+									<article className='w-[412px] flex items-center'>
+										<span className='-mr-1.5 z-0'>
+											<LineIcon className='text-5xl' />
+										</span>
+										<p className='p-3 w-full bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>
+												Speed up transactions by including a Tip.
+										</p>
+									</article>
+								</div>
+							</section>
+
 							<section className='mt-[15px] w-[500px]'>
 								<label className='text-primary font-normal text-xs block mb-[5px]'>Category*</label>
 								<Form.Item
@@ -595,30 +634,34 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 														</Dropdown>
 													</Form.Item>
 													:
-													<Form.Item
-														name={subfield}
-														rules={[{ message: 'Required', required: subfieldObject.required }]}
-														className='border-0 outline-0 my-0 p-0'
-													>
-														<div className='flex items-center h-[40px]'>
-															<Input
-																placeholder={`${subfieldObject.subfieldName}`}
-																className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
-																id={subfield}
-																value={transactionFieldsObject.subfields[subfield]?.value}
-																onChange={(e) => setTransactionFieldsObject(prev => ({
-																	category: transactionFields[category].fieldName,
-																	subfields: {
-																		...prev.subfields,
-																		[subfield]: {
-																			name: subfieldObject.subfieldName,
-																			value: e.target.value
+													subfieldObject.subfieldType === EFieldType.ATTACHMENT
+														?
+														<UploadAttachment setSubfieldAttachments={setSubfieldAttachments} subfield={subfield} />
+														:
+														<Form.Item
+															name={subfield}
+															rules={[{ message: 'Required', required: subfieldObject.required }]}
+															className='border-0 outline-0 my-0 p-0'
+														>
+															<div className='flex items-center h-[40px]'>
+																<Input
+																	placeholder={`${subfieldObject.subfieldName}`}
+																	className="w-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-24 resize-none"
+																	id={subfield}
+																	value={transactionFieldsObject.subfields[subfield]?.value}
+																	onChange={(e) => setTransactionFieldsObject(prev => ({
+																		category: transactionFields[category].fieldName,
+																		subfields: {
+																			...prev.subfields,
+																			[subfield]: {
+																				name: subfieldObject.subfieldName,
+																				value: e.target.value
+																			}
 																		}
-																	}
-																}))}
-															/>
-														</div>
-													</Form.Item>}
+																	}))}
+																/>
+															</div>
+														</Form.Item>}
 											</article>
 										</div>
 									</section>
@@ -679,7 +722,18 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						</Form>
 						<section className='flex items-center gap-x-5 justify-center mt-10'>
 							<CancelBtn className='w-[250px]' onClick={onCancel} />
-							<ModalBtn disabled={recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance))) || validRecipient.includes(false) || initiatorBalance.lt(totalDeposit.add(totalGas)) || Object.keys(transactionFields[category].subfields).some((key) => (!transactionFieldsObject.subfields[key]?.value) && transactionFields[category].subfields[key].required)} loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+							<ModalBtn disabled={
+								recipientAndAmount.some((item) => item.recipient === '' || item.amount.isZero() || item.amount.gte(new BN(multisigBalance)))
+								|| (transferKeepAlive && amount.gt((new BN(multisigBalance)).sub(inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0])))
+								|| amount.gt(new BN(multisigBalance))
+								|| validRecipient.includes(false)
+								|| initiatorBalance.lt(totalDeposit.add(totalGas))
+								|| Object.keys(transactionFields[category].subfields).some((key) => (transactionFields[category].subfields[key].subfieldType === EFieldType.ATTACHMENT ? (transactionFields[category].subfields[key].required && !subfieldAttachments[key]?.file) :  (!transactionFieldsObject.subfields[key]?.value && transactionFields[category].subfields[key].required)))}
+							loading={loading}
+							onClick={handleSubmit}
+							className='w-[250px]'
+							title='Make Transaction'
+							/>
 						</section>
 					</Spin>
 			}

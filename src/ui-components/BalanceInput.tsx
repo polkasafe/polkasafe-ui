@@ -13,7 +13,7 @@ import { inputToBn } from 'src/utils/inputToBn';
 interface Props{
 	className?: string
 	label?: string
-	fromBalance?: string
+	fromBalance?: string | BN
 	onChange: (balance: BN) => void
 	placeholder?: string
 	defaultValue?: string
@@ -33,7 +33,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 			return;
 		}
 
-		const [balance, isValid] = inputToBn(`${network === 'astar' ? value.toFixed(13) : value}`, network, false);
+		const [balance, isValid] = inputToBn(`${network === 'astar' ? value.toFixed(13) : network === 'alephzero' ? value.toFixed(11) : value}`, network, false);
 		setIsValidInput(isValid);
 
 		if(isValid){

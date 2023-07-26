@@ -3,6 +3,10 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 export interface IAddressBookItem {
 	name: string;
 	address: string;
+	email?: string,
+	roles?: string[],
+	discord?: string,
+	telegram?: string
 }
 
 export interface IMultisigSettings {
@@ -148,13 +152,13 @@ export interface IDropdownOptions{
 }
 
 export enum EFieldType{
+	ATTACHMENT = 'Attachment',
 	SINGLE_SELECT = 'Single-select',
 	// MULTI_SELECT = 'Multi-select',
 	TEXT = 'Text'
 	// NUMBER = 'Number',
 	// DATE = 'Date/Date-range',
 	// LINK = 'link',
-	// ATTACHMENT = 'Attachment'
 }
 
 export interface ITransactionCategorySubfields{

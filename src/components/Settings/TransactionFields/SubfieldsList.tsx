@@ -211,7 +211,7 @@ const SubfieldsList = ({ className, category }: { className?: string, category: 
 							return (
 								<article key={index}>
 									<div className='grid grid-cols-5 gap-x-5 py-6 px-4 text-white'>
-										<div className='max-w-[100px] sm:w-auto overflow-hidden text-ellipsis col-span-2 flex items-center text-base'>
+										<div className='sm:w-auto overflow-hidden text-ellipsis col-span-2 flex items-center text-base'>
 											{subfieldObject.subfieldName}
 										</div>
 										<div className='col-span-1 flex items-center gap-x-[10px]'>
