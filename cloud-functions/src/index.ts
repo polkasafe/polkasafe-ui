@@ -592,7 +592,6 @@ export const removeFromAddressBookEth = functions.https.onRequest(async (req, re
 				} as IUser;
 				const addressBook = addressDoc.addressBook || [];
 
-				// check if address exists in address book
 				const addressIndex = addressBook.findIndex((a) => a.address == address);
 				if (addressIndex > -1) {
 					addressBook.splice(addressIndex, 1);

@@ -6,6 +6,10 @@ import SafeApiKit, { AllTransactionsListResponse, OwnerResponse, SafeCreationInf
 import Safe, { SafeAccountConfig, SafeFactory } from '@safe-global/protocol-kit';
 import { SafeMultisigTransactionResponse, SafeTransactionDataPartial, TransactionResult } from '@safe-global/safe-core-sdk-types';
 
+(BigInt.prototype as any).toJSON = function () {
+	return this.toString();
+};
+
 export class GnosisSafeService {
 	ethAdapter: any;
 	safeFactory: any;
@@ -126,11 +130,14 @@ export class GnosisSafeService {
 	};
 
 	signAndConfirmTx = async (txHash: string, multisig: string): Promise<SignatureResponse | null> => {
-		console.log('signAndConfirmTx', txHash, multisig);
 		try {
+			const signer = await this.ethAdapter.getSignerAddress();
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
-			const signature = await safeSdk.signTransactionHash(txHash);
-			return await this.safeService.confirmTransaction(txHash, signature.data);
+			const safeTransaction = await this.safeService.getTransaction(txHash);
+			let signature = await safeSdk.signTransaction(safeTransaction) as any;
+			signature = Object.fromEntries(signature.signatures.entries());
+			console.log('signature', signature);
+			return await this.safeService.confirmTransaction(txHash, signature[signer.toLowerCase()].data);
 		} catch (err) {
 			console.log('error from signAndConfirmTx', err);
 			return null;

@@ -399,3 +399,6 @@ export default styled(SentInfo)`
         border-inline-color: #FF9F1C;
     }
 `;
+
+// signin message hash
+// linking via all address - no user input of safe address
