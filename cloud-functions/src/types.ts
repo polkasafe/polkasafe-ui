@@ -182,10 +182,13 @@ export interface ITransactionFields{
 export interface ISharedAddressBookRecord {
 	name: string,
 	address: string,
+	created_at?: Date,
 	email?: string,
 	discord?: string,
 	telegram?: string,
-	roles?: string[]
+	roles?: string[],
+	updated_at?: Date,
+	updatedBy?: string
 }
 
 export interface ISharedAddressBooks {
