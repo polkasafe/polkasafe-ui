@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import { Input } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,9 +13,10 @@ import ImportAdress from 'src/components/AddressBook/ImportAddress';
 import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { ISharedAddressBookRecord } from 'src/types';
-import { ExternalLinkIcon, SearchIcon } from 'src/ui-components/CustomIcons';
+import { IAllAddresses } from 'src/types';
+import { ExternalLinkIcon, OutlineCloseIcon, SearchIcon } from 'src/ui-components/CustomIcons';
 import { AddBoxIcon, ExportArrowIcon, ImportArrowIcon } from 'src/ui-components/CustomIcons';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 enum ETab {
 	SHARED,
@@ -27,27 +28,96 @@ const AddressBook = ({ className }: { className?: string }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { records } = useActiveMultisigContext();
 	const [tab, setTab] = useState<ETab>(ETab.SHARED);
-	const personalAddressBookFiltered = addressBook.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())||item.address.toLowerCase().includes(searchTerm.toLowerCase()));
-	const [sharedAddressBookFiltered, setSharedAddressBookFiltered] = useState<{ [address: string]: ISharedAddressBookRecord }>({} as any);
+	const [addresses, setAddresses] = useState<IAllAddresses>({} as any);
+
 	useEffect(() => {
-		if(!records) return;
-		Object.keys(records)?.filter(address => records[address]?.name.toLowerCase().includes(searchTerm.toLowerCase())|| records[address]?.address.toLowerCase().includes(searchTerm.toLowerCase()) || records[address]?.roles?.includes(searchTerm)).forEach((address) => {
-			setSharedAddressBookFiltered(prev => {
+		setAddresses({});
+		const allAddresses: IAllAddresses = {};
+		if(records){
+			Object.keys(records).forEach((address) => {
+				allAddresses[address] = {
+					address,
+					discord: records[address].discord,
+					email: records[address].email,
+					name: records[address].name,
+					nickName: '',
+					roles: records[address].roles,
+					shared: true,
+					telegram: records[address].telegram
+				};
+			});
+		}
+		addressBook.forEach(item => {
+			const substrateAddress = getSubstrateAddress(item.address) || item.address;
+			if(Object.keys(allAddresses).includes(substrateAddress)){
+				if(item.nickName) {
+					allAddresses[substrateAddress].nickName = item.nickName;
+				}
+				if(!allAddresses[substrateAddress].name){
+					allAddresses[substrateAddress].name = item.name;
+				}
+			}
+			else {
+				allAddresses[substrateAddress] = {
+					address: substrateAddress,
+					discord: item.discord,
+					email: item.email,
+					name: item.name,
+					nickName: item.nickName,
+					roles: item.roles,
+					shared: false,
+					telegram: item.telegram
+				};
+			}
+		});
+
+		Object.keys(allAddresses)?.filter(address => allAddresses[address]?.name.toLowerCase().includes(searchTerm.toLowerCase()) || allAddresses[address]?.nickName?.toLowerCase().includes(searchTerm.toLowerCase()) || allAddresses[address]?.address.toLowerCase().includes(searchTerm.toLowerCase()) || records[address]?.roles?.includes(searchTerm)).forEach((address) => {
+			setAddresses((prev) => {
 				return {
 					...prev,
 					[address]: {
-						address: records[address]?.address,
-						discord: records[address]?.discord,
-						email: records[address]?.email,
-						name: records[address].name,
-						roles: records[address]?.roles,
-						telegram: records[address]?.telegram
+						address: allAddresses[address]?.address,
+						discord: allAddresses[address]?.discord,
+						email: allAddresses[address]?.email,
+						name: allAddresses[address]?.name,
+						nickName: allAddresses[address]?.nickName,
+						roles: allAddresses[address]?.roles,
+						shared: allAddresses[address]?.shared,
+						telegram: allAddresses[address]?.telegram
 					}
 
 				};
 			});
 		});
-	}, [records, searchTerm, sharedAddressBookFiltered]);
+
+	}, [addressBook, records, searchTerm]);
+
+	const [openAddAddressModal, setOpenAddAddressModal] = useState<boolean>(false);
+
+	const AddAddressModal = ({ className }: { className?: string }) => {
+		return (
+			<>
+				<Button className='flex items-center justify-center bg-primary text-white border-none' onClick={() => setOpenAddAddressModal(true)}><AddBoxIcon/> Add Address</Button>
+				<Modal
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setOpenAddAddressModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Address</h3>}
+					open={openAddAddressModal}
+					className={`${className} w-auto md:min-w-[500px] scale-90`}
+				>
+					<AddAdress onCancel={() => setOpenAddAddressModal(false)} className={className} />
+				</Modal>
+			</>
+		);
+	};
+
 	const { openModal } = useModalContext();
 	const userAddress = localStorage.getItem('address');
 	return (
@@ -62,12 +132,12 @@ const AddressBook = ({ className }: { className?: string }) => {
 						</div>
 						<div className='flex'>
 							<Button className='flex items-center justify-center bg-highlight text-primary mr-2 border-none' onClick={() => openModal('Import Address Book', <ImportAdress/>) }><ImportArrowIcon/>Import</Button>
-							<Button className='flex items-center justify-center bg-highlight text-primary mr-2 border-none' onClick={() => openModal('Export Address Book', <ExportAdress records={sharedAddressBookFiltered} />) }><ExportArrowIcon/>Export</Button>
-							<Button className='flex items-center justify-center bg-primary text-white border-none' onClick={() => openModal('Add Address', <AddAdress className={className} />)}><AddBoxIcon/> Add Address</Button>
+							<Button className='flex items-center justify-center bg-highlight text-primary mr-2 border-none' onClick={() => openModal('Export Address Book', <ExportAdress records={addresses} />) }><ExportArrowIcon/>Export</Button>
+							<AddAddressModal className={className} />
 						</div>
 					</div>
 					<div>
-						<AddressTable setTab={setTab} tab={tab} personalAddresses={personalAddressBookFiltered} records={ sharedAddressBookFiltered } />
+						<AddressTable addresses={addresses} setTab={setTab} tab={tab} />
 					</div>
 				</div>
 				: <div className='h-full w-full flex items-center justify-center text-primary font-bold text-lg'>

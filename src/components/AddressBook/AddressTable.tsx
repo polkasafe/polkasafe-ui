@@ -3,20 +3,19 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
-import { Badge, Button, Dropdown, Modal, Table, Tooltip } from 'antd';
+import { Badge, Dropdown, Modal, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import classNames from 'classnames';
 import React, { FC, useState } from 'react';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { IAddressBookItem, ISharedAddressBookRecord } from 'src/types';
+import { IAllAddresses } from 'src/types';
 import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
@@ -29,10 +28,7 @@ export interface IAddress {
 	address: string;
 }
 interface IAddressProps {
-    records: {
-		[address: string]: ISharedAddressBookRecord
-	};
-	personalAddresses: IAddressBookItem[];
+    addresses: IAllAddresses
 	setTab: React.Dispatch<React.SetStateAction<ETab>>
 	tab: ETab;
 	className?: string
@@ -71,7 +67,7 @@ const TransactionModal = ({ className, defaultAddress }: { className?: string, d
 	);
 };
 
-const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, onlyName, personalToShared }: { personalToShared?: boolean, onlyName?: boolean, shared: boolean, className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
+const EditAddressModal = ({ className, addressToEdit, nameToEdit, nickNameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, personalToShared }: { personalToShared?: boolean, onlyName?: boolean, shared: boolean, className?: string, addressToEdit: string, nameToEdit?: string, nickNameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
 	const [openEditModal, setOpenEditModal] = useState<boolean>(false);
 	return (
 		<>
@@ -84,7 +80,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 				:
 				<button
 					onClick={() => setOpenEditModal(true)}
-					className={`text-primary ${!onlyName && 'bg-highlight'} flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8`}>
+					className={'text-primary bg-highlight flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'}>
 					<EditIcon />
 				</button>
 			}
@@ -98,7 +94,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{onlyName ? 'Edit Name' : personalToShared ? 'Add to Shared Address Book' : 'Edit Address'}</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>{ personalToShared ? 'Add to Shared Address Book' : 'Edit Address'}</h3>}
 				open={openEditModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
@@ -107,22 +103,26 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					className={className}
 					addressToEdit={addressToEdit}
 					nameToEdit={nameToEdit}
+					nickNameToEdit={nickNameToEdit}
 					discordToEdit={discordToEdit}
 					emailToEdit={emailToEdit}
 					rolesToEdit={rolesToEdit}
 					telegramToEdit={telegramToEdit}
 					shared={shared}
-					onlyName={onlyName}
+					personalToShared={personalToShared}
 				/>
 			</Modal>
 		</>
 	);
 };
 
-const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className, setTab, tab }) => {
+const AddressTable: FC<IAddressProps> = ({ addresses, className }) => {
 	const { openModal } = useModalContext();
 	const { network } = useGlobalApiContext();
-	const { address: userAddress, activeMultisig } = useGlobalUserDetailsContext();
+	const { address: userAddress, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
+	const { records } = useActiveMultisigContext();
+
+	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.address === activeMultisig);
 
 	interface DataType {
 		key: React.Key;
@@ -141,7 +141,7 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 			fixed: 'left',
 			key: 'name',
 			title: 'Name',
-			width: 200
+			width: 250
 		},
 		{
 			dataIndex: 'address',
@@ -183,15 +183,14 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 		}
 	];
 
-	const sharedAddressBookData: DataType[] = Object.keys(records).map((address) => {
+	const addressBookData: DataType[] = Object.keys(addresses)?.map((address) => {
 		const encodedAddress = getEncodedAddress(address, network) || address;
-		const personal = personalAddresses.find((item) => item.address === encodedAddress);
 		return ({
 			actions: <div className=' flex items-center justify-right gap-x-[10px]'>
-				<EditAddressModal shared={true} className={className} addressToEdit={encodedAddress} nameToEdit={records[address]?.name || personal?.name} discordToEdit={records[address]?.discord} emailToEdit={records[address]?.email} rolesToEdit={records[address]?.roles} telegramToEdit={records[address]?.telegram} />
-				{encodedAddress !== userAddress &&
+				<EditAddressModal shared={!!addresses[address].shared} className={className} nickNameToEdit={addresses[address]?.nickName} addressToEdit={encodedAddress} nameToEdit={addresses[address]?.name} discordToEdit={addresses[address]?.discord} emailToEdit={addresses[address]?.email} rolesToEdit={addresses[address]?.roles} telegramToEdit={addresses[address]?.telegram} />
+				{(encodedAddress !== userAddress && !multisig?.signatories.includes(encodedAddress)) &&
 		<button
-			onClick={() => openModal('Remove Address', <RemoveAddress shared addressToRemove={encodedAddress} name={records[address]?.name} />) }
+			onClick={() => openModal('Remove Address', <RemoveAddress shared={addresses[address].shared} addressToRemove={encodedAddress} name={addresses[address]?.name} />) }
 			className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
 			<DeleteIcon />
 		</button>}
@@ -212,127 +211,44 @@ const AddressTable: FC<IAddressProps> = ({ records, personalAddresses, className
 					</a>
 				</div>
 			</div>,
-			discord: <div className='truncate'>{records[address]?.discord ? records[address].discord : '-'}</div>,
-			email: <div className='truncate'>{records[address]?.email ? records[address].email : '-'}</div>,
+			discord: <div className='truncate'>{addresses[address]?.discord ? addresses[address].discord : '-'}</div>,
+			email: <div className='truncate'>{addresses[address]?.email ? addresses[address].email : '-'}</div>,
 			key: address,
-			name: <p title={personal?.name || records[address]?.name || DEFAULT_ADDRESS_NAME} className='sm:w-auto overflow-hidden text-ellipsis flex items-center justify-between text-base'>
-				<div className='flex items-center truncate'>{personal?.name || records[address]?.name || DEFAULT_ADDRESS_NAME} {encodedAddress === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}</div>
-				<EditAddressModal onlyName={true} shared={false} className={className} addressToEdit={encodedAddress} nameToEdit={personal?.name || records[address]?.name || DEFAULT_ADDRESS_NAME} discordToEdit={records[address]?.discord} emailToEdit={records[address]?.email} rolesToEdit={records[address]?.roles} telegramToEdit={records[address]?.telegram}  />
+			name: <p title={addresses[address]?.name || DEFAULT_ADDRESS_NAME} className='sm:w-auto overflow-hidden text-ellipsis flex items-center justify-between text-base'>
+				<div>
+					<div className='flex items-center truncate'>{addresses[address]?.name || DEFAULT_ADDRESS_NAME}
+						{encodedAddress === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
+						{addresses[address].shared && <Tooltip title={<span className='text-sm text-text_secondary'>Signatory Address</span>}><Badge className='ml-2' status='success' color='blue' /></Tooltip>}
+					</div>
+					{addresses?.[address]?.nickName && <div className='text-sm mt-1'>({addresses?.[address]?.nickName})</div>}
+				</div>
+				{records && Object.keys(records)?.length > 0 && !Object.keys(records).includes(address) &&
+				<EditAddressModal className={className} nickNameToEdit={addresses[address]?.nickName} addressToEdit={encodedAddress} nameToEdit={addresses[address]?.name} discordToEdit={addresses[address]?.discord} emailToEdit={addresses[address]?.email} rolesToEdit={addresses[address]?.roles} telegramToEdit={addresses[address]?.telegram} personalToShared shared={false} />
+				}
 			</p>,
 			roles: <div className=' flex items-center gap-x-2'>{
-				records[address] && records[address]?.roles && records[address].roles!.length > 0 ?
+				addresses[address] && addresses[address]?.roles && addresses[address].roles!.length > 0 ?
 					<>
-						{records[address].roles?.slice(0,2).map((role, i) => <span key={i} className='bg-primary bg-opacity-10 border border-solid border-primary text-primary rounded-lg py-1 px-3 max-w-[120px] truncate'>{role}</span>)}
-						{records[address]?.roles!.length > 2 &&
-					<Dropdown menu={{ items: records[address]?.roles?.slice(2).map((role, i) => ({
+						{addresses[address].roles?.slice(0,2).map((role, i) => <span key={i} className='bg-primary bg-opacity-10 border border-solid border-primary text-primary rounded-lg py-1 px-3 max-w-[120px] truncate'>{role}</span>)}
+						{addresses[address]?.roles!.length > 2 &&
+					<Dropdown menu={{ items: addresses[address]?.roles?.slice(2).map((role, i) => ({
 						key: i,
 						label: <span key={i} className='bg-primary bg-opacity-10 border border-solid border-primary text-primary rounded-lg py-1 px-3'>{role}</span>
 					})) }}>
-						<span className='cursor-pointer py-1.5 px-3 rounded-full bg-primary'>+{records[address]?.roles!.length - 2}</span>
+						<span className='cursor-pointer py-1.5 px-3 rounded-full bg-primary'>+{addresses[address]?.roles!.length - 2}</span>
 					</Dropdown>
 						}
 					</>
 					: '-'
 			}</div>,
-			telegram: <div className='truncate'>{records[address]?.telegram ? records[address].telegram : '-'}</div>
+			telegram: <div className='truncate'>{addresses[address]?.telegram ? addresses[address].telegram : '-'}</div>
 		});
 	});
 
-	const personalAddressBookData: DataType[] = personalAddresses.map(({ address, name, email, discord, telegram, roles }) => ({
-		actions: <div className=' flex items-center justify-right gap-x-[10px]'>
-			<EditAddressModal shared={false} className={className} addressToEdit={address} nameToEdit={name} discordToEdit={discord} emailToEdit={email} rolesToEdit={roles} telegramToEdit={telegram} />
-			{address !== userAddress &&
-		<button
-			onClick={() => openModal('Remove Address', <RemoveAddress addressToRemove={address} name={name} />) }
-			className='text-failure bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
-			<DeleteIcon />
-		</button>}
-			<TransactionModal defaultAddress={address} className={className} />
-		</div>,
-		address: <div className='flex items-center'>
-			<Identicon
-				className='image identicon mx-2'
-				value={address}
-				size={30}
-				theme={'polkadot'}
-			/>
-			<span title={address} className='hidden sm:block ml-[6px] max-w-md text-ellipsis overflow-hidden'>{shortenAddress(address)}</span>
-			<div className='ml-[14px] text-text_secondary text-base flex items-center gap-x-[6px]'>
-				<button className='hover:text-primary' onClick={() => copyText(address, true, network)}><CopyIcon /></button>
-				<a href={`https://${network}.subscan.io/account/${address}`} target='_blank' rel="noreferrer" >
-					<ExternalLinkIcon  />
-				</a>
-			</div>
-		</div>,
-		discord: <div className='truncate'>{discord || '-'}</div>,
-		email: <div className='truncate'>{email || '-'}</div>,
-		key: address,
-		name: <p title={name} className='sm:w-auto overflow-hidden text-ellipsis flex items-center text-base flex justify-between items-center'>
-			<div className='flex items-center'>
-				{name} {address === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
-			</div>
-			{!Object.keys(records).includes(getSubstrateAddress(address)|| address) &&
-				<EditAddressModal className={className} addressToEdit={address} nameToEdit={name} discordToEdit={discord} emailToEdit={email} rolesToEdit={roles} telegramToEdit={telegram} personalToShared shared />
-			}
-		</p>,
-		roles: <div className=' flex items-center gap-x-2'>{
-			roles && roles.length ?
-				<>
-					{roles?.slice(0,2).map((role, i) => <span key={i} className='bg-primary rounded-lg text-white py-1 px-3 max-w-[80px] truncate'>{role}</span>)}
-					{roles.length > 2 &&
-					<Dropdown menu={{ items: roles.slice(2).map((role, i) => ({
-						key: i,
-						label: <span key={i} className='bg-primary rounded-lg text-xs text-white py-1 px-3'>{role}</span>
-					})) }}>
-						<span className='cursor-pointer py-1.5 px-3 rounded-full bg-primary'>+{roles.length - 2}</span>
-					</Dropdown>
-					}
-				</>
-				: '-'
-		}</div>,
-		telegram: <div className='truncate'>{telegram || '-'}</div>
-	}));
-
 	return (
 		<>
-			<div
-				className='flex items-center mb-4'
-			>
-				<Button
-					onClick={() => setTab(ETab.SHARED)}
-					size='large'
-					className={classNames(
-						' font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
-						{
-							'text-primary bg-highlight': tab === ETab.SHARED
-						}
-					)}
-				>
-					SHARED
-				</Button>
-				<Button
-					onClick={() => setTab(ETab.PERSONAL)}
-					size='large'
-					className={classNames(
-						'font-medium text-sm leading-[15px] w-[100px] text-white outline-none border-none',
-						{
-							'text-primary bg-highlight': tab === ETab.PERSONAL
-						}
-					)}
-				>
-					PERSONAL
-				</Button>
-			</div>
 			<div className='text-sm font-medium overflow-y-auto'>
-				{
-					tab === ETab.SHARED ?
-						!activeMultisig ? <section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-							<p className='text-white'>Looks Like You Don&apos;t have a Multisig. Please Create One to add Addresses in Shared Address book.</p>
-						</section> :
-							<Table columns={columns} pagination={false} dataSource={sharedAddressBookData} scroll={{ x: 1000, y: 400 }} />
-						:
-						<Table columns={columns} pagination={false} dataSource={personalAddressBookData} scroll={{ x: 1000, y: 400 }} />
-				}
+				<Table columns={columns} pagination={false} dataSource={addressBookData} scroll={{ x: 1000, y: 400 }} />
 			</div>
 		</>
 	);

@@ -8,7 +8,7 @@ import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import longIframe from 'src/assets/long-iframe.svg';
 import shortIframe from 'src/assets/short-iframe.svg';
-import { initialActiveMultisigContext, useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalDAppContext } from 'src/context/DAppContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -48,7 +48,7 @@ const AppLayout = ({ className }: {className?: string}) => {
 	const hideSlider = iframeState && isAppsPage;
 
 	const getSharedAddressBook = useCallback(async () => {
-		if(!localStorage.getItem('signature') || !localStorage.getItem('address')) return;
+		if(!localStorage.getItem('signature') || !localStorage.getItem('address') || !multisig) return;
 
 		setMultisigChanged(true);
 		const getSharedAddressBookRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getSharedAddressBook`, {
@@ -63,12 +63,9 @@ const AppLayout = ({ className }: {className?: string}) => {
 
 		if(!sharedAddressBookError && sharedAddressBookData){
 			setActiveMultisigContextState(sharedAddressBookData as any);
-		}else {
-			setActiveMultisigContextState(initialActiveMultisigContext);
 		}
 		setMultisigChanged(false);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeMultisig, network]);
+	}, [multisig, network, setActiveMultisigContextState]);
 
 	useEffect(() => {
 		getSharedAddressBook();

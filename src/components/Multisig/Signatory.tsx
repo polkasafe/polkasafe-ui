@@ -51,14 +51,14 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 			Object.keys(records).forEach((address, i) => {
 				const personal = addressBook.find(item => getSubstrateAddress(item.address) === getSubstrateAddress(address));
 				if(address !== getSubstrateAddress(userAddress)) {
-					allAddresses.push({ address: getEncodedAddress(address, network) || address, key: i, name: records[address]?.name || personal?.name || DEFAULT_ADDRESS_NAME });
+					allAddresses.push({ address: getEncodedAddress(address, network) || address, key: i, name: personal?.nickName || records[address]?.name || personal?.name || DEFAULT_ADDRESS_NAME });
 				}
 			});
 		}
 		addressBook
-			.filter(item => getSubstrateAddress(item.address) !== getSubstrateAddress(userAddress) && !Object.keys(records).includes(getSubstrateAddress(item.address) || item.address))
+			.filter(item => getSubstrateAddress(item.address) !== getSubstrateAddress(userAddress) && !allAddresses.some((a) => getSubstrateAddress(a.address) === getSubstrateAddress(item.address)))
 			.forEach((item, i) => {
-				allAddresses.push({ address: getEncodedAddress(item.address, network) || item.address, key: i, name: item.name });
+				allAddresses.push({ address: getEncodedAddress(item.address, network) || item.address, key: i, name: item.nickName || item.name });
 			});
 
 		setAddresses(allAddresses);
@@ -85,7 +85,9 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 					setAddresses((prev) => {
 						const copyPrev = [...prev];
 						const copyObj = copyPrev[i];
-						copyObj!.balance = balance?.data?.free?.toString();
+						if(copyObj){
+							copyObj.balance = balance?.data?.free?.toString();
+						}
 						return copyPrev;
 					});
 				}

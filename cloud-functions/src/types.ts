@@ -6,7 +6,8 @@ export interface IAddressBookItem {
 	email?: string,
 	roles?: string[],
 	discord?: string,
-	telegram?: string
+	telegram?: string,
+	nickName?: string
 }
 
 export interface IMultisigSettings {
