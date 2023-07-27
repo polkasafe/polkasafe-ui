@@ -31,6 +31,8 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30, onlyAddr
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
+	const addressObj = addressBook?.find((item) => item.address === address);
+
 	return (
 		<div
 			className=' flex items-center gap-x-3'
@@ -94,7 +96,7 @@ const AddressComponent = ({ address, name, withBadge=true, iconSize=30, onlyAddr
 					<div
 						className='font-medium text-sm flex text-white'
 					>
-						{name || addressBook?.find((item) => item.address === address)?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || records?.[getSubstrateAddress(address) || address]?.name || DEFAULT_ADDRESS_NAME}
+						{name || addressObj?.nickName || addressObj?.name || multisigAddresses.find((item) => item.address === address || item.proxy === address)?.name || records?.[getSubstrateAddress(address) || address]?.name || DEFAULT_ADDRESS_NAME}
 					</div>
 					<div
 						className='flex items-center gap-x-3 font-normal text-xs text-text_secondary'

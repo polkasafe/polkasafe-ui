@@ -14,6 +14,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ISharedAddressBooks, NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 const RemoveAddress = ({ addressToRemove, name, shared }: { addressToRemove: string, name: string, shared?: boolean }) => {
 	const { address, activeMultisig, addressBook, setUserDetailsContextState } = useGlobalUserDetailsContext();
@@ -129,7 +130,7 @@ const RemoveAddress = ({ addressToRemove, name, shared }: { addressToRemove: str
 				if(removeAddressData){
 					setActiveMultisigContextState(removeAddressData as any);
 
-					const filteredAddresses = [...addressBook].filter((item) => item.address !== addressToRemove);
+					const filteredAddresses = [...addressBook].filter((item) => getSubstrateAddress(item.address) !== getSubstrateAddress(addressToRemove));
 					setUserDetailsContextState(prev => {
 						return {
 							...prev,

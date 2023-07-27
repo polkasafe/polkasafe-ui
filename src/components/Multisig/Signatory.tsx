@@ -223,7 +223,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 							<>
 								<div className='text-sm text-text_secondary'>Addresses imported directly from your Polkadot.js wallet</div>
 								{accounts.filter((item) => item.address !== getEncodedAddress(userAddress, network)).map((account, i) => (
-									<p onClick={signatories.includes(getSubstrateAddress(account.address) || account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
+									<p onClick={signatories.includes(account.address) ? clickDropReturn : clickDrop} title={getEncodedAddress(account.address, network) || ''} id={`${i+1}-${account.address}`} key={`${i+1}-${account.address}`} className='bg-bg-main p-2 m-1 rounded-md text-white' draggable onDragStart={dragStart}>{account.name}</p>
 								))}
 							</>
 						}

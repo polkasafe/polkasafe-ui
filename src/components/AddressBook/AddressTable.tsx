@@ -218,7 +218,7 @@ const AddressTable: FC<IAddressProps> = ({ addresses, className }) => {
 				<div>
 					<div className='flex items-center truncate'>{addresses[address]?.name || DEFAULT_ADDRESS_NAME}
 						{encodedAddress === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
-						{addresses[address].shared && <Tooltip title={<span className='text-sm text-text_secondary'>Signatory Address</span>}><Badge className='ml-2' status='success' color='blue' /></Tooltip>}
+						{addresses[address].shared && <Tooltip title={<span className='text-sm text-text_secondary'>Shared Address</span>}><Badge className='ml-2' status='success' color='blue' /></Tooltip>}
 					</div>
 					{addresses?.[address]?.nickName && <div className='text-sm mt-1'>({addresses?.[address]?.nickName})</div>}
 				</div>

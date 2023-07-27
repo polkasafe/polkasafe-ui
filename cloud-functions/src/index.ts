@@ -315,6 +315,8 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
+		const substrateProxyAddress = getSubstrateAddress(proxyAddress);
+
 		// cannot send proxy address if disabled is true
 		if (proxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
 
@@ -442,12 +444,15 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			}, { merge: true });
 
 			if (addressBook) {
-				const addressBookRef = newMultisig.proxy ? firestoreDB.collection('addressBooks').doc(`${proxyAddress}_${network}`) : firestoreDB.collection('addressBooks').doc(`${multisigAddress}_${network}`);
+				const addressBookRef = newMultisig.proxy ? firestoreDB.collection('addressBooks').doc(`${substrateProxyAddress}_${network}`) : firestoreDB.collection('addressBooks').doc(`${multisigAddress}_${network}`);
 				const records: { [address: string]: ISharedAddressBookRecord } = {} as any;
 				substrateSignatories.forEach((signatory) => {
 					records[signatory] = {
 						name: addressBook[signatory]?.name || '',
 						address: signatory,
+						created_at: addressBook[signatory]?.created_at || new Date(),
+						updated_at: addressBook[signatory]?.updated_at || new Date(),
+						updatedBy: addressBook[signatory]?.updatedBy || substrateAddress,
 						email: addressBook[signatory]?.email || '',
 						discord: addressBook[signatory]?.discord || '',
 						telegram: addressBook[signatory]?.telegram || '',
@@ -2468,6 +2473,7 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 		const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
 		const substrateMultisigAddress = getSubstrateAddress(String(multisigAddress));
 		if (!substrateAddressToAdd || !substrateMultisigAddress || !address) return res.status(400).json({ error: responseMessages.invalid_params });
+		const substrateUserAddress = getSubstrateAddress(address);
 
 		try {
 			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
@@ -2482,7 +2488,10 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 						email: email || '',
 						discord: discord || '',
 						telegram: telegram || '',
-						roles: roles || []
+						roles: roles || [],
+						updated_at: new Date(),
+						created_at: new Date(),
+						updatedBy: substrateUserAddress
 					}
 				},
 				multisig: substrateMultisigAddress
@@ -2490,7 +2499,6 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 
 			await addressBookRef.set({ ...updatedAddressEntry }, { merge: true });
 
-			const substrateUserAddress = getSubstrateAddress(address);
 			const addressRef = firestoreDB.collection('addresses').doc(substrateUserAddress);
 			const doc = await addressRef.get();
 			if (doc.exists) {

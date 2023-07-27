@@ -46,7 +46,7 @@ const RemoveSignatoryModal = ({ address, className, signatoriesLength, threshold
 	);
 };
 
-const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit }: { className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
+const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, nickNameToEdit }: { className?: string, nickNameToEdit?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[] }) => {
 	const [openEditModal, setOpenEditModal] = useState<boolean>(false);
 	return (
 		<>
@@ -78,6 +78,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					emailToEdit={emailToEdit}
 					rolesToEdit={rolesToEdit}
 					telegramToEdit={telegramToEdit}
+					nickNameToEdit={nickNameToEdit}
 					shared={false}
 				/>
 			</Modal>
@@ -127,7 +128,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 						</div>
 					</div>
 					<div className='col-span-1 flex items-center gap-x-[10px]'>
-						<EditAddressModal className={className} addressToEdit={userAddressObject?.address || ''} nameToEdit={userAddressObject?.name} emailToEdit={userAddressObject?.email} discordToEdit={userAddressObject?.discord} telegramToEdit={userAddressObject?.telegram} rolesToEdit={userAddressObject?.roles}  />
+						<EditAddressModal className={className} nickNameToEdit={userAddressObject?.nickName} addressToEdit={userAddressObject?.address || ''} nameToEdit={userAddressObject?.name} emailToEdit={userAddressObject?.email} discordToEdit={userAddressObject?.discord} telegramToEdit={userAddressObject?.telegram} rolesToEdit={userAddressObject?.roles}  />
 					</div>
 				</div>
 				<Divider className='bg-text_secondary my-0' />
@@ -140,7 +141,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 						<article key={index}>
 							<div className='grid grid-cols-4 gap-x-5 py-6 px-4 text-white'>
 								<p className='sm:w-auto overflow-hidden text-ellipsis col-span-1 flex items-center text-base'>
-									{addressObject?.name || records?.[address]?.name || DEFAULT_ADDRESS_NAME}
+									{addressObject?.nickName || records?.[address]?.name || addressObject?.name || DEFAULT_ADDRESS_NAME}
 								</p>
 								<div className='col-span-2 flex items-center'>
 									<Identicon
@@ -158,7 +159,7 @@ const ListOwners = ({ className, disabled }: { className?: string, disabled?: bo
 									</div>
 								</div>
 								<div className='col-span-1 flex items-center gap-x-[10px]'>
-									<EditAddressModal className={className} addressToEdit={address} nameToEdit={addressObject?.name} emailToEdit={addressObject?.email} discordToEdit={addressObject?.discord} telegramToEdit={addressObject?.telegram} rolesToEdit={addressObject?.roles}  />
+									<EditAddressModal className={className} nickNameToEdit={addressObject?.nickName} addressToEdit={address} nameToEdit={addressObject?.name} emailToEdit={addressObject?.email} discordToEdit={addressObject?.discord} telegramToEdit={addressObject?.telegram} rolesToEdit={addressObject?.roles}  />
 									{signatories.length > 2 && !disabled &&
 										<RemoveSignatoryModal threshold={multisig?.threshold || 2} className={className} signatoriesLength={signatories.length || 2} address={address} />
 									}

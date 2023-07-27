@@ -267,8 +267,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 					const updateIndex = copyAddressBook.findIndex((item) => getSubstrateAddress(item.address) === getSubstrateAddress(address));
 					if(updateIndex > -1){
 						copyAddressBook[updateIndex].nickName = nickName;
-					}
-					else {
+					}else {
 						copyAddressBook.push({
 							address: address,
 							discord,
@@ -351,10 +350,10 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 								onChange={(e) => setName(e.target.value)}
 								value={name}
 							/>
-						</Form.Item>
-						{!showNickNameField &&
+							{!showNickNameField &&
 							<Button onClick={() => setShowNickNameField(true)} icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Add Nickname</Button>
-						}
+							}
+						</Form.Item>
 					</div>
 					{
 						showNickNameField &&
