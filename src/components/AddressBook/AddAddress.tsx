@@ -2,7 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Checkbox, Form, Input, message,Select, Spin } from 'antd';
+import { MinusCircleOutlined,PlusCircleOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Form, Input, message,Modal,Select, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -15,7 +16,7 @@ import { EMAIL_REGEX } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAddressBookItem, ISharedAddressBooks, NotificationStatus } from 'src/types';
-import { WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
@@ -27,6 +28,39 @@ interface IMultisigProps {
 	setAddAddress?: React.Dispatch<React.SetStateAction<string>>
 }
 
+const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolean, className?: string, onCancel: () => void, confirm: () => Promise<void>}) => {
+	return (
+		<>
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={onCancel}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'></h3>}
+				open={open}
+				className={`${className} w-auto md:min-w-[500px] scale-90`}
+			>
+				<Form
+					className='my-0 w-[560px]'
+				>
+					<p className='text-white font-medium text-sm leading-[15px]'>
+						This will update the Address book of all Signatories of this Multisig, would you like to continue?
+					</p>
+					<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+						<CancelBtn onClick={onCancel}/>
+						<AddBtn onClick={() => { confirm(); onCancel(); }} title='Yes' />
+					</div>
+				</Form>
+			</Modal>
+		</>
+	);
+};
+
 const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddress, className }) => {
 	const [messageApi, contextHolder] = message.useMessage();
 	const { network } = useGlobalApiContext();
@@ -35,12 +69,16 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	const [address, setAddress] = useState<string>(addAddress || '');
 	const [addressValid, setAddressValid] = useState<boolean>(true);
 	const [name, setName] = useState<string>('');
+	const [nickName, setNickName] = useState<string>('');
+	const [showNickNameField, setShowNickNameField] = useState<boolean>(false);
 	const [email, setEmail] = useState<string>('');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [roles, setRoles] = useState<string[]>([]);
 	const [discord, setDiscord] = useState<string>('');
 	const [telegram, setTelegram] = useState<string>('');
 	const [shared, setShared] = useState<boolean>(activeMultisig ? true : false);
+
+	const [openConfirmationModal, setOpenConfirmationModal] = useState<boolean>(false);
 
 	const [loading, setLoading] = useState<boolean>(false);
 
@@ -104,6 +142,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						discord,
 						email,
 						name,
+						nickName,
 						roles,
 						telegram
 					}),
@@ -194,6 +233,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						email,
 						multisigAddress: multisig?.proxy ? multisig.proxy : activeMultisig,
 						name,
+						nickName,
 						roles,
 						telegram
 					}),
@@ -220,6 +260,29 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 						return {
 							...prevState,
 							...addAddressData
+						};
+					});
+
+					const copyAddressBook = [...addressBook];
+					const updateIndex = copyAddressBook.findIndex((item) => getSubstrateAddress(item.address) === getSubstrateAddress(address));
+					if(updateIndex > -1){
+						copyAddressBook[updateIndex].nickName = nickName;
+					}
+					else {
+						copyAddressBook.push({
+							address: address,
+							discord,
+							email,
+							name,
+							nickName,
+							roles,
+							telegram
+						});
+					}
+					setUserDetailsContextState(prev => {
+						return {
+							...prev,
+							addressBook: copyAddressBook
 						};
 					});
 
@@ -253,6 +316,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 		<>
 			{contextHolder}
 			<Spin spinning={loading} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
+				<EditAddressModal onCancel={() => setOpenConfirmationModal(false)} open={openConfirmationModal} confirm={handleSharedAddressBookUpdate}  />
 				<Form
 					className={`${className} add-address my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}
 				>
@@ -288,7 +352,40 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 								value={name}
 							/>
 						</Form.Item>
+						{!showNickNameField &&
+							<Button onClick={() => setShowNickNameField(true)} icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Add Nickname</Button>
+						}
 					</div>
+					{
+						showNickNameField &&
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="nick-name"
+							>
+								Nickname
+							</label>
+							<Form.Item
+								name="nick-name"
+								rules={[
+									{
+										message: 'Required',
+										required: true
+									}
+								]}
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Input
+									placeholder="Give the address a Nickname"
+									className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="nick-name"
+									onChange={(e) => setNickName(e.target.value)}
+									value={nickName}
+								/>
+								<Button onClick={() => { setShowNickNameField(false); setNickName(''); }} icon={<MinusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Remove Nickname</Button>
+							</Form.Item>
+						</div>
+					}
 					<div className="flex flex-col gap-y-3 mt-5">
 						<label
 							className="text-primary text-xs leading-[13px] font-normal"
@@ -399,7 +496,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 				</Form>
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<CancelBtn onClick={onCancel ? onCancel : toggleVisibility}/>
-					<AddBtn loading={loading} disabled={!name || !address || !addressValid || (!!email && !emailValid)} title='Add' onClick={shared ? handleSharedAddressBookUpdate : handlePersonalAddressBookUpdate} />
+					<AddBtn loading={loading} disabled={!name || !address || !addressValid || (!!email && !emailValid)} title='Add' onClick={shared ? () => setOpenConfirmationModal(true) : handlePersonalAddressBookUpdate} />
 				</div>
 			</Spin>
 		</>

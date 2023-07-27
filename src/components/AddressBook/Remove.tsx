@@ -127,10 +127,13 @@ const RemoveAddress = ({ addressToRemove, name, shared }: { addressToRemove: str
 				}
 
 				if(removeAddressData){
-					setActiveMultisigContextState((prevState) => {
+					setActiveMultisigContextState(removeAddressData as any);
+
+					const filteredAddresses = [...addressBook].filter((item) => item.address !== addressToRemove);
+					setUserDetailsContextState(prev => {
 						return {
-							...prevState,
-							...removeAddressData
+							...prev,
+							addressBook: filteredAddresses
 						};
 					});
 

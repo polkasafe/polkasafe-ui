@@ -150,8 +150,22 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			else{
 				setLoading(true);
 				setLoadingMessages('Creating Your Multisig.');
+				const records: { [address: string]: ISharedAddressBookRecord } = {};
+				signatories.forEach((signatory) => {
+					const substrateSignatory = getSubstrateAddress(signatory) || signatory;
+					const data = addressBook.find((a) => getSubstrateAddress(a.address) === substrateSignatory);
+					records[substrateSignatory] = {
+						address: signatory,
+						name: data?.name || DEFAULT_ADDRESS_NAME,
+						email: data?.email,
+						discord: data?.discord,
+						telegram: data?.telegram,
+						roles: data?.roles
+					};
+				});
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
+						addressBook: records,
 						signatories,
 						threshold,
 						multisigName

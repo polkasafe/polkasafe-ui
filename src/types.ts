@@ -134,7 +134,8 @@ export interface IAddressBookItem {
 	email?: string;
 	discord?: string;
 	telegram?: string;
-	roles?: string[]
+	roles?: string[];
+	nickName?: string;
 }
 
 interface IMultisigSettings {
@@ -250,4 +251,17 @@ export interface ISharedAddressBooks {
 		[address: string]: ISharedAddressBookRecord
 	},
 	multisig: string
+}
+
+export interface IAllAddresses {
+	[address: string]: {
+		name: string,
+		address: string,
+		shared?: boolean,
+		nickName?: string,
+		email?: string,
+		discord?: string,
+		telegram?: string,
+		roles?: string[]
+	}
 }

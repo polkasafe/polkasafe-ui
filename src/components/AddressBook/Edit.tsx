@@ -1,7 +1,8 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { Form, Input, Modal, Select, Spin } from 'antd';
+import { MinusCircleOutlined,PlusCircleOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Select, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -16,6 +17,7 @@ import { IAddressBookItem, ISharedAddressBooks } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
+import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import styled from 'styled-components';
 
 const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolean, className?: string, onCancel: () => void, confirm: () => Promise<void>}) => {
@@ -51,11 +53,13 @@ const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolea
 	);
 };
 
-const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, onlyName }: { onlyName?: boolean, className?: string, addressToEdit: string, nameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[], onCancel: () => void, shared: boolean }) => {
+const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, nickNameToEdit, discordToEdit, emailToEdit, telegramToEdit, rolesToEdit, shared, personalToShared }: { personalToShared?: boolean, className?: string, addressToEdit: string, nameToEdit?: string, nickNameToEdit?: string, discordToEdit?: string, emailToEdit?: string, telegramToEdit?: string, rolesToEdit?: string[], onCancel: () => void, shared: boolean }) => {
 	const [loading, setLoading] = useState<boolean>(false);
-	const { activeMultisig, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { setActiveMultisigContextState } = useActiveMultisigContext();
 	const [newName, setNewName] = useState<string>(nameToEdit || '');
+	const [nickName, setNickName] = useState<string>(nickNameToEdit || '');
+	const [showNickNameField, setShowNickNameField] = useState<boolean>(nickNameToEdit ? true : false);
 	const [email, setEmail] = useState<string>(emailToEdit || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [roles, setRoles] = useState<string[]>(rolesToEdit || []);
@@ -63,6 +67,8 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 	const [telegram, setTelegram] = useState<string>(telegramToEdit || '');
 	const { network } = useGlobalApiContext();
 	const [openConfirmationModal, setOpenConfirmationModal] = useState<boolean>(false);
+	const [onlyNickNameChanged, setOnlyNickNameChanged] = useState<boolean>(false);
+	const [noChange, setNoChange] = useState<boolean>(true);
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
@@ -77,6 +83,22 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 			}
 		}
 	}, [email]);
+
+	useEffect(() => {
+		if(newName === nameToEdit && email === emailToEdit && discord === discordToEdit && telegram === telegramToEdit && roles.toString() === rolesToEdit?.toString()){
+			if(nickName === nickNameToEdit){
+				setNoChange(true);
+				setOnlyNickNameChanged(false);
+			}
+			else{
+				setNoChange(false);
+				setOnlyNickNameChanged(true);
+			}
+		}
+		else {
+			setNoChange(false);
+		}
+	}, [discord, discordToEdit, email, emailToEdit, nameToEdit, newName, nickName, nickNameToEdit, roles, rolesToEdit, telegram, telegramToEdit]);
 
 	const handlePersonalAddressBookUpdate = async () => {
 		try{
@@ -97,6 +119,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 						discord,
 						email,
 						name: newName,
+						nickName,
 						roles,
 						telegram
 					}),
@@ -162,6 +185,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 						email,
 						multisigAddress: multisig?.proxy ? multisig.proxy : activeMultisig,
 						name: newName,
+						nickName,
 						roles,
 						telegram
 					}),
@@ -190,6 +214,29 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 						};
 					});
 
+					const copyAddressBook = [...addressBook];
+					const updateIndex = copyAddressBook.findIndex((item) => getSubstrateAddress(item.address) === getSubstrateAddress(addressToEdit));
+					if(updateIndex > -1){
+						copyAddressBook[updateIndex].nickName = nickName;
+					}
+					else {
+						copyAddressBook.push({
+							address: addressToEdit,
+							discord,
+							email,
+							name: newName,
+							nickName,
+							roles,
+							telegram
+						});
+					}
+					setUserDetailsContextState(prev => {
+						return {
+							...prev,
+							addressBook: copyAddressBook
+						};
+					});
+
 					queueNotification({
 						header: 'Success!',
 						message: 'Your address has been added successfully!',
@@ -209,130 +256,170 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, discordTo
 
 	return (
 		<>
-			<Spin spinning={loading && !onlyName} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
+			<Spin spinning={loading && !personalToShared} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
 				<EditAddressModal onCancel={() => setOpenConfirmationModal(false)} open={openConfirmationModal} confirm={handleSharedAddressBookUpdate}  />
-				<Form
-					className={`${className} my-0 w-[560px] max-h-[75vh] py-1 px-2 overflow-y-auto`}
-					disabled={loading}
-				>
-					<div className="flex flex-col gap-y-3">
-						<label
-							className="text-primary text-xs leading-[13px] font-normal"
-							htmlFor="name"
-						>
+				{personalToShared ?
+					<Form
+						className='my-0 w-[560px]'
+					>
+						<p className='text-white font-medium text-sm leading-[15px]'>
+							This will update the Address Book for All Signatories, do you want to proceed?
+						</p>
+					</Form>
+					:
+					<Form
+						className={`${className} my-0 w-[560px] max-h-[75vh] py-1 px-2 overflow-y-auto`}
+						disabled={loading}
+					>
+						<div className="flex flex-col gap-y-3">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="name"
+							>
 							Name
-						</label>
-						<Form.Item
-							name="name"
-							rules={[]}
-							className='border-0 outline-0 my-0 p-0'
-						>
-							<Input
-								placeholder="Give the address a name"
-								required
-								className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-								id="name"
-								onChange={(e) => setNewName(e.target.value)}
-								value={newName}
-								defaultValue={newName}
-							/>
-						</Form.Item>
-					</div>
-					{onlyName ? <></> :
-						<>
-							<div className="flex flex-col gap-y-3 mt-5">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-									htmlFor="email-address"
-								>
+							</label>
+							<Form.Item
+								name="name"
+								rules={[]}
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Input
+									placeholder="Give the address a name"
+									required
+									className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="name"
+									onChange={(e) => setNewName(e.target.value)}
+									value={newName}
+									defaultValue={newName}
+								/>
+								{!showNickNameField &&
+									<Button onClick={() => setShowNickNameField(true)} icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Add Nickname</Button>
+								}
+							</Form.Item>
+						</div>
+						{
+							showNickNameField &&
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="nick-name"
+							>
+								Nickname
+							</label>
+							<Form.Item
+								name="nick-name"
+								rules={[
+									{
+										message: 'Required',
+										required: true
+									}
+								]}
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Input
+									placeholder="Give the address a Nickname"
+									className="text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="nick-name"
+									onChange={(e) => setNickName(e.target.value)}
+									value={nickName}
+								/>
+								<Button onClick={() => { setShowNickNameField(false); setNickName(''); }} icon={<MinusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Remove Nickname</Button>
+							</Form.Item>
+						</div>
+						}
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="email-address"
+							>
 							Email
-								</label>
-								<Form.Item
-									name="email"
-									className='border-0 outline-0 my-0 p-0'
-									help={email && !emailValid && 'Please enter a valid Email.'}
-									validateStatus={email && !emailValid ? 'error' : 'success'}
-								>
-									<Input
-										type='email'
-										placeholder="Email"
-										className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-										id="email-address"
-										onChange={(e) => setEmail(e.target.value)}
-										value={email}
-										defaultValue={email}
-									/>
-								</Form.Item>
-							</div>
-							<div className="flex flex-col gap-y-3 mt-5">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-									htmlFor="discord"
-								>
+							</label>
+							<Form.Item
+								name="email"
+								className='border-0 outline-0 my-0 p-0'
+								help={email && !emailValid && 'Please enter a valid Email.'}
+								validateStatus={email && !emailValid ? 'error' : 'success'}
+							>
+								<Input
+									type='email'
+									placeholder="Email"
+									className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="email-address"
+									onChange={(e) => setEmail(e.target.value)}
+									value={email}
+									defaultValue={email}
+								/>
+							</Form.Item>
+						</div>
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="discord"
+							>
 									Discord
-								</label>
-								<Form.Item
-									name="discord"
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="Discord"
-										className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-										id="discord"
-										onChange={(e) => setDiscord(e.target.value)}
-										value={discord}
-										defaultValue={discord}
-									/>
-								</Form.Item>
-							</div>
-							<div className="flex flex-col gap-y-3 mt-5">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-									htmlFor="telegram"
-								>
+							</label>
+							<Form.Item
+								name="discord"
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Input
+									placeholder="Discord"
+									className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="discord"
+									onChange={(e) => setDiscord(e.target.value)}
+									value={discord}
+									defaultValue={discord}
+								/>
+							</Form.Item>
+						</div>
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+								htmlFor="telegram"
+							>
 									Telegram
-								</label>
-								<Form.Item
-									name="telegram"
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Input
-										placeholder="Telegram"
-										className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
-										id="telegram"
-										onChange={(e) => setTelegram(e.target.value)}
-										value={telegram}
-										defaultValue={telegram}
-									/>
-								</Form.Item>
-							</div>
-							<div className="flex flex-col gap-y-3 mt-5">
-								<label
-									className="text-primary text-xs leading-[13px] font-normal"
-								>
+							</label>
+							<Form.Item
+								name="telegram"
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Input
+									placeholder="Telegram"
+									className="text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
+									id="telegram"
+									onChange={(e) => setTelegram(e.target.value)}
+									value={telegram}
+									defaultValue={telegram}
+								/>
+							</Form.Item>
+						</div>
+						<div className="flex flex-col gap-y-3 mt-5">
+							<label
+								className="text-primary text-xs leading-[13px] font-normal"
+							>
 									Role
-								</label>
-								<Form.Item
-									name="role"
-									className='border-0 outline-0 my-0 p-0'
-								>
-									<Select
-										mode="tags"
-										className={className}
-										onChange={(value) => setRoles(value)}
-										tokenSeparators={[',']}
-										placeholder='Add Roles'
-										value={roles}
-										defaultValue={roles}
-										notFoundContent={false}
-									/>
-								</Form.Item>
-							</div>
-						</>}
-				</Form>
+							</label>
+							<Form.Item
+								name="role"
+								className='border-0 outline-0 my-0 p-0'
+							>
+								<Select
+									mode="tags"
+									className={className}
+									onChange={(value) => setRoles(value)}
+									tokenSeparators={[',']}
+									placeholder='Add Roles'
+									value={roles}
+									defaultValue={roles}
+									notFoundContent={false}
+								/>
+							</Form.Item>
+						</div>
+					</Form>
+				}
 				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 					<CancelBtn loading={loading} onClick={onCancel}/>
-					<AddBtn disabled={!newName || (!!email && !emailValid) || (onlyName && newName === nameToEdit)} loading={loading} onClick={shared ? () => setOpenConfirmationModal(true) : handlePersonalAddressBookUpdate} title='Save' />
+					<AddBtn disabled={!personalToShared && (!newName || (!!email && !emailValid) || noChange)} loading={loading} onClick={personalToShared ? handleSharedAddressBookUpdate : shared ? onlyNickNameChanged ? handleSharedAddressBookUpdate : () => setOpenConfirmationModal(true) : handlePersonalAddressBookUpdate} title={personalToShared ? 'Yes' : 'Save'} />
 				</div>
 			</Spin>
 		</>
