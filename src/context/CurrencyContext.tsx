@@ -43,6 +43,7 @@ export function CurrencyContextProvider({ children }: CurrencyContextProviderPro
 	}, []);
 
 	useEffect(() => {
+		setCurrency(getCurrency());
 		if(Object.keys(allCurrencyPrices).length > 0){
 			setCurrencyPrice(allCurrencyPrices[currencyProperties[currency].symbol]?.value?.toString());
 		}
