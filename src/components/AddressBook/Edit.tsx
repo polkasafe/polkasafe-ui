@@ -41,7 +41,7 @@ const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolea
 					className='my-0 w-[560px]'
 				>
 					<p className='text-white font-medium text-sm leading-[15px]'>
-						This will update the Address book of all Signatories of this Multisig, would you like to continue?
+						This will update the Address book for all Signatories of this Multisig, would you like to continue?
 					</p>
 					<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 						<CancelBtn onClick={onCancel}/>
@@ -256,7 +256,7 @@ const EditAddress = ({ className, onCancel, addressToEdit, nameToEdit, nickNameT
 
 	return (
 		<>
-			<Spin spinning={loading && !personalToShared} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
+			<Spin spinning={loading && !personalToShared} indicator={<LoadingLottie noWaitMessage message={'Updating Your Address Book'} />}>
 				<EditAddressModal onCancel={() => setOpenConfirmationModal(false)} open={openConfirmationModal} confirm={handleSharedAddressBookUpdate}  />
 				{personalToShared ?
 					<Form

@@ -49,7 +49,7 @@ const EditAddressModal = ({ className, confirm, open, onCancel }: { open: boolea
 					className='my-0 w-[560px]'
 				>
 					<p className='text-white font-medium text-sm leading-[15px]'>
-						This will update the Address book of all Signatories of this Multisig, would you like to continue?
+						This will update the Address book for all Signatories of this Multisig, would you like to continue?
 					</p>
 					<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
 						<CancelBtn onClick={onCancel}/>
@@ -314,7 +314,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 	return (
 		<>
 			{contextHolder}
-			<Spin spinning={loading} indicator={<LoadingLottie message={'Updating Your Address Book'} />}>
+			<Spin spinning={loading} indicator={<LoadingLottie noWaitMessage message={'Updating Your Address Book'} />}>
 				<EditAddressModal onCancel={() => setOpenConfirmationModal(false)} open={openConfirmationModal} confirm={handleSharedAddressBookUpdate}  />
 				<Form
 					className={`${className} add-address my-0 w-[560px] max-h-[75vh] px-2 overflow-y-auto`}

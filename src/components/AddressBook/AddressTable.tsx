@@ -214,13 +214,13 @@ const AddressTable: FC<IAddressProps> = ({ addresses, className }) => {
 			discord: <div className='truncate'>{addresses[address]?.discord ? addresses[address].discord : '-'}</div>,
 			email: <div className='truncate'>{addresses[address]?.email ? addresses[address].email : '-'}</div>,
 			key: address,
-			name: <p title={addresses[address]?.name || DEFAULT_ADDRESS_NAME} className='sm:w-auto overflow-hidden text-ellipsis flex items-center justify-between text-base'>
-				<div>
+			name: <p title={addresses[address]?.name || DEFAULT_ADDRESS_NAME} className='sm:w-auto h-[64px] overflow-hidden text-ellipsis flex items-center justify-between text-base'>
+				<div className='h-full flex flex-col justify-center gap-y-1'>
 					<div className='flex items-center truncate'>{addresses[address]?.name || DEFAULT_ADDRESS_NAME}
 						{encodedAddress === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
 						{addresses[address].shared && <Tooltip title={<span className='text-sm text-text_secondary'>Shared Address</span>}><Badge className='ml-2' status='success' color='blue' /></Tooltip>}
 					</div>
-					{addresses?.[address]?.nickName && <div className='text-sm mt-1'>({addresses?.[address]?.nickName})</div>}
+					{addresses?.[address]?.nickName && <div className='text-sm'>({addresses?.[address]?.nickName})</div>}
 				</div>
 				{records && Object.keys(records)?.length > 0 && !Object.keys(records).includes(address) &&
 				<EditAddressModal className={className} nickNameToEdit={addresses[address]?.nickName} addressToEdit={encodedAddress} nameToEdit={addresses[address]?.name} discordToEdit={addresses[address]?.discord} emailToEdit={addresses[address]?.email} rolesToEdit={addresses[address]?.roles} telegramToEdit={addresses[address]?.telegram} personalToShared shared={false} />
