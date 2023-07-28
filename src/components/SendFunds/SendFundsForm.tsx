@@ -15,6 +15,7 @@ import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import ModalBtn from 'src/components/Settings/ModalBtn';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
@@ -56,18 +57,14 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, transactionFields } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { records } = useActiveMultisigContext();
 	const [note, setNote] = useState<string>('');
 	const [loading, setLoading] = useState(false);
 	const [amount, setAmount] = useState(new BN(0));
 	const [recipientAndAmount, setRecipientAndAmount] = useState<IRecipientAndAmount[]>([{ amount: new BN(0), recipient: defaultSelectedAddress ? getEncodedAddress(defaultSelectedAddress, network) || '' : address || '' }]);
 	const [callData, setCallData] = useState<string>('');
 	const [transferKeepAlive, setTransferKeepAlive] = useState<boolean>(true);
-	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>(
-		addressBook?.map((account) => ({
-			label: <AddressComponent address={account.address} />,
-			value: account.address
-		}))
-	);
+	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>([]);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
 
@@ -133,6 +130,26 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		setRecipientAndAmount(copyOptionsArray);
 	};
 
+	// Set address options for recipient
+	useEffect(() => {
+		const allAddresses: string[] = [];
+		if(records){
+			Object.keys(records).forEach((address) => {
+				allAddresses.push(getEncodedAddress(address, network) || address);
+			});
+		}
+		addressBook.forEach(item => {
+			if(!allAddresses.includes(getEncodedAddress(item.address, network) || item.address)){
+				allAddresses.push(item.address);
+			}
+		});
+		setAutoCompleteAddresses(allAddresses.map(address => ({
+			label: <AddressComponent address={address} />,
+			value: address
+		})));
+
+	}, [address, addressBook, network, records]);
+
 	useEffect(() => {
 		setTransactionFieldsObject({ category, subfields: {} });
 	}, [category]);
@@ -141,7 +158,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		if(!recipientAndAmount) return;
 
 		recipientAndAmount.forEach((item, i) => {
-			if(!getSubstrateAddress(item.recipient) || recipientAndAmount.indexOf(recipientAndAmount.find(a => getSubstrateAddress(item.recipient) === getSubstrateAddress(a.recipient)) as IRecipientAndAmount) !== i){
+			if(item.recipient && (!getSubstrateAddress(item.recipient) || recipientAndAmount.indexOf(recipientAndAmount.find(a => getSubstrateAddress(item.recipient) === getSubstrateAddress(a.recipient)) as IRecipientAndAmount) !== i)){
 				setValidRecipient(prev => {
 					const copyArray = [...prev];
 					copyArray[i] = false;
@@ -276,7 +293,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		};
 		return (
 			<>
-				<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>
 				<Modal
 					centered
 					title={<h3 className='text-white mb-8 text-lg font-semibold'>Add Address</h3>}
@@ -424,6 +440,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										<div className='flex flex-col gap-y-3 mb-2'>
 											{recipientAndAmount.map(({ recipient }, i) => (
 												<article key={recipient} className='w-[500px] flex items-start gap-x-2'>
+													<AddAddressModal defaultAddress={recipient} />
 													<div className='w-[55%]'>
 														<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
 														<Form.Item
@@ -434,9 +451,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 															validateStatus={recipient && validRecipient[i] ? 'success' : 'error'}
 														>
 															<div className='h-[50px]'>
-																{recipient && autocompleteAddresses.some((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
+																{recipient && autocompleteAddresses.some((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
 																	<div className='border border-solid border-primary rounded-lg px-2 h-full flex justify-between items-center'>
-																		{autocompleteAddresses.find((item) => getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
+																		{autocompleteAddresses.find((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
 																		<button
 																			className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
 																			onClick={() => {
@@ -451,10 +468,10 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 																		autoFocus
 																		defaultOpen
 																		filterOption={(inputValue, options) => {
-																			return inputValue ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
+																			return inputValue && options?.value ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
 																		}}
-																		notFoundContent={validRecipient[i] && <AddAddressModal defaultAddress={recipient} />}
-																		options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
+																		notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
+																		options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => r.recipient && item.value && getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
 																		id='recipient'
 																		placeholder="Send to Address.."
 																		onChange={(value) => onRecipientChange(value, i)}

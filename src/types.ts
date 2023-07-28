@@ -131,6 +131,11 @@ export type ChainPropType = {
 export interface IAddressBookItem {
 	name: string;
 	address: string;
+	email?: string;
+	discord?: string;
+	telegram?: string;
+	roles?: string[];
+	nickName?: string;
 }
 
 interface IMultisigSettings {
@@ -231,3 +236,32 @@ export enum NotificationStatus {
 	WARNING = 'warning',
 	INFO = 'info'
   }
+
+export interface ISharedAddressBookRecord {
+	name: string,
+	address: string,
+	email?: string,
+	discord?: string,
+	telegram?: string,
+	roles?: string[]
+}
+
+export interface ISharedAddressBooks {
+	records: {
+		[address: string]: ISharedAddressBookRecord
+	},
+	multisig: string
+}
+
+export interface IAllAddresses {
+	[address: string]: {
+		name: string,
+		address: string,
+		shared?: boolean,
+		nickName?: string,
+		email?: string,
+		discord?: string,
+		telegram?: string,
+		roles?: string[]
+	}
+}

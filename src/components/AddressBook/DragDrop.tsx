@@ -4,14 +4,13 @@
 import { Button, UploadProps } from 'antd';
 import { message, Upload } from 'antd';
 import React from 'react';
+import { IAddressBookItem } from 'src/types';
 import { UploadBoxIcon } from 'src/ui-components/CustomIcons';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
-import { IAddress } from './AddressTable';
-
 const { Dragger } = Upload;
 
-const DragDrop = ({ setAddresses }: { setAddresses: React.Dispatch<React.SetStateAction<IAddress[]>>}) => {
+const DragDrop = ({ setAddresses }: { setAddresses: React.Dispatch<React.SetStateAction<IAddressBookItem[]>>}) => {
 
 	const props: UploadProps = {
 		accept: '.json, .csv',
@@ -25,14 +24,14 @@ const DragDrop = ({ setAddresses }: { setAddresses: React.Dispatch<React.SetStat
 					message.error('Please upload file in correct format.');
 					return false;
 				}
-				JSON.parse(fileContent).forEach((item: IAddress) => {
+				JSON.parse(fileContent).forEach((item: IAddressBookItem) => {
 					const substrateAddress = getSubstrateAddress(item.address);
 					if(!substrateAddress){
 						message.error(`${item.address} is Invalid.`);
 						return false;
 					}
 				});
-				setAddresses(JSON.parse(fileContent)?.map((item: IAddress) => ({ address: getSubstrateAddress(item.address) , name: item.name })));
+				setAddresses(JSON.parse(fileContent));
 			};
 			console.log(file);
 			reader.readAsText(file);

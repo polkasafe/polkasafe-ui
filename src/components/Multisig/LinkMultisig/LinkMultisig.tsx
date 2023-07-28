@@ -14,7 +14,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { IAddressBookItem, IMultisigAddress } from 'src/types';
+import { IMultisigAddress } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 import _createMultisig from 'src/utils/_createMultisig';
@@ -52,49 +52,6 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 	const viewNameAddress = () => {
 		setNameAddress(false);
-	};
-
-	const handleAddAddress = async (address: string, name: string) => {
-		try{
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-
-				const addAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/addToAddressBook`, {
-					body: JSON.stringify({
-						address,
-						name
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: addAddressData, error: addAddressError } = await addAddressRes.json() as { data: IAddressBookItem[], error: string };
-
-				if(addAddressError) {
-					return;
-				}
-
-				if(addAddressData){
-					setUserDetailsContextState((prevState) => {
-						return {
-							...prevState,
-							addressBook: addAddressData
-						};
-					});
-
-				}
-
-			}
-		} catch (error){
-			console.log('ERROR', error);
-			setLoading(false);
-		}
 	};
 
 	const handleMultisigBadge = async (signatories: string[], threshold: number, multisigName: string, network: string) => {
@@ -184,14 +141,6 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 								}
 							}
 						};
-					});
-					const results = await Promise.allSettled(signatoriesWithName.map(
-						(signatory) => handleAddAddress(signatory.address, signatory.name)
-					));
-					results.forEach((result) => {
-						if(result.status === 'rejected'){
-							console.log('ERROR', result.reason);
-						}
 					});
 				}
 

@@ -28,7 +28,7 @@ import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
 const Home = ({ className }: { className?: string }) => {
-	const { address, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
+	const { address: userAddress, notification_preferences, multisigAddresses, multisigSettings, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
@@ -86,6 +86,7 @@ const Home = ({ className }: { className?: string }) => {
 			setHasProxy(false);
 			fetchProxyData();
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [multisig, network]);
 
 	useEffect(() => {
@@ -109,7 +110,7 @@ const Home = ({ className }: { className?: string }) => {
 	}, [activeMultisig, api, apiReady, network, multisig, newTxn]);
 
 	useEffect(() => {
-		if(!isOnchain){
+		if(!isOnchain && userAddress && activeMultisig){
 			queueNotification({
 				className:'bg-bg-secondary border-2 border-solid border-primary text-white',
 				closeIcon: (
@@ -130,7 +131,7 @@ const Home = ({ className }: { className?: string }) => {
 				status: NotificationStatus.WARNING
 			});
 		}
-	}, [isOnchain]);
+	}, [activeMultisig, isOnchain, userAddress]);
 
 	const AddProxyModal: React.FC = () => {
 		return (
@@ -159,7 +160,7 @@ const Home = ({ className }: { className?: string }) => {
 	return (
 		<>
 			{
-				address ?
+				userAddress ?
 					<>
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
 						{multisigAddresses && multisigAddresses.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0 ?
