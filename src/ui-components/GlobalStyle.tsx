@@ -246,6 +246,14 @@ export const GlobalStyle = createGlobalStyle`
 
 	.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
 		background-color: #24272E !important;
+
+		span {
+			color: #1573FE !important;
+		}
+	}
+
+	.ant-select-arrow {
+		color: #1573FE !important;
 		color: white !important;
 	}
 	.ant-select-dropdown .ant-select-item-option-state{

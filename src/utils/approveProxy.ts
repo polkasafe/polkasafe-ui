@@ -57,7 +57,7 @@ export async function approveProxy ({ api, records, navigate, approvingAddress, 
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
-	if(callDataHex) {
+	if (callDataHex) {
 
 		const callData = api.createType('Call', callDataHex);
 		const { weight } = await calcWeight(callData, api);
