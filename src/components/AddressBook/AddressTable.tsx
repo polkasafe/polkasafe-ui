@@ -12,7 +12,7 @@ import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { IAllAddresses } from 'src/types';
-import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
+import { AddIcon, CopyIcon, DeleteIcon, EditIcon, ExternalLinkIcon, OutlineCloseIcon, SharedIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -218,7 +218,7 @@ const AddressTable: FC<IAddressProps> = ({ addresses, className }) => {
 				<div className='h-full flex flex-col justify-center gap-y-1'>
 					<div className='flex items-center truncate'>{addresses[address]?.name || DEFAULT_ADDRESS_NAME}
 						{encodedAddress === userAddress && <Tooltip title={<span className='text-sm text-text_secondary'>Your Wallet Address</span>}><Badge className='ml-2' status='success' /></Tooltip>}
-						{addresses[address].shared && <Tooltip title={<span className='text-sm text-text_secondary'>Shared Address</span>}><Badge className='ml-2' status='success' color='blue' /></Tooltip>}
+						{addresses[address].shared && <Tooltip className='ml-2' title={<span className='text-sm text-text_secondary'>Shared Address</span>}><SharedIcon className='text-primary' /></Tooltip>}
 					</div>
 					{addresses?.[address]?.nickName && <div className='text-sm'>({addresses?.[address]?.nickName})</div>}
 				</div>

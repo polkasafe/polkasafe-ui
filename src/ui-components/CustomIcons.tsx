@@ -68,6 +68,7 @@ import { ReactComponent as RightArrowOutlinedSVG } from 'src/assets/icons/RightA
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
 import { ReactComponent as ShareSVG } from 'src/assets/icons/share-icon.svg';
+import { ReactComponent as SharedIconSVG } from 'src/assets/icons/Shared.svg';
 import { ReactComponent as SlackIconSVG } from 'src/assets/icons/slack-icon.svg';
 import { ReactComponent as SquareDownArrowSVG } from 'src/assets/icons/square-down-arrow.svg';
 import { ReactComponent as SubscanSVG } from 'src/assets/icons/subscan.svg';
@@ -389,4 +390,8 @@ export const SlackIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const DocsIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={DocsSVG} {...props} />
+);
+
+export const SharedIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={SharedIconSVG} {...props} />
 );
