@@ -7,16 +7,13 @@ import '@polkadot/api-augment';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useContext, useEffect, useState } from 'react';
 import { chainProperties } from 'src/global/networkConstants';
-import getCurrency from 'src/utils/getCurrency';
 import getNetwork from 'src/utils/getNetwork';
 
 export interface ApiContextType {
 	api: ApiPromise | undefined;
 	apiReady: boolean;
 	network: string;
-	setNetwork: React.Dispatch<React.SetStateAction<string>>;
-	currency: string;
-	setCurrency: React.Dispatch<React.SetStateAction<string>>;
+	setNetwork: React.Dispatch<React.SetStateAction<string>>
 }
 
 export const ApiContext: React.Context<ApiContextType> = React.createContext(
@@ -31,7 +28,6 @@ export function ApiContextProvider({ children }: ApiContextProviderProps): React
 	const [api, setApi] = useState<ApiPromise>();
 	const [apiReady, setApiReady] = useState(false);
 	const [network, setNetwork] = useState(getNetwork());
-	const [currency, setCurrency] = useState<string>(getCurrency());
 
 	useEffect(() => {
 		const provider = new WsProvider(chainProperties[network].rpcEndpoint);
@@ -52,7 +48,7 @@ export function ApiContextProvider({ children }: ApiContextProviderProps): React
 	}, [api]);
 
 	return (
-		<ApiContext.Provider value={{ api, apiReady, currency, network, setCurrency, setNetwork }}>
+		<ApiContext.Provider value={{ api, apiReady, network, setNetwork }}>
 			{children}
 		</ApiContext.Provider>
 	);
