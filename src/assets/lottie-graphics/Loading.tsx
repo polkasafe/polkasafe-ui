@@ -10,9 +10,10 @@ import LoadingScreen from './lottie-files/loading-animation.json';
 interface Props {
 	message?: string
 	width?: number
+	noWaitMessage?: boolean
 }
 
-function LoadingLottie({ message, width = 350 }: Props): ReactElement {
+function LoadingLottie({ message, width = 350, noWaitMessage=false }: Props): ReactElement {
 	return (
 		<div className='w-full flex flex-col justify-center items-center relative'>
 			<Lottie
@@ -24,7 +25,7 @@ function LoadingLottie({ message, width = 350 }: Props): ReactElement {
 				play={true}
 			/>
 			<div className='absolute bottom-10 w-full text-center font-medium text-lg text-white' >{message ? message : 'Waiting to create your transaction'}</div>
-			<div className='text-text_secondary' >This might take a few seconds. So, sit back and relax...</div>
+			{!noWaitMessage && <div className='text-text_secondary' >This might take a few seconds. So, sit back and relax...</div>}
 		</div>
 	);
 }
