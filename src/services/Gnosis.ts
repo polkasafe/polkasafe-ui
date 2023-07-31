@@ -84,6 +84,7 @@ export class GnosisSafeService {
 	createSafeTx = async (multisigAddress: string, to: string, value: string, senderAddress: string): Promise<string | null> => {
 		try {
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisigAddress });
+			const signer = await this.ethAdapter.getSignerAddress();
 
 			const safeTransactionData: SafeTransactionDataPartial = {
 				data: '0x',
@@ -94,14 +95,15 @@ export class GnosisSafeService {
 			const safeTransaction = await safeSdk.createTransaction({ safeTransactionData });
 
 			const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
-			const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+			let signature = await safeSdk.signTransaction(safeTransaction) as any;
+			signature = Object.fromEntries(signature.signatures.entries());
 
 			await this.safeService.proposeTransaction({
 				safeAddress: multisigAddress,
 				safeTransactionData: safeTransaction.data,
 				safeTxHash,
 				senderAddress,
-				senderSignature: senderSignature.data
+				senderSignature: signature[signer.toLowerCase()].data
 			});
 
 			return safeTxHash;

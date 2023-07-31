@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { Form, Input, InputNumber, Modal, Spin, Switch } from 'antd';
+import { Form, Input, InputNumber, Modal, Spin } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
@@ -111,7 +111,6 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 						threshold,
 						multisigName,
 						safeAddress: safeAddress
-
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'
@@ -136,6 +135,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 							status: NotificationStatus.WARNING
 						});
 						setLoading(false);
+						setUserDetailsContextState(prev => ({ ...prev, activeMultisig: safeAddress || prev.activeMultisig }));
 						return;
 					}
 					queueNotification({

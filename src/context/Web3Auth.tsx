@@ -53,8 +53,8 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const [web3Provider, setWeb3Provider] = useState<Web3 | null>(null);
 
 	useEffect(() => {
-		init();
-	}, []);
+		if (!web3Auth?.connectedAdapterName) init();
+	}, [web3Auth?.connectedAdapterName]);
 
 	const init = async () => {
 		try {

@@ -5,9 +5,8 @@
 // import { WarningOutlined } from '@ant-design/icons';
 
 import { Web3Adapter } from '@safe-global/protocol-kit';
-import { AutoComplete, Divider, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
+import { AutoComplete, Divider, Form, Input, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
-import BN from 'bn.js';
 import classNames from 'classnames';
 import { ethers } from 'ethers';
 import React, { FC, useState } from 'react';
@@ -24,7 +23,7 @@ import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { LineIcon, OutlineCloseIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { LineIcon, OutlineCloseIcon, SquareDownArrowIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -58,7 +57,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		}))
 	);
 	const [success, setSuccess] = useState(false);
-	const [failure] = useState(false);
+	const [failure, setFailure] = useState(false);
 
 	const [form] = Form.useForm();
 
@@ -107,7 +106,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					},
 					method: 'POST'
 				}).then(res => res.json());
-				console.log('multisigError', multisigError);
+
 				if (multisigError) {
 					queueNotification({
 						header: 'Error.',
@@ -116,7 +115,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					});
 				}
 				setSuccess(true);
-				fetchMultisigData();
+				await fetchMultisigData();
 				queueNotification({
 					header: 'Success',
 					message: 'New Transaction Created.',
@@ -127,6 +126,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 			console.log(err);
 			setNewTxn?.(prev => !prev);
 			onCancel?.();
+			setFailure(true);
 			queueNotification({
 				header: 'Error.',
 				message: 'Please try again.',

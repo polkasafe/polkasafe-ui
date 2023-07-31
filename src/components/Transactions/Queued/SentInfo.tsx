@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Button, Collapse, Divider, Input, Modal, Timeline } from 'antd';
+import { Button, Collapse, Divider, Modal, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
@@ -13,7 +13,7 @@ import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITxNotification } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon, OutlineCloseIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
@@ -46,7 +46,7 @@ interface ISentInfoProps {
 	getMultiDataLoading?: boolean;
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction }) => {
+const SentInfo: FC<ISentInfoProps> = ({ handleExecuteTransaction, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, handleApproveTransaction, handleCancelTransaction }) => {
 	const { network } = useGlobalApiContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();

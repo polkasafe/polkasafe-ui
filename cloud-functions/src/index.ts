@@ -308,7 +308,7 @@ export const createMultisigEth = functions.https.onRequest(async (req, res) => {
 
 		const { signatories, threshold, multisigName, safeAddress, disabled } = req.body;
 
-		if (!signatories || !threshold || !multisigName) {
+		if (!signatories || !threshold || !multisigName || !safeAddress) {
 			return res.status(400).json({ error: responseMessages.missing_params });
 		}
 		if (!Array.isArray(signatories) || signatories.length < 2) return res.status(400).json({ error: responseMessages.invalid_params });

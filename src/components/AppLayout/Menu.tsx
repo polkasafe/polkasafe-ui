@@ -9,10 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
-import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, NotificationIcon, OutlineCloseIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 
 interface Props {
@@ -20,8 +17,7 @@ interface Props {
 }
 
 const Menu: FC<Props> = ({ className }) => {
-	const { multisigAddresses, activeMultisig, setUserDetailsContextState } = useGlobalUserDetailsContext();
-	const { network } = useGlobalApiContext();
+	const { multisigAddresses, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [selectedMultisigAddress, setSelectedMultisigAddress] = useState(localStorage.getItem('active_multisig') || '');
 	const location = useLocation();
 	const userAddress = localStorage.getItem('address');

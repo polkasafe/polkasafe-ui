@@ -35,7 +35,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const [nameAddress, setNameAddress] = useState(true);
 	const [viewOwners, setViewOwners] = useState(true);
 	const [viewReviews, setViewReviews] = useState(true);
-	const { address, addressBook } = useGlobalUserDetailsContext();
+	const { address, addressBook, fetchUserData } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { ethProvider } = useGlobalWeb3Context();
 	const navigate = useNavigate();
@@ -79,8 +79,6 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 
 				const info = await gnosisService.getMultisigData(multisigAddress);
 				setMultisigInfo(info);
-
-				console.log('info', info);
 
 				// const getMultisigDataRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
 				// 	body: JSON.stringify({
@@ -150,34 +148,24 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 		if (multisigData) {
 			try {
 
-				// await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-				// 	body: JSON.stringify({
-				// 		signatories: signatoriesArray.map(item => item.address),
-				// 		threshold,
-				// 		multisigName,
-				// 		proxyAddress: multisigInfo?.address
-				// 	}),
-				// 	headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
-				// 	method: 'POST'
-				// });
-
-				const signer = ethProvider.getSigner();
-				const adapter = new EthersAdapter({
-					ethers: ethProvider,
-					signerOrProvider: signer
+				await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
+					body: JSON.stringify({
+						signatories: signatoriesArray.map(item => item.address),
+						threshold,
+						multisigName,
+						safeAddress: multisigInfo?.address
+					}),
+					headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
+					method: 'POST'
 				});
-				const txUrl = returnTxUrl(network);
-				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
-
-				const pendingTx = await gnosisService.getPendingTx(multisigInfo!.address);
-				const completedTx = await gnosisService.getAllCompletedTx(multisigInfo!.address);
-				console.log('completedTx', completedTx, pendingTx);
 
 				queueNotification({
 					header: 'Success!',
 					message: 'Multisig Linked Successfully.',
 					status: NotificationStatus.SUCCESS
 				});
+
+				await fetchUserData();
 
 				navigate('/', { replace: true });
 			} catch (err) {

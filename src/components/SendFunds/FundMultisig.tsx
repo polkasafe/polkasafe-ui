@@ -24,7 +24,7 @@ import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { network } = useGlobalApiContext();
-	const { activeMultisig, addressBook } = useGlobalUserDetailsContext();
+	const { activeMultisig, addressBook, fetchMultisigData } = useGlobalUserDetailsContext();
 
 	const { sendNativeToken } = useGlobalWeb3Context();
 
@@ -46,11 +46,11 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 					amount_token: ethers.utils.parseUnits(amount.toString(), 'ether').toString(),
 					// eslint-disable-next-line sort-keys
 					from: selectedSender, safeAddress: activeMultisig, data: '', txHash: transactionHash, to, note: '', type: 'fund', executed: true
-
 				}),
 				headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
 				method: 'POST'
 			}).then(res => res.json());
+			await fetchMultisigData();
 			queueNotification({
 				header: 'Success!',
 				message: 'You have successfully completed the transaction. ',

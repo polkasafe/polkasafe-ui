@@ -96,8 +96,6 @@ const DashboardCard = ({ className, setNewTxn, transactionLoading, openTransacti
 		);
 	};
 
-	console.log('active myltisig', activeMultisigData);
-
 	return (
 		<>
 			<h2 className="text-base font-bold text-white mb-2">Overview</h2>

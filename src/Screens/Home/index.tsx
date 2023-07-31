@@ -4,7 +4,6 @@
 /* eslint-disable sort-keys */
 
 import { EthersAdapter } from '@safe-global/protocol-kit';
-import { Button, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
@@ -20,17 +19,12 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
-import { NotificationStatus } from 'src/types';
-import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
-import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
 const Home = () => {
 	const { address, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
 	const [hasProxy] = useState<boolean>(true);
-	const [proxyNotInDb] = useState<boolean>(false);
-	const [proxyInProcess] = useState<boolean>(false);
 
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
 	const { network } = useGlobalApiContext();

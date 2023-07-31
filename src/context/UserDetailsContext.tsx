@@ -37,6 +37,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 	const address = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
+
 	const fetchUserData = async () => {
 		const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
 			headers: firebaseFunctionsHeader(network, address!, signature!),
@@ -60,6 +61,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 	useEffect(() => {
 		if (address) fetchUserData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [network]);
 
 	useEffect(() => {
