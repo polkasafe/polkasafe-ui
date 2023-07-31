@@ -7,7 +7,6 @@ import { ethers } from 'ethers';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -28,7 +27,7 @@ interface IReceivedInfoProps {
 	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, note, loading }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, date, from, callHash, note, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 

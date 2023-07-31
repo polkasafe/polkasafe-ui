@@ -136,7 +136,6 @@ export class GnosisSafeService {
 			const safeTransaction = await this.safeService.getTransaction(txHash);
 			let signature = await safeSdk.signTransaction(safeTransaction) as any;
 			signature = Object.fromEntries(signature.signatures.entries());
-			console.log('signature', signature);
 			return await this.safeService.confirmTransaction(txHash, signature[signer.toLowerCase()].data);
 		} catch (err) {
 			console.log('error from signAndConfirmTx', err);

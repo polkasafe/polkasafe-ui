@@ -582,8 +582,8 @@ export const removeFromAddressBookEth = functions.https.onRequest(async (req, re
 
 		if (!doc.exists) return res.status(404).json({ error: responseMessages.address_not_in_db });
 		try {
-			const { name, address: addressToAdd } = req.body;
-			if (!name || !addressToAdd) return res.status(400).json({ error: responseMessages.missing_params });
+			const { address: addressToRemove } = req.body;
+			if (!addressToRemove) return res.status(400).json({ error: responseMessages.missing_params });
 
 			if (doc.exists) {
 				const addressDoc = {
@@ -592,14 +592,15 @@ export const removeFromAddressBookEth = functions.https.onRequest(async (req, re
 				} as IUser;
 				const addressBook = addressDoc.addressBook || [];
 
-				const addressIndex = addressBook.findIndex((a) => a.address == address);
+				const addressIndex = addressBook.findIndex((a) => a.address == addressToRemove);
 				if (addressIndex > -1) {
 					addressBook.splice(addressIndex, 1);
 					await addressRef.set({ addressBook }, { merge: true });
 					return res.status(200).json({ data: addressBook });
 				}
 			}
-			return res.status(400).json({ error: responseMessages.invalid_params });
+
+			return res.status(400).json({ error: responseMessages.missing_params });
 		} catch (err: unknown) {
 			functions.logger.error('Error in removeFromAddressBook :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });

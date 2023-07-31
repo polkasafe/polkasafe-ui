@@ -4,6 +4,7 @@
 import Identicon from '@polkadot/react-identicon';
 import { Divider, Spin, Timeline } from 'antd';
 import classNames from 'classnames';
+import { ethers } from 'ethers';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -29,7 +30,7 @@ interface ISentInfoProps {
 	from: string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, from, className, date, recipient, callHash, note, loading }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const threshold = multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
@@ -50,7 +51,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					<span
 						className='text-failure'
 					>
-						{amount} {amountType} ({amount_usd} USD)
+						{ethers.utils.formatEther(amount)}
 					</span>
 					<span>
 						to:

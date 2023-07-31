@@ -46,12 +46,13 @@ const Queued: FC<IQueued> = ({ loading, refetch, setRefetch }) => {
 		<>
 			{(queuedTransactions && queuedTransactions.length > 0) ? <div className='flex flex-col gap-y-[10px]'>
 				{queuedTransactions.map((transaction, index) => {
+					console.log('transaction modified', transaction);
 
 					return <section id={transaction.callHash} key={index}>
 						<Transaction
 							value={transaction.amount_token}
 							setQueuedTransactions={setQueuedTransactions}
-							date={dayjs(transaction.modified).format('llll')}
+							date={dayjs(transaction.created_at._seconds * 1000).format('llll')}
 							status={transaction.isExecuted ? 'Executed' : 'Approval'}
 							approvals={transaction.signatures ? transaction.signatures.map((item: any) => item.address) : []}
 							threshold={multisig?.threshold || 0}

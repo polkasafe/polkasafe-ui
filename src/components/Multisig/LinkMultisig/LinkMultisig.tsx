@@ -7,6 +7,7 @@
 import { SafeInfoResponse } from '@safe-global/api-kit';
 import { EthersAdapter } from '@safe-global/protocol-kit';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
@@ -37,6 +38,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 	const { address, addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { ethProvider } = useGlobalWeb3Context();
+	const navigate = useNavigate();
 
 	const [multisigAddress, setMultisigAddress] = useState<string>('');
 
@@ -148,16 +150,16 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 		if (multisigData) {
 			try {
 
-				await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
-					body: JSON.stringify({
-						signatories: signatoriesArray.map(item => item.address),
-						threshold,
-						multisigName,
-						proxyAddress: multisigInfo?.address
-					}),
-					headers: firebaseFunctionsHeader('goerli', localStorage.getItem('address')!, localStorage.getItem('signature')!),
-					method: 'POST'
-				});
+				// await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
+				// 	body: JSON.stringify({
+				// 		signatories: signatoriesArray.map(item => item.address),
+				// 		threshold,
+				// 		multisigName,
+				// 		proxyAddress: multisigInfo?.address
+				// 	}),
+				// 	headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
+				// 	method: 'POST'
+				// });
 
 				const signer = ethProvider.getSigner();
 				const adapter = new EthersAdapter({
@@ -176,6 +178,8 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 					message: 'Multisig Linked Successfully.',
 					status: NotificationStatus.SUCCESS
 				});
+
+				navigate('/', { replace: true });
 			} catch (err) {
 				console.log(err);
 				queueNotification({

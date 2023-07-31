@@ -123,7 +123,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 							</span>
 						</p>
 						<p className='col-span-2'>
-							{dayjs(created_at._nanoseconds / 1000000).format('lll')}
+							{dayjs(created_at._seconds * 1000).format('lll')}
 						</p>
 						<p className='col-span-2 flex items-center justify-end gap-x-4'>
 							<span className='text-success'>
@@ -147,7 +147,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								<ReceivedInfo
 									amount={String(amount_token)}
 									amountType={token}
-									date={dayjs(created_at).format('llll')}
+									date={dayjs(created_at._seconds * 1000).format('llll')}
 									from={from}
 									callHash={callHash}
 									note={note}
@@ -159,7 +159,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								<SentInfo
 									amount={String(amount_token)}
 									amountType={token}
-									date={dayjs(created_at._nanoseconds).format('llll')}
+									date={dayjs(created_at._seconds * 1000).format('llll')}
 									recipient={to}
 									callHash={callHash}
 									note={note}
