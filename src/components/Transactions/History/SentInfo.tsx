@@ -21,6 +21,7 @@ interface ISentInfoProps {
 	amount: string;
 	amountType: string;
 	date: string;
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	// time: string;
     className?: string;
 	recipient: string
@@ -33,7 +34,7 @@ interface ISentInfoProps {
 	method?:string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading, section, method }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading, section, method, transactionFields }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency } = useGlobalCurrencyContext();
@@ -147,6 +148,38 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						</span>
 					</p>
 				</div>
+				{!!transactionFields && Object.keys(transactionFields).length !== 0 && transactionFields.category !== 'none' &&
+				<>
+					<div
+						className='flex items-center justify-between mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Category:
+						</span>
+						<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
+							{transactionFields?.category}
+						</span>
+					</div>
+					{transactionFields && transactionFields.subfields && Object.keys(transactionFields?.subfields).map((key) => {
+						const subfield = transactionFields.subfields[key];
+						return (
+							<div
+								key={key}
+								className='flex items-center justify-between mt-3'
+							>
+								<span
+									className='text-text_secondary font-normal text-sm leading-[15px]'
+								>
+									{subfield.name}:
+								</span>
+								<span className='text-waiting bg-waiting bg-opacity-5 border border-solid border-waiting rounded-lg px-[6px] py-[3px]'>
+									{subfield.value}
+								</span>
+							</div>
+						);})}
+				</>}
 				{ Boolean(section) && Boolean(method) &&
 					<>
 						<div

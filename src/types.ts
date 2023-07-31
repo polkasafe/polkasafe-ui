@@ -231,6 +231,7 @@ export interface ITransaction {
 	},
 	section?:string,
 	method?:string,
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 }
 
 export interface INotification {

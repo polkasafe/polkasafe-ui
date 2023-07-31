@@ -69,7 +69,10 @@ export interface ITransaction {
 		[address: string]: {
 			lastNotified: Date;
 		}
-	}
+	},
+	id: string;
+	section?:string;
+	method?:string;
 }
 
 export interface IAsset {

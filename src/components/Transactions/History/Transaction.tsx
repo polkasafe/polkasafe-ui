@@ -22,7 +22,7 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, section, method }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, section, method, transactionFields }) => {
 	const { network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
@@ -156,6 +156,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									amount_usd={amount_usd}
 									section={section}
 									method={method}
+									transactionFields={transactionFields}
 								/>
 								:
 								type === 'Received'?
@@ -181,6 +182,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 										from={from}
 										loading={loading}
 										amount_usd={amount_usd}
+										transactionFields={transactionFields}
 									/>
 						}
 					</div>

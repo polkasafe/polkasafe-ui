@@ -52,6 +52,8 @@ import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
 import formidable from 'formidable-serverless';
 import fs from 'fs';
+import getFirebaseCategory from './utlils/getFirebaseTransactionCategory';
+import { currencySymbol } from './utlils/currencyConstants';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -541,17 +543,17 @@ export const getTransactionsForMultisig = functions.https.onRequest(async (req, 
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { multisigAddress, limit, page } = req.body;
+		const { multisigAddress, limit, page, currency } = req.body;
 		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
 		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
 		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
 
 		try {
 			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
-			const { data: transactionsArr, error: transactionsError } = await getTransactionsByAddress(encodedMultisigAddress, network, Number(limit), Number(page), firestoreDB);
+			const { data: transactionsArr, error: transactionsError, count } = await getTransactionsByAddress(encodedMultisigAddress, network, Number(limit), Number(page), firestoreDB, currency || currencySymbol.USD);
 			if (transactionsError || !transactionsArr) return res.status(400).json({ error: transactionsError || responseMessages.transfers_fetch_error });
 
-			res.status(200).json({ data: transactionsArr });
+			res.status(200).json({ data: transactionsArr, count });
 
 			// make a copy to db after response is sent
 			// single batch will do because there'll never be more than 100 transactions
@@ -1120,6 +1122,31 @@ export const updateNotificationChannelPreferences = functions.https.onRequest(as
 			addressRef.update({ ['notification_preferences.channelPreferences']: channelPreferences });
 
 			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in updateNotificationChannelPreferences :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getMultisigTransactionCategory = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { id } = req.body;
+		if (!id) return res.status(400).json({ error: responseMessages.missing_params });
+
+		try {
+			const data = await getFirebaseCategory(
+				firestoreDB,
+				id
+			);
+			return res.status(200).json({ data: data });
 		} catch (err:unknown) {
 			functions.logger.error('Error in updateNotificationChannelPreferences :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
