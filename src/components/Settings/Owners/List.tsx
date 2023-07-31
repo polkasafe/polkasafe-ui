@@ -65,7 +65,7 @@ const EditAddressModal = ({ className, addressToEdit, nameToEdit, discordToEdit,
 					>
 						<OutlineCloseIcon className='text-primary w-2 h-2' />
 					</button>}
-				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Send Funds</h3>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Edit Address</h3>}
 				open={openEditModal}
 				className={`${className} w-auto md:min-w-[500px] scale-90`}
 			>
