@@ -44,8 +44,8 @@ import TransactionSuccessScreen from './TransactionSuccessScreen';
 import UploadAttachment from './UploadAttachment';
 
 export enum ETransactionType {
-	CALL_DATA='Call Data',
-	SEND_TOKEN='Send Token'
+	SEND_TOKEN='Send Token',
+	CALL_DATA='Call Data'
 }
 
 interface ISendFundsFormProps {
@@ -289,7 +289,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 					api,
 					attachments: subfieldAttachments,
 					callDataString: callData,
-					callHash,
 					initiatorAddress: address,
 					isProxy,
 					multisig,
@@ -461,6 +460,26 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										{ required: "Please add the '${name}'" }
 									}
 								>
+									<section>
+										<p className='text-primary font-normal text-xs leading-[13px]'>From</p>
+										<div className='flex items-center gap-x-[10px] mt-[14px]'>
+											<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
+												<AddressComponent withBadge={false} address={activeMultisig} />
+												<Balance address={activeMultisig} onChange={setMultisigBalance} />
+											</article>
+											<article className='w-[412px] flex items-center'>
+												<span className='-mr-1.5 z-0'>
+													<LineIcon className='text-5xl' />
+												</span>
+												<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>The transferred balance will be subtracted (along with fees) from the sender account.</p>
+											</article>
+										</div>
+										<div className='w-[500px]'>
+											<Divider className='border-[#505050]'>
+												<SquareDownArrowIcon />
+											</Divider>
+										</div>
+									</section>
 									{transactionType === ETransactionType.CALL_DATA
 										?
 										<>
@@ -489,26 +508,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										</>
 										:
 										<>
-											<section>
-												<p className='text-primary font-normal text-xs leading-[13px]'>Sending from</p>
-												<div className='flex items-center gap-x-[10px] mt-[14px]'>
-													<article className='w-[500px] p-[10px] border-2 border-dashed border-bg-secondary rounded-lg flex items-center justify-between'>
-														<AddressComponent withBadge={false} address={activeMultisig} />
-														<Balance address={activeMultisig} onChange={setMultisigBalance} />
-													</article>
-													<article className='w-[412px] flex items-center'>
-														<span className='-mr-1.5 z-0'>
-															<LineIcon className='text-5xl' />
-														</span>
-														<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>The transferred balance will be subtracted (along with fees) from the sender account.</p>
-													</article>
-												</div>
-												<div className='w-[500px]'>
-													<Divider className='border-[#505050]'>
-														<SquareDownArrowIcon />
-													</Divider>
-												</div>
-											</section>
 
 											<section className=''>
 												<div className='flex items-start gap-x-[10px]'>
