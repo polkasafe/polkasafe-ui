@@ -30,10 +30,12 @@ const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipie
 		<div className='flex flex-col items-center'>
 			<SuccessTransactionLottie message={successMessage} waitMessage={waitMessage} />
 			<div className='flex flex-col w-full gap-y-4 bg-bg-secondary p-4 rounded-lg my-1 text-text_secondary'>
-				<div className='flex justify-between items-center'>
-					<span>Amount:</span>
-					<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 4, withUnit: true }, network)}</span>
-				</div>
+				{!amount.isZero() &&
+					<div className='flex justify-between items-center'>
+						<span>Amount:</span>
+						<span className='text-failure'>-{formatBnBalance(amount, { numberAfterComma: 4, withUnit: true }, network)}</span>
+					</div>
+				}
 				{txnHash &&
 					<div className='flex justify-between items-center'>
 						<span>Txn Hash:</span>
@@ -53,12 +55,14 @@ const TransactionSuccessScreen = ({ amount, txnHash, created_at, sender, recipie
 					<span>Created By:</span>
 					<span><AddressComponent address={sender} /></span>
 				</div>
-				<div className='flex justify-between items-center'>
-					<span>Recipients: <span className='text-white'>{recipients.length}</span></span>
-					<div className='flex flex-col gap-y-1' >
-						{recipients.map((recipient) => <AddressComponent key={recipient} address={recipient} />)}
+				{recipients.length > 0 &&
+					<div className='flex justify-between items-center'>
+						<span>Recipients: <span className='text-white'>{recipients.length}</span></span>
+						<div className='flex flex-col gap-y-1' >
+							{recipients.map((recipient) => <AddressComponent key={recipient} address={recipient} />)}
+						</div>
 					</div>
-				</div>
+				}
 			</div>
 			<div className='flex justify-center mt-2'>
 				<ModalBtn title='Done' onClick={onDone} />

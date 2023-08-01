@@ -13,8 +13,10 @@ import dotIcon from 'src/assets/icons/image 39.svg';
 import subscanIcon from 'src/assets/icons/subscan.svg';
 import polkadotIcon from 'src/assets/parachains-icons/polkadot.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IAsset } from 'src/types';
@@ -43,6 +45,7 @@ interface IDashboardCard{
 const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, openTransactionModal, setOpenTransactionModal, isOnchain }: IDashboardCard) => {
 	const { activeMultisig, multisigAddresses, multisigSettings, isProxy, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 	const { openModal } = useModalContext();
 
 	const [assetsData, setAssetsData] = useState<IAsset[]>([]);
@@ -93,7 +96,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const TransactionModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-primary text-white'>
+				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
 					New Transaction
 				</PrimaryButton>
 				<Modal
@@ -124,7 +127,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const FundMultisigModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 bg-highlight text-primary '>
+				<PrimaryButton secondary onClick={() => setOpenFundMultisigModal(true)} className='w-[45%] flex items-center justify-center py-4 2xl:py-5 '>
 					<WalletIcon /> Fund Multisig
 				</PrimaryButton>
 				<Modal
@@ -216,9 +219,9 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 							<div className='font-bold text-lg text-primary'>{assetDataLoader ? <Spin size='default' /> : assetsData.length}</div>
 						</div>
 						<div>
-							<div className='text-white'>USD Amount</div>
+							<div className='text-white'>{currencyProperties[currency].symbol} Amount</div>
 							<div className='font-bold text-lg text-primary'>
-								{assetDataLoader ? <Spin size='default' /> : assetsData.reduce((total, item) => total + Number(item.balance_usd), 0).toFixed(2) || 'N/A'}
+								{assetDataLoader ? <Spin size='default' /> : (assetsData.reduce((total, item) => total + Number(item.balance_usd), 0) * Number(currencyPrice)).toFixed(2) || 'N/A'}
 							</div>
 						</div>
 					</>}

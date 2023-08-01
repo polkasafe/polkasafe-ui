@@ -6,7 +6,8 @@ export interface IAddressBookItem {
 	email?: string,
 	roles?: string[],
 	discord?: string,
-	telegram?: string
+	telegram?: string,
+	nickName?: string
 }
 
 export interface IMultisigSettings {
@@ -176,4 +177,23 @@ export interface ITransactionFields{
 		fieldDesc: string,
 		subfields: ITransactionCategorySubfields
 	}
+}
+
+export interface ISharedAddressBookRecord {
+	name: string,
+	address: string,
+	created_at?: Date,
+	email?: string,
+	discord?: string,
+	telegram?: string,
+	roles?: string[],
+	updated_at?: Date,
+	updatedBy?: string
+}
+
+export interface ISharedAddressBooks {
+	records: {
+		[address: string]: ISharedAddressBookRecord
+	},
+	multisig: string
 }

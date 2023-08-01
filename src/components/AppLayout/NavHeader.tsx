@@ -28,7 +28,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer, showSubmenu, onClick 
 	const location = useLocation();
 	const { address } = useGlobalUserDetailsContext();
 	return (
-		<Header className='bg-bg-main flex flex-row items-center p-0 h-[70px]'>
+		<Header className='bg-bg-main z-10 flex flex-row items-center sticky top-0 left-0 p-0 h-[70px]'>
 			<section className='hidden lg:block w-[180px]'></section>
 			<section className='pr-4 lg:pr-8 pl-0 flex-1 flex items-center gap-x-2'>
 				<article className='lg:hidden ml-4'>

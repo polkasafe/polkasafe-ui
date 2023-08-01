@@ -10,7 +10,7 @@ import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
-import { NotificationStatus } from 'src/types';
+import { ISharedAddressBookRecord, NotificationStatus } from 'src/types';
 import { IMultisigAddress, UserDetailsContextType } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
@@ -30,11 +30,12 @@ interface Args {
 	callHash: string,
 	approvingAddress: string,
 	note: string,
-	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
-	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
+	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>,
+	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>,
+	records: {[address: string]: ISharedAddressBookRecord}
 }
 
-export async function approveProxy ({ api, navigate, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveProxy ({ api, records, navigate, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 
 	const encodedInitiatorAddress = getEncodedAddress(approvingAddress, network) || approvingAddress;
 
@@ -56,7 +57,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 
-	if(callDataHex) {
+	if (callDataHex) {
 
 		const callData = api.createType('Call', callDataHex);
 		const { weight } = await calcWeight(callData, api);
@@ -96,7 +97,8 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 						signatories: multisig.signatories,
 						threshold: multisig.threshold,
 						multisigName: multisig.name,
-						proxyAddress
+						proxyAddress,
+						addressBook: records
 					}),
 					headers: firebaseFunctionsHeader(network, address, signature),
 					method: 'POST'

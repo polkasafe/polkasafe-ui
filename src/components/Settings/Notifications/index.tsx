@@ -601,7 +601,6 @@ const Notifications = () => {
 					</Form.Item>
 					<PrimaryButton
 						loading={verificationLoading}
-						className={`text-white ${!email || !emailValid || (emailPreference?.handle === email) ? 'bg-highlight' : 'bg-primary'}`}
 						onClick={verifyEmail}
 						disabled={!email || !emailValid || emailPreference?.handle === email}
 					>

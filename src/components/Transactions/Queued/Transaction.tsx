@@ -11,6 +11,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import  { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
@@ -52,6 +53,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 	const navigate = useNavigate();
 
 	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
+	const { records } = useActiveMultisigContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
@@ -92,7 +94,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 		let callDataFunc = data.extrinsicFn;
 		if(callDataFunc?.section === 'proxy'){
 			const func:any = data.extrinsicCall?.args[2].toHuman();
-			callDataFunc = func.args?.calls[0];
+			callDataFunc = func.args?.calls?.[0];
 		}
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
@@ -180,6 +182,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 					navigate,
 					network,
 					note: note || '',
+					records,
 					setLoadingMessages,
 					setUserDetailsContextState
 				});

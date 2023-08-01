@@ -9,7 +9,9 @@ import { styledTheme } from 'src/themes/styledTheme';
 import { ThemeProvider } from 'styled-components';
 
 import AppLayout from './components/AppLayout';
+import { ActiveMultisigProvider } from './context/ActiveMultisigContext';
 import { ApiContextProvider } from './context/ApiContext';
+import { CurrencyContextProvider } from './context/CurrencyContext';
 import { DAppContextProvider } from './context/DAppContext';
 import ModalContextProvider from './context/ModalContext';
 import { UserDetailsProvider } from './context/UserDetailsContext';
@@ -22,14 +24,18 @@ function App() {
 			<ConfigProvider theme={antdTheme}>
 				<ThemeProvider theme={styledTheme}>
 					<ApiContextProvider>
-						<UserDetailsProvider>
-							<DAppContextProvider>
-								<GlobalStyle/>
-								<ModalContextProvider>
-									<AppLayout />
-								</ModalContextProvider>
-							</DAppContextProvider>
-						</UserDetailsProvider>
+						<CurrencyContextProvider>
+							<UserDetailsProvider>
+								<ActiveMultisigProvider>
+									<DAppContextProvider>
+										<GlobalStyle/>
+										<ModalContextProvider>
+											<AppLayout />
+										</ModalContextProvider>
+									</DAppContextProvider>
+								</ActiveMultisigProvider>
+							</UserDetailsProvider>
+						</CurrencyContextProvider>
 					</ApiContextProvider>
 				</ThemeProvider>
 			</ConfigProvider>

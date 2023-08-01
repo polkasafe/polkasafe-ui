@@ -7,10 +7,9 @@ import React, { useEffect, useState } from 'react';
 import { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { usePagination } from 'src/hooks/usePagination';
-// import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-// import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import Pagination from 'src/ui-components/Pagination';
@@ -30,6 +29,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	const { currency } = useGlobalCurrencyContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const { network } = useGlobalApiContext();
 	const location = useLocation();
@@ -57,14 +57,16 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					multisig.address,
 					network,
 					multisig.proxy ? 5 : 10,
-					currentPage
+					currentPage,
+					currency
 				);
 				if(multisig.proxy){
 					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
 						multisig.proxy,
 						network,
 						10 - multisigTransactions.length,
-						currentPage
+						currentPage,
+						currency
 					);
 					if(proxyTransactions && !proxyError){
 						setLoading(false);

@@ -9,7 +9,9 @@ import { Link } from 'react-router-dom';
 import noTransactionsHistory from 'src/assets/icons/no-transaction.svg';
 import noTransactionsQueued from 'src/assets/icons/no-transactions-queued.svg';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -32,6 +34,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, addressBook, multisigAddresses } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 
 	const [transactions, setTransactions] = useState<ITransaction[]>();
 	const [queuedTransactions, setQueuedTransactions] = useState<IQueueItem[]>([]);
@@ -70,7 +73,8 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					activeMultisig,
 					network,
 					10,
-					1
+					1,
+					currency
 				);
 				if(error){
 					setHistoryLoading(false);
@@ -86,7 +90,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 			}
 		};
 		getTransactions();
-	}, [activeMultisig, network, signature, userAddress, newTxn]);
+	}, [activeMultisig, network, signature, userAddress, newTxn, currency]);
 
 	useEffect(() => {
 		const getQueue = async () => {
@@ -208,15 +212,15 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											</div>
 										</div>
 										{!isProxyApproval &&
-										transaction?.totalAmount ?
+										Number(transaction?.totalAmount) ?
 											<div>
 												<h1 className='text-md text-white'>- {transaction.totalAmount} {chainProperties[network].tokenSymbol}</h1>
-												{!isNaN(Number(amountUSD)) && <p className='text-text_secondary text-right text-xs'>{(Number(amountUSD) * Number(transaction.totalAmount)).toFixed(2)} USD</p>}
+												{!isNaN(Number(amountUSD)) && <p className='text-text_secondary text-right text-xs'>{(Number(amountUSD) * Number(transaction.totalAmount) * Number(currencyPrice)).toFixed(2)} {currencyProperties[currency].symbol}</p>}
 											</div>
 											:
 											<div>
 												<h1 className='text-md text-white'>- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: true }) : `? ${chainProperties[network].tokenSymbol}`}</h1>
-												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} USD</p>}
+												{!isNaN(Number(amountUSD)) && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) && <p className='text-white text-right text-xs'>{(Number(amountUSD) * Number(currencyPrice) * Number(parseDecodedValue({ network, value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value), withUnit: false }))).toFixed(2)} {currencyProperties[currency].symbol}</p>}
 											</div>
 										}
 										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
@@ -266,7 +270,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 										<div>
 											{sent ? <h1 className='text-md text-failure'>-{transaction.amount_token} {transaction.token}</h1>
 												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
-											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd} USD</p>
+											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd.toFixed(2)} {currencyProperties[currency].symbol}</p>
 										</div>
 									</Link>
 								);

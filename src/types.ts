@@ -4,6 +4,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
+import { currencies, currencySymbol } from './global/currencyConstants';
 import { networks, tokenSymbol } from './global/networkConstants';
 
 export enum CHANNEL {
@@ -128,9 +129,26 @@ export type ChainPropType = {
     [index: string]: ChainProps;
 };
 
+export type Currency = typeof currencies[keyof typeof currencies];
+export type CurrencySymbol = typeof currencySymbol[keyof typeof currencySymbol];
+
+export interface CurrencyProps {
+    'logo'?: any;
+    'symbol': CurrencySymbol;
+}
+
+export type CurrencyPropType = {
+    [index: string]: CurrencyProps;
+};
+
 export interface IAddressBookItem {
 	name: string;
 	address: string;
+	email?: string;
+	discord?: string;
+	telegram?: string;
+	roles?: string[];
+	nickName?: string;
 }
 
 interface IMultisigSettings {
@@ -231,3 +249,32 @@ export enum NotificationStatus {
 	WARNING = 'warning',
 	INFO = 'info'
   }
+
+export interface ISharedAddressBookRecord {
+	name: string,
+	address: string,
+	email?: string,
+	discord?: string,
+	telegram?: string,
+	roles?: string[]
+}
+
+export interface ISharedAddressBooks {
+	records: {
+		[address: string]: ISharedAddressBookRecord
+	},
+	multisig: string
+}
+
+export interface IAllAddresses {
+	[address: string]: {
+		name: string,
+		address: string,
+		shared?: boolean,
+		nickName?: string,
+		email?: string,
+		discord?: string,
+		telegram?: string,
+		roles?: string[]
+	}
+}

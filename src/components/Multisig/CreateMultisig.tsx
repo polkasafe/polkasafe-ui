@@ -11,18 +11,21 @@ import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import SuccessTransactionLottie from 'src/assets/lottie-graphics/SuccessTransaction';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import AddBtn from 'src/components/Multisig/ModalBtn';
+import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress } from 'src/types';
+import { IMultisigAddress, ISharedAddressBookRecord } from 'src/types';
 import { NotificationStatus } from 'src/types';
 import { DashDotIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import ProxyImpPoints from 'src/ui-components/ProxyImpPoints';
 import queueNotification from 'src/ui-components/QueueNotification';
+import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import { inputToBn } from 'src/utils/inputToBn';
 import { setSigner } from 'src/utils/setSigner';
@@ -42,8 +45,9 @@ interface IMultisigProps {
 }
 
 const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) => {
-	const { setUserDetailsContextState, address: userAddress, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
+	const { setUserDetailsContextState, address: userAddress, addressBook, multisigAddresses, loggedInWallet } = useGlobalUserDetailsContext();
 	const { network, api, apiReady } = useGlobalApiContext();
+	const { records, setActiveMultisigContextState } = useActiveMultisigContext();
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [uploadSignatoriesJson, setUploadSignatoriesJson] = useState(false);
@@ -79,6 +83,24 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				}
 			};
 		});
+		const records: { [address: string]: ISharedAddressBookRecord } = {};
+		multisigData.signatories.forEach((signatory) => {
+			const data = addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(signatory));
+			const substrateSignatory = getSubstrateAddress(signatory) || signatory;
+			records[substrateSignatory] = {
+				address: signatory,
+				name: data?.name || DEFAULT_ADDRESS_NAME,
+				email: data?.email,
+				discord: data?.discord,
+				telegram: data?.telegram,
+				roles: data?.roles
+			};
+		});
+		setActiveMultisigContextState(prev => ({
+			...prev,
+			records,
+			multisig: multisigData.address
+		}));
 		onCancel?.();
 		if(create){
 			openModal('Create Proxy', <AddProxy onCancel={() => toggleVisibility()} />);
@@ -128,8 +150,22 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 			else{
 				setLoading(true);
 				setLoadingMessages('Creating Your Multisig.');
+				const records: { [address: string]: ISharedAddressBookRecord } = {};
+				signatories.forEach((signatory) => {
+					const substrateSignatory = getSubstrateAddress(signatory) || signatory;
+					const data = addressBook.find((a) => getSubstrateAddress(a.address) === substrateSignatory);
+					records[substrateSignatory] = {
+						address: signatory,
+						name: data?.name || DEFAULT_ADDRESS_NAME,
+						email: data?.email,
+						discord: data?.discord,
+						telegram: data?.telegram,
+						roles: data?.roles
+					};
+				});
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
+						addressBook: records,
 						signatories,
 						threshold,
 						multisigName
@@ -179,10 +215,24 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 	const AddAddressModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton onClick={() => setShowAddressModal(true)} className='bg-primary text-white w-fit'>
+				<PrimaryButton disabled={!addAddress || !getSubstrateAddress(addAddress) || Object.keys(records).includes(getSubstrateAddress(addAddress) || addAddress) || addressBook.some(item => item.address === getEncodedAddress(addAddress, network))} onClick={() => setShowAddressModal(true)}>
 					<p className='font-normal text-sm'>Add</p>
 				</PrimaryButton>
-				<Modal width={600} onCancel={() => setShowAddressModal(false)} footer={null} open={showAddressModal}>
+				<Modal
+					onCancel={() => setShowAddressModal(false)}
+					open={showAddressModal}
+					centered
+					footer={false}
+					closeIcon={
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+							onClick={() => setShowAddressModal(false)}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
+						</button>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Add Address</h3>}
+					className={'w-auto md:min-w-[500px] scale-90'}
+				>
 					<AddAddress onCancel={() => setShowAddressModal(false)} addAddress={addAddress} setAddAddress={setAddAddress} />
 				</Modal>
 			</>

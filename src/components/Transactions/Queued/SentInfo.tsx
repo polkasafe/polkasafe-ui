@@ -8,8 +8,10 @@ import React, { FC, useEffect, useState } from 'react';
 import CancelBtn from 'src/components/Multisig/CancelBtn';
 import RemoveBtn from 'src/components/Settings/RemoveBtn';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITxNotification } from 'src/types';
@@ -58,6 +60,7 @@ interface ISentInfoProps {
 
 const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transactionFields, getMultiDataLoading, delegate_id, isProxyAddApproval, isProxyRemovalApproval, isProxyApproval, amount, amountUSD, className, callData, callDataString, callHash, recipientAddress, date, approvals, loading, threshold, setCallDataString, handleApproveTransaction, handleCancelTransaction, notifications, customTx }) => {
 	const { api, apiReady, network } = useGlobalApiContext();
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 
 	const { address: userAddress, addressBook, multisigAddresses, activeMultisig } = useGlobalUserDetailsContext();
 	const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -208,11 +211,11 @@ const SentInfo: FC<ISentInfoProps> = ({ note, decodedCallData, txnParams, transa
 													network,
 													value: String(amount[i]),
 													withUnit: true
-												}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount[i] && <span>({(Number(amountUSD) * Number(parseDecodedValue({
+												}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amountUSD)) && amount[i] && <span>({(Number(amountUSD) * Number(currencyPrice) * Number(parseDecodedValue({
 													network,
 													value: String(amount[i]),
 													withUnit: false
-												}))).toFixed(2)} USD)</span>}
+												}))).toFixed(2)} {currencyProperties[currency].symbol})</span>}
 											</span>
 											<span>
 											To:
