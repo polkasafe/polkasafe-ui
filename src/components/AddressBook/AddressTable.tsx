@@ -248,7 +248,7 @@ const AddressTable: FC<IAddressProps> = ({ addresses, className }) => {
 	return (
 		<>
 			<div className='text-sm font-medium overflow-y-auto'>
-				<Table columns={columns} pagination={false} dataSource={addressBookData} scroll={{ x: 1000, y: 400 }} />
+				<Table columns={columns} pagination={false} dataSource={addressBookData} scroll={{ x: 1000, y: 500 }} />
 			</div>
 		</>
 	);
