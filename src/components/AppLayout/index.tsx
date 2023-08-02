@@ -72,10 +72,6 @@ const AppLayout = ({ className }: {className?: string}) => {
 	}, [getSharedAddressBook]);
 
 	useEffect(() => {
-		setLoading(true);
-	}, [activeMultisig]);
-
-	useEffect(() => {
 		if(isAppsPage)
 			setLoading(true);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,8 +90,8 @@ const AppLayout = ({ className }: {className?: string}) => {
 
 	return (
 		<Layout className={className}>
-			<NavHeader setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} showSubmenu={iframeVisibility && isAppsPage} onClick={() => {
-				setIframeVisibility(false);
+			<NavHeader setSideDrawer={setSideDrawer} sideDrawer={sideDrawer} showSubmenu={Boolean(iframeVisibility) && isAppsPage} onClick={() => {
+				setIframeVisibility(null);
 				setIframeState(false);
 				setLoading(true);
 			}}/>
