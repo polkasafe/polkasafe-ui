@@ -160,7 +160,16 @@ const Menu: FC<Props> = ({ className }) => {
 				<span>Multisigs</span>
 				<span className='bg-highlight text-primary rounded-full flex items-center justify-center h-5 w-5 font-normal text-xs'>{multisigAddresses ? multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled)).length : '0'}</span>
 			</h2>
-			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
+			{userAddress &&
+				<section className='mt-3 mb-3'>
+					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
+						onClick={() => setOpenAddMultisig(true)}>
+						<UserPlusIcon className='text-sm' />
+						<span className='font-medium text-xs'>Add Multisig</span>
+					</button>
+				</section>
+			}
+			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1'>
 				{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-3 text-white list-none'>
 						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
@@ -189,15 +198,6 @@ const Menu: FC<Props> = ({ className }) => {
 						})}
 					</ul>}
 			</section>
-			{userAddress &&
-				<section className='mt-auto'>
-					<button className='text-white bg-primary p-3 rounded-lg w-full flex items-center justify-center gap-x-2 cursor-pointer'
-						onClick={() => setOpenAddMultisig(true)}>
-						<UserPlusIcon className='text-sm' />
-						<span className='font-medium text-xs'>Add Multisig</span>
-					</button>
-				</section>
-			}
 		</div>
 	);
 };
