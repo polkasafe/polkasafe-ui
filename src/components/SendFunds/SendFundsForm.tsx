@@ -8,6 +8,7 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AutoComplete, Button, Divider, Dropdown, Form, Input, Modal, Skeleton, Spin, Switch } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import BN from 'bn.js';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
@@ -112,6 +113,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [selectType, setSelectType] = useState<boolean>(true);
 
 	const [callHash, setCallHash] = useState<string>('');
+
+	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
+		key: item,
+		label: <span className='text-white text-sm flex items-center gap-x-2'>{item}</span>
+	}));
 
 	const onRecipientChange = (value: string, i: number) => {
 		setRecipientAndAmount((prevState) => {
@@ -463,6 +469,23 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										{ required: "Please add the '${name}'" }
 									}
 								>
+									<section className='flex justify-end w-full'>
+										<Dropdown
+											trigger={['click']}
+											className={`border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer ${className}`}
+											menu={{
+												items: transactionTypes,
+												onClick: (e) => { setCallData(''); setTransactionType(e.key as ETransactionType); }
+											}}
+										>
+											<div className="flex justify-between gap-x-4 items-center text-white text-[16px]">
+												<span className='flex items-center gap-x-2 text-sm'>
+													{transactionType}
+												</span>
+												<CircleArrowDownIcon className='text-primary' />
+											</div>
+										</Dropdown>
+									</section>
 									<section>
 										<p className='text-primary font-normal text-xs leading-[13px]'>From</p>
 										<div className='flex items-center gap-x-[10px] mt-[14px]'>
