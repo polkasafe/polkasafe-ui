@@ -258,12 +258,13 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 					>
 						<div className="flex justify-between gap-x-4 items-center text-white text-[16px]">
 							<span className='flex items-center gap-x-2'>
-								{palletRpc ? palletRpc : 'Pallet'}
+								{palletRpc ? palletRpc : <span className='text-text_secondary'>Pallet</span>}
 							</span>
 							<CircleArrowDownIcon className='text-primary' />
 						</div>
 					</Dropdown>
 				</div>
+				{palletRpc &&
 				<div className='w-full'>
 					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Method</label>
 					<Dropdown
@@ -276,12 +277,12 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 					>
 						<div className="flex justify-between gap-x-4 items-center text-white text-[16px]">
 							<span className='flex items-center gap-x-2'>
-								{callable ? callable : 'Method'}
+								{callable ? callable : <span className='text-text_secondary'>Method</span>}
 							</span>
 							<CircleArrowDownIcon className='text-primary' />
 						</div>
 					</Dropdown>
-				</div>
+				</div>}
 			</div>
 			{paramFields?.map((paramField, ind) => (
 				<div key={ind} className='mt-2'>
