@@ -40,7 +40,6 @@ import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 import ManualExtrinsics from './ManualExtrinsics';
-import SelectTransactionType from './SelectTransactionType';
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 import UploadAttachment from './UploadAttachment';
@@ -54,8 +53,10 @@ export enum ETransactionType {
 interface ISendFundsFormProps {
 	onCancel?: () => void;
 	className?: string;
-	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>
-	defaultSelectedAddress?: string
+	setNewTxn?: React.Dispatch<React.SetStateAction<boolean>>;
+	defaultSelectedAddress?: string;
+	transactionType?: ETransactionType;
+	setTransactionType?: React.Dispatch<React.SetStateAction<ETransactionType>>
 }
 
 export interface ISubfieldAndAttachment {
@@ -64,7 +65,7 @@ export interface ISubfieldAndAttachment {
 	}
 }
 
-const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn }: ISendFundsFormProps) => {
+const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn, transactionType=ETransactionType.SEND_TOKEN, setTransactionType }: ISendFundsFormProps) => {
 
 	const { activeMultisig, multisigAddresses, addressBook, address, isProxy, loggedInWallet, transactionFields } = useGlobalUserDetailsContext();
 	const { api, apiReady, network } = useGlobalApiContext();
@@ -107,10 +108,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 	const [category, setCategory] = useState<string>('none');
 
 	const [subfieldAttachments, setSubfieldAttachments] = useState<ISubfieldAndAttachment>({});
-
-	const [transactionType, setTransactionType] = useState<ETransactionType>(ETransactionType.SEND_TOKEN);
-
-	const [selectType, setSelectType] = useState<boolean>(true);
 
 	const [callHash, setCallHash] = useState<string>('');
 
@@ -448,7 +445,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 						created_at={new Date()}
 					/> :
 					<Spin wrapperClassName={className} spinning={loading} indicator={<LoadingLottie message={loadingMessages} />}>
-						{selectType ? <SelectTransactionType onContinue={() => setSelectType(false)} transactionType={transactionType} setTransactionType={setTransactionType}  /> :
+						{
 							<>
 								{initiatorBalance.lte(totalDeposit.add(totalGas)) && !fetchBalancesLoading ? <section className='mb-4 text-[13px] w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2'>
 									<WarningCircleIcon />
@@ -469,23 +466,25 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 										{ required: "Please add the '${name}'" }
 									}
 								>
-									<section className='flex justify-end w-full'>
-										<Dropdown
-											trigger={['click']}
-											className={`border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer ${className}`}
-											menu={{
-												items: transactionTypes,
-												onClick: (e) => { setCallData(''); setTransactionType(e.key as ETransactionType); }
-											}}
-										>
-											<div className="flex justify-between gap-x-4 items-center text-white text-[16px]">
-												<span className='flex items-center gap-x-2 text-sm'>
-													{transactionType}
-												</span>
-												<CircleArrowDownIcon className='text-primary' />
-											</div>
-										</Dropdown>
-									</section>
+									{setTransactionType &&
+										<section className='flex justify-end w-full'>
+											<Dropdown
+												trigger={['click']}
+												className={`border border-primary rounded-lg p-2 bg-bg-secondary cursor-pointer ${className}`}
+												menu={{
+													items: transactionTypes,
+													onClick: (e) => { setCallData(''); setTransactionType?.(e.key as ETransactionType); }
+												}}
+											>
+												<div className="flex justify-between gap-x-4 items-center text-white text-[16px]">
+													<span className='flex items-center gap-x-2 text-sm'>
+														{transactionType}
+													</span>
+													<CircleArrowDownIcon className='text-primary' />
+												</div>
+											</Dropdown>
+										</section>
+									}
 									<section>
 										<p className='text-primary font-normal text-xs leading-[13px]'>From</p>
 										<div className='flex items-center gap-x-[10px] mt-[14px]'>

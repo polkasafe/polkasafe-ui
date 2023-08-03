@@ -4,8 +4,9 @@
 
 import { PlusCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Identicon from '@polkadot/react-identicon';
-import { Button, Modal,Skeleton,Tooltip } from 'antd';
+import { Button, Dropdown, Modal,Skeleton,Tooltip } from 'antd';
 import { Spin } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import React, { FC, useCallback, useEffect,useState } from 'react';
 import brainIcon from 'src/assets/icons/brain-icon.svg';
 import chainIcon from 'src/assets/icons/chain-icon.svg';
@@ -30,7 +31,7 @@ import styled from 'styled-components';
 
 import ExistentialDeposit from '../SendFunds/ExistentialDeposit';
 import FundMultisig from '../SendFunds/FundMultisig';
-import SendFundsForm from '../SendFunds/SendFundsForm';
+import SendFundsForm, { ETransactionType } from '../SendFunds/SendFundsForm';
 
 interface IDashboardCard{
 	className?: string,
@@ -52,7 +53,13 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const [openFundMultisigModal, setOpenFundMultisigModal] = useState(false);
 	const [signatureLoader, setsignatureLoader] = useState<boolean>(true);
 	const [assetDataLoader, setassetDataLoader] = useState<boolean>(true);
+	const [transactionType, setTransactionType] = useState<ETransactionType>(ETransactionType.SEND_TOKEN);
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+
+	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
+		key: item,
+		label: <span className='text-white flex items-center gap-x-2'>{item}</span>
+	}));
 
 	const handleGetAssets = useCallback(async () => {
 		try{
@@ -96,9 +103,17 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const TransactionModal: FC = () => {
 		return (
 			<>
-				<PrimaryButton icon={<PlusCircleOutlined />} onClick={() => setOpenTransactionModal(true)} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
+				<Dropdown
+					trigger={['click']}
+					menu={{
+						items: transactionTypes,
+						onClick: (e) => {setTransactionType(e.key as ETransactionType); setOpenTransactionModal(true);}
+					}}
+				>
+					<PrimaryButton icon={<PlusCircleOutlined />} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
 					New Transaction
-				</PrimaryButton>
+					</PrimaryButton>
+				</Dropdown>
 				<Modal
 					centered
 					footer={false}
@@ -117,7 +132,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
 					{isOnchain ?
-						<SendFundsForm setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
+						<SendFundsForm transactionType={transactionType} setTransactionType={setTransactionType} setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />
 						: <ExistentialDeposit setNewTxn={setNewTxn} onCancel={() => setOpenTransactionModal(false)} />}
 				</Modal>
 			</>
