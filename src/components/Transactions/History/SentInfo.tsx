@@ -10,6 +10,7 @@ import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { ITransaction } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -25,7 +26,7 @@ interface ISentInfoProps {
     className?: string;
 	recipient: string
 	callHash: string
-	note?: string
+	transactionDetails?: ITransaction
 	loading?: boolean
 	amount_usd: number
 	from: string
@@ -33,7 +34,7 @@ interface ISentInfoProps {
 	method?:string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, note, loading, section, method }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, transactionDetails, loading, section, method }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency } = useGlobalCurrencyContext();
@@ -96,7 +97,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 				</>
 				}
 				<div
-					className='flex items-center gap-x-7 mb-3'
+					className='flex items-center justify-between gap-x-7 mb-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -106,7 +107,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					<AddressComponent address={from} />
 				</div>
 				<div
-					className='flex items-center gap-x-5'
+					className='flex items-center justify-between gap-x-5'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -130,7 +131,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 					</p>
 				</div>
 				<div
-					className='flex items-center gap-x-5 mt-3'
+					className='flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -150,7 +151,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 				{ Boolean(section) && Boolean(method) &&
 					<>
 						<div
-							className='flex items-center gap-x-5 mt-3'
+							className='flex items-center justify-between gap-x-5 mt-3'
 						>
 							<span
 								className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -168,7 +169,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							</p>
 						</div>
 						<div
-							className='flex items-center gap-x-5 mt-3'
+							className='flex items-center justify-between gap-x-5 mt-3'
 						>
 							<span
 								className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -187,9 +188,42 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						</div>
 					</>
 				}
-				{loading ? <Spin className='mt-3'/> : note &&
+				{loading ? <Spin className='mt-3'/> : transactionDetails &&
+				<>
+					{!!transactionDetails.transactionFields && Object.keys(transactionDetails?.transactionFields).length !== 0 && transactionDetails.transactionFields.category !== 'none' &&
+				<>
 					<div
-						className='flex items-center gap-x-5 mt-3'
+						className='flex items-center justify-between mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Category:
+						</span>
+						<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
+							{transactionDetails?.transactionFields?.category}
+						</span>
+					</div>
+					{transactionDetails?.transactionFields && transactionDetails?.transactionFields?.subfields && Object.keys(transactionDetails?.transactionFields?.subfields).map((key) => {
+						const subfield = transactionDetails?.transactionFields?.subfields[key];
+						return (
+							<div
+								key={key}
+								className='flex items-center justify-between mt-3'
+							>
+								<span
+									className='text-text_secondary font-normal text-sm leading-[15px]'
+								>
+									{subfield?.name}:
+								</span>
+								<span className='text-waiting bg-waiting bg-opacity-5 border border-solid border-waiting rounded-lg px-[6px] py-[3px]'>
+									{subfield?.value}
+								</span>
+							</div>
+						);})}
+				</>}
+					<div
+						className='flex items-center justify-between gap-x-5 mt-3'
 					>
 						<span
 							className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -202,16 +236,17 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							<span
 								className='text-white font-normal text-sm leading-[15px] whitespace-pre'
 							>
-								{note}
+								{transactionDetails?.note}
 							</span>
 						</p>
 					</div>
+				</>
 				}
 			</article>
 			<article
 				className='p-8 rounded-lg bg-bg-main max-w-[328px] w-full'
 			>
-				<div className='h-full'>
+				<div>
 					<Timeline
 						className='h-full flex flex-col'
 					>

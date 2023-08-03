@@ -9,6 +9,7 @@ import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { ITransaction } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -25,11 +26,11 @@ interface IReceivedInfoProps {
 	from: string
 	to: string
 	callHash: string
-	note?: string
+	transactionDetails?: ITransaction
 	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, note, loading }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, transactionDetails, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency } = useGlobalCurrencyContext();
@@ -83,43 +84,45 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				</div>
 			</div>
 			<Divider className='bg-text_secondary my-5' />
-			<div
-				className=' flex items-center gap-x-7 mb-3'
-			>
-				<span
-					className='text-text_secondary font-normal text-sm leading-[15px]'
-				>
-					To:
-				</span>
-				<AddressComponent address={to} />
-			</div>
-			<div
-				className='w-full max-w-[418px] flex items-center gap-x-5'
-			>
-				<span
-					className='text-text_secondary font-normal text-sm leading-[15px]'
-				>
-								Txn Hash:
-				</span>
-				<p
-					className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-				>
-					<span
-						className='text-white font-normal text-sm leading-[15px]'
-					>
-						{shortenAddress(callHash, 10)}
-					</span>
-					<span
-						className='flex items-center gap-x-2 text-sm'
-					>
-						<button onClick={() => copyText(callHash)}><CopyIcon/></button>
-						{/* <ExternalLinkIcon /> */}
-					</span>
-				</p>
-			</div>
-			{date &&
+			<section className='w-[50%]'>
+
 				<div
-					className='w-full max-w-[418px] flex items-center gap-x-5 mt-3'
+					className=' flex items-center justify-between gap-x-7 mb-3'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+					To:
+					</span>
+					<AddressComponent address={to} />
+				</div>
+				<div
+					className='w-full flex items-center justify-between gap-x-5'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+								Txn Hash:
+					</span>
+					<p
+						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+					>
+						<span
+							className='text-white font-normal text-sm leading-[15px]'
+						>
+							{shortenAddress(callHash, 10)}
+						</span>
+						<span
+							className='flex items-center gap-x-2 text-sm'
+						>
+							<button onClick={() => copyText(callHash)}><CopyIcon/></button>
+							{/* <ExternalLinkIcon /> */}
+						</span>
+					</p>
+				</div>
+				{date &&
+				<div
+					className='w-full flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -136,9 +139,9 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 						</span>
 					</p>
 				</div>}
-			{loading ? <Spin className='mt-3' /> : note &&
+				{loading ? <Spin className='mt-3' /> : transactionDetails &&
 				<div
-					className='w-full max-w-[418px] flex items-center gap-x-5 mt-3'
+					className='w-full flex items-center justify-between gap-x-5 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -151,10 +154,11 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 						<span
 							className='text-white font-normal text-sm leading-[15px] whitespace-pre'
 						>
-							{note}
+							{transactionDetails?.note}
 						</span>
 					</p>
 				</div>}
+			</section>
 		</article>
 	);
 };
