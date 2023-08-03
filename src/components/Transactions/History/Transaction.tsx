@@ -27,14 +27,14 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [note, setNote] = useState<string>('');
+	const [transactionDetails, setTransactionDetails] = useState<ITransaction>({} as any);
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
 	const type: 'Sent' | 'Received' = multisig?.address === from || multisig?.proxy === from ? 'Sent' : 'Received';
 	const location = useLocation();
 	const hash = location.hash.slice(1);
 
-	const handleGetHistoryNote = async () => {
+	const handleGetTransactionDetails = async () => {
 		try{
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
@@ -45,7 +45,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 			}
 			else{
 				setLoading(true);
-				const noteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
+				const transactionRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
 					body: JSON.stringify({
 						callHash
 					}),
@@ -53,15 +53,15 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					method: 'POST'
 				});
 
-				const { data: noteData, error: noteError } = await noteRes.json() as { data: string, error: string };
+				const { data: transactionData, error: transactionError } = await transactionRes.json() as { data: ITransaction, error: string };
 
-				if(noteError) {
-					console.log('error', noteError);
+				if(transactionError) {
+					console.log('error', transactionError);
 					setLoading(false);
 					return;
 				}else {
 					setLoading(false);
-					setNote(noteData);
+					setTransactionDetails(transactionData);
 				}
 
 			}
@@ -82,7 +82,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					<div
 						onClick={() => {
 							if(!transactionInfoVisible){
-								handleGetHistoryNote();
+								handleGetTransactionDetails();
 							}
 							toggleTransactionVisible(!transactionInfoVisible);
 						}}
@@ -150,7 +150,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									date={dayjs(created_at).format('llll')}
 									recipient={String(to)}
 									callHash={callHash}
-									note={note}
+									transactionDetails={transactionDetails}
 									from={from}
 									loading={loading}
 									amount_usd={amount_usd}
@@ -165,7 +165,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 										date={dayjs(created_at).format('llll')}
 										from={from}
 										callHash={callHash}
-										note={note}
+										transactionDetails={transactionDetails}
 										loading={loading}
 										amount_usd={amount_usd}
 										to={String(to)}
@@ -177,7 +177,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 										date={dayjs(created_at).format('llll')}
 										recipient={String(to)}
 										callHash={callHash}
-										note={note}
+										transactionDetails={transactionDetails}
 										from={from}
 										loading={loading}
 										amount_usd={amount_usd}

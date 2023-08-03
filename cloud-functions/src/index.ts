@@ -1233,7 +1233,7 @@ export const getTransactionNote = functions.https.onRequest(async (req, res) => 
 			const txRef = firestoreDB.collection('transactions').doc(callHash);
 			const txDoc = await txRef.get();
 
-			return res.status(200).json({ data: txDoc.exists ? (txDoc.data() as ITransaction).note || '' : '' });
+			return res.status(200).json({ data: txDoc.exists ? (txDoc.data() as ITransaction) || {} : {} });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getTransactionNote :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
