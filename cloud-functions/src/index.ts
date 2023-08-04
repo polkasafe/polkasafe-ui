@@ -52,6 +52,8 @@ import { IPAUser } from './notification-engine/polkassembly/_utils/types';
 import scheduledApprovalReminder from './notification-engine/polkasafe/scheduledApprovalReminder';
 import formidable from 'formidable-serverless';
 import fs from 'fs';
+import { TOTP } from 'otpauth';
+import generateRandomBase32 from './utlils/generateRandomBase32';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -97,6 +99,49 @@ const getMultisigAddressesByAddress = async (address:string) => {
 		updated_at: doc.data().updated_at?.toDate() || doc.data().created_at.toDate()
 	})) as IMultisigAddress[];
 };
+
+export const generate2FASecret = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		const signature = req.get('x-signature');
+		const network = req.get('x-network');
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+			const base32_secret = generateRandomBase32();
+
+			const totp = new TOTP({
+				algorithm: 'SHA1',
+				digits: 6,
+				issuer: 'Polkasafe',
+				label: substrateAddress,
+				period: 30,
+				secret: base32_secret
+			});
+
+			const otpauth_url = totp.toString();
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+
+			await addressRef.set({
+				two_factor_auth: {
+					base32_secret: base32_secret,
+					enabled: false,
+					url: otpauth_url,
+					verified: false
+				}
+			}, { merge: true });
+
+			return res.status(200).json({ base32_secret: base32_secret, url: otpauth_url });
+		} catch (err:unknown) {
+			functions.logger.error('Error in generate2FASecret : ', err);
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
 
 export const getConnectAddressToken = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
