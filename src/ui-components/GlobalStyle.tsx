@@ -161,6 +161,9 @@ export const GlobalStyle = createGlobalStyle`
 		border-radius: 12px !important;
 		background-color: #24272E !important;
 		padding: 12px 8px !important;
+		overflow-y: auto;
+		max-height: 300px;
+
   }
 	.ant-picker-panel-container {
 		background-color: #1573FE !important;
