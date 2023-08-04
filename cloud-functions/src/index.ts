@@ -18,7 +18,9 @@ import {
 	IUserNotificationChannelPreferences,
 	ITransactionFields,
 	ISharedAddressBooks,
-	ISharedAddressBookRecord } from './types';
+	ISharedAddressBookRecord,
+	I2FASettings,
+	IGenerate2FAResponse } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -126,16 +128,40 @@ export const generate2FASecret = functions.https.onRequest(async (req, res) => {
 
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 
-			await addressRef.set({
-				two_factor_auth: {
-					base32_secret: base32_secret,
-					enabled: false,
-					url: otpauth_url,
-					verified: false
-				}
-			}, { merge: true });
+			const two_factor_auth: I2FASettings = {
+				base32_secret: base32_secret,
+				enabled: false,
+				url: otpauth_url,
+				verified: false
+			};
 
-			return res.status(200).json({ base32_secret: base32_secret, url: otpauth_url });
+			await addressRef.set({ two_factor_auth }, { merge: true });
+
+			return res.status(200).json({ base32_secret: base32_secret, url: otpauth_url } as IGenerate2FAResponse);
+		} catch (err:unknown) {
+			functions.logger.error('Error in generate2FASecret : ', err);
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const disable2FA = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		const signature = req.get('x-signature');
+		const network = req.get('x-network');
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+
+			await addressRef.set({ two_factor_auth: admin.firestore.FieldValue.delete() }, { merge: true });
+
+			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
 			functions.logger.error('Error in generate2FASecret : ', err);
 			return res.status(500).json({ error: responseMessages.internal });
