@@ -20,7 +20,8 @@ import {
 	ISharedAddressBooks,
 	ISharedAddressBookRecord,
 	I2FASettings,
-	IGenerate2FAResponse } from './types';
+	IGenerate2FAResponse,
+	I2FAToken } from './types';
 import isValidSubstrateAddress from './utlils/isValidSubstrateAddress';
 import getSubstrateAddress from './utlils/getSubstrateAddress';
 import _createMultisig from './utlils/_createMultisig';
@@ -56,6 +57,7 @@ import formidable from 'formidable-serverless';
 import fs from 'fs';
 import { TOTP } from 'otpauth';
 import generateRandomBase32 from './utlils/generateRandomBase32';
+import dayjs from 'dayjs';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -169,7 +171,7 @@ export const disable2FA = functions.https.onRequest(async (req, res) => {
 
 			return res.status(200).json({ data: responseMessages.success });
 		} catch (err:unknown) {
-			functions.logger.error('Error in generate2FASecret : ', err);
+			functions.logger.error('Error in disable2FA : ', err);
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -223,7 +225,95 @@ export const verify2FA = functions.https.onRequest(async (req, res) => {
 
 			return res.status(200).json({ data: newUser });
 		} catch (err:unknown) {
-			functions.logger.error('Error in generate2FASecret : ', err);
+			functions.logger.error('Error in verify2FA : ', err);
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// to use while logging in
+export const validate2FA = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		const signature = req.get('x-signature');
+		const network = req.get('x-network');
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { authCode = null } = req.body;
+		if (isNaN(authCode)) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			const addressDoc = await addressRef.get();
+			if (!addressDoc.exists) return res.status(400).json({ error: responseMessages.address_not_registered });
+
+			const data = addressDoc.data();
+			const addressData = {
+				...data,
+				created_at: data?.created_at.toDate(),
+				tfa_token: {
+					...data?.tfa_token,
+					created_at: data?.tfa_token?.created_at?.toDate()
+				}
+			} as IUser;
+
+			if (!addressData.two_factor_auth?.enabled || !addressData.two_factor_auth?.base32_secret) return res.status(400).json({ error: responseMessages.two_factor_auth_not_init });
+			if (!addressData.tfa_token?.token || !addressData.tfa_token?.created_at) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
+
+			// check if the token is expired (in 5 minutes)
+			const isTokenExpired = dayjs().diff(dayjs(addressData.tfa_token?.created_at), 'minute') > 5;
+			if (isTokenExpired) return res.status(400).json({ error: responseMessages.tfa_token_expired });
+
+			const totp = new TOTP({
+				algorithm: 'SHA1',
+				digits: 6,
+				issuer: 'Polkasafe',
+				label: substrateAddress,
+				period: 60,
+				secret: addressData.two_factor_auth?.base32_secret
+			});
+
+			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
+			if (!isValidToken) return res.status(400).json({ data: responseMessages.invalid_2fa_code });
+
+			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
+
+			const DEFAULT_NOTIFICATION_PREFERENCES : IUserNotificationPreferences = {
+				channelPreferences: {
+					[CHANNEL.IN_APP]: {
+						name: CHANNEL.IN_APP,
+						enabled: true,
+						handle: String(substrateAddress),
+						verified: true
+					}
+				},
+				triggerPreferences: {}
+			};
+
+			const resUser: IUserResponse = {
+				address: encodeAddress(addressData.address, chainProperties[String(network)].ss58Format),
+				email: addressData.email,
+				created_at: addressData.created_at,
+				addressBook: addressData.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[String(network)].ss58Format) })),
+				multisigAddresses: multisigAddresses.map((item) => (
+					{ ...item,
+						signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[String(network)].ss58Format))
+					})),
+				multisigSettings: addressData.multisigSettings,
+				notification_preferences: addressData.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
+				transactionFields: addressData.transactionFields
+			};
+
+			res.status(200).json({ data: resUser });
+
+			// delete the token
+			await addressRef.set({ tfa_token: admin.firestore.FieldValue.delete() }, { merge: true });
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in validate2FA : ', err);
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
@@ -278,6 +368,7 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 			// check if address doc already exists
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
 			const doc = await addressRef.get();
+
 			if (doc.exists) {
 				const data = doc.data();
 				if (data && data.created_at) {
@@ -285,6 +376,19 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						...data,
 						created_at: data?.created_at.toDate()
 					} as IUser;
+
+					const isTFAEnabled = addressDoc.two_factor_auth?.enabled || false;
+
+					if (isTFAEnabled) {
+						const tfa_token: I2FAToken = {
+							token: uuidv4(),
+							created_at: new Date()
+						};
+
+						await addressRef.set({ tfa_token }, { merge: true });
+
+						return res.status(200).json({ data: tfa_token });
+					}
 
 					const resUser: IUserResponse = {
 						address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),

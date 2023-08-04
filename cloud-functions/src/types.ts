@@ -27,6 +27,11 @@ export interface IGenerate2FAResponse {
 	url: string
 }
 
+export interface I2FAToken {
+	token: string
+	created_at: Date
+}
+
 export interface IUser {
 	address: string;
 	email: string | null;
@@ -36,6 +41,7 @@ export interface IUser {
 	notification_preferences?: IUserNotificationPreferences;
 	transactionFields?: ITransactionFields
 	two_factor_auth?: I2FASettings
+	tfa_token?: I2FAToken
 }
 
 export interface IUserResponse extends IUser {
