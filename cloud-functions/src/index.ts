@@ -208,7 +208,7 @@ export const verify2FA = functions.https.onRequest(async (req, res) => {
 			});
 
 			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
-			if (!isValidToken) return res.status(400).json({ data: responseMessages.invalid_2fa_code });
+			if (!isValidToken) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 
 			const new2FASettings: I2FASettings = {
 				...(addressData.two_factor_auth || {}),
@@ -277,7 +277,7 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 			});
 
 			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
-			if (!isValidToken) return res.status(400).json({ data: responseMessages.invalid_2fa_code });
+			if (!isValidToken) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 
 			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
 
