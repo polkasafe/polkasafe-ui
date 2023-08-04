@@ -224,6 +224,7 @@ export interface ITransaction {
 	amount_token: number | number[];
 	network: string;
 	note?: string;
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	notifications?: {
 		[address: string]: {
 			lastNotified: Date;
