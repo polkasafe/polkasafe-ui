@@ -21,5 +21,7 @@ export const responseMessages = {
 	transfers_fetch_error: 'Error while fetching transfers.',
 	queue_fetch_error: 'Error while fetching queue.',
 	assets_fetch_error: 'Error while fetching assets.',
-	success: 'Success'
+	success: 'Success',
+	invalid_2fa_code: 'Invalid 2FA code.',
+	two_factor_auth_not_init: '2FA not initialised.'
 };

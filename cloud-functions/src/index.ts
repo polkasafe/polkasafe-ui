@@ -102,6 +102,7 @@ const getMultisigAddressesByAddress = async (address:string) => {
 	})) as IMultisigAddress[];
 };
 
+// To enable two factor authentication
 export const generate2FASecret = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
@@ -120,7 +121,7 @@ export const generate2FASecret = functions.https.onRequest(async (req, res) => {
 				digits: 6,
 				issuer: 'Polkasafe',
 				label: substrateAddress,
-				period: 30,
+				period: 60,
 				secret: base32_secret
 			});
 
@@ -137,7 +138,12 @@ export const generate2FASecret = functions.https.onRequest(async (req, res) => {
 
 			await addressRef.set({ two_factor_auth }, { merge: true });
 
-			return res.status(200).json({ base32_secret: base32_secret, url: otpauth_url } as IGenerate2FAResponse);
+			return res.status(200).json({
+				data: {
+					base32_secret: base32_secret,
+					url: otpauth_url
+				} as IGenerate2FAResponse
+			});
 		} catch (err:unknown) {
 			functions.logger.error('Error in generate2FASecret : ', err);
 			return res.status(500).json({ error: responseMessages.internal });
@@ -162,6 +168,60 @@ export const disable2FA = functions.https.onRequest(async (req, res) => {
 			await addressRef.set({ two_factor_auth: admin.firestore.FieldValue.delete() }, { merge: true });
 
 			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in generate2FASecret : ', err);
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// To enable two factor authentication
+export const verify2FA = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const address = req.get('x-address');
+		const signature = req.get('x-signature');
+		const network = req.get('x-network');
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { authCode = null } = req.body;
+		if (isNaN(authCode)) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
+
+		try {
+			const substrateAddress = getSubstrateAddress(String(address));
+			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			const addressDoc = await addressRef.get();
+			const addressData = addressDoc.data() as IUser;
+
+			if (!addressData?.two_factor_auth?.base32_secret) return res.status(400).json({ error: responseMessages.two_factor_auth_not_init });
+
+			const totp = new TOTP({
+				algorithm: 'SHA1',
+				digits: 6,
+				issuer: 'Polkasafe',
+				label: substrateAddress,
+				period: 60,
+				secret: addressData.two_factor_auth?.base32_secret
+			});
+
+			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
+			if (!isValidToken) return res.status(400).json({ data: responseMessages.invalid_2fa_code });
+
+			const new2FASettings: I2FASettings = {
+				...(addressData.two_factor_auth || {}),
+				enabled: true,
+				verified: true
+			};
+
+			await addressRef.set({ two_factor_auth: new2FASettings }, { merge: true });
+
+			const newUser: IUser = {
+				...addressData,
+				two_factor_auth: new2FASettings
+			};
+
+			return res.status(200).json({ data: newUser });
 		} catch (err:unknown) {
 			functions.logger.error('Error in generate2FASecret : ', err);
 			return res.status(500).json({ error: responseMessages.internal });
