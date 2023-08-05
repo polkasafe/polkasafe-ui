@@ -241,8 +241,9 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { authCode = null } = req.body;
+		const { authCode = null, tfa_token = null } = req.body;
 		if (isNaN(authCode)) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
+		if (!tfa_token) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -261,7 +262,7 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 			} as IUser;
 
 			if (!addressData.two_factor_auth?.enabled || !addressData.two_factor_auth?.base32_secret) return res.status(400).json({ error: responseMessages.two_factor_auth_not_init });
-			if (!addressData.tfa_token?.token || !addressData.tfa_token?.created_at) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
+			if (!addressData.tfa_token?.token || !addressData.tfa_token?.created_at || tfa_token !== addressData.tfa_token?.token) return res.status(400).json({ error: responseMessages.invalid_2fa_token });
 
 			// check if the token is expired (in 5 minutes)
 			const isTokenExpired = dayjs().diff(dayjs(addressData.tfa_token?.created_at), 'minute') > 5;
