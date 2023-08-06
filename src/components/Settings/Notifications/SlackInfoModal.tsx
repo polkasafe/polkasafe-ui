@@ -21,7 +21,7 @@ const SlackInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNEL)
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
 				...prev.notification_preferences.channelPreferences,
 				[`${CHANNEL.SLACK}`]: {
-					...prev.notification_preferences.channelPreferences[`${CHANNEL.SLACK}`],
+					...prev.notification_preferences.channelPreferences?.[`${CHANNEL.SLACK}`],
 					verification_token: verifyToken || ''
 				}
 			} }

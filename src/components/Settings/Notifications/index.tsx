@@ -229,7 +229,7 @@ const Notifications = () => {
 
 			const newChannelPreferences = reset
 				? { ...notification_preferences.channelPreferences, [channel]: { enabled: false, handle: '', name: channel, verification_token: '', verified: false } }
-				: { ...notification_preferences.channelPreferences, [channel]: { ...notification_preferences.channelPreferences[channel], enabled } };
+				: { ...notification_preferences.channelPreferences, [channel]: { ...notification_preferences.channelPreferences?.[channel], enabled } };
 
 			const updateNotificationTriggerRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/updateNotificationChannelPreferences`, {
 				body: JSON.stringify({
@@ -260,7 +260,7 @@ const Notifications = () => {
 				if(enabled !== undefined){
 					setUserDetailsContextState(prev => ({
 						...prev,
-						notification_preferences: { ...prev.notification_preferences, channelPreferences: { ...prev.notification_preferences.channelPreferences, [channel]: { ...prev.notification_preferences.channelPreferences[channel], enabled } } }
+						notification_preferences: { ...prev.notification_preferences, channelPreferences: { ...prev.notification_preferences.channelPreferences, [channel]: { ...prev.notification_preferences.channelPreferences?.[channel], enabled } } }
 					}));
 				}
 				if(reset){
@@ -403,7 +403,7 @@ const Notifications = () => {
 	const TelegramModal: FC = () => {
 		return (
 			<>
-				{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified
+				{notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.verified
 					?
 					<div className='flex items-center gap-x-2'>
 						<CheckOutlined className='text-success'/>
@@ -430,7 +430,7 @@ const Notifications = () => {
 					open={openTelegramModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified
+					{notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.verified
 						? <div>
 							<span className='text-white'>Are you sure you want to Reset Telegram Handle?</span>
 							<div className='flex items-center justify-between mt-5'>
@@ -453,7 +453,7 @@ const Notifications = () => {
 	const DiscordModal: FC = () => {
 		return (
 			<>
-				{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified
+				{notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.verified
 					?
 					<div className='flex items-center gap-x-2'>
 						<CheckOutlined className='text-success'/>
@@ -480,7 +480,7 @@ const Notifications = () => {
 					open={openDiscordModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified
+					{notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.verified
 						? <div>
 							<span className='text-white'>Are you sure you want to Reset Discord Handle?</span>
 							<div className='flex items-center justify-between mt-5'>
@@ -503,7 +503,7 @@ const Notifications = () => {
 	const SlackModal: FC = () => {
 		return (
 			<>
-				{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified
+				{notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.verified
 					?
 					<div className='flex items-center gap-x-2'>
 						<CheckOutlined className='text-success'/>
@@ -530,7 +530,7 @@ const Notifications = () => {
 					open={openSlackModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
-					{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified
+					{notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.verified
 						? <div>
 							<span className='text-white'>Are you sure you want to Reset Slack Handle?</span>
 							<div className='flex items-center justify-between mt-5'>
@@ -624,8 +624,8 @@ const Notifications = () => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3 flex items-center gap-x-2'>
 					<span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span>
-					{notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.verified &&
-						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.TELEGRAM, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.TELEGRAM]?.enabled} />
+					{notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.handle && notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.TELEGRAM, enabled: checked })} defaultChecked={notification_preferences.channelPreferences?.[CHANNEL.TELEGRAM]?.enabled} />
 					}
 				</div>
 				<div className='col-span-5'>
@@ -635,8 +635,8 @@ const Notifications = () => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3 flex items-center gap-x-2'>
 					<span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span>
-					{notification_preferences.channelPreferences[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences[CHANNEL.DISCORD]?.verified &&
-						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.DISCORD, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.DISCORD]?.enabled} />
+					{notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.handle && notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.DISCORD, enabled: checked })} defaultChecked={notification_preferences.channelPreferences?.[CHANNEL.DISCORD]?.enabled} />
 					}
 				</div>
 				<div className='col-span-5'>
@@ -646,8 +646,8 @@ const Notifications = () => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3 flex items-center gap-x-2'>
 					<span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon /> Slack Notifications</span>
-					{notification_preferences.channelPreferences[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences[CHANNEL.SLACK]?.verified &&
-						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.SLACK, enabled: checked })} defaultChecked={notification_preferences.channelPreferences[CHANNEL.SLACK]?.enabled} />
+					{notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.handle && notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.verified &&
+						<Switch disabled={channelPreferencesLoading} size='small' onChange={checked => updateNotificationChannelPreferences({ channel: CHANNEL.SLACK, enabled: checked })} defaultChecked={notification_preferences.channelPreferences?.[CHANNEL.SLACK]?.enabled} />
 					}
 				</div>
 				<div className='col-span-5'>

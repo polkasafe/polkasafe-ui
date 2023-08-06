@@ -50,7 +50,7 @@ const VerifyEmailToken = () => {
 					channelPreferences: {
 						...prev.notification_preferences.channelPreferences,
 						[CHANNEL.EMAIL]:{
-							...prev.notification_preferences.channelPreferences[CHANNEL.EMAIL],
+							...prev.notification_preferences.channelPreferences?.[CHANNEL.EMAIL],
 							verified: true
 						}
 					}
