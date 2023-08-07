@@ -9,9 +9,9 @@ const ProxyImpPoints = () => {
 		<div className='bg-bg-secondary rounded-lg p-3 text-text_secondary'>
 			<p className='mb-2'>Adding a proxy to your account will help with the following functions:</p>
 			<ul className='px-7'>
-				<li>Signatories can edit the threshold.</li>
-				<li>Signatories can modify the number of signatories.</li>
-				<li>Signatories can create backup of their Multisig for easy transfer of assets</li>
+				<li>Edit Threshold.</li>
+				<li>Add or remove signatories.</li>
+				<li>Create backup of your multisig.</li>
 			</ul>
 		</div>
 	);
