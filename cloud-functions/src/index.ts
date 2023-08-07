@@ -315,10 +315,10 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			return res.status(400).json({ error: responseMessages.invalid_threshold });
 		}
 
-		const substrateProxyAddress = getSubstrateAddress(proxyAddress);
+		const substrateProxyAddress = proxyAddress ? getSubstrateAddress(proxyAddress) : '';
 
 		// cannot send proxy address if disabled is true
-		if (proxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (substrateProxyAddress && disabled) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		// check if signatories contain duplicate addresses
 		if ((new Set(signatories)).size !== signatories.length) return res.status(400).json({ error: responseMessages.duplicate_signatories });
