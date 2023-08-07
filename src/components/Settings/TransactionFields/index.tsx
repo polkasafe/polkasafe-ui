@@ -20,7 +20,7 @@ const ManageMultisig = () => {
 		return (
 			<>
 				<Button onClick={() => setOpenAddCustomFieldModal(true)}  size='large' className={'outline-none border-none text-xs md:text-sm font-medium bg-primary text-white rounded-md md:rounded-lg flex items-center gap-x-3'}>
-					<PlusCircleOutlined/>
+					<PlusCircleOutlined rev={undefined}/>
 					<span>Add New Category</span>
 				</Button>
 				<Modal

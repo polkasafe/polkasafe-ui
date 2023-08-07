@@ -574,7 +574,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 																							filterOption={(inputValue, options) => {
 																								return inputValue && options?.value ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
 																							}}
-																							notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
+																							notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
 																							options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => r.recipient && item.value && getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
 																							id='recipient'
 																							placeholder="Send to Address.."
@@ -597,7 +597,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 																	</article>
 																))}
 															</div>
-															<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another Recipient</Button>
+															<Button icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another Recipient</Button>
 														</div>
 														<div className='flex flex-col gap-y-4'>
 															<article className='w-[412px] flex items-center'>

@@ -277,7 +277,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 											{i === signatoriesArray.length - 1 &&
 												<Tooltip title='Add Another Signatory' >
 													<Button size='large' onClick={() => onAddSignatory()} className='rounded-lg outline-none border-none bg-highlight text-primary flex justify-center items-center'>
-														<PlusCircleOutlined />
+														<PlusCircleOutlined rev={undefined} />
 													</Button>
 												</Tooltip>
 											}

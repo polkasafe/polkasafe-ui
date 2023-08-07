@@ -35,7 +35,7 @@ const NavHeader: FC<Props> = ({ sideDrawer, setSideDrawer, showSubmenu, onClick 
 					<button className='flex items-center justify-center outline-none border-none bg-bg-secondary text-primary rounded-lg px-[18px] py-[8px] font-bold text-xl' onClick={() => {
 						setSideDrawer(!sideDrawer);
 					}}>
-						<MenuOutlined />
+						<MenuOutlined rev={undefined} />
 					</button>
 				</article>
 				<article className='hidden lg:block ml-4'>

@@ -92,7 +92,7 @@ const EditField = ({ className, onCancel, category, subfield, subfieldName, subf
 							<span className={`${option.archieved && 'text-text_secondary'}`} >{option.optionName}</span>
 							<button onClick={() => {
 								setOpenEditOptionModal({ i, open: true });
-							}}><MoreOutlined/></button>
+							}}><MoreOutlined rev={undefined}/></button>
 						</div>
 					),
 					value: option.optionName
@@ -243,7 +243,7 @@ const EditField = ({ className, onCancel, category, subfield, subfieldName, subf
 												filterOption={(inputValue, options) => {
 													return inputValue ? (String(options?.value) || '') === (inputValue) : true;
 												}}
-												notFoundContent={<Button icon={<PlusCircleOutlined/>} onClick={() => {setDropdownState(prev => prev ? [...prev, { optionName: newOption }] : [{ optionName: newOption }]); setNewOption('');}} className='bg-transparent text-primary border-none outline-none'>ADD OPTION</Button>}
+												notFoundContent={<Button icon={<PlusCircleOutlined rev={undefined}/>} onClick={() => {setDropdownState(prev => prev ? [...prev, { optionName: newOption }] : [{ optionName: newOption }]); setNewOption('');}} className='bg-transparent text-primary border-none outline-none'>ADD OPTION</Button>}
 												options={autocompleteOptions}
 												id='new_option'
 												value={newOption}

@@ -121,7 +121,7 @@ const Home = ({ className }: { className?: string }) => {
 					</div>
 				),
 				header: <span className='text-waiting'>No Existential Deposit</span>,
-				message: <div className=''>
+				message: <div className='text-white'>
 					<p>Please Add Existential Deposit to your Multisig to make it Onchain.</p>
 					<div className='flex justify-end w-full'>
 						<Button onClick={() => { setOpenTransactionModal(true); notification.destroy(); }} size='small' className='text-xs text-white bg-primary border-none outline-none'>Add Existential Deposit</Button>
@@ -136,7 +136,7 @@ const Home = ({ className }: { className?: string }) => {
 	const AddProxyModal: React.FC = () => {
 		return (
 			<>
-				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined />} >Create Proxy</Button>
+				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined rev={undefined} />} >Create Proxy</Button>
 				<Modal
 					centered
 					footer={false}

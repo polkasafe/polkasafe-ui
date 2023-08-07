@@ -47,7 +47,7 @@ const DropDown: React.FC<IAssetsTableProps> = ({ className })  => {
 				<Button className='bg-highlight text-primary border-none'>
 					<Space>
 						<p className='text-primary'>{ currencyValue }</p>
-						<DownCircleOutlined />
+						<DownCircleOutlined rev={undefined} />
 					</Space>
 				</Button>
 			</Dropdown>

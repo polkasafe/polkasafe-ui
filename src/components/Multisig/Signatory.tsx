@@ -229,7 +229,7 @@ const Signatory = ({ filterAddress, setSignatories, signatories, homepage }: ISi
 						}
 					</div>
 				</div>
-				<SwapOutlined className='text-primary' />
+				<SwapOutlined className='text-primary' rev={undefined} />
 				<div id='div2' className="flex flex-col my-2 pd-2 w-1/2 ml-2">
 					<h1 className='text-primary mt-3 mb-2'>Selected Signatory</h1>
 					<div id={`drop2${homepage && '-home'}`} className='flex flex-col bg-bg-secondary p-2 rounded-lg my-1 h-[30vh] overflow-auto cursor-grab' onDrop={drop} onDragOver={dragOver}>

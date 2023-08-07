@@ -123,7 +123,7 @@ export const generate2FASecret = functions.https.onRequest(async (req, res) => {
 				digits: 6,
 				issuer: 'Polkasafe',
 				label: substrateAddress,
-				period: 60,
+				period: 30,
 				secret: base32_secret
 			});
 
@@ -203,11 +203,12 @@ export const verify2FA = functions.https.onRequest(async (req, res) => {
 				digits: 6,
 				issuer: 'Polkasafe',
 				label: substrateAddress,
-				period: 60,
+				period: 30,
 				secret: addressData.two_factor_auth?.base32_secret
 			});
 
-			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
+			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, ''), window: 1 }) !== null;
+
 			if (!isValidToken) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 
 			const new2FASettings: I2FASettings = {
@@ -273,11 +274,11 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 				digits: 6,
 				issuer: 'Polkasafe',
 				label: substrateAddress,
-				period: 60,
+				period: 30,
 				secret: addressData.two_factor_auth?.base32_secret
 			});
 
-			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, '') }) !== null;
+			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, ''), window: 1 }) !== null;
 			if (!isValidToken) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 
 			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
@@ -305,7 +306,9 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 					})),
 				multisigSettings: addressData.multisigSettings,
 				notification_preferences: addressData.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
-				transactionFields: addressData.transactionFields
+				transactionFields: addressData.transactionFields,
+				two_factor_auth: addressData.two_factor_auth,
+				tfa_token: addressData.tfa_token
 			};
 
 			res.status(200).json({ data: resUser });
@@ -349,6 +352,8 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
+		const { refresh=false } = req.body;
+
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 
@@ -378,17 +383,19 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						created_at: data?.created_at.toDate()
 					} as IUser;
 
-					const isTFAEnabled = addressDoc.two_factor_auth?.enabled || false;
+					if (!refresh) {
+						const isTFAEnabled = addressDoc.two_factor_auth?.enabled || false;
 
-					if (isTFAEnabled) {
-						const tfa_token: I2FAToken = {
-							token: uuidv4(),
-							created_at: new Date()
-						};
+						if (isTFAEnabled) {
+							const tfa_token: I2FAToken = {
+								token: uuidv4(),
+								created_at: new Date()
+							};
 
-						await addressRef.set({ tfa_token }, { merge: true });
+							await addressRef.set({ tfa_token }, { merge: true });
 
-						return res.status(200).json({ data: tfa_token });
+							return res.status(200).json({ data: { tfa_token } });
+						}
 					}
 
 					const resUser: IUserResponse = {
@@ -402,7 +409,9 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 							})),
 						multisigSettings: addressDoc.multisigSettings,
 						notification_preferences: addressDoc.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
-						transactionFields: addressDoc.transactionFields
+						transactionFields: addressDoc.transactionFields,
+						two_factor_auth: addressDoc.two_factor_auth,
+						tfa_token: addressDoc.tfa_token
 					};
 
 					res.status(200).json({ data: resUser });
