@@ -21,7 +21,7 @@ const TelegramInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANN
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
 				...prev.notification_preferences.channelPreferences,
 				[`${CHANNEL.TELEGRAM}`]: {
-					...prev.notification_preferences.channelPreferences[`${CHANNEL.TELEGRAM}`],
+					...prev.notification_preferences.channelPreferences?.[`${CHANNEL.TELEGRAM}`],
 					verification_token: verifyToken || ''
 				}
 			} }

@@ -21,7 +21,7 @@ const DiscordInfoModal = ({ getVerifyToken }: { getVerifyToken: (channel: CHANNE
 			notification_preferences: { ...prev.notification_preferences, channelPreferences: {
 				...prev.notification_preferences.channelPreferences,
 				[`${CHANNEL.DISCORD}`]: {
-					...prev.notification_preferences.channelPreferences[`${CHANNEL.DISCORD}`],
+					...prev.notification_preferences.channelPreferences?.[`${CHANNEL.DISCORD}`],
 					verification_token: verifyToken || ''
 				}
 			} }
