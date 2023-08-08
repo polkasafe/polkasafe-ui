@@ -1,6 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { InjectedAccount,InjectedWindow } from '@polkadot/extension-inject/types';
 import { stringToHex } from '@polkadot/util';
 import { Button, Form, Input } from 'antd';
@@ -14,7 +15,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IUser, NotificationStatus } from 'src/types';
 import { Wallet } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
-import { WalletIcon } from 'src/ui-components/CustomIcons';
+import { WalletIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import queueNotification from 'src/ui-components/QueueNotification';
 import WalletButtons from 'src/ui-components/WalletButtons';
@@ -34,6 +35,7 @@ const ConnectWallet = () => {
 	const [selectedWallet, setSelectedWallet] = useState<Wallet>(Wallet.POLKADOT);
 	const [tfaToken, setTfaToken] = useState<string>('');
 	const [authCode, setAuthCode] = useState<number>();
+	const [tokenExpired, setTokenExpired] = useState<boolean>(false);
 
 	const onAccountChange = (address: string) => {
 		setAddress(address);
@@ -171,6 +173,9 @@ const ConnectWallet = () => {
 			const { data: token, error: validate2FAError } = await validate2FARes.json() as { data: string, error: string };
 
 			if(validate2FAError) {
+				if(validate2FAError === '2FA token expired.') {
+					setTokenExpired(true);
+				}
 				queueNotification({
 					header: 'Failed',
 					message: validate2FAError,
@@ -194,6 +199,7 @@ const ConnectWallet = () => {
 				const signRaw = injected && injected.signer && injected.signer.signRaw;
 				if (!signRaw) console.error('Signer not available');
 				setSigning(true);
+				setTfaToken('');
 				// @ts-ignore
 				const { signature } = await signRaw({
 					address: substrateAddress,
@@ -245,6 +251,8 @@ const ConnectWallet = () => {
 		}
 		catch(error) {
 			console.log(error);
+			setLoading(false);
+			setSigning(false);
 			queueNotification({
 				header: 'Failed',
 				message: error,
@@ -295,6 +303,19 @@ const ConnectWallet = () => {
 											Login
 									</Button>
 								</div>
+								{tokenExpired &&
+								<section className='mt-4 text-xs w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg font-normal flex items-center gap-x-2 max-w-[380px]'>
+									<WarningCircleIcon />
+									<p>Request session expired, please go back and login again.</p>
+								</section>}
+								<Button
+									icon={<ArrowLeftOutlined />}
+									disabled={loading}
+									onClick={() => {setTfaToken(''); setTokenExpired(false);}}
+									className={'mt-[25px] text-sm border-none outline-none flex items-center justify-center text-primary p-0'}
+								>
+										Go Back
+								</Button>
 							</> :
 							<>
 								<h2 className='font-bold text-lg text-white'>Get Started</h2>
