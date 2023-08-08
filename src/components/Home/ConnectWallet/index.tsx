@@ -291,6 +291,7 @@ const ConnectWallet = () => {
 											onChange={(e) => setAuthCode(Number(e.target.value))}
 											value={authCode}
 											disabled={loading}
+											maxLength={6}
 										/>
 									</Form.Item>
 									<Button
