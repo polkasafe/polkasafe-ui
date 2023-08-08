@@ -11,7 +11,7 @@ import { initialUserDetailsContext, useGlobalUserDetailsContext } from 'src/cont
 import { APP_NAME } from 'src/global/appName';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, IUserResponse, NotificationStatus } from 'src/types';
+import { IUser, NotificationStatus } from 'src/types';
 import { Wallet } from 'src/types';
 import AccountSelectionForm from 'src/ui-components/AccountSelectionForm';
 import { WalletIcon } from 'src/ui-components/CustomIcons';
@@ -32,7 +32,7 @@ const ConnectWallet = () => {
 	const [noAccounts, setNoAccounts] = useState<boolean>(false);
 	const [noExtension, setNoExtension] = useState<boolean>(false);
 	const [selectedWallet, setSelectedWallet] = useState<Wallet>(Wallet.POLKADOT);
-	const [loginData, setLoginData] = useState<IUser>();
+	const [tfaToken, setTfaToken] = useState<string>('');
 	const [authCode, setAuthCode] = useState<number>();
 
 	const onAccountChange = (address: string) => {
@@ -72,45 +72,47 @@ const ConnectWallet = () => {
 				setLoading(false);
 				return;
 			} else {
-				const injectedWindow = window as Window & InjectedWindow;
-
-				const wallet = injectedWindow.injectedWeb3[selectedWallet];
-
-				if (!wallet) {
+				if(typeof token !== 'string' && token?.tfa_token && token?.tfa_token?.token) {
+					setTfaToken(token.tfa_token.token);
 					setLoading(false);
-					return;
 				}
-				const injected = wallet && wallet.enable && await wallet.enable(APP_NAME);
+				else {
+					const injectedWindow = window as Window & InjectedWindow;
 
-				const signRaw = injected && injected.signer && injected.signer.signRaw;
-				if (!signRaw) console.error('Signer not available');
-				setSigning(true);
-				// @ts-ignore
-				const { signature } = await signRaw({
-					address: substrateAddress,
-					data: stringToHex(token),
-					type: 'bytes'
-				});
+					const wallet = injectedWindow.injectedWeb3[selectedWallet];
 
-				setSigning(false);
+					if (!wallet) {
+						setLoading(false);
+						return;
+					}
+					const injected = wallet && wallet.enable && await wallet.enable(APP_NAME);
 
-				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
-					method: 'POST'
-				});
+					const signRaw = injected && injected.signer && injected.signer.signRaw;
+					if (!signRaw) console.error('Signer not available');
+					setSigning(true);
+					// @ts-ignore
+					const { signature } = await signRaw({
+						address: substrateAddress,
+						data: stringToHex(token),
+						type: 'bytes'
+					});
 
-				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
-
-				if(!connectAddressErr && userData){
-					setLoading(false);
 					setSigning(false);
 
-					setLoginData(userData);
-					localStorage.setItem('signature', signature);
-					localStorage.setItem('address', substrateAddress);
-					localStorage.setItem('logged_in_wallet', selectedWallet);
+					const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+						headers: firebaseFunctionsHeader(network, substrateAddress, signature),
+						method: 'POST'
+					});
 
-					if(userData.address || (userData.two_factor_auth && !userData.two_factor_auth.enabled)) {
+					const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
+
+					if(!connectAddressErr && userData){
+						setLoading(false);
+						setSigning(false);
+
+						localStorage.setItem('signature', signature);
+						localStorage.setItem('address', substrateAddress);
+						localStorage.setItem('logged_in_wallet', selectedWallet);
 
 						setUserDetailsContextState((prevState) => {
 							return {
@@ -153,7 +155,7 @@ const ConnectWallet = () => {
 			return;
 		}
 
-		if(!loginData?.tfa_token?.token) return;
+		if(!tfaToken) return;
 
 		setLoading(true);
 		try{
@@ -161,13 +163,15 @@ const ConnectWallet = () => {
 			const validate2FARes = await fetch(`${FIREBASE_FUNCTIONS_URL}/validate2FA`, {
 				body: JSON.stringify({
 					authCode,
-					tfa_token: loginData?.tfa_token?.token
+					tfa_token: tfaToken
 				}),
-				headers: firebaseFunctionsHeader(network),
+				headers: {
+					'x-address': substrateAddress
+				},
 				method: 'POST'
 			});
 
-			const { data: validate2FAData, error: validate2FAError } = await validate2FARes.json() as { data: IUserResponse, error: string };
+			const { data: token, error: validate2FAError } = await validate2FARes.json() as { data: string, error: string };
 
 			if(validate2FAError) {
 				queueNotification({
@@ -178,34 +182,68 @@ const ConnectWallet = () => {
 				setLoading(false);
 			}
 
-			if(!validate2FAError && validate2FAData) {
+			if(!validate2FAError && token) {
 
-				localStorage.setItem('address', substrateAddress);
-				localStorage.setItem('logged_in_wallet', selectedWallet);
-				setLoading(false);
+				const injectedWindow = window as Window & InjectedWindow;
 
-				setUserDetailsContextState((prevState) => {
-					return {
-						...prevState,
-						address: validate2FAData?.address,
-						addressBook: validate2FAData?.addressBook || [],
-						createdAt: validate2FAData?.created_at,
-						loggedInWallet: selectedWallet,
-						multisigAddresses: validate2FAData?.multisigAddresses,
-						multisigSettings: validate2FAData?.multisigSettings || {},
-						notification_preferences: validate2FAData?.notification_preferences || {
-							channelPreferences: {},
-							triggerPreferences: {
-								newTransaction: true,
-								pendingTransaction: 2,
-								transactionExecuted: true
-							}
-						},
-						tfa_token: validate2FAData?.tfa_token,
-						transactionFields: validate2FAData?.transactionFields || initialUserDetailsContext.transactionFields,
-						two_factor_auth: validate2FAData?.two_factor_auth
-					};
+				const wallet = injectedWindow.injectedWeb3[selectedWallet];
+
+				if (!wallet) {
+					setLoading(false);
+					return;
+				}
+				const injected = wallet && wallet.enable && await wallet.enable(APP_NAME);
+
+				const signRaw = injected && injected.signer && injected.signer.signRaw;
+				if (!signRaw) console.error('Signer not available');
+				setSigning(true);
+				// @ts-ignore
+				const { signature } = await signRaw({
+					address: substrateAddress,
+					data: stringToHex(token),
+					type: 'bytes'
 				});
+
+				setSigning(false);
+
+				const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
+					headers: firebaseFunctionsHeader(network, substrateAddress, signature),
+					method: 'POST'
+				});
+
+				const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
+
+				if(!connectAddressErr && userData){
+					setLoading(false);
+					setSigning(false);
+
+					localStorage.setItem('signature', signature);
+					localStorage.setItem('address', substrateAddress);
+					localStorage.setItem('logged_in_wallet', selectedWallet);
+
+					setUserDetailsContextState((prevState) => {
+						return {
+							...prevState,
+							address: userData?.address,
+							addressBook: userData?.addressBook || [],
+							createdAt: userData?.created_at,
+							loggedInWallet: selectedWallet,
+							multisigAddresses: userData?.multisigAddresses,
+							multisigSettings: userData?.multisigSettings || {},
+							notification_preferences: userData?.notification_preferences || {
+								channelPreferences: {},
+								triggerPreferences: {
+									newTransaction: true,
+									pendingTransaction: 2,
+									transactionExecuted: true
+								}
+							},
+							tfa_token: userData?.tfa_token,
+							transactionFields: userData?.transactionFields || initialUserDetailsContext.transactionFields,
+							two_factor_auth: userData?.two_factor_auth
+						};
+					});
+				}
 			}
 		}
 		catch(error) {
@@ -224,7 +262,7 @@ const ConnectWallet = () => {
 				<img src={ConnectWalletImg} alt='Wallet' height={120} width={120} className='mb-4 mt-1' />
 				{
 					!api || !apiReady ? <Loader size='large' text='Loading Accounts...' /> :
-						loginData?.tfa_token?.token ?
+						tfaToken ?
 							<>
 								<h2 className='text-lg text-white font-semibold'>Two Factor Authentication</h2>
 								<p className='text-sm text-white'>Please open the two-step verification app or extension and input the authentication code for your Polkassembly account.</p>
