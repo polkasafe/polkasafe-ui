@@ -25,7 +25,7 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "@xstyled/styled-components": "^3.7.0",
-    "antd": "^5.8.2",
+    "antd": "5.1.0",
     "classnames": "^2.3.2",
     "dayjs": "^1.11.9",
     "react": "^18.2.0",

@@ -88,310 +88,310 @@ import { ReactComponent as PolkadotWalletSVG } from 'src/assets/wallet/polkadotj
 import { ReactComponent as SubWalletSVG } from 'src/assets/wallet/subwallet-icon.svg';
 
 export const AddIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={AddSVG} {...props} />
+	<Icon component={AddSVG} {...props} />
 );
 
 export const AddressBookIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={AddressBookSVG} {...props} />
+	<Icon component={AddressBookSVG} {...props} />
 );
 
 export const AppsIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={AppsSVG} {...props} />
+	<Icon component={AppsSVG} {...props} />
 );
 
 export const AssetsIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={AssetsSVG} {...props} />
+	<Icon component={AssetsSVG} {...props} />
 );
 
 export const ArrowDownLeftIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ArrowDownLeftSVG} {...props} />
+	<Icon component={ArrowDownLeftSVG} {...props} />
 );
 
 export const ArrowRightIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ArrowRightSVG} {...props} />
+	<Icon component={ArrowRightSVG} {...props} />
 );
 
 export const ArrowUpRightIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ArrowUpRightSVG} {...props} />
+	<Icon component={ArrowUpRightSVG} {...props} />
 );
 
 export const Circle3DotsIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={Circle3DotsSVG} {...props} />
+	<Icon component={Circle3DotsSVG} {...props} />
 );
 
 export const CircleArrowDownIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CircleArrowDownSVG} {...props} />
+	<Icon component={CircleArrowDownSVG} {...props} />
 );
 
 export const CircleArrowUpIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CircleArrowUpSVG} {...props} />
+	<Icon component={CircleArrowUpSVG} {...props} />
 );
 
 export const CircleCheckIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CircleCheckSVG} {...props} />
+	<Icon component={CircleCheckSVG} {...props} />
 );
 
 export const CirclePlusIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CirclePlusSVG} {...props} />
+	<Icon component={CirclePlusSVG} {...props} />
 );
 
 export const CircleWatchIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CircleWatchSVG} {...props} />
+	<Icon component={CircleWatchSVG} {...props} />
 );
 
 export const CopyIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CopySVG} {...props} />
+	<Icon component={CopySVG} {...props} />
 );
 
 export const DatePickerIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DatePickerSVG} {...props} />
+	<Icon component={DatePickerSVG} {...props} />
 );
 
 export const DeleteIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DeleteSVG} {...props} />
+	<Icon component={DeleteSVG} {...props} />
 );
 
 export const DollarIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DollarSVG} {...props} />
+	<Icon component={DollarSVG} {...props} />
 );
 
 export const DonateIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DonateSVG} {...props} />
+	<Icon component={DonateSVG} {...props} />
 );
 
 export const EditIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={EditSVG} {...props} />
+	<Icon component={EditSVG} {...props} />
 );
 
 export const ExternalLinkIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ExternalLinkSVG} {...props} />
+	<Icon component={ExternalLinkSVG} {...props} />
 );
 
 export const HomeIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={HomeSVG} {...props} />
+	<Icon component={HomeSVG} {...props} />
 );
 
 export const KeyIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={KeySVG} {...props} />
+	<Icon component={KeySVG} {...props} />
 );
 
 export const LineIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={LineSVG} {...props} />
+	<Icon component={LineSVG} {...props} />
 );
 
 export const MenuIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={MenuSVG} {...props} />
+	<Icon component={MenuSVG} {...props} />
 );
 
 export const NoTransactionIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={NoTransactionSVG} {...props} />
+	<Icon component={NoTransactionSVG} {...props} />
 );
 
 export const NoQueuedTransactionIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={NoQueuedTransactionSVG} {...props} />
+	<Icon component={NoQueuedTransactionSVG} {...props} />
 );
 
 export const NotificationIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={NotificationSVG} {...props} />
+	<Icon component={NotificationSVG} {...props} />
 );
 
 export const NoNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={NoNotificationSVG} {...props} />
+	<Icon component={NoNotificationSVG} {...props} />
 );
 
 export const OutlineCheckIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={OutlineCheckSVG} {...props} />
+	<Icon component={OutlineCheckSVG} {...props} />
 );
 
 export const OutlineCloseIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={OutlineCloseSVG} {...props} />
+	<Icon component={OutlineCloseSVG} {...props} />
 );
 
 export const PencilNotificationIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PencilNotificationSVG} {...props} />
+	<Icon component={PencilNotificationSVG} {...props} />
 );
 
 export const PasteIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PasteSVG} {...props} />
+	<Icon component={PasteSVG} {...props} />
 );
 
 export const PencilIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PencilSVG} {...props} />
+	<Icon component={PencilSVG} {...props} />
 );
 
 export const SearchIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SearchSVG} {...props} />
+	<Icon component={SearchSVG} {...props} />
 );
 
 export const SquareDownArrowIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SquareDownArrowSVG} {...props} />
+	<Icon component={SquareDownArrowSVG} {...props} />
 );
 
 export const SettingsIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SettingsSVG} {...props} />
+	<Icon component={SettingsSVG} {...props} />
 );
 
 export const TransactionIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={TransactionSVG} {...props} />
+	<Icon component={TransactionSVG} {...props} />
 );
 
 export const TrashIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={TrashSVG} {...props} />
+	<Icon component={TrashSVG} {...props} />
 );
 
 export const UserPlusIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={UserPlusSVG} {...props} />
+	<Icon component={UserPlusSVG} {...props} />
 );
 
 export const WarningIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={WarningSVG} {...props} />
+	<Icon component={WarningSVG} {...props} />
 );
 
 export const WarningRoundedIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={WarningRoundedSVG} {...props} />
+	<Icon component={WarningRoundedSVG} {...props} />
 );
 
 export const WarningCircleIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={WarningCircleSVG} {...props} />
+	<Icon component={WarningCircleSVG} {...props} />
 );
 
 export const WalletIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={WalletSVG} {...props} />
+	<Icon component={WalletSVG} {...props} />
 );
 
 export const MultisigLockIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={MultisigLockSVG} {...props} />
+	<Icon component={MultisigLockSVG} {...props} />
 );
 
 export const PolkadotLogoTextIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkadotLogoTextSVG} {...props} />
+	<Icon component={PolkadotLogoTextSVG} {...props} />
 );
 
 export const PolkasafeIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkasafeSVG} {...props} />
+	<Icon component={PolkasafeSVG} {...props} />
 );
 
 export const PolkasafeLogoIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkasafeLogoSVG} {...props} />
+	<Icon component={PolkasafeLogoSVG} {...props} />
 );
 
 export const PolkasafeTextIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkasafeTextSVG} {...props} />
+	<Icon component={PolkasafeTextSVG} {...props} />
 );
 
 export const SubscanIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SubscanSVG} {...props} />
+	<Icon component={SubscanSVG} {...props} />
 );
 
 export const QRIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={QRSVG} {...props} />
+	<Icon component={QRSVG} {...props} />
 );
 export const PSIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PSSVG} {...props} />
+	<Icon component={PSSVG} {...props} />
 );
 export const ChainIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ChainSVG} {...props} />
+	<Icon component={ChainSVG} {...props} />
 );
 export const BrainIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={BrainSVG} {...props} />
+	<Icon component={BrainSVG} {...props} />
 );
 
 // PARACHAINS ICONS
 
 export const KusamaIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={KusamaSVG} {...props} />
+	<Icon component={KusamaSVG} {...props} />
 );
 
 export const PolkadotIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkadotSVG} {...props} />
+	<Icon component={PolkadotSVG} {...props} />
 );
 export const CloseIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CloseSVG} {...props} />
+	<Icon component={CloseSVG} {...props} />
 );
 export const ImportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ImportArrowSVG} {...props} />
+	<Icon component={ImportArrowSVG} {...props} />
 );
 export const ExportArrowIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ExportArrowSVG} {...props} />
+	<Icon component={ExportArrowSVG} {...props} />
 );
 export const ShareIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ShareSVG} {...props} />
+	<Icon component={ShareSVG} {...props} />
 );
 export const CopyGreyIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CopyGreySVG} {...props} />
+	<Icon component={CopyGreySVG} {...props} />
 );
 export const UploadBoxIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={UploadBoxSVG} {...props} />
+	<Icon component={UploadBoxSVG} {...props} />
 );
 export const AddBoxIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={AddBoxSVG} {...props} />
+	<Icon component={AddBoxSVG} {...props} />
 );
 export const DashDotIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DashDotSVG} {...props} />
+	<Icon component={DashDotSVG} {...props} />
 );
 export const CreateMultisigIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CreateMultisigSVG} {...props} />
+	<Icon component={CreateMultisigSVG} {...props} />
 );
 export const LinkIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={LinkSVG} {...props} />
+	<Icon component={LinkSVG} {...props} />
 );
 export const NotifyMail = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={NotifyMailSVG} {...props} />
+	<Icon component={NotifyMailSVG} {...props} />
 );
 export const RightArrowOutlined = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={RightArrowOutlinedSVG} {...props} />
+	<Icon component={RightArrowOutlinedSVG} {...props} />
 );
 export const CheckOutlined = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={CheckOutlinedSVG} {...props} />
+	<Icon component={CheckOutlinedSVG} {...props} />
 );
 export const Disc = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DiscSVG} {...props} />
+	<Icon component={DiscSVG} {...props} />
 );
 
 export const HistoryIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={HistorySVG} {...props} />
+	<Icon component={HistorySVG} {...props} />
 );
 
 export const QueueIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={QueueSVG} {...props} />
+	<Icon component={QueueSVG} {...props} />
 );
 
 export const PolkadotWalletIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={PolkadotWalletSVG} {...props} />
+	<Icon component={PolkadotWalletSVG} {...props} />
 );
 
 export const SubWalletIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SubWalletSVG} {...props} />
+	<Icon component={SubWalletSVG} {...props} />
 );
 
 export const BellIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={BellIconSVG} {...props} />
+	<Icon component={BellIconSVG} {...props} />
 );
 
 export const MailIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={MailIconSVG} {...props} />
+	<Icon component={MailIconSVG} {...props} />
 );
 
 export const TelegramIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={TelegramIconSVG} {...props} />
+	<Icon component={TelegramIconSVG} {...props} />
 );
 
 export const DiscordIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DiscordIconSVG} {...props} />
+	<Icon component={DiscordIconSVG} {...props} />
 );
 
 export const ElementIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={ElementIconSVG} {...props} />
+	<Icon component={ElementIconSVG} {...props} />
 );
 
 export const SlackIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SlackIconSVG} {...props} />
+	<Icon component={SlackIconSVG} {...props} />
 );
 
 export const DocsIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={DocsSVG} {...props} />
+	<Icon component={DocsSVG} {...props} />
 );
 
 export const SharedIcon = (props: Partial<CustomIconComponentProps>) => (
-	<Icon rev={undefined} component={SharedIconSVG} {...props} />
+	<Icon component={SharedIconSVG} {...props} />
 );

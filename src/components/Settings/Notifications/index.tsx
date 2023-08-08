@@ -412,7 +412,7 @@ const Notifications = () => {
 					</div>
 					:
 					<div className='flex items-center'>
-						<Button onClick={() => setOpenTelegramModal(true)} icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<Button onClick={() => setOpenTelegramModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
 						<span>to a Telegram chat to get Telegram notifications</span>
 					</div>
 				}
@@ -462,7 +462,7 @@ const Notifications = () => {
 					</div>
 					:
 					<div className='flex items-center'>
-						<Button onClick={() => setOpenDiscordModal(true)} icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<Button onClick={() => setOpenDiscordModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
 						<span>to a Discord channel to get Discord notifications</span>
 					</div>
 				}
@@ -512,7 +512,7 @@ const Notifications = () => {
 					</div>
 					:
 					<div className='flex items-center'>
-						<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
+						<Button onClick={() => setOpenSlackModal(true)} icon={<PlusCircleOutlined className='text-primary' />} className='flex items-center outline-none border-none bg-transparant text-primary'>ADD THE POLKASAFE BOT</Button>
 						<span>to a Slack channel to get Slack notifications</span>
 					</div>
 				}

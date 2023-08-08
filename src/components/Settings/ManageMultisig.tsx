@@ -44,7 +44,7 @@ const ManageMultisig = () => {
 											</a>
 										</div>
 									</div>
-									<div className='h-[50px] w-[50px] rounded-full flex items-center justify-center bg-text_secondary text-bg-main text-xl'><ArrowRightOutlined rev={undefined} /></div>
+									<div className='h-[50px] w-[50px] rounded-full flex items-center justify-center bg-text_secondary text-bg-main text-xl'><ArrowRightOutlined /></div>
 									<div className='flex flex-col items-start'>
 										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-[#FF79F2] text-highlight'}>Proxy</div>
 										<div className='flex items-center text-text_secondary'>

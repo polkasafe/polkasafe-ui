@@ -110,7 +110,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						onClick: (e) => {setTransactionType(e.key as ETransactionType); setOpenTransactionModal(true);}
 					}}
 				>
-					<PrimaryButton icon={<PlusCircleOutlined rev={undefined} />} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
+					<PrimaryButton icon={<PlusCircleOutlined />} loading={transactionLoading} className='w-[45%] flex items-center justify-center py-4 2xl:py-5'>
 					New Transaction
 					</PrimaryButton>
 				</Dropdown>
@@ -207,7 +207,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
 								{hasProxy &&
 								<Tooltip title='Switch Account'>
-									<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' rev={undefined} /></Button>
+									<Button className='border-none outline-none w-auto rounded-full p-0' onClick={() => setUserDetailsContextState(prev => ({ ...prev, isProxy: !prev.isProxy }))}><SyncOutlined className='text-text_secondary text-base' /></Button>
 								</Tooltip>
 								}
 							</div>

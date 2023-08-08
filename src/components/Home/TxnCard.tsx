@@ -202,7 +202,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 												</div>
 												:
 												<div className='bg-waiting text-waiting bg-opacity-10 rounded-lg h-[38px] w-[38px] flex items-center justify-center'>
-													<ReloadOutlined rev={undefined} />
+													<ReloadOutlined />
 												</div>}
 											<div className='ml-3'>
 												<h1 className='text-md text-white truncate'>
@@ -224,7 +224,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											</div>
 										}
 										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
-											<ArrowRightOutlined rev={undefined}/>
+											<ArrowRightOutlined/>
 										</div>
 									</Link>
 								);})

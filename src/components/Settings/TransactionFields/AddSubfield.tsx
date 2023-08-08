@@ -169,7 +169,7 @@ const AddSubfield = ({ className, onCancel, category }: { className?: string, on
 								<div key={i} className='flex flex-col gap-y-3'>
 									{i !== 0 && <div className='flex items-center justify-between'>
 										<span className='text-white text-sm' >Sub-Field Details</span>
-										<Button icon={<MinusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={() => onRemoveSubfield(i)} >Remove Sub-Field</Button>
+										<Button icon={<MinusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={() => onRemoveSubfield(i)} >Remove Sub-Field</Button>
 									</div>}
 									<div className="flex flex-col gap-y-3 mb-4">
 										<label
@@ -221,7 +221,7 @@ const AddSubfield = ({ className, onCancel, category }: { className?: string, on
 									</div>
 								</div>
 							))}
-							<Button icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddSubfield} >Add Sub-Field</Button>
+							<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddSubfield} >Add Sub-Field</Button>
 						</section>
 
 						<section className='flex items-center gap-x-5 justify-between mt-10'>

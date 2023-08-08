@@ -84,7 +84,7 @@ const SubfieldsList = ({ className, category }: { className?: string, category: 
 		return (
 			<>
 				<Button
-					icon={<PlusCircleOutlined className='text-primary' rev={undefined} />}
+					icon={<PlusCircleOutlined className='text-primary' />}
 					className='my-2 bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'
 					onClick={() => setOpenAddSubfieldModal(true)}
 				>

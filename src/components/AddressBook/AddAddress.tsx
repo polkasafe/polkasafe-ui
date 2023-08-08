@@ -351,7 +351,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 								value={name}
 							/>
 							{!showNickNameField &&
-							<Button onClick={() => setShowNickNameField(true)} icon={<PlusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Add Nickname</Button>
+							<Button onClick={() => setShowNickNameField(true)} icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Add Nickname</Button>
 							}
 						</Form.Item>
 					</div>
@@ -381,7 +381,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 									onChange={(e) => setNickName(e.target.value)}
 									value={nickName}
 								/>
-								<Button onClick={() => { setShowNickNameField(false); setNickName(''); }} icon={<MinusCircleOutlined className='text-primary' rev={undefined} />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Remove Nickname</Button>
+								<Button onClick={() => { setShowNickNameField(false); setNickName(''); }} icon={<MinusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center'>Remove Nickname</Button>
 							</Form.Item>
 						</div>
 					}

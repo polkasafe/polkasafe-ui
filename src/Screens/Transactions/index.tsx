@@ -76,7 +76,7 @@ const Transactions = () => {
 							<Button
 								size='large'
 								onClick={() => setRefetch(prev => !prev)}
-								icon={<SyncOutlined spin={loading} className='text-primary' rev={undefined}  />}
+								icon={<SyncOutlined spin={loading} className='text-primary'  />}
 								className={'text-primary bg-highlight outline-none border-none font-medium text-sm'}
 							>
 							Refresh

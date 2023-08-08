@@ -136,7 +136,7 @@ const Home = ({ className }: { className?: string }) => {
 	const AddProxyModal: React.FC = () => {
 		return (
 			<>
-				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined rev={undefined} />} >Create Proxy</Button>
+				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined />} >Create Proxy</Button>
 				<Modal
 					centered
 					footer={false}
