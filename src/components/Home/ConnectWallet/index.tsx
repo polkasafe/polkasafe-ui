@@ -159,15 +159,12 @@ const ConnectWallet = () => {
 
 		setLoading(true);
 		try{
-
 			const validate2FARes = await fetch(`${FIREBASE_FUNCTIONS_URL}/validate2FA`, {
 				body: JSON.stringify({
 					authCode,
 					tfa_token: tfaToken
 				}),
-				headers: {
-					'x-address': substrateAddress
-				},
+				headers: firebaseFunctionsHeader(network, substrateAddress),
 				method: 'POST'
 			});
 

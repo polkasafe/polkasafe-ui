@@ -240,13 +240,12 @@ export const verify2FA = functions.https.onRequest(async (req, res) => {
 export const validate2FA = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const address = req.get('x-address');
-		if (!address) return res.status(400).json({ error: responseMessages.missing_params });
-		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
+		if (!address) return res.status(400).json({ error: responseMessages.missing_headers });
+		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_headers });
 
 		const { authCode = null, tfa_token = null } = req.body;
 		if (isNaN(authCode)) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 		if (!tfa_token) return res.status(400).json({ error: responseMessages.invalid_params });
-
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
