@@ -42,10 +42,10 @@ const ConnectWallet = () => {
 	};
 
 	useEffect(() => {
-		if (accounts && accounts.length > 0) {
+		if (accounts && accounts.length > 0 && !address) {
 			setAddress(accounts[0].address);
 		}
-	}, [accounts]);
+	}, [accounts, address]);
 
 	const handleConnectWallet = async () => {
 		try {
