@@ -65,7 +65,11 @@ const logger = functions.logger;
 
 const corsHandler = cors({ origin: true });
 
-const isValidRequest = async (address?:string, signature?:string, network?:string): Promise<{ isValid: boolean, error: string }> => {
+function getLoginToken(): string {
+	return `<Bytes>polkasafe-login-${uuidv4()}</Bytes>`;
+}
+
+async function isValidRequest(address?: string, signature?: string, network?: string): Promise<{ isValid: boolean; error: string; }> {
 	if (!address || !signature || !network) return { isValid: false, error: responseMessages.missing_headers };
 	if (!isValidSubstrateAddress(address)) return { isValid: false, error: responseMessages.invalid_headers };
 	if (!Object.values(networks).includes(network)) return { isValid: false, error: responseMessages.invalid_network };
@@ -73,9 +77,9 @@ const isValidRequest = async (address?:string, signature?:string, network?:strin
 	const isValid = await isValidSignature(signature, address);
 	if (!isValid) return { isValid: false, error: responseMessages.invalid_signature };
 	return { isValid: true, error: '' };
-};
+}
 
-const isValidSignature = async (signature:string, address:string) => {
+async function isValidSignature(signature: string, address: string): Promise<boolean> {
 	try {
 		await cryptoWaitReady();
 		const hexPublicKey = u8aToHex(decodeAddress(address));
@@ -88,9 +92,9 @@ const isValidSignature = async (signature:string, address:string) => {
 	} catch (e) {
 		return false;
 	}
-};
+}
 
-const getMultisigAddressesByAddress = async (address:string) => {
+async function getMultisigAddressesByAddress(address: string): Promise<IMultisigAddress[]> {
 	const multisigAddresses = await admin
 		.firestore()
 		.collection('multisigAddresses')
@@ -102,7 +106,7 @@ const getMultisigAddressesByAddress = async (address:string) => {
 		created_at: doc.data().created_at.toDate(),
 		updated_at: doc.data().updated_at?.toDate() || doc.data().created_at.toDate()
 	})) as IMultisigAddress[];
-};
+}
 
 // To enable two factor authentication
 export const generate2FASecret = functions.https.onRequest(async (req, res) => {
@@ -255,7 +259,6 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 			const data = addressDoc.data();
 			const addressData = {
 				...data,
-				created_at: data?.created_at.toDate(),
 				tfa_token: {
 					...data?.tfa_token,
 					created_at: data?.tfa_token?.created_at?.toDate()
@@ -281,37 +284,10 @@ export const validate2FA = functions.https.onRequest(async (req, res) => {
 			const isValidToken = totp.validate({ token: String(authCode).replaceAll(/\s/g, ''), window: 1 }) !== null;
 			if (!isValidToken) return res.status(400).json({ error: responseMessages.invalid_2fa_code });
 
-			const multisigAddresses = await getMultisigAddressesByAddress(substrateAddress);
+			const token = getLoginToken();
 
-			const DEFAULT_NOTIFICATION_PREFERENCES : IUserNotificationPreferences = {
-				channelPreferences: {
-					[CHANNEL.IN_APP]: {
-						name: CHANNEL.IN_APP,
-						enabled: true,
-						handle: String(substrateAddress),
-						verified: true
-					}
-				},
-				triggerPreferences: {}
-			};
-
-			const resUser: IUserResponse = {
-				address: encodeAddress(addressData.address, chainProperties[String(network)].ss58Format),
-				email: addressData.email,
-				created_at: addressData.created_at,
-				addressBook: addressData.addressBook?.map((item) => ({ ...item, address: encodeAddress(item.address, chainProperties[String(network)].ss58Format) })),
-				multisigAddresses: multisigAddresses.map((item) => (
-					{ ...item,
-						signatories: item.signatories.map((signatory) => encodeAddress(signatory, chainProperties[String(network)].ss58Format))
-					})),
-				multisigSettings: addressData.multisigSettings,
-				notification_preferences: addressData.notification_preferences || DEFAULT_NOTIFICATION_PREFERENCES,
-				transactionFields: addressData.transactionFields,
-				two_factor_auth: addressData.two_factor_auth,
-				tfa_token: addressData.tfa_token
-			};
-
-			res.status(200).json({ data: resUser });
+			await addressRef.set({ address: substrateAddress, token }, { merge: true });
+			res.status(200).json({ data: token });
 
 			// delete the token
 			await addressRef.set({ tfa_token: admin.firestore.FieldValue.delete() }, { merge: true });
@@ -330,10 +306,23 @@ export const getConnectAddressToken = functions.https.onRequest(async (req, res)
 		if (!isValidSubstrateAddress(address)) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
-			const token = `<Bytes>polkasafe-login-${uuidv4()}</Bytes>`;
-
 			const substrateAddress = getSubstrateAddress(String(address));
 			const addressRef = firestoreDB.collection('addresses').doc(substrateAddress);
+			const addressDocData = (await addressRef.get())?.data?.() || null;
+
+			if (addressDocData?.two_factor_auth?.enabled) {
+				const tfa_token: I2FAToken = {
+					token: uuidv4(),
+					created_at: new Date()
+				};
+
+				await addressRef.set({ tfa_token }, { merge: true });
+
+				return res.status(200).json({ data: { tfa_token } });
+			}
+
+			const token = getLoginToken();
+
 			await addressRef.set({ address: substrateAddress, token }, { merge: true });
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
@@ -351,8 +340,6 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
-
-		const { refresh=false } = req.body;
 
 		try {
 			const substrateAddress = getSubstrateAddress(String(address));
@@ -382,21 +369,6 @@ export const connectAddress = functions.https.onRequest(async (req, res) => {
 						...data,
 						created_at: data?.created_at.toDate()
 					} as IUser;
-
-					if (!refresh) {
-						const isTFAEnabled = addressDoc.two_factor_auth?.enabled || false;
-
-						if (isTFAEnabled) {
-							const tfa_token: I2FAToken = {
-								token: uuidv4(),
-								created_at: new Date()
-							};
-
-							await addressRef.set({ tfa_token }, { merge: true });
-
-							return res.status(200).json({ data: { tfa_token } });
-						}
-					}
 
 					const resUser: IUserResponse = {
 						address: encodeAddress(addressDoc.address, chainProperties[network].ss58Format),
