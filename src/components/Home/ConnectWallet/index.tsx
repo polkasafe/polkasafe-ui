@@ -106,7 +106,6 @@ const ConnectWallet = () => {
 					setSigning(false);
 
 					setLoginData(userData);
-					console.log(userData);
 					localStorage.setItem('signature', signature);
 					localStorage.setItem('address', substrateAddress);
 					localStorage.setItem('logged_in_wallet', selectedWallet);
