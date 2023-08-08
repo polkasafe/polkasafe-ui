@@ -8,7 +8,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { NotificationStatus } from 'src/types';
-import { OutlineCloseIcon, SlackIcon } from 'src/ui-components/CustomIcons';
+import { OutlineCloseIcon, PasswordOutlinedIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 import CancelBtn from '../CancelBtn';
@@ -106,7 +106,7 @@ const Disable2FA = ({ className }: { className?: string }) => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-5 text-white'>
 				<div className='col-span-3 flex gap-x-2'>
 					<div>
-						<span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon />Two-Factor Authentication</span>
+						<span className='flex items-center gap-x-2 text-text_secondary'><PasswordOutlinedIcon />Two-Factor Authentication</span>
 					</div>
 				</div>
 				<div className='col-span-5'>
