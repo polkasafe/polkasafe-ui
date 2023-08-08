@@ -55,6 +55,8 @@ import { ReactComponent as NotificationSVG } from 'src/assets/icons/notification
 import { ReactComponent as NotifyMailSVG } from 'src/assets/icons/notify-mail.svg';
 import { ReactComponent as OutlineCheckSVG } from 'src/assets/icons/outline-check.svg';
 import { ReactComponent as OutlineCloseSVG } from 'src/assets/icons/outline-close.svg';
+import { ReactComponent as PasswordFilledSVG } from 'src/assets/icons/password-filled.svg';
+import { ReactComponent as PasswordOutlinedSVG } from 'src/assets/icons/password-outlined.svg';
 import { ReactComponent as PasteSVG } from 'src/assets/icons/paste-icon.svg';
 import { ReactComponent as PencilSVG } from 'src/assets/icons/pencil.svg';
 import { ReactComponent as PencilNotificationSVG } from 'src/assets/icons/pencil-notification.svg';
@@ -394,4 +396,12 @@ export const DocsIcon = (props: Partial<CustomIconComponentProps>) => (
 
 export const SharedIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={SharedIconSVG} {...props} />
+);
+
+export const PasswordOutlinedIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PasswordOutlinedSVG} {...props} />
+);
+
+export const PasswordFilledIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={PasswordFilledSVG} {...props} />
 );

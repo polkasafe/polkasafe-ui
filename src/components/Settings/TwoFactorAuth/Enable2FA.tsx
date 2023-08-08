@@ -8,7 +8,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { IGenerate2FAResponse, IUser, NotificationStatus } from 'src/types';
-import { CopyIcon, OutlineCloseIcon, SlackIcon } from 'src/ui-components/CustomIcons';
+import { CopyIcon, OutlineCloseIcon, PasswordFilledIcon, PasswordOutlinedIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import queueNotification from 'src/ui-components/QueueNotification';
 import copyText from 'src/utils/copyText';
@@ -203,14 +203,14 @@ const Enable2FA = ({ className }: { className?: string }) => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-5 text-white'>
 				<div className='col-span-3 flex gap-x-2'>
 					<div>
-						<span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon />Two-Factor Authentication</span>
+						<span className='flex items-center gap-x-2 text-text_secondary'><PasswordOutlinedIcon />Two-Factor Authentication</span>
 					</div>
 				</div>
 				<div className='col-span-5'>
 					<p className='text-text_secondary'>
                         Enhance account security with two factor authentication. Verify your identity with an extra step for added protection.
 					</p>
-					<Button onClick={handleModalOpen} className='flex items-center p-0 outline-none border-none bg-transparant text-primary'>Enable Two-Factor Authentication</Button>
+					<Button onClick={handleModalOpen} icon={<PasswordFilledIcon />} className='flex items-center p-0 outline-none border-none bg-transparant text-primary'>Enable Two-Factor Authentication</Button>
 				</div>
 			</div>
 		</>
