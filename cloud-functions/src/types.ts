@@ -214,5 +214,6 @@ export interface ISharedAddressBooks {
 	records: {
 		[address: string]: ISharedAddressBookRecord
 	},
+	roles?: string[],
 	multisig: string
 }

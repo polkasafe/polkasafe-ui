@@ -14,6 +14,7 @@ export interface IActiveMultisigContext extends ISharedAddressBooks {
 export const initialActiveMultisigContext: IActiveMultisigContext = {
 	records: {},
 	multisig: '',
+	roles: [],
 	setActiveMultisigContextState: (): void => {
 		throw new Error('setActiveMultisigContextState function must be overridden');
 	}
