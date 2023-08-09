@@ -82,7 +82,7 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 
 	const [loading, setLoading] = useState<boolean>(false);
 
-	const { setActiveMultisigContextState, records } = useActiveMultisigContext();
+	const { setActiveMultisigContextState, records, roles: defaultRoles } = useActiveMultisigContext();
 
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
@@ -483,6 +483,10 @@ const AddAddress: React.FC<IMultisigProps> = ({ addAddress, onCancel, setAddAddr
 							className='border-0 outline-0 my-0 p-0'
 						>
 							<Select
+								options={defaultRoles ? defaultRoles.map((item, i) => ({
+									label: <span key={i} className='text-white bg-primary rounded-lg py-1 px-3'>{item}</span>,
+									value: item
+								})) : []}
 								mode="tags"
 								className={className}
 								onChange={(value) => setRoles(value)}

@@ -2681,7 +2681,7 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { name, address: addressToAdd, multisigAddress, email, discord, telegram, roles, nickName } = req.body;
+		const { name, address: addressToAdd, multisigAddress, email, discord, telegram, roles=[], nickName } = req.body;
 		if (!name || !addressToAdd || !multisigAddress) return res.status(400).json({ error: responseMessages.missing_params });
 		const substrateAddressToAdd = getSubstrateAddress(String(addressToAdd));
 		const substrateMultisigAddress = getSubstrateAddress(String(multisigAddress));
@@ -2692,6 +2692,8 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 			const addressBookRef = firestoreDB.collection('addressBooks').doc(`${substrateMultisigAddress}_${network}`);
 			const addressBookDoc = await addressBookRef.get();
 			const addressBookData = addressBookDoc.data() as ISharedAddressBooks;
+			const existingRoles = addressBookData.roles || [];
+			const newRoles = [...new Set([...existingRoles, ...roles])];
 			const updatedAddressEntry: ISharedAddressBooks = {
 				records: {
 					...addressBookData?.records,
@@ -2707,6 +2709,7 @@ export const updateSharedAddressBook = functions.https.onRequest(async (req, res
 						updatedBy: substrateUserAddress
 					}
 				},
+				roles: newRoles,
 				multisig: substrateMultisigAddress
 			};
 
