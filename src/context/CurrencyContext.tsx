@@ -7,12 +7,17 @@ import '@polkadot/api-augment';
 import React, { useContext, useEffect, useState } from 'react';
 import { CURRENCY_API_KEY } from 'src/global/currencyApiKey';
 import { currencies, currencyProperties, currencySymbol } from 'src/global/currencyConstants';
+import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 import getCurrency from 'src/utils/getCurrency';
+
+import { useGlobalApiContext } from './ApiContext';
 
 export interface CurrencyContextType {
 	currency: string;
 	setCurrency: React.Dispatch<React.SetStateAction<string>>;
-    currencyPrice: string
+    currencyPrice: string;
+	allCurrencyPrices: {[symbol: string]: { code: string, value: number }};
+	tokenUsdPrice: string
 }
 
 export const CurrencyContext: React.Context<CurrencyContextType> = React.createContext(
@@ -24,10 +29,20 @@ export interface CurrencyContextProviderProps {
 }
 
 export function CurrencyContextProvider({ children }: CurrencyContextProviderProps): React.ReactElement {
+	const { network } = useGlobalApiContext();
 	const [currency, setCurrency] = useState<string>(getCurrency());
 	const [currencyPrice, setCurrencyPrice] = useState<string>('1');
+	const [tokenUsdPrice, setTokenUsdPrice] = useState<string>('');
 
 	const [allCurrencyPrices, setAllCurrencyPrices] = useState<{[symbol: string]: { code: string, value: number }}>({});
+
+	useEffect(() => {
+		if(!network) return;
+
+		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+			setTokenUsdPrice(parseFloat(formattedUSD).toFixed(2));
+		});
+	}, [network]);
 
 	useEffect(() => {
 		const fetchCurrencyPrice = async () => {
@@ -53,7 +68,7 @@ export function CurrencyContextProvider({ children }: CurrencyContextProviderPro
 	}, [allCurrencyPrices, currency]);
 
 	return (
-		<CurrencyContext.Provider value={{ currency, currencyPrice, setCurrency }}>
+		<CurrencyContext.Provider value={{ allCurrencyPrices, currency, currencyPrice, setCurrency, tokenUsdPrice }}>
 			{children}
 		</CurrencyContext.Provider>
 	);

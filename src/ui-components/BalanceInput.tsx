@@ -2,13 +2,19 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Form, Input } from 'antd';
+import { Dropdown, Form, Input } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import BN from 'bn.js';
 import React, { useEffect, useState } from 'react';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
+import { CurrencyFlag } from 'src/components/Settings/ChangeCurrency';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
+import { currencies, currencyProperties } from 'src/global/currencyConstants';
 import { chainProperties } from 'src/global/networkConstants';
 import { inputToBn } from 'src/utils/inputToBn';
+
+import { CircleArrowDownIcon } from './CustomIcons';
 
 interface Props{
 	className?: string
@@ -22,7 +28,12 @@ interface Props{
 const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
 	const { network } = useGlobalApiContext();
+	const [balance, setBalance] = useState<string>('');
 	const [bnBalance, setBnBalance] = useState(new BN(0));
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { allCurrencyPrices, tokenUsdPrice } = useGlobalCurrencyContext();
+
+	const [currency, setCurrency] = useState<string>(network);
 
 	useEffect(() => {
 		const value = Number(defaultValue);
@@ -52,13 +63,45 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 			return;
 		}
 
-		const [balance, isValid] = inputToBn(`${value}`, network, false);
+		let balanceInput = value;
+
+		if(currency !== network && !['westend', 'rococo'].includes(network)) {
+			balanceInput = value/(Number(tokenUsdPrice) * allCurrencyPrices[currencyProperties[currency].symbol]?.value);
+		}
+
+		const [balance, isValid] = inputToBn(`${balanceInput.toFixed(5)}`, network, false);
 		setIsValidInput(isValid);
 
 		if(isValid){
+			console.log('ballance', balance.toString());
 			setBnBalance(balance);
 			onChange(balance);
 		}
+	};
+
+	const currencyOptions: ItemType[] = [{
+		key: network,
+		label: <span className='text-white flex items-center gap-x-2'>
+			<ParachainIcon src={chainProperties[network].logo} />
+			{ chainProperties[network].tokenSymbol}
+		</span>
+	}];
+
+	Object.values(currencies).forEach((c) => {
+		currencyOptions.push({
+			key: c,
+			label: <span className='text-white flex items-center gap-x-2'>
+				<CurrencyFlag src={currencyProperties[c].logo} />
+				{c} ({currencyProperties[c].symbol})
+			</span>
+
+		});
+	});
+
+	const onCurrencyChange = (e: any) => {
+		setCurrency(e.key);
+		onBalanceChange('');
+		setBalance('');
 	};
 
 	return <section className={`${className}`}>
@@ -76,15 +119,41 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 					<div className='flex items-center h-[50px]'>
 						<Input
 							id="balance"
-							onChange={(a) => onBalanceChange(a.target.value)}
+							onChange={(a) => {onBalanceChange(a.target.value); setBalance(a.target.value);}}
 							placeholder={`${placeholder} ${chainProperties[network]?.tokenSymbol}`}
 							defaultValue={defaultValue}
+							value={balance}
 							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
 						/>
-						<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
-							<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-							<span>{ chainProperties[network].tokenSymbol}</span>
-						</div>
+						{!['westend', 'rococo'].includes(network) ?
+							<Dropdown
+								trigger={['click']}
+								className={className}
+								menu={{
+									items: currencyOptions,
+									onClick: onCurrencyChange
+								}}
+							>
+								{currency === network ?
+									<div className='absolute cursor-pointer right-0 text-white pr-3 flex items-center justify-center'>
+										<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
+										<span>{ chainProperties[network].tokenSymbol}</span>
+										<CircleArrowDownIcon className='text-primary ml-1' />
+									</div>
+									:
+									<div className='absolute cursor-pointer right-0 text-white pr-3 flex items-center justify-center'>
+										<CurrencyFlag className='mr-2' src={currencyProperties[currency].logo} />
+										<span>{ currencyProperties[currency].symbol}</span>
+										<CircleArrowDownIcon className='text-primary ml-1' />
+									</div>
+								}
+							</Dropdown>
+							:
+							<div className='absolute right-0 text-white pr-3 flex items-center justify-center'>
+								<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
+								<span>{ chainProperties[network].tokenSymbol}</span>
+							</div>
+						}
 					</div>
 				</Form.Item>
 			</article>
