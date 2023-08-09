@@ -121,7 +121,7 @@ const Home = ({ className }: { className?: string }) => {
 					</div>
 				),
 				header: <span className='text-waiting'>No Existential Deposit</span>,
-				message: <div className=''>
+				message: <div className='text-white'>
 					<p>Please Add Existential Deposit to your Multisig to make it Onchain.</p>
 					<div className='flex justify-end w-full'>
 						<Button onClick={() => { setOpenTransactionModal(true); notification.destroy(); }} size='small' className='text-xs text-white bg-primary border-none outline-none'>Add Existential Deposit</Button>

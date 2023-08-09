@@ -7,8 +7,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { ISharedAddressBooks } from 'src/types';
 
-import { useGlobalUserDetailsContext } from './UserDetailsContext';
-
 export interface IActiveMultisigContext extends ISharedAddressBooks {
     setActiveMultisigContextState: React.Dispatch<React.SetStateAction<IActiveMultisigContext>>
 }
@@ -28,11 +26,6 @@ export function useActiveMultisigContext() {
 }
 
 export const ActiveMultisigProvider = ({ children }: React.PropsWithChildren<{}>) => {
-	// const { network } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	const [activeMultisigContextState, setActiveMultisigContextState] = useState<IActiveMultisigContext>(initialActiveMultisigContext);
 

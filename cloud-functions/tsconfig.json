@@ -8,7 +8,10 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2020",
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "lib": [
+      "ES2021.String"
+    ]
   },
   "compileOnSave": true,
   "include": [

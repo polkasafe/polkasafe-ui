@@ -16,7 +16,7 @@ import { useGlobalApiContext } from './ApiContext';
 
 export const initialUserDetailsContext : UserDetailsContextType = {
 	activeMultisig: localStorage.getItem('active_multisig') || '',
-	address: localStorage.getItem('address') || '',
+	address: '',
 	addressBook: [],
 	createdAt: new Date(),
 	isProxy: false,
@@ -336,7 +336,9 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 					multisigAddresses: userData?.multisigAddresses,
 					multisigSettings: userData?.multisigSettings || {},
 					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences,
-					transactionFields: userData?.transactionFields || initialUserDetailsContext.transactionFields
+					transactionFields: userData?.transactionFields || initialUserDetailsContext.transactionFields,
+					tfa_token: userData?.tfa_token,
+					two_factor_auth: userData?.two_factor_auth
 				};
 			});
 		}else {

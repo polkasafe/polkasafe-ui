@@ -91,7 +91,9 @@ export interface UserDetailsContextType {
     addressBook: IAddressBookItem[];
 		notifiedTill: Date | null;
     setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
-	transactionFields: ITransactionFields
+	transactionFields: ITransactionFields;
+	two_factor_auth?: I2FASettings;
+	tfa_token?: I2FAToken
 }
 
 export enum Wallet {
@@ -156,6 +158,23 @@ interface IMultisigSettings {
 	name: string;
 }
 
+export interface I2FASettings {
+	base32_secret: string,
+	enabled: boolean,
+	url: string,
+	verified: boolean
+}
+
+export interface IGenerate2FAResponse {
+	base32_secret: string,
+	url: string
+}
+
+export interface I2FAToken {
+	token: string
+	created_at: Date
+}
+
 export interface IUser {
 	address: string;
 	email: string | null;
@@ -164,7 +183,9 @@ export interface IUser {
 	multisigAddresses: IMultisigAddress[];
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
 	notification_preferences: IUserNotificationPreferences;
-	transactionFields?: ITransactionFields
+	transactionFields?: ITransactionFields;
+	two_factor_auth?: I2FASettings;
+	tfa_token?: I2FAToken
 }
 
 export interface IMultisigAddress {

@@ -21,5 +21,10 @@ export const responseMessages = {
 	transfers_fetch_error: 'Error while fetching transfers.',
 	queue_fetch_error: 'Error while fetching queue.',
 	assets_fetch_error: 'Error while fetching assets.',
-	success: 'Success'
+	success: 'Success',
+	invalid_2fa_code: 'Invalid 2FA code.',
+	invalid_2fa_token: 'Invalid 2FA token.',
+	two_factor_auth_not_init: '2FA not initialised.',
+	address_not_registered: 'Address not registered.',
+	tfa_token_expired: '2FA token expired.'
 };

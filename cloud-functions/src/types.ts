@@ -15,6 +15,23 @@ export interface IMultisigSettings {
 	deleted: boolean;
 }
 
+export interface I2FASettings {
+	base32_secret: string,
+	enabled: boolean,
+	url: string,
+	verified: boolean
+}
+
+export interface IGenerate2FAResponse {
+	base32_secret: string,
+	url: string
+}
+
+export interface I2FAToken {
+	token: string
+	created_at: Date
+}
+
 export interface IUser {
 	address: string;
 	email: string | null;
@@ -23,6 +40,8 @@ export interface IUser {
 	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
 	notification_preferences?: IUserNotificationPreferences;
 	transactionFields?: ITransactionFields
+	two_factor_auth?: I2FASettings
+	tfa_token?: I2FAToken
 }
 
 export interface IUserResponse extends IUser {

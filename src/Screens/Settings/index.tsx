@@ -6,11 +6,13 @@ import React, { useState } from 'react';
 import ManageMultisig from 'src/components/Settings/ManageMultisig';
 import Notifications from 'src/components/Settings/Notifications';
 import TransactionFields from 'src/components/Settings/TransactionFields';
+import TwoFactorAuth from 'src/components/Settings/TwoFactorAuth';
 
 enum ETab {
 	SIGNATORIES,
 	NOTIFICATIONS,
-	TRANSACTIONS
+	TRANSACTIONS,
+	ADMIN
 }
 
 const Settings = () => {
@@ -54,6 +56,17 @@ const Settings = () => {
 				>
 						Transaction Fields
 				</button>
+				<button
+					onClick={() => setTab(ETab.ADMIN)}
+					className={classNames(
+						'rounded-lg p-3 text-sm leading-[15px] text-white flex items-center gap-x-2',
+						{
+							'text-primary bg-highlight': tab === ETab.ADMIN
+						}
+					)}
+				>
+					Admin <span className='bg-success text-bg-secondary text-xs py-[2px] px-2 rounded-lg'>New</span>
+				</button>
 			</div>
 			{
 				tab === ETab.SIGNATORIES ?
@@ -62,7 +75,9 @@ const Settings = () => {
 					tab === ETab.NOTIFICATIONS ?
 						<Notifications/>
 						:
-						<TransactionFields/>
+						tab === ETab.TRANSACTIONS ?
+							<TransactionFields/>
+							: <TwoFactorAuth />
 			}
 		</div>
 	);
