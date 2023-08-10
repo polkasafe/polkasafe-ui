@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Dropdown, Form, Input } from 'antd';
+import { Dropdown, Form, Input, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import BN from 'bn.js';
 import React, { useEffect, useState } from 'react';
@@ -12,9 +12,10 @@ import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { currencies, currencyProperties } from 'src/global/currencyConstants';
 import { chainProperties } from 'src/global/networkConstants';
+import formatBnBalance from 'src/utils/formatBnBalance';
 import { inputToBn } from 'src/utils/inputToBn';
 
-import { CircleArrowDownIcon } from './CustomIcons';
+import { CircleArrowDownIcon, WarningCircleIcon } from './CustomIcons';
 
 interface Props{
 	className?: string
@@ -30,10 +31,11 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 	const { network } = useGlobalApiContext();
 	const [balance, setBalance] = useState<string>('');
 	const [bnBalance, setBnBalance] = useState(new BN(0));
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { allCurrencyPrices, tokenUsdPrice } = useGlobalCurrencyContext();
 
 	const [currency, setCurrency] = useState<string>(network);
+
+	const tokenCurrencyPrice = currency !== network ? Number(tokenUsdPrice) * allCurrencyPrices[currencyProperties[currency]?.symbol]?.value : 1;
 
 	useEffect(() => {
 		const value = Number(defaultValue);
@@ -66,14 +68,13 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 		let balanceInput = value;
 
 		if(currency !== network && !['westend', 'rococo'].includes(network)) {
-			balanceInput = value/(Number(tokenUsdPrice) * allCurrencyPrices[currencyProperties[currency].symbol]?.value);
+			balanceInput = value/tokenCurrencyPrice;
 		}
 
 		const [balance, isValid] = inputToBn(`${balanceInput.toFixed(5)}`, network, false);
 		setIsValidInput(isValid);
 
 		if(isValid){
-			console.log('ballance', balance.toString());
 			setBnBalance(balance);
 			onChange(balance);
 		}
@@ -155,6 +156,14 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 							</div>
 						}
 					</div>
+					{currency !== network && isValidInput &&
+						<span className='text-xs text-waiting flex items-center gap-x-1 mt-1'>
+							You send = {formatBnBalance(bnBalance, { numberAfterComma: 3, withUnit: true }, network)}
+							<Tooltip title={`1 ${chainProperties[network].tokenSymbol} = ${tokenCurrencyPrice?.toFixed(2)} ${currencyProperties[currency].symbol}`}>
+								<WarningCircleIcon className='text-sm' />
+							</Tooltip>
+						</span>
+					}
 				</Form.Item>
 			</article>
 		</div>
