@@ -161,16 +161,12 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 		let paramFields: ParamField[] = [];
 		const metaArgs = api.tx[palletRpc][callable].meta.args;
 
-		// console.log('metaArgs', metaArgs);
 		if (metaArgs && metaArgs.length > 0) {
 			paramFields = metaArgs.map((arg) => {
-				// console.log('getTypeDef', getTypeDef(arg.type.toString()));
-				const instance = api.registry.createType(arg.type as unknown as 'u32');
-				// console.log('instance', instance);
-				const raw = getTypeDef(instance.toRawType());
-				console.log('raw', raw);
 
-				// arg.typeName.isSome && console.log('typeName.unwrap().toString()', arg.typeName.unwrap().toString());
+				const instance = api.registry.createType(arg.type as unknown as 'u32');
+
+				const raw = getTypeDef(instance.toRawType());
 
 				return {
 					name: arg.name.toString(),
@@ -215,7 +211,7 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 	}, []);
 
 	const onParamChange = (
-		value: any,
+		value: string,
 		{ ind, paramField }: { ind: number; paramField: ParamField }
 	) => {
 		setFormState((formState) => {
@@ -302,7 +298,6 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 								<Input
 									placeholder={paramField.type}
 									type='text'
-									key={ind}
 									className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
 									// value={inputParams[ind]?.value || ''}
 									onChange={(event) => onParamChange(event.target.value, { ind, paramField })}
