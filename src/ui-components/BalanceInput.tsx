@@ -24,9 +24,10 @@ interface Props{
 	onChange: (balance: BN) => void
 	placeholder?: string
 	defaultValue?: string
+	multipleCurrency?: boolean
 }
 
-const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue }: Props) => {
+const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholder = '', defaultValue, multipleCurrency=false }: Props) => {
 	const [isValidInput, setIsValidInput] = useState(true);
 	const { network } = useGlobalApiContext();
 	const [balance, setBalance] = useState<string>('');
@@ -67,7 +68,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 
 		let balanceInput = value;
 
-		if(currency !== network && !['westend', 'rococo'].includes(network)) {
+		if(currency !== network && !['westend', 'rococo'].includes(network) && multipleCurrency) {
 			balanceInput = value/tokenCurrencyPrice;
 		}
 
@@ -126,7 +127,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 							value={balance}
 							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
 						/>
-						{!['westend', 'rococo'].includes(network) ?
+						{!['westend', 'rococo'].includes(network) && multipleCurrency ?
 							<Dropdown
 								trigger={['click']}
 								className={className}

@@ -587,7 +587,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 																			</Form.Item>
 																		</div>
 																		<div className='flex items-center gap-x-2 w-[45%]'>
-																			<BalanceInput label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
+																			<BalanceInput multipleCurrency label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
 																			{i !== 0 && <Button
 																				onClick={() => onRemoveRecipient(i)}
 																				className='text-failure border-none outline-none bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>

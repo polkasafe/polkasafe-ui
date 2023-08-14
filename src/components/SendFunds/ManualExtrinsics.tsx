@@ -2,10 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import { getTypeDef } from '@polkadot/types/create';
+import { TypeDef,TypeDefInfo } from '@polkadot/types/types';
 import { Dropdown, Input } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
+import AddressInput from 'src/ui-components/AddressInput';
+import BalanceInput from 'src/ui-components/BalanceInput';
 import { CircleArrowDownIcon } from 'src/ui-components/CustomIcons';
 import paramConversion from 'src/utils/paramConversion';
 
@@ -13,6 +16,7 @@ interface ParamField {
     name: string
     type: string
     optional: boolean
+	raw: TypeDef
   }
 
   interface FormState {
@@ -27,6 +31,7 @@ const initFormState = {
 	palletRpc: ''
 } as FormState;
 
+// Multix
 const argIsOptional = (arg: any) => arg.type.toString().startsWith('Option<');
 
 const transformParams = (
@@ -170,12 +175,11 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 				return {
 					name: arg.name.toString(),
 					optional: argIsOptional(arg),
+					raw,
 					type: arg.type.toString()
 				};
 			});
 		}
-
-		// console.log('params', paramFields);
 
 		setParamFields(paramFields);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,12 +215,12 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 	}, []);
 
 	const onParamChange = (
-		event: any,
+		value: any,
 		{ ind, paramField }: { ind: number; paramField: ParamField }
 	) => {
 		setFormState((formState) => {
 			const inputParams = [...formState.inputParams];
-			inputParams[ind] = { type: paramField.type, value: event.target.value };
+			inputParams[ind] = { type: paramField.type, value };
 			return { ...formState, inputParams };
 		});
 	};
@@ -284,19 +288,28 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 					</Dropdown>
 				</div>}
 			</div>
-			{paramFields?.map((paramField, ind) => (
-				<div key={ind} className='mt-2'>
-					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>{paramField.name}{paramField.optional ? ' (optional)' : ''}</label>
-					<Input
-						placeholder={paramField.type}
-						type='text'
-						key={ind}
-						className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
-						// value={inputParams[ind]?.value || ''}
-						onChange={(event) => onParamChange(event, { ind, paramField })}
-					/>
-				</div>
-			))}
+			{paramFields?.map((paramField, ind) => {
+				return (
+					<div key={ind} className='mt-2'>
+						<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>{paramField.name}{paramField.optional ? ' (optional)' : ''}</label>
+						{paramField.raw.info === TypeDefInfo.Compact && paramField.raw.sub && ['i8', 'i16', 'i32', 'i64', 'i128', 'u8', 'u16', 'u32', 'u64', 'u128', 'u256'].includes((paramField.raw.sub as any)?.type)
+							? <BalanceInput onChange={(balance) => onParamChange(balance.toString(), { ind, paramField })} />
+							:
+							['AccountId', 'Address', 'LookupSource', 'MultiAddress'].includes(paramField.type)
+								?
+								<AddressInput onChange={(address) => onParamChange(address, { ind, paramField })} placeholder={paramField.type} />
+								:
+								<Input
+									placeholder={paramField.type}
+									type='text'
+									key={ind}
+									className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
+									// value={inputParams[ind]?.value || ''}
+									onChange={(event) => onParamChange(event.target.value, { ind, paramField })}
+								/>
+						}
+					</div>
+				);})}
 		</section>
 	);
 };
