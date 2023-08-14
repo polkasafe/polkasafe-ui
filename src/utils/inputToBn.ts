@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+// Ref Polkadot apps https://github.com/polkadot-js/apps/blob/0df3dbf03151d516cd55762860b4586117290c9e/packages/react-components/src/InputNumber.tsx
 import BN from 'bn.js';
 import { chainProperties } from 'src/global/networkConstants';
 

@@ -174,7 +174,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 									</div>
 								</section>
 
-								<BalanceInput fromBalance={selectedAccountBalance} className='mt-6' placeholder={'5'} onChange={(balance) => setAmount(balance)} />
+								<BalanceInput multipleCurrency fromBalance={selectedAccountBalance} className='mt-6' placeholder={'5'} onChange={(balance) => setAmount(balance)} />
 
 								{/* <section className='mt-6'>
 						<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
