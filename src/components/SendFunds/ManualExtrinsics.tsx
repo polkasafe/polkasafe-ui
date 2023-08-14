@@ -31,7 +31,7 @@ const initFormState = {
 	palletRpc: ''
 } as FormState;
 
-// Multix
+// Ref - Multix https://github.com/ChainSafe/Multix/blob/main/packages/ui/src/components/EasySetup/ManualExtrinsic.tsx
 const argIsOptional = (arg: any) => arg.type.toString().startsWith('Option<');
 
 const transformParams = (

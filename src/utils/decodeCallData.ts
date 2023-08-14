@@ -40,6 +40,7 @@ export default function decodeCallData (hex: string, api: ApiPromise) : { data?:
 		let decoded: SubmittableExtrinsic<'promise'> | null = null;
 		let isCall = false;
 
+		// Ref - Polkadot apps https://github.com/polkadot-js/apps/blob/0df3dbf03151d516cd55762860b4586117290c9e/packages/page-extrinsics/src/Decoder.tsx
 		try {
 			// cater for an extrinsic input
 			const tx = api.tx(hex);
