@@ -111,6 +111,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 
 	const [callHash, setCallHash] = useState<string>('');
 
+	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+
 	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
 		key: item,
 		label: <span className='text-white text-sm flex items-center gap-x-2'>{item}</span>
@@ -154,9 +156,15 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 
 		const { data, error } = decodeCallData(callData, api);
 		if(error || !data) return;
-		console.log('call data', data.extrinsicCall?.toJSON());
 
 		setCallHash(data.decoded?.method.hash.toHex() || '');
+
+		let callDataFunc = data.extrinsicFn;
+		if(callDataFunc?.section === 'proxy'){
+			const func:any = data.extrinsicCall?.args[2].toHuman();
+			callDataFunc = func.args?.calls?.[0];
+		}
+		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 	}, [api, apiReady, callData, network, transactionType]);
 
@@ -423,6 +431,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 					successMessage='Transaction in Progress!'
 					waitMessage='All Threshold Signatories need to Approve the Transaction.'
 					amount={amount}
+					txnParams={transactionType !== ETransactionType.SEND_TOKEN ? txnParams : undefined}
 					txnHash={transactionData?.callHash}
 					created_at={transactionData?.created_at || new Date()}
 					sender={address}

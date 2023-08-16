@@ -89,7 +89,7 @@ const Review = ({ multisigData, signatories, multisigName }: Props) => {
 					<div className='w-[50%] ml-2 h-full rounded-lg bg-bg-secondary [&::-webkit-scrollbar]:hidden'>
 						<div className='flex flex-col h-full rounded-lg bg-bg-secondary text-sm'>
 							<h1 className='mt-5 mx-5'>Owners</h1>
-							<div className='flex flex-1 flex-col items-center justify-start overflow-auto'>
+							<div className='flex flex-1 flex-col items-center justify-start overflow-y-hidden hover:overflow-y-auto max-h-[100%]'>
 								{signatories.map((item, i: number) => (
 									<div className='flex items-center mx-5 mt-5' key={i}>
 										<Identicon

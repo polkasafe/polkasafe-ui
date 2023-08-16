@@ -330,7 +330,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 									</span>
 
 									<span>
-										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : customTx ? 'Custom Transaction' : 'Sent'}
+										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : customTx ? `${txnParams?.section}.${txnParams?.method}` : 'Sent'}
 									</span>
 								</p>
 								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && !customTx &&
