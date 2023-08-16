@@ -11,11 +11,11 @@ interface Args {
 	withUnit: boolean;
 }
 
-export default function parseDecodedValue({ value, network, withUnit = false }: Args) : string {
+export default function parseDecodedValue({ value, network, withUnit = false }: Args): string {
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
-	return formatBalance(value, { forceUnit: chainProperties[network].tokenSymbol, withSiFull: false, withUnit });
+	return formatBalance(value, { forceUnit: chainProperties[network].ticker, withSiFull: false, withUnit });
 }

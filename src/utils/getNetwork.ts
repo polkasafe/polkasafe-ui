@@ -2,22 +2,24 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { networks } from 'src/global/networkConstants';
-import { Network } from 'src/types';
+import { NETWORK } from 'src/global/networkConstants';
+
 /**
  * Return the current network
  *
  */
 
-export default function getNetwork(): Network {
-	const defaultNetwork = process.env.REACT_APP_ENV === 'dev' ? 'westend' : 'polkadot';
-	let network = localStorage.getItem('network') || defaultNetwork;
+export default function getNetwork(): NETWORK {
+	const defaultNetwork = NETWORK.ASTAR;
+	let network = localStorage.getItem('network') as NETWORK || defaultNetwork;
 
-	const possibleNetworks = Object.values(networks);
+	const possibleNetworks = Object.values(network);
 
 	if (!possibleNetworks.includes(network)) {
 		network = defaultNetwork;
 	}
+
+	localStorage.setItem('network', network);
 
 	return network;
 }

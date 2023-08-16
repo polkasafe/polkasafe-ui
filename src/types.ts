@@ -2,9 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ChainNamespaceType } from '@web3auth/base';
 import { Dispatch, SetStateAction } from 'react';
 
-import { networks, tokenSymbol } from './global/networkConstants';
+import { tokenSymbol } from './global/networkConstants';
 
 export enum CHANNEL {
 	EMAIL = 'email',
@@ -13,7 +14,7 @@ export enum CHANNEL {
 	ELEMENT = 'element',
 	SLACK = 'slack',
 	IN_APP = 'in_app'
-  }
+}
 
 export interface IUserNotificationChannelPreferences {
 	name: CHANNEL;
@@ -30,8 +31,8 @@ export interface IUserNotificationTriggerPreferences {
 }
 
 export interface IUserNotificationPreferences {
-	channelPreferences: {[index: string]: IUserNotificationChannelPreferences}
-	triggerPreferences: {[index:string]: IUserNotificationTriggerPreferences}
+	channelPreferences: { [index: string]: IUserNotificationChannelPreferences }
+	triggerPreferences: { [index: string]: IUserNotificationTriggerPreferences }
 }
 
 export enum Triggers {
@@ -48,51 +49,60 @@ export enum Triggers {
 
 export interface UserDetailsContextType {
 	loggedInWallet: Wallet;
-    activeMultisig: string;
-	isProxy: boolean;
-    address: string;
+	activeMultisig: string;
+	address: string;
 	createdAt: Date;
-    multisigAddresses: IMultisigAddress[];
-	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
-	notification_preferences: IUserNotificationPreferences;
-    addressBook: IAddressBookItem[];
-		notifiedTill: Date | null;
-    setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
+	fetchUserData?: any;
+	fetchMultisigData?: any;
+	multisigAddresses: IMultisigAddress[];
+	addressBook: IAddressBookItem[];
+	setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
+	activeMultisigData?: any;
+	activeMultisigTxs?: any[]
+	setLoading?: any
+	loading?: boolean
 }
 
 export enum Wallet {
-    POLKADOT = 'polkadot-js',
-	SUBWALLET = 'subwallet-js',
-	TALISMAN = 'talisman',
+	WEB3AUTH = 'web3-auth'
 }
 
 export interface AccountMeta {
-    genesisHash: string | undefined;
-    name: string;
-    source: string;
+	genesisHash: string | undefined;
+	name: string;
+	source: string;
 }
 
 export interface Account {
-    address: string;
-    meta: AccountMeta;
+	address: string;
+	meta: AccountMeta;
 }
 
-export type Network = typeof networks[keyof typeof networks];
 export type TokenSymbol = typeof tokenSymbol[keyof typeof tokenSymbol];
 
 export interface ChainProps {
-    'blockTime': number;
-    'logo'?: any;
-    'ss58Format': number;
-    'tokenDecimals': number;
-    'tokenSymbol': TokenSymbol;
-    'chainId': number;
-    'rpcEndpoint': string;
-    'existentialDeposit': string;
+	'blockTime': number;
+	'logo'?: any;
+	'ss58Format': number;
+	'tokenDecimals': number;
+	'tokenSymbol': TokenSymbol;
+	'chainId': number;
+	'rpcEndpoint': string;
+	'existentialDeposit': string;
 }
 
 export type ChainPropType = {
-    [index: string]: ChainProps;
+	[network: string]: {
+		blockExplorer: string;
+		chainId: string;
+		chainNamespace: ChainNamespaceType;
+		decimals: number;
+		displayName: string;
+		rpcTarget: string;
+		ticker: string;
+		tickerName: string;
+		logo: string
+	};
 };
 
 export interface IAddressBookItem {
@@ -111,7 +121,7 @@ export interface IUser {
 	addressBook?: IAddressBookItem[];
 	created_at: Date;
 	multisigAddresses: IMultisigAddress[];
-	multisigSettings: { [multisigAddress: string]: IMultisigSettings};
+	multisigSettings: { [multisigAddress: string]: IMultisigSettings };
 	notification_preferences: IUserNotificationPreferences;
 }
 
@@ -124,7 +134,8 @@ export interface IMultisigAddress {
 	updated_at?: Date;
 	threshold: number;
 	proxy?: string
-	disabled?: boolean
+	disabled?: boolean;
+	type?: 'fund' | 'sent'
 }
 
 export interface IUserResponse extends IUser {
@@ -160,7 +171,7 @@ export interface IQueueItem {
 export interface ITransaction {
 	callData?: string;
 	callHash: string;
-	created_at: Date;
+	created_at: any;
 	block_number: number;
 	from: string;
 	to: string;
@@ -174,7 +185,8 @@ export interface ITransaction {
 		[address: string]: {
 			lastNotified: Date;
 		}
-	}
+	},
+	type?: string
 }
 
 export interface INotification {
@@ -188,8 +200,8 @@ export interface INotification {
 }
 
 export enum NotificationStatus {
-	SUCCESS= 'success',
+	SUCCESS = 'success',
 	ERROR = 'error',
 	WARNING = 'warning',
 	INFO = 'info'
-  }
+}

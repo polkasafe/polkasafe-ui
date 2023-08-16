@@ -21,24 +21,24 @@ interface Props {
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function cancelProxy ({ api, approvingAddress, callHash, multisig, network, setLoadingMessages }: Props) {
+export async function cancelProxy({ api, approvingAddress, callHash, multisig, network, setLoadingMessages }: Props) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	// remove approving address address from signatories
-	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 
 	// 3. Retrieve and unwrap the timepoint
 	const info = await api.query.multisig.multisigs(multisig.address, callHash);
-	const TIME_POINT= info.unwrap().when;
+	const TIME_POINT = info.unwrap().when;
 	console.log(`Time point is: ${TIME_POINT}`);
 
 	return new Promise<void>((resolve, reject) => {
@@ -83,7 +83,7 @@ export async function cancelProxy ({ api, approvingAddress, callHash, multisig, 
 							console.log('Transaction failed');
 
 							const errorModule = (event.data as any)?.dispatchError?.asModule;
-							if(!errorModule) {
+							if (!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',

@@ -1,10 +1,9 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
-import { AutoComplete, Form, Modal, Spin } from 'antd';
-import { DefaultOptionType } from 'antd/es/select';
-import BN from 'bn.js';
-import React, { FC, useEffect, useState } from 'react';
+import { Form, Spin } from 'antd';
+import { ethers } from 'ethers';
+import React, { useState } from 'react';
 import FailedTransactionLottie from 'src/assets/lottie-graphics/FailedTransaction';
 import LoadingLottie from 'src/assets/lottie-graphics/Loading';
 import CancelBtn from 'src/components/Settings/CancelBtn';
@@ -12,110 +11,65 @@ import ModalBtn from 'src/components/Settings/ModalBtn';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CopyIcon, QRIcon } from 'src/ui-components/CustomIcons';
-import copyText from 'src/utils/copyText';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { setSigner } from 'src/utils/setSigner';
-import { transferFunds } from 'src/utils/transferFunds';
+import queueNotification from 'src/ui-components/QueueNotification';
 import styled from 'styled-components';
 
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
-	const { api, apiReady, network } = useGlobalApiContext();
-	const { activeMultisig, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
+	const { network } = useGlobalApiContext();
+	const { activeMultisig, addressBook, fetchMultisigData } = useGlobalUserDetailsContext();
 
-	const { accounts } = useGetWalletAccounts(loggedInWallet);
-	const { web3AuthUser, sendNativeToken } = useGlobalWeb3Context();
+	const { sendNativeToken } = useGlobalWeb3Context();
 
-	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
-	const [amount, setAmount] = useState(new BN(0));
+	const [selectedSender] = useState(addressBook[0].address);
+	const [amount, setAmount] = useState('0');
 	const [loading, setLoading] = useState(false);
-	const [showQrModal, setShowQrModal] = useState(false);
 	const [success, setSuccess] = useState(false);
-	const [failure, setFailure] = useState(false);
-	const [isValidSender, setIsValidSender] = useState(true);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const [txnHash, setTxnHash] = useState<string>('');
+	const [failure] = useState(false);
+	const [loadingMessages] = useState<string>('');
+	const [txnHash] = useState<string>('');
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
 
-	useEffect(() => {
-		if (!getSubstrateAddress(selectedSender)) {
-			setIsValidSender(false);
-		}
-		else {
-			setIsValidSender(true);
-		}
-	}, [selectedSender]);
-
-	const autocompleteAddresses: DefaultOptionType[] = accounts?.map((account) => ({
-		label: <AddressComponent name={account.name} address={account.address} />,
-		value: account.address
-	}));
-
-	const addSenderHeading = () => {
-		const elm = document.getElementById('recipient_list');
-		if (elm) {
-			const parentElm = elm.parentElement;
-			if (parentElm) {
-				const isElmPresent = document.getElementById('recipient_heading');
-				if (!isElmPresent) {
-					const recipientHeading = document.createElement('p');
-					recipientHeading.textContent = 'Addresses';
-					recipientHeading.id = 'recipient_heading';
-					recipientHeading.classList.add('recipient_heading');
-					parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
-				}
-			}
-		}
-	};
-
 	const handleSubmit = async () => {
-		if (web3AuthUser) {
-			const rec = await sendNativeToken(activeMultisig, amount);
-			console.log('yash rec', rec);
-		} else {
-			if (!api || !apiReady) return;
+		setLoading(true);
+		try {
+			const { transactionHash, to } = await sendNativeToken(activeMultisig, ethers.utils.parseUnits(amount, 'ether'));
+			await fetch(`${FIREBASE_FUNCTIONS_URL}/addTransactionEth`, {
+				body: JSON.stringify({
+					amount_token: ethers.utils.parseUnits(amount.toString(), 'ether').toString(),
+					// eslint-disable-next-line sort-keys
+					from: selectedSender, safeAddress: activeMultisig, data: '', txHash: transactionHash, to, note: '', type: 'fund', executed: true
+				}),
+				headers: firebaseFunctionsHeader(network, localStorage.getItem('address')!, localStorage.getItem('signature')!),
+				method: 'POST'
+			}).then(res => res.json());
+			await fetchMultisigData();
+			queueNotification({
+				header: 'Success!',
+				message: 'You have successfully completed the transaction. ',
+				status: NotificationStatus.SUCCESS
+			});
+			setSuccess(true);
+		} catch (err) {
+			console.log('error from handleSubmit sendNativeToken', err);
+			setNewTxn?.(prev => !prev);
+			onCancel();
+			queueNotification({
+				header: 'Error!',
+				message: 'Please try again',
+				status: NotificationStatus.ERROR
+			});
 
-			await setSigner(api, loggedInWallet);
-
-			setLoading(true);
-			try {
-				await transferFunds({
-					amount: amount,
-					api,
-					network,
-					recepientAddress: activeMultisig,
-					senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
-					setLoadingMessages,
-					setTxnHash
-				});
-				setLoading(false);
-				setSuccess(true);
-			} catch (error) {
-				console.log(error);
-				setLoading(false);
-				setFailure(true);
-				setTimeout(() => setFailure(false), 5000);
-			}
 		}
-	};
 
-	const QrModal: FC = () => {
-		return (
-			<>
-				<button onClick={() => setShowQrModal(true)}><QRIcon className='text-text_secondary' /></button>
-				<Modal title={<span className='font-bold text-lg text-white' >Address QR</span>} onCancel={() => setShowQrModal(false)} open={showQrModal} footer={null}>
-					<AddressQr address={selectedSender} />
-				</Modal>
-			</>
-		);
+		setLoading(false);
 	};
 
 	return (
@@ -129,7 +83,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 				txnHash={txnHash}
 				onDone={() => {
 					setNewTxn?.(prev => !prev);
-					onCancel();
+
 				}}
 			/>
 				: failure ? <FailedTransactionLottie message='Failed!' />
@@ -152,7 +106,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 									</div>
 									<div className='flex items-center gap-x-[10px]'>
 										<div className='w-full'>
-											<Form.Item
+											{/* <Form.Item
 												name="sender"
 												rules={[{ required: true }]}
 												help={!isValidSender && 'Please add a valid Address.'}
@@ -167,16 +121,16 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 														id='sender'
 														placeholder="Send from Address.."
 														onChange={(value) => setSelectedSender(value)}
-														defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
+														defaultValue={addressBook[0]?.address}
 													/>
 													<div className='absolute right-2'>
-														<button onClick={() => copyText(selectedSender, true, network)}>
+														<button onClick={() => copyText(selectedSender)}>
 															<CopyIcon className='mr-2 text-primary' />
 														</button>
 														<QrModal />
 													</div>
 												</div>
-											</Form.Item>
+											</Form.Item> */}
 										</div>
 									</div>
 								</section>
@@ -212,8 +166,7 @@ const FundMultisig = ({ className, onCancel, setNewTxn }: { className?: string, 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
 									<ModalBtn
-										disabled={false}
-										//!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))
+										disabled={amount == '0'}
 										loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>

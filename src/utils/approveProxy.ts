@@ -34,11 +34,11 @@ interface Args {
 	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveProxy ({ api, navigate, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveProxy({ api, navigate, approvingAddress, callDataHex, callHash, multisig, network, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	// 2. Set relevant vars
@@ -46,14 +46,14 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 	let WEIGHT: any = ZERO_WEIGHT;
 
 	// remove approving address address from signatories
-	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 
-	if(callDataHex) {
+	if (callDataHex) {
 
 		const callData = api.createType('Call', callDataHex);
 		const { weight } = await calcWeight(callData, api);
@@ -68,7 +68,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 
-	if(!multisigInfo) {
+	if (!multisigInfo) {
 		console.log('No multisig info found');
 		return;
 	}
@@ -78,15 +78,15 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 	const numApprovals = multisigInfo.approvals.length;
 
 	const handleMultisigCreate = async (proxyAddress: string) => {
-		try{
+		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !proxyAddress) {
+			if (!address || !signature || !proxyAddress) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 				setLoadingMessages('Creating Your Proxy.');
 				const createMultisigRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisig`, {
 					body: JSON.stringify({
@@ -99,9 +99,9 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 					method: 'POST'
 				});
 
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress };
 
-				if(multisigError) {
+				if (multisigError) {
 					queueNotification({
 						header: 'Error!',
 						message: multisigError,
@@ -110,7 +110,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 					return;
 				}
 
-				if(multisigData){
+				if (multisigData) {
 					queueNotification({
 						header: 'Success!',
 						message: 'Your Proxy has been created Successfully!',
@@ -126,7 +126,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 							isProxy: true,
 							multisigAddresses: copyMultisigAddresses,
 							multisigSettings: {
-								...prevState.multisigSettings,
+								...prevState,
 								[multisigData.address]: {
 									name: multisigData.name,
 									deleted: false
@@ -138,7 +138,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 		}
 	};
@@ -159,10 +159,10 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 		);
 
 		const responseJSON = await response.json();
-		if(responseJSON.data.count === 0){
+		if (responseJSON.data.count === 0) {
 			return;
 		}
-		else{
+		else {
 			const params = JSON.parse(responseJSON.data?.events[0]?.params);
 			const proxyAddress = getEncodedAddress(params[0].value, network);
 			await handleMultisigCreate(proxyAddress || '');
@@ -221,7 +221,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 					reject(error);
 				});
 		} else {
-			if(!callDataHex){
+			if (!callDataHex) {
 				reject('Invalid Call Data');
 				return;
 			}
@@ -276,7 +276,7 @@ export async function approveProxy ({ api, navigate, approvingAddress, callDataH
 								console.log('Transaction failed');
 
 								const errorModule = (event.data as any)?.dispatchError?.asModule;
-								if(!errorModule) {
+								if (!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',

@@ -2,31 +2,24 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { bnToBn } from '@polkadot/util';
-import { Collapse, Divider, message,Skeleton } from 'antd';
-import BN from 'bn.js';
+import { EthersAdapter } from '@safe-global/protocol-kit';
+import { Collapse, Divider, Skeleton } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import React, { FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import  { useNavigate } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
+import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { chainProperties } from 'src/global/networkConstants';
-import { IMultisigAddress, IQueueItem, ITxNotification } from 'src/types';
+import { GnosisSafeService } from 'src/services';
+import { IQueueItem, ITxNotification } from 'src/types';
 import { ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
 import LoadingModal from 'src/ui-components/LoadingModal';
-import { approveAddProxy } from 'src/utils/approveAddProxy';
-import { approveMultisigTransfer } from 'src/utils/approveMultisigTransfer';
-import { approveProxy } from 'src/utils/approveProxy';
-import { cancelMultisigTransfer } from 'src/utils/cancelMultisigTransfer';
-import { cancelProxy } from 'src/utils/cancelProxy';
-import decodeCallData from 'src/utils/decodeCallData';
-import parseDecodedValue from 'src/utils/parseDecodedValue';
-import { setSigner } from 'src/utils/setSigner';
 
 import SentInfo from './SentInfo';
 
@@ -42,244 +35,121 @@ interface ITransactionProps {
 	refetch?: () => void;
 	setQueuedTransactions?: React.Dispatch<React.SetStateAction<IQueueItem[]>>
 	numberOfTransactions: number;
-	notifications?:ITxNotification;
+	notifications?: ITxNotification;
+	value: string;
 }
 
-const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUSD, callData, callHash, date, setQueuedTransactions, numberOfTransactions, threshold, notifications }) => {
-	const [messageApi, contextHolder] = message.useMessage();
-	const navigate = useNavigate();
+const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callData, callHash, date, threshold, notifications, value }) => {
 
-	const { activeMultisig, multisigAddresses, address, setUserDetailsContextState, loggedInWallet } = useGlobalUserDetailsContext();
+	const { activeMultisig, address } = useGlobalUserDetailsContext();
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [failure, setFailure] = useState(false);
-	const [getMultiDataLoading, setGetMultisigDataLoading] = useState(false);
-	const [loadingMessages, setLoadingMessages] = useState('');
+	const [getMultiDataLoading] = useState(false);
+	const [loadingMessages, setLoadingMessage] = useState('');
 	const [openLoadingModal, setOpenLoadingModal] = useState(false);
-	const { api, apiReady, network } = useGlobalApiContext();
+	const { network } = useGlobalApiContext();
+	const { fetchMultisigData } = useGlobalUserDetailsContext();
+	const { web3AuthUser, ethProvider, web3Provider } = useGlobalWeb3Context();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [callDataString, setCallDataString] = useState<string>(callData || '');
-	const [decodedCallData, setDecodedCallData] = useState<any>(null);
-	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
-	const [isProxyAddApproval, setIsProxyAddApproval] = useState<boolean>(false);
-	const [isProxyRemovalApproval, setIsProxyRemovalApproval] = useState<boolean>(false);
+	const [isProxyApproval] = useState<boolean>(false);
+	const [isProxyAddApproval] = useState<boolean>(false);
+	const [isProxyRemovalApproval] = useState<boolean>(false);
 
-	const token = chainProperties[network].tokenSymbol;
+	const token = chainProperties[network].ticker;
 	const location = useLocation();
 	const hash = location.hash.slice(1);
 
-	const multisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
-
-	useEffect(() => {
-		if(!api || !apiReady) return;
-
-		const { data, error } = decodeCallData(callDataString, api);
-		if(error || !data) return;
-
-		if(data?.extrinsicCall?.hash.toHex() !== callHash) {
-			messageApi.error('Invalid call data');
-			return;
-		}
-
-		setDecodedCallData(data.extrinsicCall?.toJSON());
-
-		// store callData in BE
-		(async () => {
-			if(decodedCallData || callData) return; // already stored
-
-			await fetch(`${FIREBASE_FUNCTIONS_URL}/setTransactionCallData`, {
-				body: JSON.stringify({
-					callData: callDataString,
-					callHash,
-					network
-				}),
-				headers: firebaseFunctionsHeader(network),
-				method: 'POST'
-			});
-		})();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [api, apiReady, callDataString, callHash, network]);
-
-	useEffect(() => {
-		const fetchMultisigData = async (newMultisigAddress: string) => {
-			const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
-				body: JSON.stringify({
-					multisigAddress: newMultisigAddress,
-					network
-				}),
-				headers: firebaseFunctionsHeader(network),
-				method: 'POST'
-			});
-
-			const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
-
-			if(multisigFetchError || !newMultisigData || !multisig) {
-				setGetMultisigDataLoading(false);
-				return;
-			}
-
-			// if approval is for removing old multisig from proxy
-			if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
-				setGetMultisigDataLoading(false);
-				setIsProxyRemovalApproval(true);
-			}
-			else {
-				setGetMultisigDataLoading(false);
-				setIsProxyAddApproval(true);
-			}
-		};
-		if(decodedCallData && decodedCallData?.args?.proxy_type){
-			setIsProxyApproval(true);
-		}
-		else if(decodedCallData && decodedCallData?.args?.call?.args?.delegate?.id){
-			setGetMultisigDataLoading(true);
-			fetchMultisigData(decodedCallData?.args?.call?.args?.delegate?.id);
-		}
-	}, [decodedCallData, multisig, multisigAddresses, network]);
-
 	const handleApproveTransaction = async () => {
-		if(!api || !apiReady || !address){
-			return;
-		}
-
-		await setSigner(api, loggedInWallet);
-
-		if(!multisig) return;
-
 		setLoading(true);
-		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
-				return;
+			const signer = ethProvider.getSigner();
+			const web3Adapter = new EthersAdapter({
+				ethers: web3Provider as any,
+				signerOrProvider: signer
+			});
+			const txUrl = returnTxUrl(network);
+			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+			const response = await gnosisService.signAndConfirmTx(callHash, activeMultisig);
+			if (response) {
+				const updateTx = {
+					signer: web3AuthUser!.accounts[0],
+					txHash: callHash,
+					txSignature: response
+				};
+				await fetch(`${FIREBASE_FUNCTIONS_URL}/updateTransaction`, {
+					body: JSON.stringify(updateTx),
+					headers: {
+						'Accept': 'application/json',
+						'Acess-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+						'x-address': web3AuthUser!.accounts[0],
+						'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+						'x-signature': localStorage.getItem('signature')!,
+						'x-source': 'polkasafe'
+					},
+					method: 'POST'
+				}).then(res => res.json());
+				await fetchMultisigData();
+				setSuccess(true);
+				setLoadingMessage('Transaction Signed Successfully.');
 			}
-			if(decodedCallData?.args?.proxy_type){
-				await approveProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					navigate,
-					network,
-					note: note || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
-			}
-			else if(decodedCallData?.args?.call?.args?.delegate){
-				await approveAddProxy({
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					newMultisigAddress: decodedCallData?.args?.call?.args?.delegate?.id,
-					note: note || '',
-					proxyAddress: multisig.proxy || '',
-					setLoadingMessages,
-					setUserDetailsContextState
-				});
-			}
-			else{
-				await approveMultisigTransfer({
-					amount: network === 'astar' ? bnToBn(decodedCallData.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || 0),
-					api,
-					approvingAddress: address,
-					callDataHex: callDataString,
-					callHash,
-					multisig,
-					network,
-					note: note || '',
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-					setLoadingMessages
-				});
-			}
-			setLoading(false);
-			setSuccess(true);
-			setTimeout(() => {
-				setSuccess(false);
-				setOpenLoadingModal(false);
-			}, 5000);
-			if(!openLoadingModal){
-				refetch?.();
-			}
+
 		} catch (error) {
 			console.log(error);
-			setLoading(false);
 			setFailure(true);
-			setTimeout(() => {
-				setFailure(false);
-				setOpenLoadingModal(false);
-			}, 5000);
+			setLoadingMessage('Something went wrong! Please try again.');
 		}
+		setLoading(false);
 	};
 
-	const handleCancelTransaction = async () => {
-		if(!api || !apiReady || !address){
-			return;
-		}
-
-		await setSigner(api, loggedInWallet);
-
-		const multisig = multisigAddresses?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
-
-		if(!multisig) return;
-
+	const handleExecuteTransaction = async () => {
 		setLoading(true);
-		setOpenLoadingModal(true);
 		try {
-			if((!decodedCallData || !decodedCallData?.args?.value || !decodedCallData?.args?.dest?.id) && !decodedCallData?.args?.proxy_type && (!decodedCallData?.args?.call?.args?.value || !decodedCallData?.args?.call?.args?.dest?.id) && (!decodedCallData?.args?.call?.args?.delegate || !decodedCallData?.args?.call?.args?.delegate?.id) ){
-				return;
+			const signer = ethProvider.getSigner();
+			const web3Adapter = new EthersAdapter({
+				ethers: web3Provider as any,
+				signerOrProvider: signer
+			});
+			const txUrl = returnTxUrl(network);
+			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
+			const response = await gnosisService.executeTx(callHash, activeMultisig);
+			const completeTx = {
+				receipt: response || {},
+				txHash: callHash
+			};
+			if (response) {
+				await fetch(`${FIREBASE_FUNCTIONS_URL}/completeTransaction`, {
+					body: JSON.stringify(completeTx),
+					headers: {
+						'Accept': 'application/json',
+						'Acess-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+						'x-address': web3AuthUser!.accounts[0],
+						'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+						'x-network': network,
+						'x-signature': localStorage.getItem('signature')!,
+						'x-source': 'polkasafe'
+					},
+					method: 'POST'
+				}).then(res => res.json());
+				await fetchMultisigData();
+				setSuccess(true);
+				setLoadingMessage('Transaction Executed Successfully.');
 			}
-			if(decodedCallData?.args?.proxy_type){
-				await cancelProxy({
-					api,
-					approvingAddress: address,
-					callHash,
-					multisig,
-					network,
-					setLoadingMessages
-				});
-			}
-			else{
-				await cancelMultisigTransfer({
-					api,
-					approvingAddress: address,
-					callHash,
-					multisig,
-					network,
-					recipientAddress: decodedCallData.args.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || '',
-					setLoadingMessages
-				});
-			}
-			setLoading(false);
-			setSuccess(true);
-			setTimeout(() => {
-				setSuccess(false);
-				setOpenLoadingModal(false);
-			}, 5000);
-			if(!openLoadingModal){
-				document.getElementById(callHash)?.remove();
-				if(numberOfTransactions < 2 && setQueuedTransactions){
-					setQueuedTransactions([]);
-				}
-			}
+
 		} catch (error) {
 			console.log(error);
-			setLoading(false);
 			setFailure(true);
-			setTimeout(() => {
-				setFailure(false);
-				setOpenLoadingModal(false);
-			}, 5000);
+			setLoadingMessage('Something went wrong! Please try again.');
 		}
+		setLoading(false);
 	};
 
 	return (
 		<>
-			{ contextHolder }
 
 			<Collapse
 				className='bg-bg-secondary rounded-lg p-2.5 scale-90 h-[111%] w-[111%] origin-top-left'
@@ -311,20 +181,14 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : 'Sent'}
 									</span>
 								</p>
-								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval &&
-							<p className='col-span-2 flex items-center gap-x-[6px]'>
-								<ParachainIcon src={chainProperties[network].logo} />
-								<span
-									className={'font-normal text-xs leading-[13px] text-failure'}
-								>
-									- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({
-										network,
-										value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
-										withUnit: true
-									}) : `? ${token}`}
-								</span>
-							</p>
-								}
+								<p className='col-span-2 flex items-center gap-x-[6px]'>
+									<ParachainIcon src={chainProperties[network].logo} />
+									<span
+										className={'font-normal text-xs leading-[13px] text-failure'}
+									>
+										{ethers.utils.formatEther(value).toString()} {token}
+									</span>
+								</p>
 								<p className='col-span-2'>
 									{dayjs(date).format('lll')}
 								</p>
@@ -334,8 +198,8 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 									</span>
 									<span className='text-white text-sm'>
 										{
-											transactionInfoVisible?
-												<CircleArrowUpIcon />:
+											transactionInfoVisible ?
+												<CircleArrowUpIcon /> :
 												<CircleArrowDownIcon />
 										}
 									</span>
@@ -356,7 +220,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 						<Divider className='bg-text_secondary my-5' />
 
 						<SentInfo
-							amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || ''}
+							amount={value}
 							amountUSD={amountUSD}
 							callHash={callHash}
 							callDataString={callDataString}
@@ -366,14 +230,15 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, refetch, amountUS
 							threshold={threshold}
 							loading={loading}
 							getMultiDataLoading={getMultiDataLoading}
-							recipientAddress={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id}
+							recipientAddress={''}
 							setCallDataString={setCallDataString}
 							handleApproveTransaction={handleApproveTransaction}
-							handleCancelTransaction={handleCancelTransaction}
+							handleExecuteTransaction={handleExecuteTransaction}
+							handleCancelTransaction={async () => { }}
 							note={note}
 							isProxyApproval={isProxyApproval}
 							isProxyAddApproval={isProxyAddApproval}
-							delegate_id={decodedCallData?.args?.call?.args?.delegate?.id}
+							delegate_id={''}
 							isProxyRemovalApproval={isProxyRemovalApproval}
 							notifications={notifications}
 						/>

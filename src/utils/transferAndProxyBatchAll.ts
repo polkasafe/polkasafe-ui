@@ -23,17 +23,17 @@ interface Props {
 	api: ApiPromise;
 	network: string;
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>;
-    signatories: string[];
-    threshold: number;
+	signatories: string[];
+	threshold: number;
 	setTxnHash: React.Dispatch<React.SetStateAction<string>>;
 	multisigAddress: string
 }
 
-export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold } : Props) {
+export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHash, network, recepientAddress, senderAddress, amount, setLoadingMessages, signatories, threshold }: Props) {
 
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: 18,
+		unit: chainProperties[network].ticker
 	});
 
 	const AMOUNT_TO_SEND = amount.toNumber();
@@ -131,7 +131,7 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 							console.log('Transaction failed');
 
 							const errorModule = (event.data as any)?.dispatchError?.asModule;
-							if(!errorModule) {
+							if (!errorModule) {
 								queueNotification({
 									header: 'Error!',
 									message: 'Transaction Failed',

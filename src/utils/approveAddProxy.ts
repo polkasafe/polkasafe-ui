@@ -37,11 +37,11 @@ interface Args {
 	setUserDetailsContextState: React.Dispatch<React.SetStateAction<UserDetailsContextType>>
 }
 
-export async function approveAddProxy ({ api, approvingAddress, callDataHex, callHash, multisig, network, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
+export async function approveAddProxy({ api, approvingAddress, callDataHex, callHash, multisig, network, newMultisigAddress, proxyAddress, note, setLoadingMessages, setUserDetailsContextState }: Args) {
 	// 1. Use formatBalance to display amounts
 	formatBalance.setDefaults({
-		decimals: chainProperties[network].tokenDecimals,
-		unit: chainProperties[network].tokenSymbol
+		decimals: chainProperties[network].decimals,
+		unit: chainProperties[network].ticker
 	});
 
 	// 2. Set relevant vars
@@ -49,14 +49,14 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 	let WEIGHT: any = ZERO_WEIGHT;
 
 	// remove approving address address from signatories
-	const encodedSignatories =  multisig.signatories.sort().map((signatory) => {
+	const encodedSignatories = multisig.signatories.sort().map((signatory) => {
 		const encodedSignatory = getEncodedAddress(signatory, network);
-		if(!encodedSignatory) throw new Error('Invalid signatory address');
+		if (!encodedSignatory) throw new Error('Invalid signatory address');
 		return encodedSignatory;
 	});
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== approvingAddress);
 
-	if(callDataHex) {
+	if (callDataHex) {
 
 		const callData = api.createType('Call', callDataHex);
 		const { weight } = await calcWeight(callData, api);
@@ -71,7 +71,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 	const multisigInfos = await getMultisigInfo(multisig.address, api);
 	const [, multisigInfo] = multisigInfos?.find(([h]) => h.eq(callHash)) || [null, null];
 
-	if(!multisigInfo) {
+	if (!multisigInfo) {
 		console.log('No multisig info found');
 		return;
 	}
@@ -83,10 +83,10 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const addExistentialDeposit = async (multisigData: IMultisigAddress) => {
 
-		setLoadingMessages(`Please Sign To Add A Small (${chainProperties[network].existentialDeposit} ${chainProperties[network].tokenSymbol}) Existential Deposit To Make Your Multisig Onchain.`);
+		setLoadingMessages(`Please Sign To Add A Small (${chainProperties[network]} ${chainProperties[network].ticker}) Existential Deposit To Make Your Multisig Onchain.`);
 		try {
 			await transferFunds({
-				amount: inputToBn(`${chainProperties[network].existentialDeposit}`, network, false)[0],
+				amount: inputToBn(`${chainProperties[network]}`, network, false)[0],
 				api,
 				network,
 				recepientAddress: multisigData.address,
@@ -99,15 +99,15 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 	};
 
 	const handleMultisigCreate = async () => {
-		try{
+		try {
 			const address = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!address || !signature || !newMultisigAddress) {
+			if (!address || !signature || !newMultisigAddress) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 				const getNewMultisigData = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigDataByMultisigAddress`, {
 					body: JSON.stringify({
 						multisigAddress: newMultisigAddress,
@@ -119,7 +119,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 
 				const { data: newMultisigData, error: multisigFetchError } = await getNewMultisigData.json() as { data: IMultisigAddress, error: string };
 
-				if(multisigFetchError || !newMultisigData) {
+				if (multisigFetchError || !newMultisigData) {
 
 					queueNotification({
 						header: 'Error!',
@@ -129,7 +129,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 					return;
 				}
 				// if approval is for removing old multisig from proxy
-				if(dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)){
+				if (dayjs(newMultisigData?.created_at).isBefore(multisig.created_at)) {
 					return;
 				}
 				setLoadingMessages('Creating Your Proxy.');
@@ -144,13 +144,13 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 					method: 'POST'
 				});
 
-				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress};
+				const { data: multisigData, error: multisigError } = await createMultisigRes.json() as { error: string; data: IMultisigAddress };
 
-				if(multisigError) {
+				if (multisigError) {
 					return;
 				}
 
-				if(multisigData){
+				if (multisigData) {
 					setUserDetailsContextState((prevState) => {
 						const copyMultisigAddresses = [...prevState.multisigAddresses];
 						const indexOfNew = copyMultisigAddresses.findIndex((item) => item.address === newMultisigAddress);
@@ -163,7 +163,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 							activeMultisig: multisigData.address,
 							multisigAddresses: copyMultisigAddresses,
 							multisigSettings: {
-								...prevState.multisigSettings,
+								...prevState,
 								[multisigData.address]: {
 									deleted: false,
 									name: multisigData.name
@@ -174,7 +174,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 		}
 	};
@@ -231,7 +231,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 					reject(error);
 				});
 		} else {
-			if(!callDataHex){
+			if (!callDataHex) {
 				reject('Invalid Call Data');
 				return;
 			}
@@ -292,7 +292,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 								console.log('Transaction failed');
 
 								const errorModule = (event.data as any)?.dispatchError?.asModule;
-								if(!errorModule) {
+								if (!errorModule) {
 									queueNotification({
 										header: 'Error!',
 										message: 'Transaction Failed',

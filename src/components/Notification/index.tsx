@@ -21,18 +21,18 @@ export enum ENotificationStatus {
 	UNREAD = 'UNREAD'
 }
 
-const Notification= () => {
+const Notification = () => {
 	const { network } = useGlobalApiContext();
-	const { address, setUserDetailsContextState, notifiedTill } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 
 	const [loading, setLoading] = useState(true);
 	const [notifications, setNotifications] = useState<INotification[]>([]);
 	const [isVisible, toggleVisibility] = useState(false);
 	const isMouseEnter = useRef(false);
-	const unreadNotificationAvailable = !notifications.length ? undefined :  notifications.filter(({ created_at }) => notifiedTill && dayjs(notifiedTill).isAfter(created_at) ? false : true);
+	const unreadNotificationAvailable = !notifications.length ? undefined : notifications.filter(({ created_at }) => dayjs().isAfter(created_at) ? false : true);
 
 	const getNotifications = useCallback(async () => {
-		if(!address) return;
+		if (!address) return;
 
 		setLoading(true);
 		const getNotificationsRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getNotifications`, {
@@ -41,10 +41,10 @@ const Notification= () => {
 		});
 
 		const { data, error } = await getNotificationsRes.json();
-		if(error){
+		if (error) {
 			console.log('Error in Fetching notifications: ', error);
 		}
-		if(data){
+		if (data) {
 			setNotifications(data as INotification[]);
 		}
 		setLoading(false);
@@ -53,19 +53,19 @@ const Notification= () => {
 	const markAllRead = useCallback(async () => {
 		const newNotifiedTill = new Date();
 		localStorage.setItem('notifiedTill', newNotifiedTill.toISOString());
-		setUserDetailsContextState((prevState) => {
+		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
 				notifiedTill: newNotifiedTill
 			};
 		});
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
-		if(!address) return;
+		if (!address) return;
 		getNotifications();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [address]);
 
 	return (
@@ -105,13 +105,13 @@ const Notification= () => {
 						!!unreadNotificationAvailable?.length &&
 						<button
 							onClick={() => markAllRead()} className='outline-none border-none shadow-none py-[6px[ px-[10px] text-sm flex items-center justify-center h-[25px] rounded-md text-failure bg-failure bg-opacity-10'>
-								Mark all as read
+							Mark all as read
 						</button>
 					}
 				</div>
 				<div className='overflow-y-auto px-3 pt-0 max-h-[375px] '>
 					<div>
-						{ loading ? <Loader size='large'/> :
+						{loading ? <Loader size='large' /> :
 							notifications.length > 0 ?
 								<section>
 									<div className='flex flex-col gap-y-[10px] mt-2'>

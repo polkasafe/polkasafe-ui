@@ -12,12 +12,12 @@ import shortenAddress from 'src/utils/shortenAddress';
 
 import Loader from '../../UserFlow/Loader';
 
-interface ISignatory{
+interface ISignatory {
 	name: string
 	address: string
 }
 
-interface Props{
+interface Props {
 	signatories: ISignatory[]
 	setSignatoriesWithName: React.Dispatch<React.SetStateAction<ISignatory[]>>
 	signatoriesArray: ISignatory[]
@@ -69,20 +69,20 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 			<div className='flex flex-col items-center w-[800px] h-[400px]'>
 				<div className="flex justify-around items-center mb-10 w-full">
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined /></div>
 						<p>Select Network</p>
 					</div>
-					<Loader className='bg-primary h-[2px] w-[80px]'/>
+					<Loader className='bg-primary h-[2px] w-[80px]' />
 					<div className='flex flex-col text-white items-center justify-center'>
-						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined/></div>
+						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'><CheckOutlined /></div>
 						<p>Name & Address</p>
 					</div>
-					<Loader className='bg-primary h-[2px] w-[80px]'/>
+					<Loader className='bg-primary h-[2px] w-[80px]' />
 					<div className='flex flex-col text-white items-center justify-center'>
 						<div className='rounded-lg bg-primary w-9 h-9 mb-2 flex items-center justify-center'>3</div>
 						<p>Owners</p>
 					</div>
-					<Loader className='bg-bg-secondary h-[2px] w-[80px]'/>
+					<Loader className='bg-bg-secondary h-[2px] w-[80px]' />
 					<div className='flex flex-col text-white items-center justify-center'>
 						<div className='rounded-lg bg-highlight text-primary w-9 h-9 mb-2 flex items-center justify-center'>4</div>
 						<p>Review</p>
@@ -102,7 +102,7 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 											<label
 												className="text-primary text-xs leading-[13px] font-normal"
 												htmlFor="name1"
-											>Owner Name {i+1}</label>
+											>Owner Name {i + 1}</label>
 											<div className="flex items-center">
 
 												<Input
@@ -122,7 +122,7 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 												<div className='flex ml-3'>
 													<Identicon value={item.address} size={20} theme='polkadot' />
 													<div className='text-white'>{shortenAddress(item.address)}</div>
-													<button onClick={() => copyText(item.address, true, network)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary'/></button>
+													<button onClick={() => copyText(item.address)}><CopyIcon className='mx-1 text-text_secondary hover:text-primary' /></button>
 													<a href={`https://${network}.subscan.io/account/${item.address}`} target='_blank' rel="noreferrer" >
 														<ExternalLinkIcon className='text-text_secondary hover:text-primary' />
 													</a>
@@ -142,9 +142,9 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 												<Form.Item>
 													<label
 														className="text-primary text-xs leading-[13px] font-normal"
-													>Name {i+1}</label>
+													>Name {i + 1}</label>
 													<Input
-														placeholder={`Name ${i+1}`}
+														placeholder={`Name ${i + 1}`}
 														disabled={i === 0}
 														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 														value={signatory.name}
@@ -153,17 +153,17 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 												</Form.Item>
 												<Form.Item
 													className='w-full'
-													name={`Address ${i+1}`}
+													name={`Address ${i + 1}`}
 													rules={[{ required: true }]}
 													help={signatory.address === '' && 'This Is Required.'}
 													validateStatus={!signatory.address ? 'error' : 'success'}
 												>
 													<label
 														className="text-primary text-xs leading-[13px] font-normal"
-													>Address {i+1}</label>
+													>Address {i + 1}</label>
 													<Input
-														id={`Address ${i+1}`}
-														placeholder={`Address ${i+1}`}
+														id={`Address ${i + 1}`}
+														placeholder={`Address ${i + 1}`}
 														disabled={i === 0}
 														className=" text-sm font-normal m-0 leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white"
 														value={signatory.address}

@@ -11,16 +11,16 @@ interface Options {
 	withThousandDelimitor?: boolean
 }
 
-export  default function formatBnBalance(value: BN | string, options: Options, network: string): string {
-	const tokenDecimals = chainProperties[network]?.tokenDecimals;
+export default function formatBnBalance(value: BN | string, options: Options, network: string): string {
+	const tokenDecimals = 18;
 	const valueString = value.toString();
 
 	let suffix = '';
 	let prefix = '';
 
-	if (valueString.length>tokenDecimals){
+	if (valueString.length > tokenDecimals) {
 		suffix = valueString.slice(-tokenDecimals);
-		prefix = valueString.slice(0, valueString.length-tokenDecimals);
+		prefix = valueString.slice(0, valueString.length - tokenDecimals);
 	}
 	else {
 		prefix = '0';
@@ -31,18 +31,18 @@ export  default function formatBnBalance(value: BN | string, options: Options, n
 	const { numberAfterComma, withThousandDelimitor = true, withUnit } = options;
 	const numberAfterCommaLtZero = numberAfterComma && numberAfterComma < 0;
 
-	if (numberAfterCommaLtZero || numberAfterComma === 0 || suffix === ''){
+	if (numberAfterCommaLtZero || numberAfterComma === 0 || suffix === '') {
 		comma = '';
 		suffix = '';
-	} else if (numberAfterComma && numberAfterComma > 0){
+	} else if (numberAfterComma && numberAfterComma > 0) {
 		suffix = suffix.slice(0, numberAfterComma);
 	}
 
-	if (withThousandDelimitor){
+	if (withThousandDelimitor) {
 		prefix = prefix.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	}
 
-	const unit = withUnit ? ` ${chainProperties[network]?.tokenSymbol}` : '';
+	const unit = withUnit ? ` ${chainProperties[network]}` : '';
 
 	return `${prefix}${comma}${suffix}${unit}`;
 }

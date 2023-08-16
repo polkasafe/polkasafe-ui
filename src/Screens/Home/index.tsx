@@ -3,9 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 /* eslint-disable sort-keys */
 
-import { PlusCircleOutlined } from '@ant-design/icons';
 import { EthersAdapter } from '@safe-global/protocol-kit';
-import { Button, Modal, notification } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import AddressCard from 'src/components/Home/AddressCard';
@@ -13,40 +11,28 @@ import ConnectWallet from 'src/components/Home/ConnectWallet';
 import ConnectWalletWrapper from 'src/components/Home/ConnectWallet/ConnectWalletWrapper';
 import NewUserModal from 'src/components/Home/ConnectWallet/NewUserModal';
 import DashboardCard from 'src/components/Home/DashboardCard';
-import EmailBadge from 'src/components/Home/EmailBadge';
 import TxnCard from 'src/components/Home/TxnCard';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
-import AddProxy from 'src/components/Multisig/AddProxy';
 import Loader from 'src/components/UserFlow/Loader';
 import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { SUBSCAN_API_HEADERS } from 'src/global/subscan_consts';
+import { returnTxUrl } from 'src/global/gnosisService';
 import { GnosisSafeService } from 'src/services';
-import { CHANNEL, NotificationStatus } from 'src/types';
-import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
-import queueNotification from 'src/ui-components/QueueNotification';
-import getEncodedAddress from 'src/utils/getEncodedAddress';
-import hasExistentialDeposit from 'src/utils/hasExistentialDeposit';
 import styled from 'styled-components';
 
-const Home = ({ className }: { className?: string }) => {
-	const { address, notification_preferences, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
-	const { network, api, apiReady } = useGlobalApiContext();
-	const [newTxn, setNewTxn] = useState<boolean>(false);
+const Home = () => {
+	const { address, multisigAddresses, createdAt, addressBook, activeMultisig } = useGlobalUserDetailsContext();
 	const [openNewUserModal, setOpenNewUserModal] = useState(false);
-	const [openProxyModal, setOpenProxyModal] = useState(false);
-	const [hasProxy, setHasProxy] = useState<boolean>(true);
-	const [proxyNotInDb, setProxyNotInDb] = useState<boolean>(false);
-	const [proxyInProcess, setProxyInProcess] = useState<boolean>(false);
+	const [hasProxy] = useState<boolean>(true);
 
 	const { web3AuthUser, ethProvider } = useGlobalWeb3Context();
+	const { network } = useGlobalApiContext();
 
-	const [transactionLoading, setTransactionLoading] = useState(false);
+	const [transactionLoading] = useState(false);
 	const [isOnchain, setIsOnchain] = useState(true);
 	const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	useEffect(() => {
 		if ((dayjs(createdAt) > dayjs().subtract(15, 'seconds')) && addressBook?.length === 1) {
 			setOpenNewUserModal(true);
@@ -55,56 +41,17 @@ const Home = ({ className }: { className?: string }) => {
 	}, [createdAt]);
 
 	useEffect(() => {
-		const fetchProxyData = async () => {
-			if (!multisig || network === 'astar') return;
-			const response = await fetch(
-				`https://${network}.api.subscan.io/api/scan/events`,
-				{
-					body: JSON.stringify({
-						row: 1,
-						page: 0,
-						module: 'proxy',
-						call: 'PureCreated',
-						address: multisig.address
-					}),
-					headers: SUBSCAN_API_HEADERS,
-					method: 'POST'
-				}
-			);
-
-			const responseJSON = await response.json();
-			if (responseJSON.data.count === 0) {
-				return;
-			}
-			else {
-				const params = JSON.parse(responseJSON.data?.events[0]?.params);
-				const proxyAddress = getEncodedAddress(params[0].value, network);
-				if (proxyAddress) {
-					setProxyNotInDb(true);
-				}
-			}
-		};
-		if (multisig?.proxy) {
-			setHasProxy(true);
-		}
-		else {
-			setHasProxy(false);
-			fetchProxyData();
-		}
-	}, [multisig, network]);
-
-	useEffect(() => {
 		const handleNewTransaction = async () => {
-			if (!api || !apiReady || !activeMultisig) return;
+			if (!activeMultisig) return;
 
-			if (web3AuthUser) {
-				const signer = ethProvider.getSigner();
-				const ethAdapter = new EthersAdapter({
+			if (web3AuthUser && ethProvider) {
+				const signer = ethProvider?.getSigner();
+				const adapter = new EthersAdapter({
 					ethers: ethProvider,
-					signerOrProvider: signer
+					signerOrProvider: ethProvider.getSigner()
 				});
-				const txUrl = 'https://safe-transaction-goerli.safe.global';
-				const gnosisService = new GnosisSafeService(ethAdapter, signer, txUrl);
+				const txUrl = returnTxUrl(network);
+				const gnosisService = new GnosisSafeService(adapter, signer, txUrl);
 
 				const safeData = await gnosisService.getSafeCreationInfo(activeMultisig);
 
@@ -113,71 +60,12 @@ const Home = ({ className }: { className?: string }) => {
 				} else {
 					setIsOnchain(false);
 				}
-			} else {
-				setTransactionLoading(true);
-				// check if wallet has existential deposit
-				const hasExistentialDepositRes = await hasExistentialDeposit(api, multisig?.address || activeMultisig, network);
-
-				if (!hasExistentialDepositRes) {
-					setIsOnchain(false);
-				} else {
-					setIsOnchain(true);
-				}
 			}
-
-			setTransactionLoading(false);
 		};
 		handleNewTransaction();
 
-	}, [activeMultisig, api, apiReady, network, multisig, newTxn, web3AuthUser, ethProvider]);
-
-	useEffect(() => {
-		if (!isOnchain) {
-			queueNotification({
-				className: 'bg-bg-secondary border-2 border-solid border-primary text-white',
-				closeIcon: (
-					<div
-						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-					>
-						<OutlineCloseIcon className='text-primary w-2 h-2' />
-					</div>
-				),
-				header: <span className='text-waiting'>No Existential Deposit</span>,
-				message: <div className=''>
-					<p>Please Add Existential Deposit to your Multisig to make it Onchain.</p>
-					<div className='flex justify-end w-full'>
-						<Button onClick={() => { setOpenTransactionModal(true); notification.destroy(); }} size='small' className='text-xs text-white bg-primary border-none outline-none'>Add Existential Deposit</Button>
-					</div>
-				</div>,
-				placement: 'bottomRight',
-				status: NotificationStatus.WARNING
-			});
-		}
-	}, [isOnchain]);
-
-	const AddProxyModal: React.FC = () => {
-		return (
-			<>
-				<Button onClick={() => setOpenProxyModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent flex items-center' icon={<PlusCircleOutlined />} >Create Proxy</Button>
-				<Modal
-					centered
-					footer={false}
-					closeIcon={
-						<button
-							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
-							onClick={() => setOpenProxyModal(false)}
-						>
-							<OutlineCloseIcon className='text-primary w-2 h-2' />
-						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl'>Create Proxy</h3>}
-					open={openProxyModal}
-					className={`w-auto md:min-w-[500px] ${className}`}
-				>
-					<AddProxy setProxyInProcess={setProxyInProcess} homepage onCancel={() => setOpenProxyModal(false)} />
-				</Modal>
-			</>
-		);
-	};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [web3AuthUser, ethProvider]);
 
 	return (
 		<>
@@ -185,42 +73,14 @@ const Home = ({ className }: { className?: string }) => {
 				address ?
 					<>
 						<NewUserModal open={openNewUserModal} onCancel={() => setOpenNewUserModal(false)} />
-						{multisigAddresses
+						{multisigAddresses.length > 0
 							//&& multisigAddresses.filter((multisig) => multisig.network === network &&
 							//!multisigSettings?.[multisig.address]?.deleted && !multisig.disabled).length > 0
 							?
 							<section>
-								{network !== 'astar' && (!hasProxy && !proxyNotInDb && isOnchain && !proxyInProcess) ?
-									<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-										<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
-										<AddProxyModal />
-									</section>
-									:
-									!isOnchain ?
-										<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-											<p className='text-white'>Please Add Existential Deposit to make Multisig Onchain.</p>
-											<Button onClick={() => setOpenTransactionModal(true)} size='small' className='border-none outline-none text-waiting bg-transparent' >Add Existential Deposit</Button>
-										</section>
-										:
-										proxyNotInDb ?
-											<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-												<p className='text-white'>Your Proxy has been Created.</p>
-												<Button onClick={() => window.location.reload()} size='small' className='border-none outline-none text-waiting bg-transparent' >Refresh</Button>
-											</section>
-											:
-											proxyInProcess && !hasProxy ?
-												<section className='mb-2 text-sm scale-[80%] w-[125%] h-[125%] origin-top-left w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-													<p className='text-white'>Your Proxy is Awaiting Approvals from other Signatories.</p>
-												</section>
-												:
-												<></>
-								}
-								{!notification_preferences?.channelPreferences?.[CHANNEL.EMAIL]?.verified &&
-									<EmailBadge />
-								}
 								<div className="mb-0 grid grid-cols-16 gap-4 grid-row-2 lg:grid-row-1 h-auto">
 									<div className='col-start-1 col-end-13 lg:col-end-8'>
-										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={setNewTxn} />
+										<DashboardCard transactionLoading={transactionLoading} isOnchain={isOnchain} setOpenTransactionModal={setOpenTransactionModal} openTransactionModal={openTransactionModal} hasProxy={hasProxy} setNewTxn={() => { }} />
 									</div>
 									<div className='col-start-1 col-end-13 lg:col-start-8 h-full'>
 										<AddressCard />
@@ -228,7 +88,7 @@ const Home = ({ className }: { className?: string }) => {
 								</div>
 								<div className="grid grid-cols-12 gap-4 grid-row-2 lg:grid-row-1">
 									<div className='col-start-1 col-end-13 lg:col-end-13'>
-										<TxnCard setProxyInProcess={setProxyInProcess} newTxn={newTxn} />
+										<TxnCard />
 									</div>
 								</div>
 							</section>

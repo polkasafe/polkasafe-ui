@@ -19,6 +19,7 @@
     "@polkadot/react-identicon": "^3.4.1",
     "@polkadot/react-qr": "^3.0.2",
     "@safe-global/api-kit": "^1.1.0",
+    "@safe-global/auth-kit": "^1.2.0",
     "@safe-global/protocol-kit": "^1.0.1",
     "@safe-global/safe-core-sdk-types": "^2.0.0",
     "@testing-library/jest-dom": "^5.16.5",
@@ -32,10 +33,10 @@
     "@walletconnect/sign-client": "^2.7.7",
     "@walletconnect/types": "^2.7.7",
     "@walletconnect/utils": "^2.7.7",
-    "@web3auth/base": "^5.2.0",
+    "@web3auth/base": "^6.1.7",
     "@web3auth/metamask-adapter": "^5.2.0",
-    "@web3auth/modal": "^5.2.1",
-    "@web3auth/openlogin-adapter": "^5.2.1",
+    "@web3auth/modal": "^6.1.7",
+    "@web3auth/openlogin-adapter": "^6.1.7",
     "@web3auth/torus-evm-adapter": "^5.2.0",
     "@web3auth/torus-wallet-connector-plugin": "^5.2.0",
     "@web3auth/wallet-connect-v2-adapter": "^5.2.0",
@@ -63,7 +64,8 @@
     "styled-components": "^5.3.6",
     "typescript": "^4.4.2",
     "url": "^0.11.0",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "web3": "^4.0.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -95,6 +97,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.45.1",

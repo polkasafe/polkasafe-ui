@@ -4,21 +4,17 @@
 import { Button, Modal } from 'antd';
 import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useModalContext } from 'src/context/ModalContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { DEFAULT_MULTISIG_NAME } from 'src/global/default';
-import { DeleteIcon, EditIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
+import { DeleteIcon, OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 
 import RemoveMultisigAddress from './RemoveMultisig';
-import RenameMultisig from './RenameMultisig';
 
 const Details = () => {
 
-	const { activeMultisig, multisigAddresses, multisigSettings } = useGlobalUserDetailsContext();
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const [openRemoveModal, setOpenRemoveModal] = useState<boolean>(false);
-
-	const { openModal } = useModalContext();
 
 	const RemoveSafeModal: FC = () => {
 		return (
@@ -41,7 +37,7 @@ const Details = () => {
 					open={openRemoveModal}
 					className={'w-auto md:min-w-[500px] scale-90'}
 				>
-					<RemoveMultisigAddress onCancel={() => setOpenRemoveModal(false)}/>
+					<RemoveMultisigAddress onCancel={() => setOpenRemoveModal(false)} />
 				</Modal>
 			</>
 		);
@@ -70,10 +66,10 @@ const Details = () => {
 					<div className='flex items-center justify-between gap-x-5 mt-7'>
 						<span>Safe Name:</span>
 						<span className='text-white flex items-center gap-x-3'>
-							{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
-							<button onClick={() => openModal('Rename Multisig', <RenameMultisig name={multisigSettings?.[activeMultisig]?.name || multisigAddresses.find((item) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME} />)}>
+							{multisigAddresses?.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+							{/* <button onClick={() => openModal('Rename Multisig', <RenameMultisig name={multisigSettings?.[activeMultisig]?.name || multisigAddresses.find((item: any) => item.address === activeMultisig)?.name || DEFAULT_MULTISIG_NAME} />)}>
 								<EditIcon className='text-primary cursor-pointer' />
-							</button>
+							</button> */}
 						</span>
 					</div>
 				}

@@ -13,7 +13,6 @@ import { useGlobalWeb3Context } from 'src/context';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { chainProperties } from 'src/global/networkConstants';
-import useGetWalletAccounts from 'src/hooks/useGetWalletAccounts';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import AddressQr from 'src/ui-components/AddressQr';
 import Balance from 'src/ui-components/Balance';
@@ -22,47 +21,41 @@ import { CopyIcon, QRIcon, WarningCircleIcon } from 'src/ui-components/CustomIco
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
-import { setSigner } from 'src/utils/setSigner';
-import { transferFunds } from 'src/utils/transferFunds';
 import styled from 'styled-components';
 
 import { ParachainIcon } from '../NetworksDropdown';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 
 const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: string, onCancel: () => void, setNewTxn?: React.Dispatch<React.SetStateAction<boolean>> }) => {
-	const { api, apiReady, network } = useGlobalApiContext();
-	const { activeMultisig, multisigAddresses, addressBook, loggedInWallet } = useGlobalUserDetailsContext();
-	const { accounts } = useGetWalletAccounts(loggedInWallet);
+	const { network } = useGlobalApiContext();
+	const { activeMultisig, multisigAddresses, addressBook } = useGlobalUserDetailsContext();
 	const { web3AuthUser } = useGlobalWeb3Context();
 
 	const [selectedSender, setSelectedSender] = useState(getEncodedAddress(addressBook[0].address, network) || '');
 	const [amount, setAmount] = useState(new BN(0));
-	const [loading, setLoading] = useState(false);
+	const [loading] = useState(false);
 	const [showQrModal, setShowQrModal] = useState(false);
-	const [success, setSuccess] = useState(false);
-	const [failure, setFailure] = useState(false);
+	const [success] = useState(false);
+	const [failure] = useState(false);
 	const [isValidSender, setIsValidSender] = useState(true);
-	const [loadingMessages, setLoadingMessages] = useState<string>('');
-	const [txnHash, setTxnHash] = useState<string>('');
+	const [loadingMessages] = useState<string>('');
+	const [txnHash] = useState<string>('');
 	const [selectedAccountBalance, setSelectedAccountBalance] = useState<string>('');
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
-		if(!getSubstrateAddress(selectedSender)){
+		if (!getSubstrateAddress(selectedSender)) {
 			setIsValidSender(false);
 		}
-		else{
+		else {
 			setIsValidSender(true);
 		}
 	}, [selectedSender]);
 
-	const autocompleteAddresses: DefaultOptionType[] = web3AuthUser ? web3AuthUser.accounts.map(item => ({
+	const autocompleteAddresses: DefaultOptionType[] = web3AuthUser?.accounts.map(item => ({
 		label: <AddressComponent name={''} address={item} />,
 		value: item
-	})) : accounts?.map((account) => ({
-		label: <AddressComponent name={account.name} address={account.address} />,
-		value: account.address
-	}));
+	})) || [];
 
 	const addSenderHeading = () => {
 		const elm = document.getElementById('recipient_list');
@@ -78,32 +71,6 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 					parentElm.insertBefore(recipientHeading, parentElm.firstChild!);
 				}
 			}
-		}
-	};
-
-	const handleSubmit = async () => {
-		if(!api || !apiReady ) return;
-
-		await setSigner(api, loggedInWallet);
-
-		setLoading(true);
-		try {
-			await transferFunds({
-				amount: amount,
-				api,
-				network,
-				recepientAddress: multisig?.address || activeMultisig,
-				senderAddress: getSubstrateAddress(selectedSender) || selectedSender,
-				setLoadingMessages,
-				setTxnHash
-			});
-			setLoading(false);
-			setSuccess(true);
-		} catch (error) {
-			console.log(error);
-			setLoading(false);
-			setFailure(true);
-			setTimeout(() => setFailure(false), 5000);
 		}
 	};
 
@@ -125,7 +92,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 				waitMessage='Your multisig is now on-chain.
 				You can now, create a proxy which will allow you to change multisig configurations later.
 				'
-				amount={amount}
+				amount={amount as any}
 				sender={selectedSender}
 				recipient={multisig?.address || activeMultisig}
 				created_at={new Date()}
@@ -151,11 +118,11 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 								<Balance address={multisig?.address || activeMultisig} />
 							</div>
 
-							<Form disabled={ loading }>
+							<Form disabled={loading}>
 								<section className='mt-6'>
 									<div className='flex items-center justify-between mb-2'>
 										<label className='text-primary font-normal text-xs leading-[13px] block'>Sending from</label>
-										<Balance address={selectedSender} onChange={setSelectedAccountBalance}/>
+										<Balance address={selectedSender} onChange={setSelectedAccountBalance} />
 									</div>
 									<div className='flex items-center gap-x-[10px]'>
 										<div className='w-full'>
@@ -177,7 +144,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 														defaultValue={getEncodedAddress(addressBook[0]?.address, network) || ''}
 													/>
 													<div className='absolute right-2'>
-														<button onClick={() => copyText(selectedSender, true, network)}>
+														<button onClick={() => copyText(selectedSender)}>
 															<CopyIcon className='mr-2 text-primary' />
 														</button>
 														<QrModal />
@@ -188,7 +155,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 									</div>
 								</section>
 
-								<BalanceInput fromBalance={selectedAccountBalance} defaultValue={String(chainProperties[network]?.existentialDeposit)} className='mt-6' placeholder={String(chainProperties[network]?.existentialDeposit)} onChange={(balance) => setAmount(balance) } />
+								<BalanceInput fromBalance={selectedAccountBalance} defaultValue={String(chainProperties[network])} className='mt-6' placeholder={String(chainProperties[network])} onChange={(balance) => setAmount(balance as any)} />
 
 								<section className='mt-6'>
 									<label className='text-primary font-normal text-xs leading-[13px] block mb-3'>Existential Deposit</label>
@@ -202,13 +169,13 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 													<Input
 														disabled={true}
 														type='number'
-														placeholder={String(chainProperties[network].existentialDeposit)}
+														placeholder={String(chainProperties[network])}
 														className="text-sm font-normal leading-[15px] outline-0 p-2.5 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white pr-24"
 														id="existential_deposit"
 													/>
 													<div className='absolute right-0 text-white px-3 flex items-center justify-center'>
 														<ParachainIcon src={chainProperties[network].logo} className='mr-2' />
-														<span>{ chainProperties[network].tokenSymbol}</span>
+														<span>{chainProperties[network].ticker}</span>
 													</div>
 												</div>
 											</Form.Item>
@@ -218,7 +185,7 @@ const ExistentialDeposit = ({ className, onCancel, setNewTxn }: { className?: st
 
 								<section className='flex items-center gap-x-5 justify-center mt-10'>
 									<CancelBtn loading={loading} className='w-[250px]' onClick={onCancel} />
-									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero() ||  amount.gte(new BN(selectedAccountBalance))}  loading={loading} onClick={handleSubmit} className='w-[250px]' title='Make Transaction' />
+									<ModalBtn disabled={!selectedSender || !isValidSender || amount.isZero() || amount.gte(new BN(selectedAccountBalance))} loading={loading} onClick={() => { }} className='w-[250px]' title='Make Transaction' />
 								</section>
 							</Form>
 						</div>

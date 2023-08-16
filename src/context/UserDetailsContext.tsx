@@ -2,145 +2,117 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import dayjs from 'dayjs';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
-import { IUser, Triggers, UserDetailsContextType, Wallet } from 'src/types';
-import Loader from 'src/ui-components/Loader';
-import logout from 'src/utils/logout';
+import { chainProperties } from 'src/global/networkConstants';
+import { UserDetailsContextType, Wallet } from 'src/types';
 
 import { useGlobalApiContext } from './ApiContext';
+import { useGlobalWeb3Context } from './Web3Auth';
 
-const initialUserDetailsContext : UserDetailsContextType = {
+const initialUserDetailsContext: UserDetailsContextType = {
 	activeMultisig: localStorage.getItem('active_multisig') || '',
 	address: localStorage.getItem('address') || '',
 	addressBook: [],
 	createdAt: new Date(),
-	isProxy: false,
-	loggedInWallet: Wallet.POLKADOT,
+	loggedInWallet: Wallet.WEB3AUTH,
 	multisigAddresses: [],
-	multisigSettings: {},
-	notification_preferences: {
-		channelPreferences: {},
-		triggerPreferences:{
-			[Triggers.CANCELLED_TRANSACTION]: {
-				enabled: false,
-				name: Triggers.CANCELLED_TRANSACTION
-			},
-			[Triggers.EXECUTED_TRANSACTION]: {
-				enabled: false,
-				name: Triggers.EXECUTED_TRANSACTION
-			},
-			[Triggers.EDIT_MULTISIG_USERS_EXECUTED]: {
-				enabled: false,
-				name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
-			},
-			[Triggers.EXECUTED_PROXY]:{
-				enabled: false,
-				name: Triggers.EXECUTED_PROXY
-			},
-			[Triggers.INIT_MULTISIG_TRANSFER]:{
-				enabled: false,
-				name: Triggers.INIT_MULTISIG_TRANSFER
-			},
-			[Triggers.CREATED_PROXY]:{
-				enabled: false,
-				name: Triggers.CREATED_PROXY
-			},
-			[Triggers.EDIT_MULTISIG_USERS_START]:{
-				enabled: false,
-				name: Triggers.EDIT_MULTISIG_USERS_START
-			},
-			[Triggers.APPROVAL_REMINDER]:{
-				enabled: false,
-				name: Triggers.APPROVAL_REMINDER
-			}
-		}
-	},
-	notifiedTill: localStorage.getItem('notifiedTill') ? dayjs(localStorage.getItem('notifiedTill')).toDate() : null,
-	setUserDetailsContextState : (): void => {
+	setUserDetailsContextState: (): void => {
 		throw new Error('setUserDetailsContextState function must be overridden');
 	}
 };
 
-export const UserDetailsContext = createContext(initialUserDetailsContext);
+export const UserDetailsContext: React.Context<UserDetailsContextType> = createContext(initialUserDetailsContext);
 
 export function useGlobalUserDetailsContext() {
 	return useContext(UserDetailsContext);
 }
 
 export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) => {
-	const navigate = useNavigate();
-	const { network } = useGlobalApiContext();
-
 	const [userDetailsContextState, setUserDetailsContextState] = useState(initialUserDetailsContext);
+	const [activeMultisigTxs, setActiveMultisigTxs] = useState<any[]>([]);
+	const [activeMultisigData, setActiveMultisigData] = useState<any>({});
+	const { ethProvider } = useGlobalWeb3Context();
+	const { network } = useGlobalApiContext();
+	const { switchChain, addChain } = useGlobalWeb3Context();
+
 	const [loading, setLoading] = useState(false);
 
-	const connectAddress = useCallback(async () => {
-		if(!localStorage.getItem('signature') || !localStorage.getItem('address')) return;
+	const address = localStorage.getItem('address');
+	const signature = localStorage.getItem('signature');
 
+	const fetchUserData = async () => {
 		setLoading(true);
-		const connectAddressRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddress`, {
-			headers: firebaseFunctionsHeader(network),
+		console.log('connectAddressEth');
+		const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
+			headers: firebaseFunctionsHeader(network, address!, signature!),
 			method: 'POST'
+		}).then(res => res.json());
+
+		if (data?.multisigAddresses.length > 0) localStorage.setItem('activeMultisig', data?.multisigAddresses[0].address);
+
+		setUserDetailsContextState((prevState) => {
+			return {
+				...prevState,
+				activeMultisig: data?.multisigAddresses.length > 0 ? data?.multisigAddresses[0].address : '',
+				address: data?.address,
+				addressBook: data?.addressBook || [],
+				createdAt: data?.created_at,
+				loggedInWallet: Wallet.WEB3AUTH,
+				multisigAddresses: data?.multisigAddresses
+			};
 		});
-
-		const { data: userData, error: connectAddressErr } = await connectAddressRes.json() as { data: IUser, error: string };
-
-		if(!connectAddressErr && userData){
-			setUserDetailsContextState((prevState) => {
-				return {
-					...prevState,
-					activeMultisig: localStorage.getItem('active_multisig') || '',
-					address: userData?.address,
-					addressBook: userData?.addressBook || [],
-					createdAt: userData?.created_at,
-					loggedInWallet: localStorage.getItem('logged_in_wallet') as Wallet || Wallet.POLKADOT,
-					multisigAddresses: userData?.multisigAddresses,
-					multisigSettings: userData?.multisigSettings || {},
-					notification_preferences: userData?.notification_preferences || initialUserDetailsContext.notification_preferences
-				};
-			});
-		}else {
-			logout();
-			setUserDetailsContextState(prevState => {
-				return {
-					...prevState,
-					activeMultisig: localStorage.getItem('active_multisig') || '',
-					address: '',
-					addressBook: [],
-					loggedInWallet: Wallet.POLKADOT,
-					multisigAddresses: [],
-					multisigSettings: {}
-				};
-			});
-			navigate('/');
-		}
 		setLoading(false);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+	};
+
+	useEffect(() => {
+		if (address) fetchUserData();
+		const chains = async () => {
+			await addChain(network);
+			await switchChain(chainProperties[network].chainId);
+		};
+
+		chains();
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [network]);
 
 	useEffect(() => {
-		if(localStorage.getItem('signature')){
-			connectAddress();
-		} else {
-			logout();
+		if (userDetailsContextState.activeMultisig && ethProvider) fetchMultisigData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [userDetailsContextState.activeMultisig, ethProvider]);
+
+	const fetchMultisigData = async () => {
+		try {
+			setLoading(true);
+			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAllTransaction`, {
+				headers: {
+					'Accept': 'application/json',
+					'Acess-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json',
+					'x-address': userDetailsContextState.address,
+					'x-api-key': '47c058d8-2ddc-421e-aeb5-e2aa99001949',
+					'x-multisig': userDetailsContextState.activeMultisig,
+					'x-signature': localStorage.getItem('signature')!,
+					'x-source': 'polkasafe'
+				},
+				method: 'GET'
+			}).then(res => res.json());
+			const safeBalance = await ethProvider?.getBalance(userDetailsContextState.activeMultisig);
+			setActiveMultisigData({ safeBalance });
+
+			setActiveMultisigTxs(data);
 			setLoading(false);
-			navigate('/');
+		} catch (err) {
+			setLoading(false);
+			console.log('err from fetchMultisigData', err);
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [connectAddress]);
+	};
 
 	return (
-		<UserDetailsContext.Provider value={{ ...userDetailsContextState, setUserDetailsContextState }}>
-			{loading ?
-				<main className="h-screen w-screen flex items-center justify-center text-2xl bg-bg-main text-white">
-					<Loader size='large' />
-				</main> :
-				children
-			}
+		<UserDetailsContext.Provider value={{ activeMultisigData, activeMultisigTxs, fetchMultisigData, fetchUserData, loading, ...userDetailsContextState, setLoading, setUserDetailsContextState }}>
+			{children}
 		</UserDetailsContext.Provider>
 	);
 };

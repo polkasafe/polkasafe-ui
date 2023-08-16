@@ -24,16 +24,16 @@ const NetworkCard: FC<INetworkCardProps> = ({ isCardToken, onClick, selectedNetw
 		})}>
 			<p className='flex items-center gap-x-[6px]'>
 				<span className='h-4 w-4'>
-					<ParachainIcon src={chainProperties[network].logo} />
+					{chainProperties[network] && <ParachainIcon src={chainProperties[network].logo} />}
 				</span>
 				<span className={classNames('font-medium text-sm capitalize', {
 					'text-primary': isSelected,
 					'text-white': !isSelected
 				})}>
-					{isCardToken? chainProperties[network].tokenSymbol: network}
+					{isCardToken ? chainProperties[network].ticker : network}
 				</span>
 			</p>
-			{isSelected? <OutlineCheckIcon className='text-primary' />: null}
+			{isSelected ? <OutlineCheckIcon className='text-primary' /> : null}
 		</button>
 	);
 };

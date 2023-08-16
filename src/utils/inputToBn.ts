@@ -10,23 +10,23 @@ const ZERO = new BN(0);
 const TWO = new BN(2);
 const TEN = new BN(10);
 
-function getGlobalMaxValue (): BN {
+function getGlobalMaxValue(): BN {
 	return TWO
 		.pow(new BN(BITLENGTH))
 		.subn(1);
 }
 
-function isValidNumber (bn: BN, isZeroable?: boolean): boolean {
+function isValidNumber(bn: BN, isZeroable?: boolean): boolean {
 	const bnEqZero = !isZeroable && bn.eq(ZERO);
 	if (
 		// cannot be negative
 		bn.lt(ZERO) ||
-        // cannot be > than allowed max
-        !bn.lt(getGlobalMaxValue()) ||
-        // check if 0 and it should be a value
-        bnEqZero ||
-        // check that the bitlengths fit
-        bn.bitLength() > BITLENGTH
+		// cannot be > than allowed max
+		!bn.lt(getGlobalMaxValue()) ||
+		// check if 0 and it should be a value
+		bnEqZero ||
+		// check that the bitlengths fit
+		bn.bitLength() > BITLENGTH
 	) {
 		return false;
 	}
@@ -34,8 +34,8 @@ function isValidNumber (bn: BN, isZeroable?: boolean): boolean {
 	return true;
 }
 
-export function inputToBn (input: string, network:string, isZeroable?: boolean): [BN, boolean] {
-	const tokenDecimal = chainProperties[network]?.tokenDecimals;
+export function inputToBn(input: string, network: string, isZeroable?: boolean): [BN, boolean] {
+	const tokenDecimal = chainProperties[network]?.decimals;
 	const tokenDecimalBN = new BN(tokenDecimal);
 
 	const isDecimalValue = input.match(/^(\d+)\.(\d+)$/);

@@ -23,15 +23,15 @@ const Notifications = () => {
 
 	const { network } = useGlobalApiContext();
 	const { pathname } = useLocation();
-	const { notification_preferences, address, setUserDetailsContextState } = useGlobalUserDetailsContext();
+	const { address, setUserDetailsContextState } = useGlobalUserDetailsContext();
 	const [notifyAfter, setNotifyAfter] = useState<number>(8);
-	const emailPreference = notification_preferences?.channelPreferences?.[CHANNEL.EMAIL];
+	const emailPreference = '' as any;
 	const [email, setEmail] = useState<string>(emailPreference?.handle || '');
 	const [emailValid, setEmailValid] = useState<boolean>(true);
 	const [newTxn, setNewTxn] = useState<boolean>(false);
 	const [txnExecuted, setTxnExecuted] = useState<boolean>(false);
 	const [cancelledTxn, setCancelledTxn] = useState<boolean>(false);
-	const [scheduleTxn, setScheduleTxn]=useState<boolean>(false);
+	const [scheduleTxn, setScheduleTxn] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [verificationLoading, setVerificationLoading] = useState<boolean>(false);
 
@@ -41,66 +41,31 @@ const Notifications = () => {
 	const [remindersFromOthers, setReminderFromOthers] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [resendEmail, setResendEmail] = useState<boolean>(emailPreference?.verified || false);
-	const [enabledUpdate, setEnableUpdate] = useState<boolean>(false);
+	const [enabledUpdate] = useState<boolean>(false);
 
 	const emailVerificationRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 	useEffect(() => {
-		if(email){
+		if (email) {
 			const validEmail = emailVerificationRegex.test(email);
-			if(validEmail){
+			if (validEmail) {
 				setEmailValid(true);
 			}
-			else{
+			else {
 				setEmailValid(false);
 			}
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [email]);
 
-	useEffect(() => {
-		const triggerPreferences = notification_preferences?.triggerPreferences;
-		if(triggerPreferences){
-			setNewTxn(triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false);
-			setTxnExecuted(triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false);
-			setCancelledTxn(triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false);
-			setScheduleTxn(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false);
-			setNotifyAfter(triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8);
-			setReminderFromOthers(triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false);
-		}
-	}, [notification_preferences]);
-
 	const handleEnableUpdate = () => {
-		if(notification_preferences){
-			const triggerPreferences = notification_preferences.triggerPreferences;
-			const oldPreferences = {
-				cancelledTxn:triggerPreferences[Triggers.CANCELLED_TRANSACTION]?.enabled || false,
-				newTxn:triggerPreferences[Triggers.INIT_MULTISIG_TRANSFER]?.enabled || false,
-				notifyAfter: triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.hoursToRemindIn || 8,
-				remindersFromOthers: triggerPreferences[Triggers.APPROVAL_REMINDER]?.enabled || false,
-				scheduleTxn:triggerPreferences[Triggers.SCHEDULED_APPROVAL_REMINDER]?.enabled || false,
-				txnExecuted:triggerPreferences[Triggers.EXECUTED_TRANSACTION]?.enabled || false
-			};
-			const newPreferences = {
-				cancelledTxn,
-				newTxn,
-				notifyAfter,
-				remindersFromOthers,
-				scheduleTxn,
-				txnExecuted
-			};
-			if(JSON.stringify(oldPreferences) === JSON.stringify(newPreferences)){
-				setEnableUpdate(false);
-				return;
-			}
-			setEnableUpdate(true);
-		}
+
 	};
 
 	useEffect(() => {
 		handleEnableUpdate();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers, notification_preferences]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [cancelledTxn, newTxn, scheduleTxn, txnExecuted, notifyAfter, remindersFromOthers]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const notifyAfterHours: MenuProps['items'] = [8, 12, 24, 48].map((hr) => {
@@ -117,16 +82,16 @@ const Notifications = () => {
 
 	const updateNotificationPreferences = async () => {
 
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
-				const newPreferences: {[index: string]: IUserNotificationTriggerPreferences} = {
+			else {
+				const newPreferences: { [index: string]: IUserNotificationTriggerPreferences } = {
 					[Triggers.CANCELLED_TRANSACTION]: {
 						enabled: cancelledTxn,
 						name: Triggers.CANCELLED_TRANSACTION
@@ -139,28 +104,28 @@ const Notifications = () => {
 						enabled: txnExecuted,
 						name: Triggers.EDIT_MULTISIG_USERS_EXECUTED
 					},
-					[Triggers.EXECUTED_PROXY]:{
+					[Triggers.EXECUTED_PROXY]: {
 						enabled: txnExecuted,
 						name: Triggers.EXECUTED_PROXY
 					},
-					[Triggers.INIT_MULTISIG_TRANSFER]:{
+					[Triggers.INIT_MULTISIG_TRANSFER]: {
 						enabled: newTxn,
 						name: Triggers.INIT_MULTISIG_TRANSFER
 					},
-					[Triggers.CREATED_PROXY]:{
+					[Triggers.CREATED_PROXY]: {
 						enabled: newTxn,
 						name: Triggers.CREATED_PROXY
 					},
-					[Triggers.SCHEDULED_APPROVAL_REMINDER]:{
+					[Triggers.SCHEDULED_APPROVAL_REMINDER]: {
 						enabled: scheduleTxn,
 						hoursToRemindIn: notifyAfter,
 						name: Triggers.SCHEDULED_APPROVAL_REMINDER
 					},
-					[Triggers.EDIT_MULTISIG_USERS_START]:{
+					[Triggers.EDIT_MULTISIG_USERS_START]: {
 						enabled: newTxn,
 						name: Triggers.EDIT_MULTISIG_USERS_START
 					},
-					[Triggers.APPROVAL_REMINDER]:{
+					[Triggers.APPROVAL_REMINDER]: {
 						enabled: remindersFromOthers,
 						name: Triggers.APPROVAL_REMINDER
 					}
@@ -177,7 +142,7 @@ const Notifications = () => {
 
 				const { data: updateNotificationTriggerData, error: updateNotificationTriggerError } = await updateNotificationTriggerRes.json() as { data: string, error: string };
 
-				if(updateNotificationTriggerError) {
+				if (updateNotificationTriggerError) {
 					queueNotification({
 						header: 'Failed!',
 						message: updateNotificationTriggerError,
@@ -187,13 +152,13 @@ const Notifications = () => {
 					return;
 				}
 
-				if(updateNotificationTriggerData){
+				if (updateNotificationTriggerData) {
 					queueNotification({
 						header: 'Success!',
 						message: 'Your Notification Preferences has been Updated.',
 						status: NotificationStatus.SUCCESS
 					});
-					setUserDetailsContextState(prev => ({
+					setUserDetailsContextState((prev: any) => ({
 						...prev,
 						notification_preferences: { ...prev.notification_preferences, triggerPreferences: newPreferences }
 					}));
@@ -201,7 +166,7 @@ const Notifications = () => {
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			queueNotification({
 				header: 'Failed!',
@@ -214,20 +179,20 @@ const Notifications = () => {
 
 	const verifyEmail = async () => {
 
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 				setVerificationLoading(true);
 
 				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/notify`, {
 					body: JSON.stringify({
-						args:{
+						args: {
 							address,
 							email
 						},
@@ -239,7 +204,7 @@ const Notifications = () => {
 
 				const { data: verifyEmailUpdate, error: verifyTokenError } = await verifyTokenRes.json() as { data: string, error: string };
 
-				if(verifyTokenError) {
+				if (verifyTokenError) {
 					queueNotification({
 						header: 'Failed!',
 						message: verifyTokenError,
@@ -249,7 +214,7 @@ const Notifications = () => {
 					return;
 				}
 
-				if(verifyEmailUpdate){
+				if (verifyEmailUpdate) {
 					queueNotification({
 						header: 'Success!',
 						message: 'Verification Email Sent.',
@@ -257,23 +222,25 @@ const Notifications = () => {
 					});
 					setResendEmail(false);
 					setTimeout(() => setResendEmail(true), 60000);
-					setUserDetailsContextState(prev => ({
+					setUserDetailsContextState((prev: any) => ({
 						...prev,
-						notification_preferences: { ...prev.notification_preferences, channelPreferences: {
-							...prev.notification_preferences.channelPreferences,
-							[CHANNEL.EMAIL]: {
-								enabled: false,
-								handle: email,
-								name: CHANNEL.EMAIL,
-								verified: false
+						notification_preferences: {
+							...prev.notification_preferences, channelPreferences: {
+								...prev.notification_preferences.channelPreferences,
+								[CHANNEL.EMAIL]: {
+									enabled: false,
+									handle: email,
+									name: CHANNEL.EMAIL,
+									verified: false
+								}
 							}
-						} }
+						}
 					}));
 					setVerificationLoading(false);
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			queueNotification({
 				header: 'Failed!',
@@ -286,15 +253,15 @@ const Notifications = () => {
 
 	const getVerifyToken = async (channel: CHANNEL) => {
 
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 
 				const verifyTokenRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getChannelVerifyToken`, {
 					body: JSON.stringify({
@@ -306,7 +273,7 @@ const Notifications = () => {
 
 				const { data: verifyToken, error: verifyTokenError } = await verifyTokenRes.json() as { data: string, error: string };
 
-				if(verifyTokenError) {
+				if (verifyTokenError) {
 					queueNotification({
 						header: 'Failed!',
 						message: verifyTokenError,
@@ -315,12 +282,12 @@ const Notifications = () => {
 					return;
 				}
 
-				if(verifyToken){
+				if (verifyToken) {
 					return verifyToken;
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			console.log('ERROR', error);
 			queueNotification({
 				header: 'Failed!',
@@ -344,7 +311,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary'/> How to add Telegram Bot</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><TelegramIcon className='text-text_secondary' /> How to add Telegram Bot</h3>}
 					open={openTelegramModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
@@ -368,7 +335,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><DiscordIcon className='text-text_secondary'/> How to add Discord Bot</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><DiscordIcon className='text-text_secondary' /> How to add Discord Bot</h3>}
 					open={openDiscordModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
@@ -392,7 +359,7 @@ const Notifications = () => {
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><SlackIcon className='text-text_secondary'/> How to add Slack Bot</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold flex items-center gap-x-2'><SlackIcon className='text-text_secondary' /> How to add Slack Bot</h3>}
 					open={openSlackModal}
 					className={' w-auto md:min-w-[500px] max-w-[600px] scale-90'}
 				>
@@ -424,7 +391,7 @@ const Notifications = () => {
 						<div className='flex items-center gap-x-3'>
 							<Checkbox disabled={loading} className='text-white m-0 [&>span>span]:border-primary' checked={scheduleTxn} onChange={(e) => setScheduleTxn(e.target.checked)}>For Pending Transactions remind signers every:</Checkbox>
 							<Dropdown disabled={!scheduleTxn || loading} className='text-white' trigger={['click']} menu={{ items: notifyAfterHours, onClick: onNotifyHoursChange }} >
-								<button className={`'flex items-center gap-x-2 border ${!scheduleTxn || loading ? 'border-text_secondary': 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className={`hidden md:inline-flex text-base ${!scheduleTxn || loading ? 'text-text_secondary': 'text-primary'}`}/></button>
+								<button className={`'flex items-center gap-x-2 border ${!scheduleTxn || loading ? 'border-text_secondary' : 'border-primary'} rounded-md px-3 py-1 text-sm leading-[15px] text-text_secondary`}>{`${notifyAfter} ${notifyAfter === 1 ? 'hr' : 'hrs'}`} <CircleArrowDownIcon className={`hidden md:inline-flex text-base ${!scheduleTxn || loading ? 'text-text_secondary' : 'text-primary'}`} /></button>
 							</Dropdown>
 						</div>
 					</div>
@@ -462,7 +429,7 @@ const Notifications = () => {
 				</Form>
 				{emailPreference?.verified && emailPreference?.handle === email &&
 					<div className='flex items-center col-span-2 ml-5 gap-x-2'>
-						<CheckOutlined className='text-success'/>
+						<CheckOutlined className='text-success' />
 						<div className='text-white'>Email Verified!</div>
 					</div>
 				}
@@ -477,21 +444,21 @@ const Notifications = () => {
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><TelegramIcon /> Telegram Notifications</span></div>
 				<div className='col-span-5 flex items-center'>
-					<TelegramModal/>
+					<TelegramModal />
 					<span>to a Telegram chat to get Telegram notifications</span>
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><DiscordIcon /> Discord Notifications</span></div>
 				<div className='col-span-5 flex items-center'>
-					<DiscordModal/>
+					<DiscordModal />
 					<span>to a Discord channel to get Discord notifications</span>
 				</div>
 			</div>
 			<div className='grid grid-cols-10 bg-bg-main rounded-lg p-4 text-white'>
 				<div className='col-span-3'><span className='flex items-center gap-x-2 text-text_secondary'><SlackIcon /> Slack Notifications</span></div>
 				<div className='col-span-5 flex items-center'>
-					<SlackModal/>
+					<SlackModal />
 					<span>to a Slack channel to get Slack notifications</span>
 				</div>
 			</div>

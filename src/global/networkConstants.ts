@@ -2,79 +2,54 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
-import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
-import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
-import rococoLogo from 'src/assets/parachains-logos/rococo-logo.svg';
-import westendLogo from 'src/assets/parachains-logos/westend-logo.png';
+import { CHAIN_NAMESPACES } from '@web3auth/base';
+import ethereumLogo from 'src/assets/eth.png';
+import polygonLogo from 'src/assets/polygon.png';
 import { ChainPropType } from 'src/types';
 
-export const networks = {
-	ASTAR: 'astar',
-	KUSAMA: 'kusama',
-	POLKADOT: 'polkadot',
-	ROCOCO: 'rococo',
-	WESTEND: 'westend'
-};
-
+export enum NETWORK {
+	GOERLI = 'goerli',
+	POLYGON = 'polygon',
+	ASTAR = 'astar'
+}
 export const tokenSymbol = {
-	ASTR: 'ASTR',
-	DOT: 'DOT',
-	KSM: 'KSM',
-	ROC: 'ROC',
-	WND: 'WND'
+	ASTAR: 'ASTR',
+	GOERLI: 'GOER',
+	POLYGON: 'MATIC'
 };
 
 export const chainProperties: ChainPropType = {
-	[networks.POLKADOT]: {
-		blockTime: 6000,
-		chainId: 0,
-		existentialDeposit: '1.00',
-		logo: polkadotLogo,
-		rpcEndpoint: 'wss://rpc.polkadot.io',
-		ss58Format: 0,
-		tokenDecimals: 10,
-		tokenSymbol: tokenSymbol.DOT
+	[NETWORK.GOERLI]: {
+		blockExplorer: 'https://goerli.etherscan.io',
+		chainId: '0x5',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		decimals: 18,
+		displayName: 'Goerli',
+		logo: ethereumLogo,
+		rpcTarget: 'https://goerli.blockpi.network/v1/rpc/public',
+		ticker: 'ETH',
+		tickerName: 'GoerliETH'
 	},
-	[networks.KUSAMA]: {
-		blockTime: 6000,
-		chainId: 0,
-		existentialDeposit: '0.000333333333',
-		logo: kusamaLogo,
-		rpcEndpoint: 'wss://kusama-rpc.polkadot.io',
-		ss58Format: 2,
-		tokenDecimals: 12,
-		tokenSymbol: tokenSymbol.KSM
+	[NETWORK.POLYGON]: {
+		blockExplorer: 'https://polygonscan.com/',
+		chainId: '0x89',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		decimals: 18,
+		displayName: 'Polygon',
+		logo: polygonLogo,
+		rpcTarget: 'https://polygon-rpc.com/',
+		ticker: 'MATIC',
+		tickerName: 'Matic'
 	},
-	[networks.WESTEND]: {
-		blockTime: 6000,
-		chainId: 0,
-		existentialDeposit: '0.0100',
-		logo: westendLogo,
-		rpcEndpoint: 'wss://westend-rpc.dwellir.com',
-		ss58Format: 42,
-		tokenDecimals: 12,
-		tokenSymbol: tokenSymbol.WND
-	},
-	[networks.ROCOCO]: {
-		blockTime: 6000,
-		chainId: 0,
-		existentialDeposit: '0.000033333333',
-		logo: rococoLogo,
-		rpcEndpoint: 'wss://rococo-rpc.polkadot.io',
-		ss58Format: 42,
-		tokenDecimals: 12,
-		tokenSymbol: tokenSymbol.ROC
-	},
-	[networks.ASTAR]: {
-		blockTime: 12000,
-		chainId: 0,
-		existentialDeposit: '0.000000000001',
-		logo: astarLogo,
-		rpcEndpoint: 'wss://astar.api.onfinality.io/public-ws',
-		ss58Format: 5,
-		tokenDecimals: 18,
-		tokenSymbol: tokenSymbol.ASTR
+	[NETWORK.ASTAR]: {
+		blockExplorer: 'https://astar.subscan.io',
+		chainId: '0x250',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		decimals: 18,
+		displayName: 'Astar',
+		logo: polygonLogo,
+		rpcTarget: 'https://evm.astar.network/',
+		ticker: 'ASTR',
+		tickerName: 'Astar'
 	}
-
 };

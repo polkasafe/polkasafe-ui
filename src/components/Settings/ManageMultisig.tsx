@@ -5,7 +5,6 @@ import { ArrowRightOutlined } from '@ant-design/icons';
 import React from 'react';
 import Details from 'src/components/Settings/Details';
 import Feedback from 'src/components/Settings/Feedback';
-import AddNewOwnerBtn from 'src/components/Settings/Owners/AddBtn';
 import ListOwners from 'src/components/Settings/Owners/List';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
@@ -19,7 +18,7 @@ const ManageMultisig = () => {
 	const { multisigAddresses, activeMultisig, address: userAddress } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 
-	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
+	const multisig = multisigAddresses.find((item: any) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	return (
 		<div>
@@ -36,9 +35,9 @@ const ManageMultisig = () => {
 										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-primary text-white'}>Multisig</div>
 										<div className='flex items-center text-text_secondary'>
 											{shortenAddress(multisig?.address || '', 10)}
-											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.address || '', true, network)}><CopyIcon /></button>
+											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.address)}><CopyIcon /></button>
 											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.address || '', network)}`} target='_blank' rel="noreferrer" >
-												<ExternalLinkIcon  />
+												<ExternalLinkIcon />
 											</a>
 										</div>
 									</div>
@@ -47,19 +46,19 @@ const ManageMultisig = () => {
 										<div className={'px-2 mb-1 py-[2px] rounded-md text-xs font-medium bg-[#FF79F2] text-highlight'}>Proxy</div>
 										<div className='flex items-center text-text_secondary'>
 											{shortenAddress(multisig?.proxy || '', 10)}
-											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy || '', true, network)}><CopyIcon /></button>
+											<button className='ml-2 mr-1' onClick={() => copyText(multisig?.proxy!)}><CopyIcon /></button>
 											<a href={`https://${network}.subscan.io/account/${getEncodedAddress(multisig?.proxy || '', network)}`} target='_blank' rel="noreferrer" >
-												<ExternalLinkIcon  />
+												<ExternalLinkIcon />
 											</a>
 										</div>
 									</div>
 								</div>
-								<AddNewOwnerBtn disabled={!multisig?.proxy} />
-							</section> :
-							network !== 'astar' &&
-							<section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
-								<p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
-							</section>
+								{/* <AddNewOwnerBtn disabled={!multisig?.proxy} /> */}
+							</section> : <></>
+							// network !== 'astar' &&
+							// <section className='mb-4 text-sm border-2 border-solid border-waiting w-full text-waiting bg-waiting bg-opacity-10 p-2.5 rounded-lg flex items-center gap-x-2'>
+							// <p className='text-white'>Create a proxy to edit or backup your Multisig.</p>
+							// </section>
 						}
 						<section>
 							<ListOwners disabled={!multisig?.proxy} />
@@ -67,15 +66,15 @@ const ManageMultisig = () => {
 					</div>
 				</>}
 			{userAddress &&
-		<div className='mt-[30px] flex gap-x-[30px]'>
-			{multisigAddresses && activeMultisig && multisig &&
-			<section className='w-full'>
-				<Details />
-			</section>}
-			<section className='w-full max-w-[50%]'>
-				<Feedback />
-			</section>
-		</div>}
+				<div className='mt-[30px] flex gap-x-[30px]'>
+					{multisigAddresses && activeMultisig && multisig &&
+						<section className='w-full'>
+							<Details />
+						</section>}
+					<section className='w-full max-w-[50%]'>
+						<Feedback />
+					</section>
+				</div>}
 		</div>
 	);
 };

@@ -5,11 +5,11 @@
 import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC,useState } from 'react';
+import { ethers } from 'ethers';
+import React, { FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
-import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
@@ -22,28 +22,28 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, type }) => {
 	const { network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [note, setNote] = useState<string>('');
-	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
-	const type: 'Sent' | 'Received' = multisig?.address === from || multisig?.proxy === from ? 'Sent' : 'Received';
+
 	const location = useLocation();
 	const hash = location.hash.slice(1);
 
+	console.log('multisig?.type, to', type);
+
 	const handleGetHistoryNote = async () => {
-		try{
+		try {
 			const userAddress = localStorage.getItem('address');
 			const signature = localStorage.getItem('signature');
 
-			if(!userAddress || !signature) {
+			if (!userAddress || !signature) {
 				console.log('ERROR');
 				return;
 			}
-			else{
+			else {
 				setLoading(true);
 				const noteRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
 					body: JSON.stringify({
@@ -55,17 +55,17 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 
 				const { data: noteData, error: noteError } = await noteRes.json() as { data: string, error: string };
 
-				if(noteError) {
+				if (noteError) {
 					console.log('error', noteError);
 					setLoading(false);
 					return;
-				}else {
+				} else {
 					setLoading(false);
 					setNote(noteData);
 				}
 
 			}
-		} catch (error){
+		} catch (error) {
 			setLoading(false);
 			console.log('ERROR', error);
 		}
@@ -81,7 +81,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 					<div
 						onClick={() => {
-							if(!transactionInfoVisible){
+							if (!transactionInfoVisible) {
 								handleGetHistoryNote();
 							}
 							toggleTransactionVisible(!transactionInfoVisible);
@@ -92,7 +92,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					>
 						<p className='col-span-3 flex items-center gap-x-3'>
 							{
-								type === 'Sent'?
+								type === 'sent' ?
 									<span
 										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
 									>
@@ -115,15 +115,15 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								className={classNames(
 									'font-normal text-xs leading-[13px] text-failure',
 									{
-										'text-success': type === 'Received'
+										'text-success': type === 'fund'
 									}
 								)}
 							>
-								{type === 'Sent'? '-': '+'}{amount_token} {token}
+								{type === 'sent' ? '-' : '+'}{ethers.utils.formatEther(amount_token.toString()).toString()} {token}
 							</span>
 						</p>
 						<p className='col-span-2'>
-							{dayjs(created_at).format('lll')}
+							{dayjs(created_at._seconds * 1000).format('lll')}
 						</p>
 						<p className='col-span-2 flex items-center justify-end gap-x-4'>
 							<span className='text-success'>
@@ -131,8 +131,8 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 							</span>
 							<span className='text-white text-sm'>
 								{
-									transactionInfoVisible?
-										<CircleArrowUpIcon />:
+									transactionInfoVisible ?
+										<CircleArrowUpIcon /> :
 										<CircleArrowDownIcon />
 								}
 							</span>
@@ -143,11 +143,11 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					<div>
 						<Divider className='bg-text_secondary my-5' />
 						{
-							type === 'Received'?
+							type === 'fund' ?
 								<ReceivedInfo
 									amount={String(amount_token)}
 									amountType={token}
-									date={dayjs(created_at).format('llll')}
+									date={dayjs(created_at._seconds * 1000).format('llll')}
 									from={from}
 									callHash={callHash}
 									note={note}
@@ -159,7 +159,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 								<SentInfo
 									amount={String(amount_token)}
 									amountType={token}
-									date={dayjs(created_at).format('llll')}
+									date={dayjs(created_at._seconds * 1000).format('llll')}
 									recipient={to}
 									callHash={callHash}
 									note={note}
