@@ -5,7 +5,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { CHAIN_NAMESPACES } from '@web3auth/base';
 import { MetamaskAdapter } from '@web3auth/metamask-adapter';
 import { Web3Auth, Web3AuthOptions } from '@web3auth/modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
@@ -19,16 +18,7 @@ export const WEB3AUTH_CLIENT_ID = 'BBfZ90Z0u4b_o6dDVe5S9KBOoV7SuYE6RqEf9YYQAv78d
 export const WEB3AUTH_SECRET = '720cee4d131652a8fef38f644d5905b259d5518ac0bd9d5da3ad72fd8847cf06';
 
 export const webAuth = new Web3Auth({
-	chainConfig: {
-		blockExplorer: 'https://polygonscan.com/',
-		chainId: '0x89',
-		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		decimals: 18,
-		displayName: 'Polygon',
-		rpcTarget: 'https://polygon-rpc.com/',
-		ticker: 'MATIC',
-		tickerName: 'Matic'
-	},
+	chainConfig: chainProperties[NETWORK.ASTAR],
 	clientId: WEB3AUTH_CLIENT_ID!,
 	uiConfig: {
 		appLogo: 'https://web3auth.io/images/w3a-L-Favicon-1.svg', // @TODO Customise this to our logo
@@ -70,16 +60,7 @@ export const torusPlugin = new TorusWalletConnectorPlugin({
 });
 
 export const metamaskAdapter = new MetamaskAdapter({
-	chainConfig: {
-		blockExplorer: 'https://polygonscan.com/',
-		chainId: '0x89',
-		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		decimals: 18,
-		displayName: 'Polygon',
-		rpcTarget: 'https://polygon-rpc.com/',
-		ticker: 'MATIC',
-		tickerName: 'Matic'
-	},
+	chainConfig: chainProperties[NETWORK.ASTAR],
 	clientId: WEB3AUTH_CLIENT_ID,
 	sessionTime: 3600, // 1 hour in seconds
 	web3AuthNetwork: 'mainnet'
@@ -90,16 +71,7 @@ export const torusWalletAdapter = new TorusWalletAdapter({
 });
 
 export const options: Web3AuthOptions = {
-	chainConfig: {
-		blockExplorer: 'https://polygonscan.com/',
-		chainId: '0x89',
-		chainNamespace: CHAIN_NAMESPACES.EIP155,
-		decimals: 18,
-		displayName: 'Polygon',
-		rpcTarget: 'https://polygon-rpc.com/',
-		ticker: 'MATIC',
-		tickerName: 'Matic'
-	},
+	chainConfig: chainProperties[NETWORK.ASTAR],
 	clientId: WEB3AUTH_CLIENT_ID,
 	uiConfig: {
 		loginMethodsOrder: ['google', 'facebook'],

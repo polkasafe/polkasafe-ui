@@ -41,7 +41,7 @@ const AddressDropdown = () => {
 		setUserDetailsContextState((prevState: any) => {
 			return {
 				...prevState,
-				activeMultisig: localStorage.getItem('active_multisig') || '',
+				activeMultisig: '',
 				address: '',
 				addressBook: [],
 				loggedInWallet: Wallet.WEB3AUTH,

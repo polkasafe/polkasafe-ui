@@ -10,7 +10,7 @@ import { NETWORK } from 'src/global/networkConstants';
  */
 
 export default function getNetwork(): NETWORK {
-	const defaultNetwork = NETWORK.POLYGON;
+	const defaultNetwork = NETWORK.ASTAR;
 	let network = localStorage.getItem('network') as NETWORK || defaultNetwork;
 
 	const possibleNetworks = Object.values(network);

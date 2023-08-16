@@ -59,6 +59,8 @@ export interface UserDetailsContextType {
 	setUserDetailsContextState: Dispatch<SetStateAction<UserDetailsContextType>>;
 	activeMultisigData?: any;
 	activeMultisigTxs?: any[]
+	setLoading?: any
+	loading?: boolean
 }
 
 export enum Wallet {

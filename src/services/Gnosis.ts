@@ -83,7 +83,9 @@ export class GnosisSafeService {
 
 	createSafeTx = async (multisigAddress: string, to: string, value: string, senderAddress: string): Promise<string | null> => {
 		try {
+			console.log('multiAddress', multisigAddress);
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisigAddress });
+			console.log('owners', await safeSdk.getOwners());
 			const signer = await this.ethAdapter.getSignerAddress();
 
 			const safeTransactionData: SafeTransactionDataPartial = {
@@ -147,15 +149,10 @@ export class GnosisSafeService {
 
 	executeTx = async (txHash: string, multisig: string): Promise<TransactionResult | undefined> => {
 		try {
-			console.log('execute receipt', 'running', txHash, multisig);
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisig });
 			const safeTransaction = await this.safeService.getTransaction(txHash);
-			console.log('execute receipt', 'running 1', safeTransaction);
 			const executeTxResponse = await safeSdk.executeTransaction(safeTransaction);
-			console.log('execute receipt executeTxResponse', executeTxResponse);
-			const res = await executeTxResponse.transactionResponse?.wait();
-
-			console.log('execute receipt executeTxResponse res', res);
+			await executeTxResponse.transactionResponse?.wait(10);
 			return executeTxResponse;
 		} catch (err) {
 			console.log('error from executeTx', err);

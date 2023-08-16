@@ -92,7 +92,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
-				fetchMultisigData();
+				await fetchMultisigData();
 				setSuccess(true);
 				setLoadingMessage('Transaction Signed Successfully.');
 			}
@@ -135,7 +135,7 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 					},
 					method: 'POST'
 				}).then(res => res.json());
-				fetchMultisigData();
+				await fetchMultisigData();
 				setSuccess(true);
 				setLoadingMessage('Transaction Executed Successfully.');
 			}

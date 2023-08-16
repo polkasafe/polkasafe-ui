@@ -133,8 +133,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 				status: NotificationStatus.ERROR
 			});
 		}
-		setLoading(true);
-
+		setLoading(false);
 	};
 
 	const AddAddressModal: FC = () => {

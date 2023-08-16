@@ -20,9 +20,11 @@ const ConnectWallet = () => {
 			setLoading(true);
 			const ethProvider = await login();
 			const userData = await handleWeb3AuthConnection(ethProvider);
+			console.log('userData', userData);
 			setUserDetailsContextState((prevState: any) => {
 				return {
 					...prevState,
+					activeMultisig: userData?.multisigAddresses[0].data,
 					address: userData?.address,
 					addressBook: userData?.addressBook || [],
 					createdAt: userData?.created_at,

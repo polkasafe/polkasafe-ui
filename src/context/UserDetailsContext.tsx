@@ -35,10 +35,14 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	const { ethProvider } = useGlobalWeb3Context();
 	const { network } = useGlobalApiContext();
 
+	const [loading, setLoading] = useState(false);
+
 	const address = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 
 	const fetchUserData = async () => {
+		setLoading(true);
+		console.log('connectAddressEth');
 		const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/connectAddressEth`, {
 			headers: firebaseFunctionsHeader(network, address!, signature!),
 			method: 'POST'
@@ -57,6 +61,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 				multisigAddresses: data?.multisigAddresses
 			};
 		});
+		setLoading(false);
 	};
 
 	useEffect(() => {
@@ -71,6 +76,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 	const fetchMultisigData = async () => {
 		try {
+			setLoading(true);
 			const { data } = await fetch(`${FIREBASE_FUNCTIONS_URL}/getAllTransaction`, {
 				headers: {
 					'Accept': 'application/json',
@@ -88,13 +94,15 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 			setActiveMultisigData({ safeBalance });
 
 			setActiveMultisigTxs(data);
+			setLoading(false);
 		} catch (err) {
+			setLoading(false);
 			console.log('err from fetchMultisigData', err);
 		}
 	};
 
 	return (
-		<UserDetailsContext.Provider value={{ activeMultisigData, activeMultisigTxs, fetchMultisigData, fetchUserData, ...userDetailsContextState, setUserDetailsContextState }}>
+		<UserDetailsContext.Provider value={{ activeMultisigData, activeMultisigTxs, fetchMultisigData, fetchUserData, loading, ...userDetailsContextState, setLoading, setUserDetailsContextState }}>
 			{children}
 		</UserDetailsContext.Provider>
 	);

@@ -104,7 +104,9 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage = false }
 				const safeAddress = await gnosisService.createSafe(
 					signatories as [string],
 					threshold!);
-				if (safeAddress === '') return;
+				// if (safeAddress) return;
+				console.log(safeAddress);
+				console.log('txUrl', txUrl);
 				const { data: multisigData, error: multisigError } = await fetch(`${FIREBASE_FUNCTIONS_URL}/createMultisigEth`, {
 					body: JSON.stringify({
 						signatories: signatories,

@@ -9,9 +9,11 @@ import { ChainPropType } from 'src/types';
 
 export enum NETWORK {
 	GOERLI = 'goerli',
-	POLYGON = 'polygon'
+	POLYGON = 'polygon',
+	ASTAR = 'astar'
 }
 export const tokenSymbol = {
+	ASTAR: 'ASTR',
 	GOERLI: 'GOER',
 	POLYGON: 'MATIC'
 };
@@ -38,5 +40,16 @@ export const chainProperties: ChainPropType = {
 		rpcTarget: 'https://polygon-rpc.com/',
 		ticker: 'MATIC',
 		tickerName: 'Matic'
+	},
+	[NETWORK.ASTAR]: {
+		blockExplorer: 'astar.subscan.io',
+		chainId: '0x250',
+		chainNamespace: CHAIN_NAMESPACES.EIP155,
+		decimals: 18,
+		displayName: 'Astar',
+		logo: polygonLogo,
+		rpcTarget: 'https://evm.astar.network/',
+		ticker: 'ASTR',
+		tickerName: 'Astar'
 	}
 };

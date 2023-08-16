@@ -1,11 +1,14 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+// Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
 
 import Identicon from '@polkadot/react-identicon';
 import { Badge, Modal } from 'antd';
 import classNames from 'classnames';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
@@ -66,19 +69,6 @@ const Menu: FC<Props> = ({ className }) => {
 			}
 		);
 	}
-
-	useEffect(() => {
-		localStorage.setItem('active_multisig', selectedMultisigAddress);
-		setUserDetailsContextState((prevState: any) => {
-			return {
-				...prevState,
-				activeMultisig: selectedMultisigAddress
-			};
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [multisigAddresses, selectedMultisigAddress]);
-
-	console.log('multisigAddresses', multisigAddresses);
 
 	const AddMultisigModal: FC = () => {
 		return (
