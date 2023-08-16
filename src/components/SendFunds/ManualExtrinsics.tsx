@@ -32,17 +32,14 @@ const initFormState = {
 } as FormState;
 
 // Ref - Multix https://github.com/ChainSafe/Multix/blob/main/packages/ui/src/components/EasySetup/ManualExtrinsic.tsx
-const argIsOptional = (arg: any) => arg.type.toString().startsWith('Option<');
+const paramIsOptional = (arg: any) => arg.type.toString().startsWith('Option<');
 
 const transformParams = (
 	paramFields: ParamField[],
 	inputParams: any[],
 	opts = { emptyAsNull: true }
 ) => {
-	// if `opts.emptyAsNull` is true, empty param value will be added to res as `null`.
-	// otherwise, it will not be added
 	const paramVal = inputParams.map((inputParam) => {
-		// to cater the js quirk that `null` is a type of `object`.
 		if (
 			typeof inputParam === 'object' &&
         inputParam !== null &&
@@ -66,7 +63,6 @@ const transformParams = (
 
 		let converted = value;
 
-		// Deal with a vector
 		if (type.indexOf('Vec<') >= 0) {
 			converted = converted.split(',').map((e: string) => e.trim());
 			converted = converted.map((single: any) =>
@@ -79,7 +75,6 @@ const transformParams = (
 			return [...previousValue, converted];
 		}
 
-		// Deal with a single value
 		if (isNumType(type)) {
 			converted =
           converted.indexOf('.') >= 0 ? Number.parseFloat(converted) : Number.parseInt(converted);
@@ -101,7 +96,6 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 	const [transformedParams, setTransformedParams] = useState<any>();
 	const areAllParamsFilled = useMemo(() => {
 		if (paramFields === null) {
-			// it hasn't been initialized yet
 			return false;
 		}
 
@@ -170,7 +164,7 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 
 				return {
 					name: arg.name.toString(),
-					optional: argIsOptional(arg),
+					optional: paramIsOptional(arg),
 					raw,
 					type: arg.type.toString()
 				};
