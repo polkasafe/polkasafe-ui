@@ -745,6 +745,59 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 	});
 });
 
+// This is only for SDK custom transaction, we are not verifying signature so we can prevent double transactions while voting or using SDK on polkassembly
+export const getMultisigDataByAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const network = String(req.get('x-network'));
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		try {
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
+			// check if the multisig already exists in our db
+			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
+			if (multisigRef.exists) {
+				const data = multisigRef.data();
+				return res.status(200).json({ data: {
+					...data,
+					created_at: data?.created_at.toDate(),
+					updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
+				} });
+			}
+
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
+			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
+			if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
+
+			const newMultisig: IMultisigAddress = {
+				address: encodedMultisigAddress,
+				created_at: new Date(),
+				updated_at: new Date(),
+				name: DEFAULT_MULTISIG_NAME,
+				signatories: multisigMetaData.signatories || [],
+				network: String(network).toLowerCase(),
+				threshold: Number(multisigMetaData.threshold) || 0
+			};
+
+			res.status(200).json({ data: newMultisig });
+
+			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
+				// make a copy to db
+				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
+				await newMultisigRef.set(newMultisig);
+			}
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
 export const getTransactionsForMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
@@ -984,6 +1037,41 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
+
+		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
+		if (!block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
+
+		try {
+			const usdValue = await fetchTokenUSDValue(network);
+			const newTransaction: ITransaction = {
+				callData,
+				callHash,
+				created_at: new Date(),
+				block_number: Number(block_number),
+				from,
+				to: to || '',
+				token: chainProperties[network].tokenSymbol,
+				amount_usd: usdValue ? `${Number(amount_token) * usdValue}` : '',
+				amount_token: String(amount_token) || '',
+				network,
+				note: note || '',
+				transactionFields: transactionFields || {}
+			};
+
+			const transactionRef = firestoreDB.collection('transactions').doc(String(callHash));
+			await transactionRef.set(newTransaction);
+
+			return res.status(200).json({ data: responseMessages.success });
+		} catch (err:unknown) {
+			functions.logger.error('Error in addTransaction :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const addTransactionForCustomTransaction = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const network = String(req.get('x-network'));
 
 		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
 		if (!block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
