@@ -83,9 +83,7 @@ export class GnosisSafeService {
 
 	createSafeTx = async (multisigAddress: string, to: string, value: string, senderAddress: string): Promise<string | null> => {
 		try {
-			console.log('multiAddress', multisigAddress);
 			const safeSdk = await Safe.create({ ethAdapter: this.ethAdapter, isL1SafeMasterCopy: true, safeAddress: multisigAddress });
-			console.log('owners', await safeSdk.getOwners());
 			const signer = await this.ethAdapter.getSignerAddress();
 
 			const safeTransactionData: SafeTransactionDataPartial = {

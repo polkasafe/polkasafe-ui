@@ -43,7 +43,7 @@ export const Web3AuthContext: React.Context<Web3AuthContextType> = React.createC
 	{} as any
 );
 
-const DEFAULT_NETWORK = 'polygon';
+const DEFAULT_NETWORK = NETWORK.ASTAR;
 
 export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): React.ReactElement {
 	const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(null);
@@ -59,7 +59,7 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 	const init = async () => {
 		try {
 			webAuth.configureAdapter(openloginAdapter);
-			await webAuth.addPlugin(torusPlugin);
+			await webAuth.addPlugin(torusPlugin as any);
 
 			const defaultWcSettings = await getWalletConnectV2Settings('eip155', [1, 137, 5], '04309ed1007e77d1f119b85205bb779d');
 			const walletConnectV2Adapter = new WalletConnectV2Adapter({
@@ -67,9 +67,9 @@ export function Web3AuthProvider({ children }: React.PropsWithChildren<{}>): Rea
 				loginSettings: { ...defaultWcSettings.loginSettings }
 			});
 
-			webAuth.configureAdapter(metamaskAdapter);
-			webAuth.configureAdapter(torusWalletAdapter);
-			webAuth.configureAdapter(walletConnectV2Adapter);
+			webAuth.configureAdapter(metamaskAdapter as any);
+			webAuth.configureAdapter(torusWalletAdapter as any);
+			webAuth.configureAdapter(walletConnectV2Adapter as any);
 
 			if (webAuth.provider) {
 				setProvider(webAuth.provider);

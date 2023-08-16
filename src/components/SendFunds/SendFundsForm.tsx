@@ -4,7 +4,7 @@
 
 // import { WarningOutlined } from '@ant-design/icons';
 
-import { Web3Adapter } from '@safe-global/protocol-kit';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { AutoComplete, Divider, Form, Input, Modal, Spin } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 import classNames from 'classnames';
@@ -73,9 +73,9 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn 
 		setLoading(true);
 		try {
 			const signer = ethProvider.getSigner();
-			const web3Adapter = new Web3Adapter({
-				signerAddress: web3AuthUser!.accounts[0],
-				web3: web3Provider as any
+			const web3Adapter = new EthersAdapter({
+				ethers: web3Provider as any,
+				signerOrProvider: signer
 			});
 			const txUrl = returnTxUrl(network);
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);

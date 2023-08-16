@@ -5,6 +5,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import { UserDetailsContextType, Wallet } from 'src/types';
 
 import { useGlobalApiContext } from './ApiContext';
@@ -34,6 +35,7 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 	const [activeMultisigData, setActiveMultisigData] = useState<any>({});
 	const { ethProvider } = useGlobalWeb3Context();
 	const { network } = useGlobalApiContext();
+	const { switchChain, addChain } = useGlobalWeb3Context();
 
 	const [loading, setLoading] = useState(false);
 
@@ -66,6 +68,13 @@ export const UserDetailsProvider = ({ children }: React.PropsWithChildren<{}>) =
 
 	useEffect(() => {
 		if (address) fetchUserData();
+		const chains = async () => {
+			await addChain(network);
+			await switchChain(chainProperties[network].chainId);
+		};
+
+		chains();
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [network]);
 

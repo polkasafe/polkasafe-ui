@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Web3Adapter } from '@safe-global/protocol-kit';
+import { EthersAdapter } from '@safe-global/protocol-kit';
 import { Collapse, Divider, Skeleton } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
@@ -66,9 +66,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		setLoading(true);
 		try {
 			const signer = ethProvider.getSigner();
-			const web3Adapter = new Web3Adapter({
-				signerAddress: web3AuthUser!.accounts[0],
-				web3: web3Provider as any
+			const web3Adapter = new EthersAdapter({
+				ethers: web3Provider as any,
+				signerOrProvider: signer
 			});
 			const txUrl = returnTxUrl(network);
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);
@@ -109,9 +109,9 @@ const Transaction: FC<ITransactionProps> = ({ note, approvals, amountUSD, callDa
 		setLoading(true);
 		try {
 			const signer = ethProvider.getSigner();
-			const web3Adapter = new Web3Adapter({
-				signerAddress: web3AuthUser!.accounts[0],
-				web3: web3Provider as any
+			const web3Adapter = new EthersAdapter({
+				ethers: web3Provider as any,
+				signerOrProvider: signer
 			});
 			const txUrl = returnTxUrl(network);
 			const gnosisService = new GnosisSafeService(web3Adapter, signer, txUrl);

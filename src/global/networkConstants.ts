@@ -42,7 +42,7 @@ export const chainProperties: ChainPropType = {
 		tickerName: 'Matic'
 	},
 	[NETWORK.ASTAR]: {
-		blockExplorer: 'astar.subscan.io',
+		blockExplorer: 'https://astar.subscan.io',
 		chainId: '0x250',
 		chainNamespace: CHAIN_NAMESPACES.EIP155,
 		decimals: 18,
