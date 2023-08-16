@@ -51,6 +51,7 @@ const NameAddress = ({ multisigAddress, setMultisigAddress, multisigName, setMul
 			setAllSafes(filteredSafes!);
 		};
 		getAllSafes();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
