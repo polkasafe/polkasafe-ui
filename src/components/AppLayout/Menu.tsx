@@ -11,7 +11,7 @@ import polkasafeLogo from 'src/assets/icons/polkasafe.svg';
 import AddMultisig from 'src/components/Multisig/AddMultisig';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { AddressBookIcon, AppsIcon, AssetsIcon, HomeIcon, NotificationIcon, OutlineCloseIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
+import { AddressBookIcon, AppsIcon, AssetsIcon, ExchangeIcon, HomeIcon, NotificationIcon, OutlineCloseIcon, SettingsIcon, TransactionIcon, UserPlusIcon } from 'src/ui-components/CustomIcons';
 
 interface Props {
 	className?: string;
@@ -31,6 +31,11 @@ const Menu: FC<Props> = ({ className }) => {
 			icon: <HomeIcon />,
 			key: '/',
 			title: 'Home'
+		},
+		{
+			icon: <ExchangeIcon />,
+			key: '/exchange',
+			title: 'Exchange'
 		},
 		{
 			icon: <AssetsIcon />,
