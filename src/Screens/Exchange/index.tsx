@@ -47,18 +47,16 @@ const Exchange = ({ className }: { className?: string }) => {
 
 	const onConfirm = () => {
 		if(!walletAddress || !coinAmount || isNaN(coinAmount)) return;
-		const onrampInstance = new OnrampWebSDK({
-			appId: 1, // replace this with the appID you got during onboarding process
+		const onramp = new OnrampWebSDK({
+			appId: 437189,
 			coinAmount: Number(coinAmount),
 			coinCode: coinCode === 'kusama' ? 'ksm' : 'dot',
-			// fiatType: 1, // 1 -> INR || 2 -> TRY || 3 -> AED || 4 -> MXN || 5-> VND
-			flowType: isOnramp, // 1 -> onramp || 2 -> offramp || 3 -> Merchant checkout
-			paymentMethod: 1, // 1 -> Instant transafer(UPI) || 2 -> Bank transfer(IMPS/FAST)
-			walletAddress: getEncodedAddress(walletAddress, network) || walletAddress // replace with user's wallet address
-			// ... pass other configs here
+			flowType: isOnramp,
+			paymentMethod: 1,
+			walletAddress: getEncodedAddress(walletAddress, network) || walletAddress
 		});
 
-		onrampInstance.show();
+		onramp.show();
 
 	};
 
