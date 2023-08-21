@@ -17,6 +17,7 @@ interface ParamField {
     type: string
     optional: boolean
 	raw: TypeDef
+	typeName: string
   }
 
   interface FormState {
@@ -166,7 +167,8 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 					name: arg.name.toString(),
 					optional: paramIsOptional(arg),
 					raw,
-					type: arg.type.toString()
+					type: arg.type.toString(),
+					typeName: arg.typeName.toString()
 				};
 			});
 		}
@@ -282,7 +284,7 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 				return (
 					<div key={ind} className='mt-2'>
 						<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>{paramField.name}{paramField.optional ? ' (optional)' : ''}</label>
-						{paramField.raw.info === TypeDefInfo.Compact && paramField.raw.sub && ['i8', 'i16', 'i32', 'i64', 'i128', 'u8', 'u16', 'u32', 'u64', 'u128', 'u256'].includes((paramField.raw.sub as any)?.type)
+						{paramField.raw.info === TypeDefInfo.Compact && paramField.raw.sub && ['i8', 'i16', 'i32', 'i64', 'i128', 'u8', 'u16', 'u32', 'u64', 'u128', 'u256'].includes((paramField.raw.sub as any)?.type) && ['Amount', 'Balance', 'BalanceOf'].includes(paramField.typeName)
 							? <BalanceInput onChange={(balance) => onParamChange(balance.toString(), { ind, paramField })} />
 							:
 							['AccountId', 'Address', 'LookupSource', 'MultiAddress'].includes(paramField.type)
