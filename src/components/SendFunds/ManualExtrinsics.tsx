@@ -229,7 +229,6 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 		try {
 			const extrinsic = transformedParams ? api.tx[palletRpc][callable](...transformedParams) : api.tx[palletRpc][callable]();
 
-			console.log(extrinsic?.method?.toHex());
 			if(extrinsic) setCallData(extrinsic.method.toHex());
 
 		} catch (e) {
