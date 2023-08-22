@@ -162,7 +162,6 @@ const ManualExtrinsics = ({ className, setCallData }: { className?: string, setC
 				const instance = api.registry.createType(arg.type as unknown as 'u32');
 
 				const raw = getTypeDef(instance.toRawType());
-				console.log(raw);
 
 				return {
 					name: arg.name.toString(),
