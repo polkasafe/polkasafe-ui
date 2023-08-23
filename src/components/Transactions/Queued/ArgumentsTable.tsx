@@ -37,7 +37,6 @@ const Arguments = ({ argumentsJSON }: { argumentsJSON: any }) => {
 	return (
 		<>
 			{Object.entries(argumentsJSON).map(([name, value], index) => {
-				console.log(name, value);
 				return(
 					<div key={index}>
 						<tr className='grid grid-cols-4 border-b border-solid border-bg-secondary gap-x-2 text-white'>
