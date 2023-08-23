@@ -33,13 +33,12 @@ const constructAnchorTag = (value: string) => {
 };
 
 const Arguments = ({ argumentsJSON }: { argumentsJSON: any }) => {
-	if(argumentsJSON) return null;
+	if(!argumentsJSON) return null;
 	return (
 		<>
 			{Object.entries(argumentsJSON).map(([name, value], index) => {
-
-				// eslint-disable-next-line no-tabs
-				return	(
+				console.log(name, value);
+				return(
 					<div key={index}>
 						<tr className='grid grid-cols-4 border-b border-solid border-bg-secondary gap-x-2 text-white'>
 							<td className='sm:w-auto p-2 border-r border-solid border-bg-secondary truncate col-span-1 flex items-center text-sm'>
@@ -95,20 +94,22 @@ const ArgumentsTable: FC<IArgumentsTableProps> = ({ callData, className }) => {
 					<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.method}</span>
 				</p>
 			</div>
-			<table cellSpacing={0} cellPadding={0} className={`w-full mt-3 ${className}`}>
-				<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
-					<span className='col-span-1'>
+			<div className='w-full overflow-auto max-h-[500px]'>
+				<table cellSpacing={0} cellPadding={0} className={`w-full mt-3 ${className} w-[850px] overflow-scroll`}>
+					<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
+						<span className='col-span-1'>
 						Name
-					</span>
-					<span className='col-span-3'>
+						</span>
+						<span className='col-span-3'>
 						Value
-					</span>
-				</article>
-				{decodedCallData && decodedCallData?.args &&
+						</span>
+					</article>
+					{decodedCallData && decodedCallData?.args &&
 				<tbody className='border-l border-r border-solid border-bg-secondary'>
 					<Arguments argumentsJSON={decodedCallData.args} />
 				</tbody>}
-			</table>
+				</table>
+			</div>
 		</>
 	);
 };
