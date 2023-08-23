@@ -33,6 +33,7 @@ const constructAnchorTag = (value: string) => {
 };
 
 const Arguments = ({ argumentsJSON }: { argumentsJSON: any }) => {
+	if(argumentsJSON) return null;
 	return (
 		<>
 			{Object.entries(argumentsJSON).map(([name, value], index) => {
