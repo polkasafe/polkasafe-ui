@@ -651,11 +651,6 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 														</div>
 													</>
 													}
-													{showDecodedCallData &&
-													<article className='w-[500px]'>
-														<Divider className='border-bg-secondary text-text_secondary my-5' orientation='left'>Decoded Call</Divider>
-														<ArgumentsTable callData={callData} />
-													</article>}
 													<p
 														onClick={() => setShowDecodedCallData(prev => !prev)}
 														className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-3 mb-6 flex items-center gap-x-3'
@@ -665,6 +660,11 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 														</span>
 														<ArrowRightIcon />
 													</p>
+													{showDecodedCallData &&
+													<article className='w-[900px]'>
+														<Divider className='border-bg-secondary text-text_secondary my-5' orientation='left'>Decoded Call</Divider>
+														<ArgumentsTable className='w-[500px]' callData={callData} />
+													</article>}
 												</section>
 									}
 

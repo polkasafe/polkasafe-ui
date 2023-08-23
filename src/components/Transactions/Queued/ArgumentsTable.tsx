@@ -81,20 +81,22 @@ const ArgumentsTable: FC<IArgumentsTableProps> = ({ callData, className }) => {
 	}, [api, apiReady, callData, network]);
 	return (
 		<>
-			<div className='flex items-center gap-x-5 justify-between'>
-				<span className='text-text_secondary font-normal text-sm leading-[15px]'>Section:</span>
-				<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-					<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.section}</span>
-				</p>
-			</div>
-			<div className='flex items-center gap-x-5 justify-between mt-3'>
-				<span className='text-text_secondary font-normal text-sm leading-[15px]'>Method:</span>
-				<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
-					<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.method}</span>
-				</p>
+			<div className={className}>
+				<div className='flex items-center gap-x-5 justify-between'>
+					<span className='text-text_secondary font-normal text-sm leading-[15px]'>Section:</span>
+					<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+						<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.section}</span>
+					</p>
+				</div>
+				<div className='flex items-center gap-x-5 justify-between mt-3'>
+					<span className='text-text_secondary font-normal text-sm leading-[15px]'>Method:</span>
+					<p className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'>
+						<span className='text-white font-normal text-sm leading-[15px]'> {txnParams?.method}</span>
+					</p>
+				</div>
 			</div>
 			<div className='w-full overflow-auto max-h-[500px]'>
-				<table cellSpacing={0} cellPadding={0} className={`w-full mt-3 ${className} w-[850px] overflow-scroll`}>
+				<table cellSpacing={0} cellPadding={0} className={'w-full mt-3 overflow-scroll'}>
 					<article className='grid grid-cols-4 gap-x-2 bg-bg-secondary text-text_secondary py-2 px-2 rounded-t-md'>
 						<span className='col-span-1'>
 						Name
