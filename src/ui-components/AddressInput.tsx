@@ -17,16 +17,20 @@ interface IAddressInput {
     onChange: (address: string) => void
     placeholder?: string
 	defaultAddress?: string
+	showMultisigAddresses?: boolean
 }
 
-const AddressInput = ({ onChange, placeholder, defaultAddress }: IAddressInput) => {
+const AddressInput = ({ onChange, placeholder, defaultAddress, showMultisigAddresses=false }: IAddressInput) => {
 	const { network } = useGlobalApiContext();
+	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 
 	const [selectedAddress, setSelectedAddress] = useState<string>(defaultAddress ||'');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>([]);
 	const [isValidAddress, setIsValidAddress] = useState(true);
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { records } = useActiveMultisigContext();
+
+	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
 	useEffect(() => {
 		if(selectedAddress && !getSubstrateAddress(selectedAddress)){
@@ -38,7 +42,7 @@ const AddressInput = ({ onChange, placeholder, defaultAddress }: IAddressInput) 
 	}, [selectedAddress]);
 
 	useEffect(() => {
-		const allAddresses: string[] = [];
+		const allAddresses: string[] = multisig && showMultisigAddresses ? multisig.proxy ?  [multisig.proxy, multisig.address] : [multisig.address] : [];
 		if(records){
 			Object.keys(records).forEach((address) => {
 				allAddresses.push(getEncodedAddress(address, network) || address);
@@ -50,11 +54,11 @@ const AddressInput = ({ onChange, placeholder, defaultAddress }: IAddressInput) 
 			}
 		});
 		setAutoCompleteAddresses(allAddresses.map(address => ({
-			label: <AddressComponent address={address} />,
+			label: <AddressComponent withBadge={false} address={address} />,
 			value: address
 		})));
 
-	}, [addressBook, network, records]);
+	}, [addressBook, multisig, network, records, showMultisigAddresses]);
 
 	return (
 		<div className='w-full'>

@@ -35,6 +35,7 @@ const Menu: FC<Props> = ({ className }) => {
 		{
 			icon: <ExchangeIcon />,
 			key: '/exchange',
+			new: true,
 			title: 'Exchange'
 		},
 		{
@@ -152,7 +153,7 @@ const Menu: FC<Props> = ({ className }) => {
 										to={item.key} >
 										{item.icon}
 										{item.title}
-										{item.title === 'Notifications' &&
+										{item.new &&
 										<div className={'px-[6px] py-[1px] text-[10px] rounded-lg text-xs bg-primary text-white'}>New</div>}
 									</Link>
 								</li>;
