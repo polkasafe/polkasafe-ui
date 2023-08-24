@@ -24,7 +24,7 @@ import { EFieldType, NotificationStatus } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import Balance from 'src/ui-components/Balance';
 import BalanceInput from 'src/ui-components/BalanceInput';
-import { CircleArrowDownIcon, CopyIcon, DeleteIcon, LineIcon, OutlineCloseIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleArrowDownIcon, CopyIcon, DeleteIcon, LineIcon, OutlineCloseIcon, SquareDownArrowIcon, WarningCircleIcon } from 'src/ui-components/CustomIcons';
 import queueNotification from 'src/ui-components/QueueNotification';
 import { addToAddressBook } from 'src/utils/addToAddressBook';
 import copyText from 'src/utils/copyText';
@@ -39,6 +39,7 @@ import { setSigner } from 'src/utils/setSigner';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
+import ArgumentsTable from '../Transactions/Queued/ArgumentsTable';
 import ManualExtrinsics from './ManualExtrinsics';
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
@@ -112,6 +113,8 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 	const [callHash, setCallHash] = useState<string>('');
 
 	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+
+	const [showDecodedCallData, setShowDecodedCallData] = useState<boolean>(false);
 
 	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
 		key: item,
@@ -626,25 +629,43 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 														</div>
 													</div>
 												</section>
-
-												{callData && !recipientAndAmount.some(item => item.recipient === '' || item.amount.isZero()) &&
-												<section className='mt-[15px]'>
-													<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Call Data</label>
-													<div className='flex items-center gap-x-[10px]'>
-														<article className='w-[500px]'>
-															<div
-																className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
-																onClick={() => copyText(callData)}
-															>
-																{shortenAddress(callData, 10)}
-																<button className='text-primary'><CopyIcon /></button>
-															</div>
-
-														</article>
-													</div>
-												</section>
-												}
 											</>
+									}
+
+									{callData &&
+												<section className='mt-[15px]'>
+													{transactionType !== ETransactionType.CALL_DATA &&
+													<>
+														<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Call Data</label>
+														<div className='flex items-center gap-x-[10px]'>
+															<article className='w-[500px]'>
+																<div
+																	className="text-sm cursor-pointer w-full font-normal flex items-center justify-between leading-[15px] outline-0 p-3 placeholder:text-[#505050] border-2 border-dashed border-[#505050] rounded-lg text-white"
+																	onClick={() => copyText(callData)}
+																>
+																	{shortenAddress(callData, 10)}
+																	<button className='text-primary'><CopyIcon /></button>
+																</div>
+
+															</article>
+														</div>
+													</>
+													}
+													<p
+														onClick={() => setShowDecodedCallData(prev => !prev)}
+														className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-3 mb-6 flex items-center gap-x-3'
+													>
+														<span>
+															{showDecodedCallData ? 'Hide' : 'Advanced'} Details
+														</span>
+														<ArrowRightIcon />
+													</p>
+													{showDecodedCallData &&
+													<article className='w-[900px]'>
+														<Divider className='border-bg-secondary text-text_secondary my-5' orientation='left'>Decoded Call</Divider>
+														<ArgumentsTable className='w-[500px]' callData={callData} />
+													</article>}
+												</section>
 									}
 
 									<section className='mt-[15px]'>
