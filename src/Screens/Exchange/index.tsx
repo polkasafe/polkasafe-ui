@@ -15,6 +15,7 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { onrampTokenProperties, onrampTokens } from 'src/global/networkConstants';
 import { ONRAMP_APP_ID } from 'src/global/onrampAppId';
 import AddressInput from 'src/ui-components/AddressInput';
+import Balance from 'src/ui-components/Balance';
 import { CircleArrowDownIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
@@ -28,10 +29,10 @@ enum EOnramp {
 const Exchange = ({ className }: { className?: string }) => {
 
 	const { network } = useGlobalApiContext();
-	const { address: userAddress } = useGlobalUserDetailsContext();
+	const { address: userAddress, activeMultisig } = useGlobalUserDetailsContext();
 
 	const [onrampFlowType, setOnrampFlowType] = useState<EOnramp>(EOnramp.BUY);
-	const [walletAddress, setWalletAddress] = useState<string>(userAddress);
+	const [walletAddress, setWalletAddress] = useState<string>(activeMultisig);
 	const [coinCode, setCoinCode] = useState(onrampTokens.POLKADOT);
 	const [coinAmount, setCoinAmount] = useState<number>();
 
@@ -79,8 +80,11 @@ const Exchange = ({ className }: { className?: string }) => {
 						</span>
 					</div>
 					<div>
-						<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Wallet Address*</label>
-						<AddressInput defaultAddress={userAddress} onChange={(address) => setWalletAddress(address)} />
+						<div className='flex items-center justify-between mb-[5px]'>
+							<label className='text-primary font-normal text-xs leading-[13px] block'>Wallet Address*</label>
+							<Balance address={walletAddress} />
+						</div>
+						<AddressInput defaultAddress={activeMultisig} showMultisigAddresses onChange={(address) => setWalletAddress(address)} />
 					</div>
 					<div className='flex-1'>
 						<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Token Amount*</label>
