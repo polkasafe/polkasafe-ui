@@ -30,12 +30,12 @@ const Exchange = ({ className }: { className?: string }) => {
 	const { network } = useGlobalApiContext();
 	const { address: userAddress } = useGlobalUserDetailsContext();
 
-	const [isOnramp, setIsOnramp] = useState<EOnramp>(EOnramp.BUY);
+	const [onrampFlowType, setOnrampFlowType] = useState<EOnramp>(EOnramp.BUY);
 	const [walletAddress, setWalletAddress] = useState<string>(userAddress);
 	const [coinCode, setCoinCode] = useState(onrampTokens.POLKADOT);
 	const [coinAmount, setCoinAmount] = useState<number>();
 
-	const currencyOptions: ItemType[] = Object.values(onrampTokens).filter((token) => isOnramp === EOnramp.SELL ? onrampTokenProperties[token].offramp : true).map(token => ({
+	const currencyOptions: ItemType[] = Object.values(onrampTokens).filter((token) => onrampFlowType === EOnramp.SELL ? onrampTokenProperties[token].offramp : true).map(token => ({
 		key: token,
 		label: <span className='text-white flex items-center gap-x-2'>
 			<ParachainIcon src={onrampTokenProperties[token]?.logo} />
@@ -49,7 +49,7 @@ const Exchange = ({ className }: { className?: string }) => {
 			appId: ONRAMP_APP_ID,
 			coinAmount: Number(coinAmount),
 			coinCode: onrampTokenProperties[coinCode].tokenSymbol,
-			flowType: isOnramp,
+			flowType: onrampFlowType,
 			paymentMethod: 1,
 			walletAddress: getEncodedAddress(walletAddress, network) || walletAddress
 		});
@@ -64,15 +64,15 @@ const Exchange = ({ className }: { className?: string }) => {
 				<div className='h-full flex flex-col gap-y-5 bg-bg-secondary rounded-lg p-5'>
 					<div className='w-full flex items-center gap-x-3'>
 						<span
-							onClick={() => setIsOnramp(EOnramp.BUY)}
-							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${isOnramp === 1 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
+							onClick={() => setOnrampFlowType(EOnramp.BUY)}
+							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${onrampFlowType === 1 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
 						>
 							<PlusCircleOutlined/>
 							Buy
 						</span>
 						<span
-							onClick={() => setIsOnramp(EOnramp.SELL)}
-							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${isOnramp === 2 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
+							onClick={() => setOnrampFlowType(EOnramp.SELL)}
+							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${onrampFlowType === 2 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
 						>
 							<MinusCircleOutlined/>
 							Sell
