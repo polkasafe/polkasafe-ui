@@ -2,11 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import acalaLogo from 'src/assets/parachains-logos/acala-logo.png';
 import alephzeroLogo from 'src/assets/parachains-logos/aleph-zero-logo.jpeg';
 import assethubLogo from 'src/assets/parachains-logos/assethub-logo.svg';
 import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
 import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
+import moonbeamLogo from 'src/assets/parachains-logos/moonbeam-logo.png';
+import moonriverLogo from 'src/assets/parachains-logos/moonriver-logo.png';
 import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
+import polymeshLogo from 'src/assets/parachains-logos/polymesh-logo.png';
 import rococoLogo from 'src/assets/parachains-logos/rococo-logo.svg';
 import westendLogo from 'src/assets/parachains-logos/westend-logo.png';
 import { ChainPropType } from 'src/types';
@@ -113,4 +117,49 @@ export const chainProperties: ChainPropType = {
 		tokenSymbol: tokenSymbol.AZERO
 	}
 
+};
+
+/* eslint-disable sort-keys */
+export const onrampTokens = {
+	POLKADOT: 'polkadot',
+	KUSAMA: 'kusama',
+	ASTAR: 'astar',
+	MOONBEAM: 'moonbeam',
+	MOONRIVER: 'moonriver',
+	POLYMESH: 'polymesh',
+	ACALA: 'acala'
+};
+
+export const onrampTokenProperties = {
+	[onrampTokens.POLKADOT]: {
+		tokenSymbol: 'dot',
+		logo: polkadotLogo,
+		offramp: true
+	},
+	[onrampTokens.KUSAMA]: {
+		tokenSymbol: 'ksm',
+		logo: kusamaLogo,
+		offramp: true
+	},
+	[onrampTokens.ASTAR]: {
+		tokenSymbol: 'astr',
+		logo: astarLogo
+	},
+	[onrampTokens.MOONBEAM]: {
+		tokenSymbol: 'glmr',
+		logo: moonbeamLogo,
+		offramp: true
+	},
+	[onrampTokens.MOONRIVER]: {
+		tokenSymbol: 'movr',
+		logo: moonriverLogo
+	},
+	[onrampTokens.POLYMESH]: {
+		tokenSymbol: 'polyx',
+		logo: polymeshLogo
+	},
+	[onrampTokens.ACALA]: {
+		tokenSymbol: 'aca',
+		logo: acalaLogo
+	}
 };

@@ -9,16 +9,10 @@ import { Dropdown, Form, Input } from 'antd';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import acalaLogo from 'src/assets/parachains-logos/acala-logo.png';
-import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
-import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
-import moonbeamLogo from 'src/assets/parachains-logos/moonbeam-logo.png';
-import moonriverLogo from 'src/assets/parachains-logos/moonriver-logo.png';
-import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
-import polymeshLogo from 'src/assets/parachains-logos/polymesh-logo.png';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { onrampTokenProperties, onrampTokens } from 'src/global/networkConstants';
 import { ONRAMP_APP_ID } from 'src/global/onrampAppId';
 import AddressInput from 'src/ui-components/AddressInput';
 import { CircleArrowDownIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
@@ -26,58 +20,22 @@ import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
 
-export const onrampTokens = {
-	POLKADOT: 'polkadot',
-	KUSAMA: 'kusama',
-	ASTAR: 'astar',
-	MOONBEAM: 'moonbeam',
-	MOONRIVER: 'moonriver',
-	POLYMESH: 'polymesh',
-	ACALA: 'acala'
-};
-
-export const onrampTokenProperties = {
-	[onrampTokens.POLKADOT]: {
-		tokenSymbol: 'dot',
-		logo: polkadotLogo
-	},
-	[onrampTokens.KUSAMA]: {
-		tokenSymbol: 'ksm',
-		logo: kusamaLogo
-	},
-	[onrampTokens.ASTAR]: {
-		tokenSymbol: 'astr',
-		logo: astarLogo
-	},
-	[onrampTokens.MOONBEAM]: {
-		tokenSymbol: 'glmr',
-		logo: moonbeamLogo
-	},
-	[onrampTokens.MOONRIVER]: {
-		tokenSymbol: 'movr',
-		logo: moonriverLogo
-	},
-	[onrampTokens.POLYMESH]: {
-		tokenSymbol: 'polyx',
-		logo: polymeshLogo
-	},
-	[onrampTokens.ACALA]: {
-		tokenSymbol: 'aca',
-		logo: acalaLogo
-	}
-};
+enum EOnramp {
+	BUY=1,
+	SELL=2
+}
 
 const Exchange = ({ className }: { className?: string }) => {
 
 	const { network } = useGlobalApiContext();
 	const { address: userAddress } = useGlobalUserDetailsContext();
 
-	const [isOnramp, setIsOnramp] = useState<number>(1);
+	const [isOnramp, setIsOnramp] = useState<EOnramp>(EOnramp.BUY);
 	const [walletAddress, setWalletAddress] = useState<string>(userAddress);
 	const [coinCode, setCoinCode] = useState(onrampTokens.POLKADOT);
 	const [coinAmount, setCoinAmount] = useState<number>();
 
-	const currencyOptions: ItemType[] = Object.values(onrampTokens).map(token => ({
+	const currencyOptions: ItemType[] = Object.values(onrampTokens).filter((token) => isOnramp === EOnramp.SELL ? onrampTokenProperties[token].offramp : true).map(token => ({
 		key: token,
 		label: <span className='text-white flex items-center gap-x-2'>
 			<ParachainIcon src={onrampTokenProperties[token]?.logo} />
@@ -106,14 +64,14 @@ const Exchange = ({ className }: { className?: string }) => {
 				<div className='h-full flex flex-col gap-y-5 bg-bg-secondary rounded-lg p-5'>
 					<div className='w-full flex items-center gap-x-3'>
 						<span
-							onClick={() => setIsOnramp(1)}
+							onClick={() => setIsOnramp(EOnramp.BUY)}
 							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${isOnramp === 1 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
 						>
 							<PlusCircleOutlined/>
 							Buy
 						</span>
 						<span
-							onClick={() => setIsOnramp(2)}
+							onClick={() => setIsOnramp(EOnramp.SELL)}
 							className={`p-[10px] bg-opacity-10 text-xl text-white flex items-center justify-center flex-col gap-y-3 ${isOnramp === 2 ? 'bg-success text-success' : 'bg-text_secondary'} cursor-pointer rounded-lg leading-none w-[180px] h-[120px]`}
 						>
 							<MinusCircleOutlined/>
