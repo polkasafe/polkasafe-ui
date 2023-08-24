@@ -7,22 +7,22 @@ import React, { useEffect, useState } from 'react';
 import { useActiveMultisigContext } from 'src/context/ActiveMultisigContext';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 
 import AddressComponent from './AddressComponent';
-import { CopyIcon } from './CustomIcons';
+import { OutlineCloseIcon } from './CustomIcons';
 
 interface IAddressInput {
     onChange: (address: string) => void
     placeholder?: string
+	defaultAddress?: string
 }
 
-const AddressInput = ({ onChange, placeholder }: IAddressInput) => {
+const AddressInput = ({ onChange, placeholder, defaultAddress }: IAddressInput) => {
 	const { network } = useGlobalApiContext();
 
-	const [selectedAddress, setSelectedAddress] = useState<string>('');
+	const [selectedAddress, setSelectedAddress] = useState<string>(defaultAddress ||'');
 	const [autocompleteAddresses, setAutoCompleteAddresses] = useState<DefaultOptionType[]>([]);
 	const [isValidAddress, setIsValidAddress] = useState(true);
 	const { addressBook } = useGlobalUserDetailsContext();
@@ -66,19 +66,26 @@ const AddressInput = ({ onChange, placeholder }: IAddressInput) => {
 				validateStatus={selectedAddress && isValidAddress ? 'success' : 'error'}
 			>
 				<div className="flex items-center">
-					<AutoComplete
-						filterOption={true}
-						options={autocompleteAddresses}
-						id='sender'
-						placeholder={placeholder || 'Select Address'}
-						onChange={(value) => {setSelectedAddress(value); onChange(value);}}
-					/>
-					{selectedAddress &&
-					<div className='absolute right-2'>
-						<button onClick={() => copyText(selectedAddress, true, network)}>
-							<CopyIcon className='mr-2 text-primary' />
+					{selectedAddress && autocompleteAddresses.some((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(selectedAddress)) ? <div className='border border-solid border-primary rounded-lg p-2 h-full flex justify-between items-center w-full'>
+						{autocompleteAddresses.find((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(selectedAddress))?.label}
+						<button
+							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
+							onClick={() => {
+								setSelectedAddress('');
+								onChange('');
+							}}
+						>
+							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>
-					</div>
+					</div> :
+						<AutoComplete
+							filterOption={true}
+							defaultOpen
+							options={autocompleteAddresses}
+							id='sender'
+							placeholder={placeholder || 'Select Address'}
+							onChange={(value) => {setSelectedAddress(value); onChange(value);}}
+						/>
 					}
 				</div>
 			</Form.Item>

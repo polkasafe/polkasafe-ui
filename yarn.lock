@@ -1632,6 +1632,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@onramp.money/onramp-web-sdk@^1.4.5":
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/@onramp.money/onramp-web-sdk/-/onramp-web-sdk-1.4.5.tgz#da63560c5fad48366398949a60a78b5416517171"
+  integrity sha512-hdtyiNWJ04ggRJlUSQm9S6YwrTk0IOY7KJJtJcc7zMnY9xM6YW7TLRdAmFCWgCnQRiOJfWxwXJ7G24acI6MLog==
+
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
   version "0.5.10"
   resolved "https://registry.npmjs.org/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.10.tgz"

@@ -11,6 +11,7 @@
     "url": "https://github.com/polkasafe/polkasafe-ui/issues"
   },
   "dependencies": {
+    "@onramp.money/onramp-web-sdk": "^1.4.5",
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-augment": "^10.9.1",
     "@polkadot/extension-dapp": "^0.46.5",

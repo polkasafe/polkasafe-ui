@@ -11,6 +11,7 @@ import ContactUs from 'src/Screens/ContactUs';
 import Donate from 'src/Screens/Donate';
 import Error404 from 'src/Screens/Error404';
 import Error500 from 'src/Screens/Error500';
+import Exchange from 'src/Screens/Exchange';
 import Home from 'src/Screens/Home';
 import PrivacyPolicy from 'src/Screens/PrivacyPolicy';
 import Settings from 'src/Screens/Settings';
@@ -37,6 +38,7 @@ const SwitchRoutes = () => {
 			<Route path='/privacy-policy' element={<PrivacyPolicy/>} />
 			<Route path='/terms-and-conditions' element={<TermsAndCondition/>} />
 			<Route path='/verify-email' element={<VerifyEmailToken/>} />
+			<Route path='/exchange' element={<Exchange/>} />
 		</Routes>
 	);
 };

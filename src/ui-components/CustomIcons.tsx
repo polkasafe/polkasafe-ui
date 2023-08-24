@@ -38,6 +38,7 @@ import { ReactComponent as DollarSVG } from 'src/assets/icons/dollar.svg';
 import { ReactComponent as DonateSVG } from 'src/assets/icons/donate.svg';
 import { ReactComponent as EditSVG } from 'src/assets/icons/edit.svg';
 import { ReactComponent as ElementIconSVG } from 'src/assets/icons/element-icon.svg';
+import { ReactComponent as ExchangeSVG } from 'src/assets/icons/Exchange.svg';
 import { ReactComponent as ExportArrowSVG } from 'src/assets/icons/export-arrow.svg';
 import { ReactComponent as ExternalLinkSVG } from 'src/assets/icons/external-link.svg';
 import { ReactComponent as HomeSVG } from 'src/assets/icons/home.svg';
@@ -404,4 +405,8 @@ export const PasswordOutlinedIcon = (props: Partial<CustomIconComponentProps>) =
 
 export const PasswordFilledIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={PasswordFilledSVG} {...props} />
+);
+
+export const ExchangeIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={ExchangeSVG} {...props} />
 );
