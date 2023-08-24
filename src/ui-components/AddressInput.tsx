@@ -66,7 +66,7 @@ const AddressInput = ({ onChange, placeholder, defaultAddress }: IAddressInput) 
 				validateStatus={selectedAddress && isValidAddress ? 'success' : 'error'}
 			>
 				<div className="flex items-center">
-					{selectedAddress ? <div className='border border-solid border-primary rounded-lg p-2 h-full flex justify-between items-center w-full'>
+					{selectedAddress && autocompleteAddresses.some((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(selectedAddress)) ? <div className='border border-solid border-primary rounded-lg p-2 h-full flex justify-between items-center w-full'>
 						{autocompleteAddresses.find((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(selectedAddress))?.label}
 						<button
 							className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'

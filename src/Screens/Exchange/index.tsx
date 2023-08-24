@@ -1,6 +1,7 @@
 // Copyright 2022-2023 @Polkasafe/polkaSafe-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+/* eslint-disable sort-keys */
 
 import { MinusCircleOutlined,PlusCircleOutlined } from '@ant-design/icons';
 import { OnrampWebSDK } from '@onramp.money/onramp-web-sdk';
@@ -8,15 +9,63 @@ import { Dropdown, Form, Input } from 'antd';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import acalaLogo from 'src/assets/parachains-logos/acala-logo.png';
+import astarLogo from 'src/assets/parachains-logos/astar-logo.png';
+import kusamaLogo from 'src/assets/parachains-logos/kusama-logo.gif';
+import moonbeamLogo from 'src/assets/parachains-logos/moonbeam-logo.png';
+import moonriverLogo from 'src/assets/parachains-logos/moonriver-logo.png';
+import polkadotLogo from 'src/assets/parachains-logos/polkadot-logo.jpg';
+import polymeshLogo from 'src/assets/parachains-logos/polymesh-logo.png';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { chainProperties } from 'src/global/networkConstants';
+import { ONRAMP_APP_ID } from 'src/global/onrampAppId';
 import AddressInput from 'src/ui-components/AddressInput';
 import { CircleArrowDownIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import PrimaryButton from 'src/ui-components/PrimaryButton';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
 import styled from 'styled-components';
+
+export const onrampTokens = {
+	POLKADOT: 'polkadot',
+	KUSAMA: 'kusama',
+	ASTAR: 'astar',
+	MOONBEAM: 'moonbeam',
+	MOONRIVER: 'moonriver',
+	POLYMESH: 'polymesh',
+	ACALA: 'acala'
+};
+
+export const onrampTokenProperties = {
+	[onrampTokens.POLKADOT]: {
+		tokenSymbol: 'dot',
+		logo: polkadotLogo
+	},
+	[onrampTokens.KUSAMA]: {
+		tokenSymbol: 'ksm',
+		logo: kusamaLogo
+	},
+	[onrampTokens.ASTAR]: {
+		tokenSymbol: 'astr',
+		logo: astarLogo
+	},
+	[onrampTokens.MOONBEAM]: {
+		tokenSymbol: 'glmr',
+		logo: moonbeamLogo
+	},
+	[onrampTokens.MOONRIVER]: {
+		tokenSymbol: 'movr',
+		logo: moonriverLogo
+	},
+	[onrampTokens.POLYMESH]: {
+		tokenSymbol: 'polyx',
+		logo: polymeshLogo
+	},
+	[onrampTokens.ACALA]: {
+		tokenSymbol: 'aca',
+		logo: acalaLogo
+	}
+};
 
 const Exchange = ({ className }: { className?: string }) => {
 
@@ -25,32 +74,23 @@ const Exchange = ({ className }: { className?: string }) => {
 
 	const [isOnramp, setIsOnramp] = useState<number>(1);
 	const [walletAddress, setWalletAddress] = useState<string>(userAddress);
-	const [coinCode, setCoinCode] = useState<'polkadot' | 'kusama'>(network === 'kusama' ? 'kusama' : 'polkadot');
+	const [coinCode, setCoinCode] = useState(onrampTokens.POLKADOT);
 	const [coinAmount, setCoinAmount] = useState<number>();
 
-	const currencyOptions: ItemType[] = [
-		{
-			key: 'polkadot',
-			label: <span className='text-white flex items-center gap-x-2'>
-				<ParachainIcon src={chainProperties['polkadot'].logo} />
-				{ chainProperties['polkadot'].tokenSymbol}
-			</span>
-		},
-		{
-			key: 'kusama',
-			label: <span className='text-white flex items-center gap-x-2'>
-				<ParachainIcon src={chainProperties['kusama'].logo} />
-				{ chainProperties['kusama'].tokenSymbol}
-			</span>
-		}
-	];
+	const currencyOptions: ItemType[] = Object.values(onrampTokens).map(token => ({
+		key: token,
+		label: <span className='text-white flex items-center gap-x-2'>
+			<ParachainIcon src={onrampTokenProperties[token]?.logo} />
+			{ onrampTokenProperties[token]?.tokenSymbol?.toUpperCase()}
+		</span>
+	}));
 
 	const onConfirm = () => {
 		if(!walletAddress || !coinAmount || isNaN(coinAmount)) return;
 		const onramp = new OnrampWebSDK({
-			appId: 437189,
+			appId: ONRAMP_APP_ID,
 			coinAmount: Number(coinAmount),
-			coinCode: coinCode === 'kusama' ? 'ksm' : 'dot',
+			coinCode: onrampTokenProperties[coinCode].tokenSymbol,
 			flowType: isOnramp,
 			paymentMethod: 1,
 			walletAddress: getEncodedAddress(walletAddress, network) || walletAddress
@@ -110,8 +150,8 @@ const Exchange = ({ className }: { className?: string }) => {
 									}}
 								>
 									<div className='absolute cursor-pointer right-0 text-white pr-3 flex items-center justify-center'>
-										<ParachainIcon src={chainProperties[coinCode].logo} className='mr-2' />
-										<span>{ chainProperties[coinCode].tokenSymbol}</span>
+										<ParachainIcon src={onrampTokenProperties[coinCode]?.logo} className='mr-2' />
+										<span>{ onrampTokenProperties[coinCode]?.tokenSymbol?.toUpperCase()}</span>
 										<CircleArrowDownIcon className='text-primary ml-1' />
 									</div>
 								</Dropdown>
