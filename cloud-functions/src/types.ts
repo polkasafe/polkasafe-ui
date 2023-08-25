@@ -74,6 +74,7 @@ export interface ChainProperties {
 export interface ITransaction {
 	callData?: string;
 	callHash: string;
+	approvals?: string[];
 	created_at: Date;
 	block_number: number;
 	from: string;
@@ -88,7 +89,9 @@ export interface ITransaction {
 		[address: string]: {
 			lastNotified: Date;
 		}
-	}
+	},
+	section?:string,
+	method?:string,
 }
 
 export interface IAsset {

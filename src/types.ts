@@ -233,6 +233,7 @@ export interface IQueueItem {
 }
 
 export interface ITransaction {
+	approvals?: string[];
 	callData?: string;
 	callHash: string;
 	created_at: Date;
