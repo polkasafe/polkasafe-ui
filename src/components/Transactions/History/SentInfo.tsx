@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider, Spin, Timeline } from 'antd';
+import { Collapse, Divider, Spin, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -19,6 +19,7 @@ import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
 interface ISentInfoProps {
+	approvals?: string[];
 	amount: string;
 	amountType: string;
 	date: string;
@@ -34,7 +35,7 @@ interface ISentInfoProps {
 	method?:string
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, className, date, recipient, callHash, transactionDetails, loading, section, method }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amountType, className, date, recipient, callHash, transactionDetails, loading, section, method }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency } = useGlobalCurrencyContext();
@@ -58,7 +59,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 						<span
 							className='text-failure'
 						>
-							{amount} {amountType} ({amount_usd.toFixed(2)} {currencyProperties[currency].symbol})
+							{amount} {amountType} ({Number(amount_usd).toFixed(2)} {currencyProperties[currency].symbol})
 						</span>
 						<span>
 							to:
@@ -278,6 +279,45 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, from, amount_usd, amountType, cl
 							Confirmations <span className='text-text_secondary'>{threshold} of {threshold}</span>
 							</div>
 						</Timeline.Item>
+						{!!approvals?.length &&
+						<Timeline.Item
+							dot={
+								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+									<CircleCheckIcon className='text-success text-sm' />
+								</span>
+							}
+							className='success'
+						>
+							<Collapse bordered={false}>
+								<Collapse.Panel
+									showArrow={false}
+									key={1}
+									header={<span className='text-primary font-normal text-sm leading-[15px] px-3 py-2 rounded-md bg-highlight'>Show All Confirmations</span>}
+								>
+									<Timeline>
+										{approvals.map((address, i) => (
+											<Timeline.Item
+												key={i}
+												dot={
+													<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>
+														<CircleCheckIcon className='text-success text-sm' />
+													</span>
+												}
+												className={`${i == 0 && 'mt-4'} success bg-transaparent`}
+											>
+												<div
+													className='mb-3 flex items-center gap-x-4'
+												>
+													<AddressComponent address={address} />
+												</div>
+											</Timeline.Item>
+										))}
+
+									</Timeline>
+								</Collapse.Panel>
+							</Collapse>
+						</Timeline.Item>
+						}
 						<Timeline.Item
 							dot={
 								<span className='bg-success bg-opacity-10 flex items-center justify-center p-1 rounded-md h-6 w-6'>

@@ -22,7 +22,7 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, section, method }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, approvals, token, created_at, to, from, callHash, amount_usd, section, method }) => {
 	const { network } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
@@ -146,6 +146,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 							Boolean(section) && Boolean(method) ?
 								<SentInfo
 									amount={String(amount_token)}
+									approvals={approvals}
 									amountType={token}
 									date={dayjs(created_at).format('llll')}
 									recipient={String(to)}
@@ -173,6 +174,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 									:
 									<SentInfo
 										amount={String(amount_token)}
+										approvals={approvals}
 										amountType={token}
 										date={dayjs(created_at).format('llll')}
 										recipient={String(to)}
