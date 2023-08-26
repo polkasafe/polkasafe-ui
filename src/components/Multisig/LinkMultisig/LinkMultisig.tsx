@@ -65,7 +65,8 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 				return;
 			}
 			else{
-				if(!signatories.includes(address)){
+				const substrateAddress = getSubstrateAddress(address);
+				if(!signatories.map(add => getSubstrateAddress(add)).includes(substrateAddress||'')){
 					queueNotification({
 						header: 'Error!',
 						message: 'Signatories does not have your Address.',
