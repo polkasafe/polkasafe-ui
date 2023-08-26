@@ -30,7 +30,7 @@ export default async function approvalReminder(args: Args) {
 	const { from } = await getTransactionData(firestore_db, callHash);
 	if (from === address || from === substrateAddress) return; // no need to send notification to creator
 
-	const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
+	const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress, network);
 	const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, substrateAddress);
 	const { deleted = false, name: userMultisigName = defaultMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings || {};
 

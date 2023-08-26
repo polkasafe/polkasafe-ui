@@ -134,7 +134,7 @@ const Owners = ({ signatories, multisigThreshold, threshold, setThreshold, setSi
 							</>
 							:
 							<>
-								<p className='text-text_secondary mb-3'>We cannot find this Multisig, Please enter the Signatories and threshold of this Multisig.</p>
+								<p className='text-text_secondary mb-3'>We cannot find this Multisig or multisig is not on-chain (it should have a existential balance and at least one transaction), Please enter the Signatories and threshold of this Multisig.</p>
 								{signatoriesArray.map((signatory, i) => (
 									<div className="flex flex-col gap-y-3" key={i}>
 										<div className="flex items-center gap-x-4">
