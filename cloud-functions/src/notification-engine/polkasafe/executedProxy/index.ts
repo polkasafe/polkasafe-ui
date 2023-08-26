@@ -41,7 +41,7 @@ export default async function executedProxy(args: Args) {
 		const addressData = addressDoc?.data();
 
 		if (addressData) {
-			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress);
+			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress, network);
 			const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, address);
 			const { deleted = false, name: userMultisigName = defaultMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings || {};
 

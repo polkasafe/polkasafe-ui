@@ -568,7 +568,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 			};
 
 			// check if the multisig exists in our db
-			const multisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
+			const multisigRef = firestoreDB.collection('multisigAddresses').doc(`${encodedMultisigAddress}_${network}`);
 			const multisigDoc = await multisigRef.get();
 
 			if (multisigDoc.exists) {
@@ -704,9 +704,8 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 
 		try {
 			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
-
 			// check if the multisig already exists in our db
-			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(encodedMultisigAddress)).get();
+			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(`${encodedMultisigAddress}_${network}`)).get();
 			if (multisigRef.exists) {
 				const data = multisigRef.data();
 				return res.status(200).json({ data: {
@@ -734,7 +733,60 @@ export const getMultisigDataByMultisigAddress = functions.https.onRequest(async 
 
 			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
 				// make a copy to db
-				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress);
+				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(`${encodedMultisigAddress}_${network}`);
+				await newMultisigRef.set(newMultisig);
+			}
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getMultisigByMultisigAddress :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// This is only for SDK custom transaction, we are not verifying signature so we can prevent double transactions while voting or using SDK on polkassembly
+export const getMultisigDataByAddress = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const network = String(req.get('x-network'));
+
+		const { multisigAddress } = req.body;
+		if (!multisigAddress || !network) {
+			return res.status(400).json({ error: responseMessages.missing_params });
+		}
+
+		try {
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+
+			// check if the multisig already exists in our db
+			const multisigRef = await firestoreDB.collection('multisigAddresses').doc(String(`${encodedMultisigAddress}_${network}`)).get();
+			if (multisigRef.exists) {
+				const data = multisigRef.data();
+				return res.status(200).json({ data: {
+					...data,
+					created_at: data?.created_at.toDate(),
+					updated_at: data?.updated_at?.toDate() || data?.created_at.toDate()
+				} });
+			}
+
+			const { data: multisigMetaData, error: multisigMetaDataErr } = await getOnChainMultisigMetaData(encodedMultisigAddress, network);
+			if (multisigMetaDataErr) return res.status(400).json({ error: multisigMetaDataErr || responseMessages.onchain_multisig_fetch_error });
+			if (!multisigMetaData) return res.status(400).json({ error: responseMessages.multisig_not_found_on_chain });
+
+			const newMultisig: IMultisigAddress = {
+				address: encodedMultisigAddress,
+				created_at: new Date(),
+				updated_at: new Date(),
+				name: DEFAULT_MULTISIG_NAME,
+				signatories: multisigMetaData.signatories || [],
+				network: String(network).toLowerCase(),
+				threshold: Number(multisigMetaData.threshold) || 0
+			};
+
+			res.status(200).json({ data: newMultisig });
+
+			if (newMultisig.signatories.length > 1 && newMultisig.threshold) {
+				// make a copy to db
+				const newMultisigRef = firestoreDB.collection('multisigAddresses').doc(`${encodedMultisigAddress}_${network}`);
 				await newMultisigRef.set(newMultisig);
 			}
 			return;
@@ -1032,7 +1084,7 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 			const substrateAddress = getSubstrateAddress(String(address));
 			const encodedMultisigAddress = encodeAddress(mutisigAddress, chainProperties[network].ss58Format);
 
-			const multisigDocData = (await firestoreDB.collection('multisigAddresses').doc(encodedMultisigAddress).get()).data() as IMultisigAddress;
+			const multisigDocData = (await firestoreDB.collection('multisigAddresses').doc(`${encodedMultisigAddress}_${network}`).get()).data() as IMultisigAddress;
 
 			if (multisigDocData.signatories.includes(substrateAddress)) {
 				const newMultisigSettings: IMultisigSettings = {
@@ -1179,7 +1231,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 			if (!encodedMultisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
 
 			// get signatories for multisig
-			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : encodedMultisigAddress).get();
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : `${encodedMultisigAddress}_${network}`).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
 				txRef.set({ callHash, note: String(note) }, { merge: true });
