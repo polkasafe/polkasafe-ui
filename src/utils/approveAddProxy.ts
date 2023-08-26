@@ -167,7 +167,7 @@ export async function approveAddProxy ({ api, approvingAddress, callDataHex, cal
 							multisigAddresses: copyMultisigAddresses,
 							multisigSettings: {
 								...prevState.multisigSettings,
-								[multisigData.address]: {
+								[`${multisig.address}_${multisig.network}`]: {
 									deleted: false,
 									name: multisigData.name
 								}

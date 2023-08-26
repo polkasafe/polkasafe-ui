@@ -136,7 +136,7 @@ const LinkMultisig = ({ onCancel }: { onCancel: () => void }) => {
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 							multisigSettings: {
 								...prevState?.multisigSettings,
-								[multisigData.address]: {
+								[`${multisigData.address}_${multisigData.network}`]: {
 									name: multisigName,
 									deleted: false
 								}

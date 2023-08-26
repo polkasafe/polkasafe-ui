@@ -132,7 +132,7 @@ export async function approveProxy ({ api, records, navigate, approvingAddress, 
 							multisigAddresses: copyMultisigAddresses,
 							multisigSettings: {
 								...prevState.multisigSettings,
-								[multisigData.address]: {
+								[`${multisig.address}_${multisig.network}`]: {
 									name: multisigData.name,
 									deleted: false
 								}

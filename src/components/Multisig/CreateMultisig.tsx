@@ -76,7 +76,7 @@ const CreateMultisig: React.FC<IMultisigProps> = ({ onCancel, homepage=false }) 
 				multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 				multisigSettings: {
 					...prevState.multisigSettings,
-					[multisigData.address]: {
+					[`${multisigData.address}_${multisigData.network}`]: {
 						name: multisigData.name,
 						deleted: false
 					}
