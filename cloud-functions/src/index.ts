@@ -609,7 +609,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 				await firestoreDB.collection('addresses').doc(substrateAddress).set({
 					'multisigSettings': {
-						[encodedMultisigAddress]: newMultisigSettings
+						[`${encodedMultisigAddress}_${network}`]: newMultisigSettings
 					}
 				}, { merge: true });
 
@@ -652,7 +652,7 @@ export const createMultisig = functions.https.onRequest(async (req, res) => {
 
 			await firestoreDB.collection('addresses').doc(substrateAddress).set({
 				'multisigSettings': {
-					[encodedMultisigAddress]: newMultisigSettings
+					[`${encodedMultisigAddress}_${network}`]: newMultisigSettings
 				}
 			}, { merge: true });
 
@@ -889,7 +889,7 @@ export const deleteMultisig = functions.https.onRequest(async (req, res) => {
 			// delete multisig for user
 			firestoreDB.collection('addresses').doc(substrateAddress).set({
 				'multisigSettings': {
-					[encodedMultisigAddress]: newMultisigSettings
+					[`${encodedMultisigAddress}_${network}`]: newMultisigSettings
 				}
 			}, { merge: true });
 
@@ -1095,7 +1095,7 @@ export const renameMultisig = functions.https.onRequest(async (req, res) => {
 				// delete multisig for user
 				firestoreDB.collection('addresses').doc(substrateAddress).set({
 					'multisigSettings': {
-						[encodedMultisigAddress]: newMultisigSettings
+						[`${encodedMultisigAddress}_${network}`]: newMultisigSettings
 					}
 				}, { merge: true });
 			} else {

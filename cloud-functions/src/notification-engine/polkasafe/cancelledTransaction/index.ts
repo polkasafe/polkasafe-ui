@@ -43,7 +43,7 @@ export default async function cancelledTransaction(args: Args) {
 		if (addressData) {
 			const { name: defaultMultisigName } = await getMultisigData(firestore_db, multisigAddress, network);
 			const { multisigSettings, notification_preferences = null } = await getPSUser(firestore_db, address);
-			const { deleted = false, name: userMultisigName = defaultMultisigName } = multisigSettings?.[multisigAddress] as IPSMultisigSettings || {};
+			const { deleted = false, name: userMultisigName = defaultMultisigName } = multisigSettings?.[`${multisigAddress}_${network}`] as IPSMultisigSettings || {};
 
 			if (deleted || !notification_preferences) continue; // skip if multisig is deleted or user has no notification preferences
 

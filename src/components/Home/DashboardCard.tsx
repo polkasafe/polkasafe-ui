@@ -203,7 +203,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						</div>
 						<div>
 							<div className='text-base font-bold text-white flex items-center gap-x-2'>
-								{multisigSettings?.[activeMultisig]?.name || currentMultisig?.name}
+								{multisigSettings?.[`${activeMultisig}_${network}`]?.name || currentMultisig?.name}
 								<div className={`px-2 py-[2px] rounded-md text-xs font-medium ${hasProxy && isProxy ? 'bg-[#FF79F2] text-highlight' : 'bg-primary text-white'}`}>{hasProxy && isProxy ? 'Proxy' : 'Multisig'}</div>
 								{hasProxy &&
 								<Tooltip title='Switch Account'>

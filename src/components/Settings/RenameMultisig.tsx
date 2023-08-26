@@ -70,8 +70,8 @@ const RenameMultisig = ({ name }: { name: string }) => {
 								multisigAddresses: copyMultisigAddresses,
 								multisigSettings: {
 									...prev.multisigSettings,
-									[multisig.address]: {
-										...prev.multisigSettings[multisig.address],
+									[`${multisig.address}_${multisig.network}`]: {
+										...prev.multisigSettings[`${multisig.address}_${multisig.network}`],
 										name: multisigName
 									}
 								}

@@ -130,7 +130,7 @@ const AddOwner = ({ onCancel, className }: { onCancel?: () => void, className?: 
 							multisigAddresses: [...(prevState?.multisigAddresses || []), multisigData],
 							multisigSettings: {
 								...prevState.multisigSettings,
-								[multisigData.address]: {
+								[`${multisigData.address}_${multisigData.network}`]: {
 									deleted: false,
 									name: multisigData.name
 								}

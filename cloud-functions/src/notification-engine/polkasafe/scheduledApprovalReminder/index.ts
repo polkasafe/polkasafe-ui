@@ -81,7 +81,7 @@ export default async function scheduledApprovalReminder() {
 			const multisigAddressData = multisigAddressesToNotifyForUser[index];
 
 			pendingTxMultisigs.push({
-				multisigName: userAddressDoc.multisigSettings?.[multisigAddressData.address]?.name || multisigAddressData?.name || 'Untitled Multisig',
+				multisigName: userAddressDoc.multisigSettings?.[`${multisigAddressData.address}_${multisigAddressData.network}`]?.name || multisigAddressData?.name || 'Untitled Multisig',
 				multisigAddress: multisigAddressData.address,
 				network: multisigAddressData.network
 			});

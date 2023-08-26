@@ -76,7 +76,7 @@ const Menu: FC<Props> = ({ className }) => {
 	}
 
 	useEffect(() => {
-		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[multisig.address]?.deleted && !multisig.disabled) || [];
+		const filteredMutisigs = multisigAddresses?.filter((multisig) => multisig.network === network && !multisigSettings?.[`${multisig.address}_${multisig.network}`]?.deleted && !multisig.disabled) || [];
 		const multi = filteredMutisigs?.find((multisig) => multisig.address === activeMultisig || multisig.proxy === activeMultisig);
 		if(multi){
 			if(!multi.proxy){
@@ -169,7 +169,7 @@ const Menu: FC<Props> = ({ className }) => {
 			<section className='overflow-y-auto max-h-full [&::-webkit-scrollbar]:hidden flex-1 mb-3'>
 				{multisigAddresses &&
 					<ul className='flex flex-col gap-y-2 py-3 text-white list-none'>
-						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[multisig.address]?.deleted) && !multisig.disabled).map((multisig) => {
+						{multisigAddresses.filter((multisig) => (multisig.network === network && !multisigSettings?.[`${multisig.address}_${multisig.network}`]?.deleted) && !multisig.disabled).map((multisig) => {
 							return <li className='w-full' key={multisig.address}>
 								<button className={classNames('w-full flex items-center gap-x-2 flex-1 rounded-lg p-3 font-medium text-[13px]', {
 									'bg-highlight text-primary': multisig.address === selectedMultisigAddress
@@ -189,7 +189,7 @@ const Menu: FC<Props> = ({ className }) => {
 										size={23}
 										theme={'polkadot'}
 									/>
-									<span className='truncate'>{multisigSettings?.[multisig.address]?.name || multisig.name}</span>
+									<span className='truncate'>{multisigSettings?.[`${multisig.address}_${multisig.network}`]?.name || multisig.name}</span>
 								</button>
 							</li>;
 						})}

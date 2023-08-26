@@ -60,7 +60,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 					const copy = [...multisigAddresses];
 					setUserDetailsContextState((prevState) => {
 						const newMutlisigArray = copy.filter((item) => item.address !== activeMultisig || item.proxy === activeMultisig);
-						if(newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[newMutlisigArray[0]?.address]?.deleted){
+						if(newMutlisigArray && newMutlisigArray[0]?.address && !multisigSettings?.[`${newMutlisigArray[0]?.address}_${newMutlisigArray[0]?.network}`]?.deleted){
 							localStorage.setItem('active_multisig', newMutlisigArray[0].address);
 						}
 						else{
@@ -72,8 +72,8 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 							multisigAddresses: newMutlisigArray,
 							multisigSettings: {
 								...prevState.multisigSettings,
-								[multisig.address]: {
-									...prevState.multisigSettings[multisig.address],
+								[`${multisig.address}_${multisig.network}`]: {
+									...prevState.multisigSettings[`${multisig.address}_${multisig.network}`],
 									deleted: true
 								}
 							}
@@ -95,7 +95,7 @@ const RemoveMultisigAddress = ({ onCancel }: { onCancel: () => void }) => {
 			<p className='text-white font-medium text-sm leading-[15px]'>
 				Are you sure you want to permanently delete
 				<span className='text-primary mx-1.5'>
-					{multisigSettings?.[activeMultisig]?.name || multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
+					{multisigSettings?.[`${activeMultisig}_${network}`]?.name || multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.name || DEFAULT_MULTISIG_NAME}
 				</span>
                 ?
 			</p>
