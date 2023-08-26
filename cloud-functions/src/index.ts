@@ -1231,7 +1231,7 @@ export const updateTransactionNote = functions.https.onRequest(async (req, res) 
 			if (!encodedMultisigAddress && !txDoc.exists) return res.status(400).json({ error: responseMessages.missing_params });
 
 			// get signatories for multisig
-			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? txDocData.from : `${encodedMultisigAddress}_${network}`).get();
+			const multisigAddressDoc = await firestoreDB.collection('multisigAddresses').doc(txDoc.exists && txDocData.from ? `${txDocData.from}_${network}` : `${encodedMultisigAddress}_${network}`).get();
 
 			if (multisigAddressDoc.exists && (multisigAddressDoc.data() as IMultisigAddress).signatories.includes(substrateAddress)) {
 				txRef.set({ callHash, note: String(note) }, { merge: true });
