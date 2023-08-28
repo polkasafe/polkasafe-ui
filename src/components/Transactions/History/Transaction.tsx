@@ -27,6 +27,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
 	const [customTx, setCustomTx] = useState<boolean>(false);
+	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
 	const [decodedCallData, setDecodedCallData] = useState<any>();
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
@@ -46,18 +47,17 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
 
-		let callDataFunc = data.extrinsicFn;
-		if(callDataFunc?.section === 'proxy'){
-			const func:any = data.extrinsicCall?.args[2].toJSON();
-			callDataFunc = func.args?.calls?.[0];
-		}
+		const callDataFunc = data.extrinsicFn;
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [api, apiReady, callData, callHash, network]);
 
 	useEffect(() => {
-		if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest ) {
+		if(decodedCallData && decodedCallData?.args?.proxy_type){
+			setIsProxyApproval(true);
+		}
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest ) {
 			setCustomTx(true);
 		}
 	}, [decodedCallData]);
@@ -80,7 +80,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 							{
 								type === 'Sent' || customTx ?
 									<span
-										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+										className={`flex items-center justify-center w-9 h-9 ${isProxyApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
 									>
 										<ArrowUpRightIcon />
 									</span>
@@ -92,7 +92,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 									</span>
 							}
 							<span>
-								{customTx ? txnParams ? `${txnParams.section}.${txnParams.method}` : 'Custom Transaction' : type}
+								{customTx ? txnParams ? `${txnParams.section}.${txnParams.method}` : 'Custom Transaction' : isProxyApproval ? 'Proxy Creation' : type}
 							</span>
 						</p>
 						{Number(amount_token) ?
