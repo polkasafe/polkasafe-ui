@@ -49,7 +49,6 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 		}
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
-		console.log(data.extrinsicCall?.toJSON());
 
 		let callDataFunc = data.extrinsicFn;
 		if(callDataFunc?.section === 'proxy'){
@@ -194,7 +193,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 								/>
 								:
 								<SentInfo
-									amount={decodedCallData?.args?.calls?.map((item: any) => item?.args?.value) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.value) || ''}
+									amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || decodedCallData?.args?.calls?.map((item: any) => item?.args?.value) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.value) || ''}
 									approvals={approvals}
 									date={dayjs(created_at).format('llll')}
 									callHash={callHash}
@@ -205,7 +204,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 									txnParams={txnParams}
 									customTx={customTx}
 									callData={callData}
-									recipientAddresses={decodedCallData?.args?.calls?.map((item: any) => item?.args?.dest?.id) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.dest?.id)}
+									recipientAddresses={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.map((item: any) => item?.args?.dest?.id) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.dest?.id)}
 								/>
 						}
 					</div>

@@ -51,8 +51,6 @@ export default async function getHistoryTransactions(
 					headers: SUBSCAN_API_HEADERS
 				});
 
-				console.log(multisigData);
-
 				const transactionDoc = await firestoreDB.collection('transactions').doc(transaction.call_hash).get();
 				const txn: ITransaction = transactionDoc.data() as ITransaction;
 

@@ -185,7 +185,6 @@ export async function approveMultisigTransfer ({ amount, approvals, api, approvi
 									note,
 									to: recipientAddress || ''
 								});
-								console.log('transaction added to history');
 
 								sendNotificationToAddresses({
 									addresses: otherSignatories,
