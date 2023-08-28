@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Collapse, Divider, Spin, Timeline } from 'antd';
+import { Collapse, Divider, Timeline } from 'antd';
 import classNames from 'classnames';
 import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -11,7 +11,6 @@ import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
 import { chainProperties } from 'src/global/networkConstants';
-import { ITransaction } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -31,15 +30,15 @@ interface ISentInfoProps {
 	// time: string;
     className?: string;
 	callHash: string
-	transactionDetails?: ITransaction
-	loading?: boolean
+	note?: string;
+	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
 	amount_usd: number
 	from: string
 	txnParams?: { method: string, section: string }
 	customTx: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, txnParams, recipientAddresses, from, amount_usd, className, date, callHash, transactionDetails, loading }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, txnParams, recipientAddresses, from, amount_usd, className, date, callHash, transactionFields, note }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency, currencyPrice } = useGlobalCurrencyContext();
@@ -199,9 +198,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 						</span>
 					</p>
 				</div>
-				{loading ? <Spin className='mt-3'/> : transactionDetails &&
-				<>
-					{!!transactionDetails.transactionFields && Object.keys(transactionDetails?.transactionFields).length !== 0 && transactionDetails.transactionFields.category !== 'none' &&
+				{!!transactionFields && Object.keys(transactionFields).length !== 0 && transactionFields.category !== 'none' &&
 				<>
 					<div
 						className='flex items-center justify-between mt-3'
@@ -212,11 +209,11 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 							Category:
 						</span>
 						<span className='text-primary border border-solid border-primary rounded-xl px-[6px] py-1'>
-							{transactionDetails?.transactionFields?.category}
+							{transactionFields?.category}
 						</span>
 					</div>
-					{transactionDetails?.transactionFields && transactionDetails?.transactionFields?.subfields && Object.keys(transactionDetails?.transactionFields?.subfields).map((key) => {
-						const subfield = transactionDetails?.transactionFields?.subfields[key];
+					{transactionFields && transactionFields?.subfields && Object.keys(transactionFields?.subfields).map((key) => {
+						const subfield = transactionFields?.subfields[key];
 						return (
 							<div
 								key={key}
@@ -233,7 +230,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 							</div>
 						);})}
 				</>}
-					{transactionDetails?.note &&
+				{note &&
 					<div
 						className='flex items-center justify-between gap-x-5 mt-3'
 					>
@@ -248,12 +245,10 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 							<span
 								className='text-white font-normal text-sm leading-[15px] whitespace-pre'
 							>
-								{transactionDetails?.note}
+								{note}
 							</span>
 						</p>
 					</div>
-					}
-				</>
 				}
 				<p
 					onClick={() => setShowDetails(prev => !prev)}
