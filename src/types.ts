@@ -243,7 +243,7 @@ export interface ITransaction {
 	id: string;
 	token: string;
 	amount_usd: number;
-	amount_token: number | number[];
+	amount_token: string;
 	network: string;
 	note?: string;
 	transactionFields?: {category: string, subfields: {[subfield: string]: { name: string, value: string }}}
@@ -251,9 +251,7 @@ export interface ITransaction {
 		[address: string]: {
 			lastNotified: Date;
 		}
-	},
-	section?:string,
-	method?:string,
+	}
 }
 
 export interface INotification {

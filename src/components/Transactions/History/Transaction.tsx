@@ -5,7 +5,7 @@
 import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC,useState } from 'react';
+import React, { FC,useEffect,useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
@@ -15,6 +15,7 @@ import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
+import decodeCallData from 'src/utils/decodeCallData';
 
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
@@ -22,17 +23,49 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, approvals, token, created_at, to, from, callHash, amount_usd, section, method }) => {
-	const { network } = useGlobalApiContext();
+const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, token, created_at, to, from, callHash, amount_usd }) => {
+	const { network, api, apiReady } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [transactionDetails, setTransactionDetails] = useState<ITransaction>({} as any);
+	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+	const [customTx, setCustomTx] = useState<boolean>(false);
+	const [decodedCallData, setDecodedCallData] = useState<any>();
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
 	const type: 'Sent' | 'Received' = multisig?.address === from || multisig?.proxy === from ? 'Sent' : 'Received';
 	const location = useLocation();
 	const hash = location.hash.slice(1);
+
+	useEffect(() => {
+		if(!api || !apiReady || !callData) return;
+
+		const { data, error } = decodeCallData(callData, api);
+		if(error || !data) return;
+
+		if(data?.extrinsicCall?.hash.toHex() !== callHash) {
+			return;
+		}
+
+		setDecodedCallData(data.extrinsicCall?.toJSON());
+		console.log(data.extrinsicCall?.toJSON());
+
+		let callDataFunc = data.extrinsicFn;
+		if(callDataFunc?.section === 'proxy'){
+			const func:any = data.extrinsicCall?.args[2].toJSON();
+			callDataFunc = func.args?.calls?.[0];
+		}
+		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [api, apiReady, callData, callHash, network]);
+
+	useEffect(() => {
+		if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest ) {
+			setCustomTx(true);
+		}
+	}, [decodedCallData]);
 
 	const handleGetTransactionDetails = async () => {
 		try{
@@ -92,7 +125,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, approvals, token, created
 					>
 						<p className='col-span-3 flex items-center gap-x-3'>
 							{
-								type === 'Sent' || Boolean(section) && Boolean(method) ?
+								type === 'Sent' || customTx ?
 									<span
 										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
 									>
@@ -106,22 +139,26 @@ const Transaction: FC<ITransaction> = ({ amount_token, approvals, token, created
 									</span>
 							}
 							<span>
-								{Boolean(section) && Boolean(method) ? 'Custom Transaction' : type}
+								{customTx ? txnParams ? `${txnParams.section}.${txnParams.method}` : 'Custom Transaction' : type}
 							</span>
 						</p>
-						<p className='col-span-2 flex items-center gap-x-[6px]'>
-							{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
-							<span
-								className={classNames(
-									'font-normal text-xs leading-[13px] text-failure',
-									{
-										'text-success': type === 'Received'
-									}
-								)}
-							>
-								{type === 'Sent' || !(amount_token) ? '-': '+'} { Boolean(amount_token) && amount_token} {Boolean(amount_token) && token}
-							</span>
-						</p>
+						{Number(amount_token) ?
+							<p className='col-span-2 flex items-center gap-x-[6px]'>
+								{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
+								<span
+									className={classNames(
+										'font-normal text-xs leading-[13px] text-failure',
+										{
+											'text-success': type === 'Received'
+										}
+									)}
+								>
+									{type === 'Sent' || !(amount_token) ? '-': '+'} { Boolean(amount_token) && amount_token} {Boolean(amount_token) && token || chainProperties[network].tokenSymbol}
+								</span>
+							</p>
+							:
+							<p className='col-span-2'>-</p>
+						}
 						<p className='col-span-2'>
 							{dayjs(created_at).format('lll')}
 						</p>
@@ -143,47 +180,33 @@ const Transaction: FC<ITransaction> = ({ amount_token, approvals, token, created
 					<div>
 						<Divider className='bg-text_secondary my-5' />
 						{
-							Boolean(section) && Boolean(method) ?
-								<SentInfo
+							type === 'Received'?
+								<ReceivedInfo
 									amount={String(amount_token)}
-									approvals={approvals}
 									amountType={token}
 									date={dayjs(created_at).format('llll')}
-									recipient={String(to)}
+									from={from}
+									callHash={callHash}
+									transactionDetails={transactionDetails}
+									loading={loading}
+									amount_usd={amount_usd}
+									to={String(to)}
+								/>
+								:
+								<SentInfo
+									amount={decodedCallData?.args?.calls?.map((item: any) => item?.args?.value) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.value) || ''}
+									approvals={approvals}
+									date={dayjs(created_at).format('llll')}
 									callHash={callHash}
 									transactionDetails={transactionDetails}
 									from={from}
 									loading={loading}
 									amount_usd={amount_usd}
-									section={section}
-									method={method}
+									txnParams={txnParams}
+									customTx={customTx}
+									callData={callData}
+									recipientAddresses={decodedCallData?.args?.calls?.map((item: any) => item?.args?.dest?.id) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.dest?.id)}
 								/>
-								:
-								type === 'Received'?
-									<ReceivedInfo
-										amount={String(amount_token)}
-										amountType={token}
-										date={dayjs(created_at).format('llll')}
-										from={from}
-										callHash={callHash}
-										transactionDetails={transactionDetails}
-										loading={loading}
-										amount_usd={amount_usd}
-										to={String(to)}
-									/>
-									:
-									<SentInfo
-										amount={String(amount_token)}
-										approvals={approvals}
-										amountType={token}
-										date={dayjs(created_at).format('llll')}
-										recipient={String(to)}
-										callHash={callHash}
-										transactionDetails={transactionDetails}
-										from={from}
-										loading={loading}
-										amount_usd={amount_usd}
-									/>
 						}
 					</div>
 				</Collapse.Panel>

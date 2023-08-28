@@ -66,7 +66,6 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					method: 'POST'
 				});
 				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getMultisigHistoryTransactions.json() as { data: ITransaction[], error: string, count: number };
-				console.log(multisigTransactions);
 				if(multisig.proxy){
 					const getProxyHistoryTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigHistory`, {
 						body: JSON.stringify({

@@ -4,42 +4,47 @@
 import Identicon from '@polkadot/react-identicon';
 import { Collapse, Divider, Spin, Timeline } from 'antd';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
+import { chainProperties } from 'src/global/networkConstants';
 import { ITransaction } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
-import { CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
+import { ArrowRightIcon, CircleCheckIcon, CirclePlusIcon, CircleWatchIcon, CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
+import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
 import styled from 'styled-components';
 
+import ArgumentsTable from '../Queued/ArgumentsTable';
+
 interface ISentInfoProps {
 	approvals?: string[];
-	amount: string;
-	amountType: string;
+	callData?: string;
+	recipientAddresses?: string[]
+	amount: string[];
 	date: string;
 	// time: string;
     className?: string;
-	recipient: string
 	callHash: string
 	transactionDetails?: ITransaction
 	loading?: boolean
 	amount_usd: number
 	from: string
-	section?:string
-	method?:string
+	txnParams?: { method: string, section: string }
+	customTx: boolean
 }
 
-const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amountType, className, date, recipient, callHash, transactionDetails, loading, section, method }) => {
+const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, txnParams, recipientAddresses, from, amount_usd, className, date, callHash, transactionDetails, loading }) => {
 	const { addressBook, activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { currency } = useGlobalCurrencyContext();
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 	const threshold = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig)?.threshold || 0;
+	const [showDetails, setShowDetails] = useState<boolean>(false);
 
 	return (
 		<div
@@ -48,57 +53,70 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amo
 			<article
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
-				{!(Boolean(section) && Boolean(method)) &&
-				<>
-					<p
-						className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
-					>
-						<span>
-							Sent
-						</span>
-						<span
-							className='text-failure'
-						>
-							{amount} {amountType} ({Number(amount_usd).toFixed(2)} {currencyProperties[currency].symbol})
-						</span>
-						<span>
-							to:
-						</span>
-					</p>
-					<div
-						className='mt-3 flex items-center gap-x-4'
-					>
-						<Identicon size={30} value={recipient} theme='polkadot'  />
-						<div
-							className='flex flex-col gap-y-[6px]'
-						>
-							<p
-								className='font-medium text-sm leading-[15px] text-white'
-							>
-								{addressBook?.find((item) => item.address === recipient)?.name || DEFAULT_ADDRESS_NAME}
-							</p>
-							<p
-								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-							>
-								<span>
-									{getEncodedAddress(recipient, network)}
-								</span>
-								<span
-									className='flex items-center gap-x-2 text-sm'
+				{customTx ? <></> :
+					<div className='flex flex-col gap-y-1' >
+						{Array.isArray(recipientAddresses) && recipientAddresses.map((item, i) => (
+							<>
+								<p
+									className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
 								>
-									<button onClick={() => copyText(recipient, true, network)}><CopyIcon className='hover:text-primary'/></button>
-									<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipient, network)}`} target='_blank' rel="noreferrer" >
-										<ExternalLinkIcon />
-									</a>
-								</span>
-							</p>
-						</div>
+									<span>
+											Sent
+									</span>
+									<span
+										className='text-failure'
+									>
+										{amount[i] ? parseDecodedValue({
+											network,
+											value: String(amount[i]),
+											withUnit: true
+										}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amount_usd)) && amount[i] && <span>({(Number(amount_usd) * Number(currencyPrice) * Number(parseDecodedValue({
+											network,
+											value: String(amount[i]),
+											withUnit: false
+										}))).toFixed(2)} {currencyProperties[currency].symbol})</span>}
+									</span>
+									<span>
+											To:
+									</span>
+								</p>
+								<div
+									className='mt-3 flex items-center gap-x-4'
+								>
+									{item && <Identicon size={30} theme='polkadot' value={item} />}
+									<div
+										className='flex flex-col gap-y-[6px]'
+									>
+										<p
+											className='font-medium text-sm leading-[15px] text-white'
+										>
+											{recipientAddresses ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+										</p>
+										{recipientAddresses &&
+											<p
+												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+											>
+												<span>
+													{getEncodedAddress(item, network)}
+												</span>
+												<span
+													className='flex items-center gap-x-2 text-sm'
+												>
+													<button onClick={() => copyText(item, true, network)}><CopyIcon className='hover:text-primary'/></button>
+													<a href={`https://${network}.subscan.io/account/${getEncodedAddress(item, network)}`} target='_blank' rel="noreferrer" >
+														<ExternalLinkIcon />
+													</a>
+												</span>
+											</p>}
+									</div>
+								</div>
+								{recipientAddresses.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
+							</>
+						))}
 					</div>
-					<Divider className='bg-text_secondary my-5' />
-				</>
 				}
 				<div
-					className='flex items-center justify-between gap-x-7 mb-3'
+					className='flex items-center justify-between gap-x-7 mt-3'
 				>
 					<span
 						className='text-text_secondary font-normal text-sm leading-[15px]'
@@ -106,30 +124,6 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amo
 							From:
 					</span>
 					<AddressComponent address={from} />
-				</div>
-				<div
-					className='flex items-center justify-between gap-x-5'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
-							Txn Hash:
-					</span>
-					<p
-						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-					>
-						<span
-							className='text-white font-normal text-sm leading-[15px]'
-						>
-							{shortenAddress(callHash, 10)}
-						</span>
-						<span
-							className='flex items-center gap-x-2 text-sm'
-						>
-							<button onClick={() => copyText(callHash)}><CopyIcon/></button>
-							{/* <ExternalLinkIcon /> */}
-						</span>
-					</p>
 				</div>
 				<div
 					className='flex items-center justify-between gap-x-5 mt-3'
@@ -149,46 +143,6 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amo
 						</span>
 					</p>
 				</div>
-				{ Boolean(section) && Boolean(method) &&
-					<>
-						<div
-							className='flex items-center justify-between gap-x-5 mt-3'
-						>
-							<span
-								className='text-text_secondary font-normal text-sm leading-[15px]'
-							>
-									Section:
-							</span>
-							<p
-								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-							>
-								<span
-									className='text-white font-normal text-sm leading-[15px]'
-								>
-									{section}
-								</span>
-							</p>
-						</div>
-						<div
-							className='flex items-center justify-between gap-x-5 mt-3'
-						>
-							<span
-								className='text-text_secondary font-normal text-sm leading-[15px]'
-							>
-								Method:
-							</span>
-							<p
-								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-							>
-								<span
-									className='text-white font-normal text-sm leading-[15px]'
-								>
-									{method}
-								</span>
-							</p>
-						</div>
-					</>
-				}
 				{loading ? <Spin className='mt-3'/> : transactionDetails &&
 				<>
 					{!!transactionDetails.transactionFields && Object.keys(transactionDetails?.transactionFields).length !== 0 && transactionDetails.transactionFields.category !== 'none' &&
@@ -223,6 +177,7 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amo
 							</div>
 						);})}
 				</>}
+					{transactionDetails?.note &&
 					<div
 						className='flex items-center justify-between gap-x-5 mt-3'
 					>
@@ -241,6 +196,76 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, approvals, from, amount_usd, amo
 							</span>
 						</p>
 					</div>
+					}
+				</>
+				}
+				<p
+					onClick={() => setShowDetails(prev => !prev)}
+					className='text-primary cursor-pointer font-medium text-sm leading-[15px] mt-5 flex items-center gap-x-3'
+				>
+					<span>
+						{showDetails ? 'Hide' : 'Advanced'} Details
+					</span>
+					<ArrowRightIcon />
+				</p>
+				{showDetails &&
+				<>
+					{callData &&
+				<div
+					className='flex items-center justify-between gap-x-5 mt-3'
+				>
+					<span
+						className='text-text_secondary font-normal text-sm leading-[15px]'
+					>
+							Call Data:
+					</span>
+					<p
+						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+					>
+						<span
+							className='text-white font-normal text-sm leading-[15px]'
+						>
+							{shortenAddress(callData, 10)}
+						</span>
+						<span
+							className='flex items-center gap-x-2 text-sm'
+						>
+							<button onClick={() => copyText(callData)}><CopyIcon/></button>
+							{/* <ExternalLinkIcon /> */}
+						</span>
+					</p>
+				</div>
+					}
+					<div
+						className='flex items-center justify-between gap-x-5 mt-3'
+					>
+						<span
+							className='text-text_secondary font-normal text-sm leading-[15px]'
+						>
+							Txn Hash:
+						</span>
+						<p
+							className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+						>
+							<span
+								className='text-white font-normal text-sm leading-[15px]'
+							>
+								{shortenAddress(callHash, 10)}
+							</span>
+							<span
+								className='flex items-center gap-x-2 text-sm'
+							>
+								<button onClick={() => copyText(callHash)}><CopyIcon/></button>
+								{/* <ExternalLinkIcon /> */}
+							</span>
+						</p>
+					</div>
+					{callData && txnParams &&
+					<>
+						<Divider className='border-bg-secondary text-text_secondary my-5' orientation='left'>Decoded Call</Divider>
+						<ArgumentsTable callData={callData} />
+					</>
+					}
 				</>
 				}
 			</article>
