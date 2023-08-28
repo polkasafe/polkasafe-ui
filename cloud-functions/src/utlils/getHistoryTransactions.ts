@@ -7,8 +7,7 @@ import { firestore } from 'firebase-admin';
 
 interface IResponse {
 	error?: string | null;
-	data: ITransaction[];
-    count: number;
+	data: { transactions: ITransaction[], count: number }
 }
 
 export default async function getHistoryTransactions(
@@ -19,9 +18,8 @@ export default async function getHistoryTransactions(
 	firestoreDB: firestore.Firestore
 ): Promise<IResponse> {
 	const returnValue: IResponse = {
-		count: 0,
 		error: '',
-		data: []
+		data: { transactions: [], count: 0 }
 	};
 
 	try {
@@ -104,8 +102,8 @@ export default async function getHistoryTransactions(
 			}
 		}
 
-		returnValue.data = transactions;
-		returnValue.count = transactions.length;
+		returnValue.data.transactions = transactions;
+		returnValue.data.count = transactions.length;
 	} catch (err) {
 		console.log('Error in getTransfersByAddress:', err);
 		returnValue.error = String(err) || responseMessages.transfers_fetch_error;
