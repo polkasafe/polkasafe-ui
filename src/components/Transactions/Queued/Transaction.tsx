@@ -91,11 +91,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
 
-		let callDataFunc = data.extrinsicFn;
-		if(callDataFunc?.section === 'proxy'){
-			const func:any = data.extrinsicCall?.args[2].toHuman();
-			callDataFunc = func.args?.calls?.[0];
-		}
+		const callDataFunc = data.extrinsicFn;
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 		// store callData in BE

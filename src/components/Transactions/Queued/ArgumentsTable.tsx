@@ -76,6 +76,10 @@ const ArgumentsTable: FC<IArgumentsTableProps> = ({ callData, className }) => {
 		setDecodedCallData(data.extrinsicCall?.toJSON());
 
 		const callDataFunc = data.extrinsicFn;
+		// if(callDataFunc?.section === 'proxy' && callDataFunc?.method === 'proxy'){
+		// const func:any = data.extrinsicCall?.args[2].toHuman();
+		// callDataFunc = func.args?.calls?.[0];
+		// }
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 	}, [api, apiReady, callData, network]);
