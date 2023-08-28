@@ -2,14 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 import Identicon from '@polkadot/react-identicon';
-import { Divider, Spin } from 'antd';
+import { Divider } from 'antd';
 import React, { FC } from 'react';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { currencyProperties } from 'src/global/currencyConstants';
 import { DEFAULT_ADDRESS_NAME } from 'src/global/default';
-import { ITransaction } from 'src/types';
 import AddressComponent from 'src/ui-components/AddressComponent';
 import { CopyIcon, ExternalLinkIcon } from 'src/ui-components/CustomIcons';
 import copyText from 'src/utils/copyText';
@@ -26,11 +25,9 @@ interface IReceivedInfoProps {
 	from: string
 	to: string
 	callHash: string
-	transactionDetails?: ITransaction
-	loading?: boolean
 }
 
-const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, transactionDetails, loading }) => {
+const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
 	const { currency, currencyPrice } = useGlobalCurrencyContext();
@@ -136,25 +133,6 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 							className='text-white font-normal text-sm leading-[15px]'
 						>
 							{date}
-						</span>
-					</p>
-				</div>}
-				{loading ? <Spin className='mt-3' /> : transactionDetails &&
-				<div
-					className='w-full flex items-center justify-between gap-x-5 mt-3'
-				>
-					<span
-						className='text-text_secondary font-normal text-sm leading-[15px]'
-					>
-							Note:
-					</span>
-					<p
-						className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
-					>
-						<span
-							className='text-white font-normal text-sm leading-[15px] whitespace-pre'
-						>
-							{transactionDetails?.note}
 						</span>
 					</p>
 				</div>}

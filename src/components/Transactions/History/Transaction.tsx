@@ -10,8 +10,6 @@ import { useLocation } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
@@ -23,12 +21,10 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, token, created_at, to, from, callHash, amount_usd }) => {
+const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, token, created_at, to, from, callHash, amount_usd, note, transactionFields }) => {
 	const { network, api, apiReady } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [transactionDetails, setTransactionDetails] = useState<ITransaction>({} as any);
 	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
 	const [customTx, setCustomTx] = useState<boolean>(false);
 	const [decodedCallData, setDecodedCallData] = useState<any>();
@@ -66,43 +62,6 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 		}
 	}, [decodedCallData]);
 
-	const handleGetTransactionDetails = async () => {
-		try{
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
-
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-				setLoading(true);
-				const transactionRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
-					body: JSON.stringify({
-						callHash
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
-
-				const { data: transactionData, error: transactionError } = await transactionRes.json() as { data: ITransaction, error: string };
-
-				if(transactionError) {
-					console.log('error', transactionError);
-					setLoading(false);
-					return;
-				}else {
-					setLoading(false);
-					setTransactionDetails(transactionData);
-				}
-
-			}
-		} catch (error){
-			setLoading(false);
-			console.log('ERROR', error);
-		}
-	};
-
 	return (
 		<>
 			<Collapse
@@ -112,12 +71,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 			>
 				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 					<div
-						onClick={() => {
-							if(!transactionInfoVisible){
-								handleGetTransactionDetails();
-							}
-							toggleTransactionVisible(!transactionInfoVisible);
-						}}
+						onClick={() => toggleTransactionVisible(!transactionInfoVisible)}
 						className={classNames(
 							'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
 						)}
@@ -186,8 +140,6 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 									date={dayjs(created_at).format('llll')}
 									from={from}
 									callHash={callHash}
-									transactionDetails={transactionDetails}
-									loading={loading}
 									amount_usd={amount_usd}
 									to={String(to)}
 								/>
@@ -197,9 +149,9 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 									approvals={approvals}
 									date={dayjs(created_at).format('llll')}
 									callHash={callHash}
-									transactionDetails={transactionDetails}
+									transactionFields={transactionFields}
+									note={note}
 									from={from}
-									loading={loading}
 									amount_usd={amount_usd}
 									txnParams={txnParams}
 									customTx={customTx}
