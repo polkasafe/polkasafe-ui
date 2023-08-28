@@ -122,7 +122,7 @@ const BalanceInput = ({ fromBalance, className, label = '', onChange, placeholde
 						<Input
 							id="balance"
 							onChange={(a) => {onBalanceChange(a.target.value); setBalance(a.target.value);}}
-							placeholder={`${placeholder} ${chainProperties[network]?.tokenSymbol}`}
+							placeholder={`${placeholder} ${currency === network ? chainProperties[network]?.tokenSymbol : currencyProperties[currency].symbol}`}
 							defaultValue={defaultValue}
 							value={balance}
 							className="w-full h-full text-sm font-normal leading-[15px] border-0 outline-0 p-3 placeholder:text-[#505050] bg-bg-secondary rounded-lg text-white pr-20"
