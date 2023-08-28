@@ -25,8 +25,8 @@ import ArgumentsTable from '../Queued/ArgumentsTable';
 interface ISentInfoProps {
 	approvals?: string[];
 	callData?: string;
-	recipientAddresses?: string[]
-	amount: string[];
+	recipientAddresses?: string | string[]
+	amount: string | string[];
 	date: string;
 	// time: string;
     className?: string;
@@ -54,45 +54,101 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 				className='p-4 rounded-lg bg-bg-main flex-1'
 			>
 				{customTx ? <></> :
-					<div className='flex flex-col gap-y-1' >
-						{Array.isArray(recipientAddresses) && recipientAddresses.map((item, i) => (
-							<>
-								<p
-									className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+					(typeof recipientAddresses === 'string') ?
+						<>
+							<p
+								className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+							>
+								<span>
+									Sent
+								</span>
+								<span
+									className='text-failure'
 								>
-									<span>
-											Sent
-									</span>
-									<span
-										className='text-failure'
-									>
-										{amount[i] ? parseDecodedValue({
-											network,
-											value: String(amount[i]),
-											withUnit: true
-										}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amount_usd)) && amount[i] && <span>({(Number(amount_usd) * Number(currencyPrice) * Number(parseDecodedValue({
-											network,
-											value: String(amount[i]),
-											withUnit: false
-										}))).toFixed(2)} {currencyProperties[currency].symbol})</span>}
-									</span>
-									<span>
-											To:
-									</span>
-								</p>
+									{amount ? parseDecodedValue({
+										network,
+										value: String(amount),
+										withUnit: true
+									}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amount_usd)) && amount && <span>({(Number(amount_usd) * Number(parseDecodedValue({
+										network,
+										value: String(amount),
+										withUnit: false
+									}))).toFixed(2)} USD)</span>}
+								</span>
+								<span>
+									To:
+								</span>
+							</p>
+							<div
+								className='mt-3 flex items-center gap-x-4'
+							>
+								{recipientAddresses && <Identicon size={30} theme='polkadot' value={recipientAddresses} />}
 								<div
-									className='mt-3 flex items-center gap-x-4'
+									className='flex flex-col gap-y-[6px]'
 								>
-									{item && <Identicon size={30} theme='polkadot' value={item} />}
-									<div
-										className='flex flex-col gap-y-[6px]'
+									<p
+										className='font-medium text-sm leading-[15px] text-white'
 									>
-										<p
-											className='font-medium text-sm leading-[15px] text-white'
+										{recipientAddresses ? (addressBook?.find((item) => item.address === recipientAddresses)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+									</p>
+									{recipientAddresses &&
+							<p
+								className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
+							>
+								<span>
+									{getEncodedAddress(recipientAddresses, network)}
+								</span>
+								<span
+									className='flex items-center gap-x-2 text-sm'
+								>
+									<button onClick={() => copyText(recipientAddresses, true, network)}><CopyIcon className='hover:text-primary'/></button>
+									<a href={`https://${network}.subscan.io/account/${getEncodedAddress(recipientAddresses, network)}`} target='_blank' rel="noreferrer" >
+										<ExternalLinkIcon />
+									</a>
+								</span>
+							</p>}
+								</div>
+							</div>
+						</>:
+						<div className='flex flex-col gap-y-1' >
+							{Array.isArray(recipientAddresses) && recipientAddresses.map((item, i) => (
+								<>
+									<p
+										className='flex items-center gap-x-1 text-white font-medium text-sm leading-[15px]'
+									>
+										<span>
+											Sent
+										</span>
+										<span
+											className='text-failure'
 										>
-											{recipientAddresses ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
-										</p>
-										{recipientAddresses &&
+											{amount[i] ? parseDecodedValue({
+												network,
+												value: String(amount[i]),
+												withUnit: true
+											}) : `? ${chainProperties[network].tokenSymbol}`} {!isNaN(Number(amount_usd)) && amount[i] && <span>({(Number(amount_usd) * Number(currencyPrice) * Number(parseDecodedValue({
+												network,
+												value: String(amount[i]),
+												withUnit: false
+											}))).toFixed(2)} {currencyProperties[currency].symbol})</span>}
+										</span>
+										<span>
+											To:
+										</span>
+									</p>
+									<div
+										className='mt-3 flex items-center gap-x-4'
+									>
+										{item && <Identicon size={30} theme='polkadot' value={item} />}
+										<div
+											className='flex flex-col gap-y-[6px]'
+										>
+											<p
+												className='font-medium text-sm leading-[15px] text-white'
+											>
+												{recipientAddresses ? (addressBook?.find((a) => a.address === item)?.name || DEFAULT_ADDRESS_NAME) : '?'}
+											</p>
+											{recipientAddresses &&
 											<p
 												className='flex items-center gap-x-3 font-normal text-xs leading-[13px] text-text_secondary'
 											>
@@ -108,12 +164,12 @@ const SentInfo: FC<ISentInfoProps> = ({ amount, callData, approvals, customTx, t
 													</a>
 												</span>
 											</p>}
+										</div>
 									</div>
-								</div>
-								{recipientAddresses.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
-							</>
-						))}
-					</div>
+									{recipientAddresses.length - 1 !== i && <Divider className='bg-text_secondary mt-1' />}
+								</>
+							))}
+						</div>
 				}
 				<div
 					className='flex items-center justify-between gap-x-7 mt-3'

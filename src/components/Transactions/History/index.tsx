@@ -65,7 +65,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
-				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getMultisigHistoryTransactions.json() as { data: ITransaction[], error: string, count: number };
+				const { data: { transactions: multisigTransactions, count: multisigTransactionsCount }, error: multisigError } = await getMultisigHistoryTransactions.json() as { data: { transactions: ITransaction[], count: number}, error: string };
 				if(multisig.proxy){
 					const getProxyHistoryTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigHistory`, {
 						body: JSON.stringify({
@@ -76,7 +76,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 						headers: firebaseFunctionsHeader(network),
 						method: 'POST'
 					});
-					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getProxyHistoryTransactions.json() as { data: ITransaction[], error: string, count: number };
+					const { data: { transactions: proxyTransactions, count: proxyTransactionsCount }, error: proxyError } = await getProxyHistoryTransactions.json() as { data: { transactions: ITransaction[], count: number}, error: string };
 					if(proxyTransactions && !proxyError){
 						setLoading(false);
 						data = proxyTransactions;
@@ -96,6 +96,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					console.log('Error in Fetching Transactions: ', multisigError);
 				}
 			} catch (error) {
+				setLoading(false);
 				console.log(error);
 			}
 		};

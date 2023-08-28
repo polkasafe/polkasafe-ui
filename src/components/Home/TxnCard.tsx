@@ -77,7 +77,7 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					headers: firebaseFunctionsHeader(network),
 					method: 'POST'
 				});
-				const { data: multisigTransactions, error: multisigError } = await getMultisigHistoryTransactions.json() as { data: ITransaction[], error: string };
+				const { data: { transactions: multisigTransactions }, error: multisigError } = await getMultisigHistoryTransactions.json() as { data: { transactions: ITransaction[] }, error: string };
 				if(multisigError){
 					setHistoryLoading(false);
 					console.log('Error in Fetching Transactions: ', multisigError);

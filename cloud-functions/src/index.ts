@@ -2906,7 +2906,7 @@ export const getMultisigHistory = functions.https.onRequest(async (req, res) => 
 
 			if (historyItemsError || !historyItemsArr) return res.status(400).json({ error: historyItemsError || responseMessages.queue_fetch_error });
 
-			res.status(200).json({ data: historyItemsArr, count });
+			res.status(200).json({ data: { transactions: historyItemsArr, count } });
 
 			// TODO: make a copy to db after response is sent
 			// single batch will do because there'll never be more than 100 transactions
