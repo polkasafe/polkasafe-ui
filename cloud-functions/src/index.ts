@@ -2896,7 +2896,7 @@ export const getMultisigHistory = functions.https.onRequest(async (req, res) => 
 
 		try {
 			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
-			const { data: historyItemsArr, error: historyItemsError, count } = await getHistoryTransactions(
+			const { data: { transactions: historyItemsArr, count }, error: historyItemsError } = await getHistoryTransactions(
 				encodedMultisigAddress,
 				network,
 				Number(limit),
