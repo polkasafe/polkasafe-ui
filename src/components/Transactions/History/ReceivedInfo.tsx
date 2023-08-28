@@ -33,7 +33,7 @@ interface IReceivedInfoProps {
 const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountType, date, from, callHash, transactionDetails, loading }) => {
 	const { addressBook } = useGlobalUserDetailsContext();
 	const { network } = useGlobalApiContext();
-	const { currency } = useGlobalCurrencyContext();
+	const { currency, currencyPrice } = useGlobalCurrencyContext();
 
 	return (
 		<article
@@ -48,7 +48,7 @@ const ReceivedInfo: FC<IReceivedInfoProps> = ({ amount, to, amount_usd, amountTy
 				<span
 					className='text-success'
 				>
-					{amount} {amountType} ({Number(amount_usd).toFixed(2)} {currencyProperties[currency].symbol})
+					{amount} {amountType} ({(Number(amount_usd) * Number(currencyPrice)).toFixed(2)} {currencyProperties[currency].symbol})
 				</span>
 				<span>
 								from:
