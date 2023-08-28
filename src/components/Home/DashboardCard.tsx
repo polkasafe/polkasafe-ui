@@ -127,7 +127,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 						>
 							<OutlineCloseIcon className='text-primary w-2 h-2' />
 						</button>}
-					title={<h3 className='text-white mb-8 text-lg font-semibold'>{isOnchain ? 'Send Funds' : 'Existential Deposit'}</h3>}
+					title={<h3 className='text-white mb-8 text-lg font-semibold'>{isOnchain ? transactionType : 'Existential Deposit'}</h3>}
 					open={openTransactionModal}
 					className={`${className} w-auto md:min-w-[500px] scale-90`}
 				>
