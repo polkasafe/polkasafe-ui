@@ -147,30 +147,36 @@ export async function approveProxy ({ api, records, navigate, approvingAddress, 
 			console.log('ERROR', error);
 		}
 	};
-	const fetchProxyData = async () => {
-		const response = await fetch(
-			`https://${network}.api.subscan.io/api/scan/events`,
-			{
-				body: JSON.stringify({
-					row: 1,
-					page: 0,
-					module: 'proxy',
-					call: 'PureCreated',
-					address: multisig.address
-				}),
-				headers: SUBSCAN_API_HEADERS,
-				method: 'POST'
-			}
-		);
+	const fetchProxyData = async (reject: (reason?: any) => void) => {
+		try {
+			const response = await fetch(
+				`https://${network}.api.subscan.io/api/scan/events`,
+				{
+					body: JSON.stringify({
+						row: 1,
+						page: 0,
+						module: 'proxy',
+						call: 'PureCreated',
+						address: multisig.address
+					}),
+					headers: SUBSCAN_API_HEADERS,
+					method: 'POST'
+				}
+			);
 
-		const responseJSON = await response.json();
-		if(responseJSON.data.count === 0){
-			return;
+			const responseJSON = await response.json();
+			if(responseJSON.data.count === 0){
+				throw new Error('error in proxy creation');
+			}
+			else{
+				const params = JSON.parse(responseJSON.data?.events[0]?.params);
+				const proxyAddress = getEncodedAddress(params[0].value, network);
+				await handleMultisigCreate(proxyAddress || '');
+			}
 		}
-		else{
-			const params = JSON.parse(responseJSON.data?.events[0]?.params);
-			const proxyAddress = getEncodedAddress(params[0].value, network);
-			await handleMultisigCreate(proxyAddress || '');
+		catch (error) {
+			console.log(error);
+			reject('Failed to create Proxy.');
 		}
 	};
 
@@ -251,7 +257,7 @@ export async function approveProxy ({ api, records, navigate, approvingAddress, 
 
 						for (const { event } of events) {
 							if (event.method === 'ExtrinsicSuccess') {
-								await fetchProxyData();
+								await fetchProxyData(reject);
 
 								notify({
 									args: {

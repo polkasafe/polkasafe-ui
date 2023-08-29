@@ -100,9 +100,9 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 								{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
 								<span
 									className={classNames(
-										'font-normal text-xs leading-[13px] text-failure',
+										'font-normal text-xs leading-[13px] text-success',
 										{
-											'text-success': type === 'Received'
+											'text-failure': type === 'Sent'
 										}
 									)}
 								>
