@@ -91,7 +91,7 @@ const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, toke
 										<ArrowDownLeftIcon />
 									</span>
 							}
-							<span>
+							<span className='capitalize'>
 								{customTx ? txnParams ? `${txnParams.section}.${txnParams.method}` : 'Custom Transaction' : isProxyApproval ? 'Proxy Creation' : type}
 							</span>
 						</p>
