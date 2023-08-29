@@ -63,7 +63,8 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 
 		setReservedProxyDeposit((api.consts.proxy.proxyDepositFactor as unknown as BN)
 			.muln(1)
-			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN));
+			.iadd(api.consts.proxy.proxyDepositBase as unknown as BN)
+			.add((api.consts.balances.existentialDeposit as unknown as BN).muln(2)));
 	}, [activeMultisig, api, apiReady]);
 
 	const createProxy = async () => {
