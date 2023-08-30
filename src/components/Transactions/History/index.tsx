@@ -78,23 +78,21 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					});
 					const { data: { transactions: proxyTransactions, count: proxyTransactionsCount }, error: proxyError } = await getProxyHistoryTransactions.json() as { data: { transactions: ITransaction[], count: number}, error: string };
 					if(proxyTransactions && !proxyError){
-						setLoading(false);
 						data = proxyTransactions;
 						docs = proxyTransactionsCount;
 					}
 				}
 
 				if(multisigTransactions){
-					setLoading(false);
 					data = [...data, ...multisigTransactions];
 					setTransactions(data);
 					docs = docs + multisigTransactionsCount;
 					setTotalDocs(docs);
 				}
 				if(multisigError){
-					setLoading(false);
 					console.log('Error in Fetching Transactions: ', multisigError);
 				}
+				setLoading(false);
 			} catch (error) {
 				setLoading(false);
 				console.log(error);
