@@ -20,6 +20,7 @@ import updateTransactionNote from './updateTransactionNote';
 
 interface Args {
 	api: ApiPromise,
+	approvals: string[],
 	network: string,
 	multisig: IMultisigAddress,
 	callDataHex: string,
@@ -31,7 +32,7 @@ interface Args {
 	setLoadingMessages: React.Dispatch<React.SetStateAction<string>>
 }
 
-export async function approveMultisigTransfer ({ amount, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
+export async function approveMultisigTransfer ({ amount, approvals, api, approvingAddress, callDataHex, callHash, recipientAddress, multisig, network, note, setLoadingMessages }: Args) {
 
 	const encodedInitiatorAddress = getEncodedAddress(approvingAddress, network) || approvingAddress;
 
@@ -171,10 +172,11 @@ export async function approveMultisigTransfer ({ amount, api, approvingAddress, 
 								resolve();
 
 								// update note for transaction history
-								updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
+								if(note) updateTransactionNote({ callHash: txHash.toHex(), multisigAddress: multisig.address, network, note });
 
 								addNewTransaction({
 									amount: amount || new BN(0),
+									approvals: approvals.length > 0 ? [...approvals, approvingAddress] : [],
 									block_number: blockNumber,
 									callData: callDataHex,
 									callHash: txHash.toHex(),

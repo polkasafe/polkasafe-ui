@@ -91,11 +91,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 
 		setDecodedCallData(data.extrinsicCall?.toJSON());
 
-		let callDataFunc = data.extrinsicFn;
-		if(callDataFunc?.section === 'proxy'){
-			const func:any = data.extrinsicCall?.args[2].toHuman();
-			callDataFunc = func.args?.calls?.[0];
-		}
+		const callDataFunc = data.extrinsicFn;
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 		// store callData in BE
@@ -206,6 +202,7 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 				await approveMultisigTransfer({
 					amount: network === 'astar' ? bnToBn(decodedCallData.args.calls?.[0]?.args.value as number) : new BN(decodedCallData.args.value || decodedCallData?.args?.call?.args?.value || decodedCallData?.args?.calls?.[0]?.args.value || decodedCallData?.args?.call?.args?.calls?.[0]?.args?.value || 0),
 					api,
+					approvals,
 					approvingAddress: address,
 					callDataHex: callDataString,
 					callHash,

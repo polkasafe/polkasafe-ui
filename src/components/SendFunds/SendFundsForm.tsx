@@ -162,11 +162,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 
 		setCallHash(data.decoded?.method.hash.toHex() || '');
 
-		let callDataFunc = data.extrinsicFn;
-		if(callDataFunc?.section === 'proxy'){
-			const func:any = data.extrinsicCall?.args[2].toHuman();
-			callDataFunc = func.args?.calls?.[0];
-		}
+		const callDataFunc = data.extrinsicFn;
 		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
 
 	}, [api, apiReady, callData, network, transactionType]);

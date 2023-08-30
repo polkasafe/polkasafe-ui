@@ -21,7 +21,6 @@ import Loader from 'src/ui-components/Loader';
 import decodeCallData from 'src/utils/decodeCallData';
 import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 import getEncodedAddress from 'src/utils/getEncodedAddress';
-import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 import getSubstrateAddress from 'src/utils/getSubstrateAddress';
 import parseDecodedValue from 'src/utils/parseDecodedValue';
 import shortenAddress from 'src/utils/shortenAddress';
@@ -69,20 +68,23 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 
 			setHistoryLoading(true);
 			try{
-				const { data, error } = await getHistoryTransactions(
-					activeMultisig,
-					network,
-					10,
-					1,
-					currency
-				);
-				if(error){
+				const getMultisigHistoryTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigHistory`, {
+					body: JSON.stringify({
+						limit: 10,
+						multisigAddress: activeMultisig,
+						page: 1
+					}),
+					headers: firebaseFunctionsHeader(network),
+					method: 'POST'
+				});
+				const { data: { transactions: multisigTransactions }, error: multisigError } = await getMultisigHistoryTransactions.json() as { data: { transactions: ITransaction[] }, error: string };
+				if(multisigError){
 					setHistoryLoading(false);
-					console.log('Error in Fetching Transactions: ', error);
+					console.log('Error in Fetching Transactions: ', multisigError);
 				}
-				if(data){
+				if(multisigTransactions){
 					setHistoryLoading(false);
-					setTransactions(data);
+					setTransactions(multisigTransactions);
 				}
 			} catch (error) {
 				console.log(error);
@@ -164,15 +166,19 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 						{!queueLoading && api && apiReady ? (queuedTransactions && queuedTransactions.length > 0) ?
 							queuedTransactions.filter((_, i) => i < 10).map((transaction, i) => {
 								let decodedCallData = null;
+								let callDataFunc = null;
 
 								if(transaction.callData) {
 									const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
 									if(!error && data) {
 										decodedCallData = data.extrinsicCall?.toJSON();
+										callDataFunc = data.extrinsicFn;
 									}
 								}
 
 								const isProxyApproval = decodedCallData && (decodedCallData?.args?.proxy_type || decodedCallData?.args?.call?.args?.delegate?.id);
+
+								const customTx = decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest;
 
 								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
 								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;
@@ -206,12 +212,12 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 												</div>}
 											<div className='ml-3'>
 												<h1 className='text-md text-white truncate'>
-													{ decodedCallData && !isProxyApproval ? <span>To: {batchCallRecipients.length ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
+													{ decodedCallData && !isProxyApproval && !customTx ? <span>To: {batchCallRecipients.length ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : customTx ? <span>Txn: {callDataFunc?.section}.{callDataFunc?.method}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>}
 												</h1>
 												<p className='text-text_secondary text-xs'>{isProxyApproval ? 'Proxy Creation request in Process...' : 'In Process...'}</p>
 											</div>
 										</div>
-										{!isProxyApproval &&
+										{!isProxyApproval && !customTx &&
 										Number(transaction?.totalAmount) ?
 											<div>
 												<h1 className='text-md text-white'>- {transaction.totalAmount} {chainProperties[network].tokenSymbol}</h1>
@@ -250,17 +256,48 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 					<div className="flex flex-col bg-bg-main px-5 py-3 shadow-lg rounded-lg h-60 scale-90 w-[111%] origin-top-left overflow-auto">
 						<h1 className="text-primary text-sm mb-4">Completed Transactions</h1>
 
-						{!historyLoading ? (transactions && transactions.length > 0) ?
+						{!historyLoading && api && apiReady ? (transactions && transactions.length > 0) ?
 							transactions.filter((_, i) => i < 10).map((transaction, i) => {
 								const sent = transaction.from === activeMultisig;
+								let decodedCallData = null;
+								let callDataFunc = null;
+
+								if(transaction.callData) {
+									const { data, error } = decodeCallData(transaction.callData, api) as { data: any, error: any };
+									if(!error && data) {
+										decodedCallData = data.extrinsicCall?.toJSON();
+										callDataFunc = data.extrinsicFn;
+									}
+
+								}
+								const customTx = decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest;
+
+								const destSubstrateAddress = decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? getSubstrateAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) : '';
+								const destAddressName = addressBook?.find((address) => getSubstrateAddress(address.address) === destSubstrateAddress)?.name;
+								const toText = decodedCallData && destSubstrateAddress && destAddressName ? destAddressName :
+									(shortenAddress( decodedCallData && (decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id) ? String(getEncodedAddress(decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id, network)) : ''));
+
+								let batchCallRecipients: string[] = [];
+								if(decodedCallData && decodedCallData?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
+								else if(decodedCallData && decodedCallData?.args?.call?.args?.calls){
+									batchCallRecipients = decodedCallData?.args?.call?.args?.calls?.map((call: any) => {
+										const dest = call?.args?.dest?.id;
+										return addressBook.find((a) => getSubstrateAddress(a.address) === getSubstrateAddress(dest))?.name || shortenAddress(getEncodedAddress(dest, network) || '');
+									});
+								}
 
 								return (
-									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center justify-between pb-2 mb-2">
-										<div className="flex items-center justify-between">
+									<Link to={`/transactions?tab=History#${transaction.callHash}`} key={i} className="flex items-center pb-2 mb-2">
+										<div className="flex flex-1 items-center">
 											<div className={`${sent ? 'bg-failure' : 'bg-success'} bg-opacity-10 rounded-lg p-2 mr-3 h-[38px] w-[38px] flex items-center justify-center`}><img src={sent ? TopRightArrow : BottomLeftArrow} alt="send"/></div>
-											<div>
+											<div className='text-md text-white truncate'>
 												{sent ?
-													<h1 className='text-md text-white'>To: {addressBook?.find((address) => address.address === getEncodedAddress(String(transaction.to), network))?.name || shortenAddress(getEncodedAddress(String(transaction.to), network) || '')}</h1>
+													decodedCallData && !customTx ? <span>To: {batchCallRecipients.length ? batchCallRecipients.map((a, i) => `${a}${i !== batchCallRecipients?.length - 1 ? ', ' : ''}`) : toText}</span> : customTx ? <span>Txn: {callDataFunc?.section}.{callDataFunc?.method}</span> : <span>Txn: {shortenAddress(transaction.callHash)}</span>
 													:
 													<h1 className='text-md text-white'>From: {addressBook?.find((address) => address.address === getEncodedAddress(transaction.from, network))?.name || shortenAddress(getEncodedAddress(transaction.from, network) || '')}</h1>
 												}
@@ -268,9 +305,12 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											</div>
 										</div>
 										<div>
-											{sent ? <h1 className='text-md text-failure'>-{transaction.amount_token} {transaction.token}</h1>
+											{sent ? <h1 className='text-md text-failure'>-{Number(transaction.amount_token) ? <>{transaction.amount_token} {transaction.token || chainProperties[network].tokenSymbol}</> : '?'}</h1>
 												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
-											<p className='text-text_secondary text-right text-xs'>{transaction.amount_usd.toFixed(2)} {currencyProperties[currency].symbol}</p>
+											{Number(transaction.amount_token) ? <p className='text-text_secondary text-right text-xs'>{!isNaN(transaction.amount_usd) ? (Number(transaction.amount_usd) * Number(currencyPrice)).toFixed(2) : isNaN(Number(amountUSD)) ? '0.00' : Number(transaction.amount_token) * Number(amountUSD) * Number(currencyPrice)} {currencyProperties[currency].symbol}</p> : ''}
+										</div>
+										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
+											<ArrowRightOutlined/>
 										</div>
 									</Link>
 								);

@@ -10,7 +10,6 @@ import { NotificationStatus } from 'src/types';
 import queueNotification from 'src/ui-components/QueueNotification';
 
 import { addNewTransaction } from './addNewTransaction';
-import { calcWeight } from './calcWeight';
 import getEncodedAddress from './getEncodedAddress';
 import { IMultiTransferResponse } from './initMultisigTransfer';
 import { notify } from './notify';
@@ -50,21 +49,18 @@ export async function transferAndProxyBatchAll({ api, multisigAddress, setTxnHas
 
 	const otherSignatories = encodedSignatories.filter((signatory) => signatory !== encodedInitiatorAddress);
 	const proxyTx = api.tx.proxy.createPure('Any', 0, new Date().getMilliseconds());
-	const transferTx = api.tx.balances.transferKeepAlive(recepientAddress, AMOUNT_TO_SEND);
+	const transferTxn = api.tx.balances.transferKeepAlive(recepientAddress, AMOUNT_TO_SEND);
 
-	const callData = api.createType('Call', transferTx.method.toHex());
-	const { weight: MAX_WEIGHT } = await calcWeight(callData, api);
-
-	const multiSigProxyCall = api.tx.multisig.asMulti(threshold, otherSignatories, null, proxyTx, MAX_WEIGHT as any);
-	// Some funds are needed on the multisig for the pure proxy creation
+	const ZERO_WEIGHT = new Uint8Array(0);
+	const multisigProxyTxn = api.tx.multisig.asMulti(threshold, otherSignatories, null, proxyTx, ZERO_WEIGHT);
 
 	let blockHash = '';
 
-	const batchTx = amount.isZero() ? api.tx.utility.batchAll([multiSigProxyCall]) : api.tx.utility.batchAll([transferTx, multiSigProxyCall]);
+	const batchTxn = amount.isZero() ? api.tx.utility.batchAll([multisigProxyTxn]) : api.tx.utility.batchAll([transferTxn, multisigProxyTxn]);
 
 	return new Promise<IMultiTransferResponse>((resolve, reject) => {
 
-		batchTx
+		batchTxn
 			.signAndSend(encodedInitiatorAddress, async ({ status, txHash, events }) => {
 				if (status.isInvalid) {
 					console.log('Transaction invalid');

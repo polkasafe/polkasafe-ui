@@ -5,16 +5,15 @@
 import { Collapse, Divider } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import React, { FC,useState } from 'react';
+import React, { FC,useEffect,useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ParachainIcon } from 'src/components/NetworksDropdown';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
-import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { chainProperties } from 'src/global/networkConstants';
 import { ITransaction } from 'src/types';
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CircleArrowDownIcon, CircleArrowUpIcon } from 'src/ui-components/CustomIcons';
+import decodeCallData from 'src/utils/decodeCallData';
 
 import ReceivedInfo from './ReceivedInfo';
 import SentInfo from './SentInfo';
@@ -22,54 +21,46 @@ import SentInfo from './SentInfo';
 const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 dayjs.extend(LocalizedFormat);
 
-const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, from, callHash, amount_usd, section, method }) => {
-	const { network } = useGlobalApiContext();
+const Transaction: FC<ITransaction> = ({ amount_token, callData, approvals, token, created_at, to, from, callHash, amount_usd, note, transactionFields }) => {
+	const { network, api, apiReady } = useGlobalApiContext();
 
 	const [transactionInfoVisible, toggleTransactionVisible] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [transactionDetails, setTransactionDetails] = useState<ITransaction>({} as any);
+	const [txnParams, setTxnParams] = useState<{ method: string, section: string }>({} as any);
+	const [customTx, setCustomTx] = useState<boolean>(false);
+	const [isProxyApproval, setIsProxyApproval] = useState<boolean>(false);
+	const [decodedCallData, setDecodedCallData] = useState<any>();
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
 	const multisig = multisigAddresses.find(item => item.address === activeMultisig || item.proxy === activeMultisig);
 	const type: 'Sent' | 'Received' = multisig?.address === from || multisig?.proxy === from ? 'Sent' : 'Received';
 	const location = useLocation();
 	const hash = location.hash.slice(1);
 
-	const handleGetTransactionDetails = async () => {
-		try{
-			const userAddress = localStorage.getItem('address');
-			const signature = localStorage.getItem('signature');
+	useEffect(() => {
+		if(!api || !apiReady || !callData) return;
 
-			if(!userAddress || !signature) {
-				console.log('ERROR');
-				return;
-			}
-			else{
-				setLoading(true);
-				const transactionRes = await fetch(`${FIREBASE_FUNCTIONS_URL}/getTransactionNote`, {
-					body: JSON.stringify({
-						callHash
-					}),
-					headers: firebaseFunctionsHeader(network),
-					method: 'POST'
-				});
+		const { data, error } = decodeCallData(callData, api);
+		if(error || !data) return;
 
-				const { data: transactionData, error: transactionError } = await transactionRes.json() as { data: ITransaction, error: string };
-
-				if(transactionError) {
-					console.log('error', transactionError);
-					setLoading(false);
-					return;
-				}else {
-					setLoading(false);
-					setTransactionDetails(transactionData);
-				}
-
-			}
-		} catch (error){
-			setLoading(false);
-			console.log('ERROR', error);
+		if(data?.extrinsicCall?.hash.toHex() !== callHash) {
+			return;
 		}
-	};
+
+		setDecodedCallData(data.extrinsicCall?.toJSON());
+
+		const callDataFunc = data.extrinsicFn;
+		setTxnParams({ method: `${callDataFunc?.method}`, section:  `${callDataFunc?.section}` });
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [api, apiReady, callData, callHash, network]);
+
+	useEffect(() => {
+		if(decodedCallData && decodedCallData?.args?.proxy_type){
+			setIsProxyApproval(true);
+		}
+		else if(decodedCallData?.args && !decodedCallData?.args?.dest && !decodedCallData?.args?.call?.args?.dest && !decodedCallData?.args?.calls?.[0]?.args?.dest && !decodedCallData?.args?.call?.args?.calls?.[0]?.args?.dest ) {
+			setCustomTx(true);
+		}
+	}, [decodedCallData]);
 
 	return (
 		<>
@@ -80,21 +71,16 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 			>
 				<Collapse.Panel showArrow={false} key={`${callHash}`} header={
 					<div
-						onClick={() => {
-							if(!transactionInfoVisible){
-								handleGetTransactionDetails();
-							}
-							toggleTransactionVisible(!transactionInfoVisible);
-						}}
+						onClick={() => toggleTransactionVisible(!transactionInfoVisible)}
 						className={classNames(
 							'grid items-center grid-cols-9 cursor-pointer text-white font-normal text-sm leading-[15px]'
 						)}
 					>
 						<p className='col-span-3 flex items-center gap-x-3'>
 							{
-								type === 'Sent' || Boolean(section) && Boolean(method) ?
+								type === 'Sent' || customTx ?
 									<span
-										className='flex items-center justify-center w-9 h-9 bg-success bg-opacity-10 p-[10px] rounded-lg text-red-500'
+										className={`flex items-center justify-center w-9 h-9 ${isProxyApproval ? 'bg-[#FF79F2] text-[#FF79F2]' : 'bg-success text-red-500'} bg-opacity-10 p-[10px] rounded-lg`}
 									>
 										<ArrowUpRightIcon />
 									</span>
@@ -105,23 +91,27 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 										<ArrowDownLeftIcon />
 									</span>
 							}
-							<span>
-								{Boolean(section) && Boolean(method) ? 'Custom Transaction' : type}
+							<span className='capitalize'>
+								{customTx ? txnParams ? `${txnParams.section}.${txnParams.method}` : 'Custom Transaction' : isProxyApproval ? 'Proxy Creation' : type}
 							</span>
 						</p>
-						<p className='col-span-2 flex items-center gap-x-[6px]'>
-							{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
-							<span
-								className={classNames(
-									'font-normal text-xs leading-[13px] text-failure',
-									{
-										'text-success': type === 'Received'
-									}
-								)}
-							>
-								{type === 'Sent' || !(amount_token) ? '-': '+'} { Boolean(amount_token) && amount_token} {Boolean(amount_token) && token}
-							</span>
-						</p>
+						{Number(amount_token) ?
+							<p className='col-span-2 flex items-center gap-x-[6px]'>
+								{Boolean(amount_token) && <ParachainIcon src={chainProperties[network].logo} />}
+								<span
+									className={classNames(
+										'font-normal text-xs leading-[13px] text-success',
+										{
+											'text-failure': type === 'Sent'
+										}
+									)}
+								>
+									{type === 'Sent' || !(amount_token) ? '-': '+'} { Boolean(amount_token) && amount_token} {Boolean(amount_token) && token || chainProperties[network].tokenSymbol}
+								</span>
+							</p>
+							:
+							<p className='col-span-2'>-</p>
+						}
 						<p className='col-span-2'>
 							{dayjs(created_at).format('lll')}
 						</p>
@@ -143,45 +133,31 @@ const Transaction: FC<ITransaction> = ({ amount_token, token, created_at, to, fr
 					<div>
 						<Divider className='bg-text_secondary my-5' />
 						{
-							Boolean(section) && Boolean(method) ?
-								<SentInfo
+							type === 'Received'?
+								<ReceivedInfo
 									amount={String(amount_token)}
 									amountType={token}
 									date={dayjs(created_at).format('llll')}
-									recipient={String(to)}
-									callHash={callHash}
-									transactionDetails={transactionDetails}
 									from={from}
-									loading={loading}
+									callHash={callHash}
 									amount_usd={amount_usd}
-									section={section}
-									method={method}
+									to={String(to)}
 								/>
 								:
-								type === 'Received'?
-									<ReceivedInfo
-										amount={String(amount_token)}
-										amountType={token}
-										date={dayjs(created_at).format('llll')}
-										from={from}
-										callHash={callHash}
-										transactionDetails={transactionDetails}
-										loading={loading}
-										amount_usd={amount_usd}
-										to={String(to)}
-									/>
-									:
-									<SentInfo
-										amount={String(amount_token)}
-										amountType={token}
-										date={dayjs(created_at).format('llll')}
-										recipient={String(to)}
-										callHash={callHash}
-										transactionDetails={transactionDetails}
-										from={from}
-										loading={loading}
-										amount_usd={amount_usd}
-									/>
+								<SentInfo
+									amount={decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value || decodedCallData?.args?.calls?.map((item: any) => item?.args?.value) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.value) || ''}
+									approvals={approvals}
+									date={dayjs(created_at).format('llll')}
+									callHash={callHash}
+									transactionFields={transactionFields}
+									note={note}
+									from={from}
+									amount_usd={amount_usd}
+									txnParams={txnParams}
+									customTx={customTx}
+									callData={callData}
+									recipientAddresses={decodedCallData?.args?.dest?.id || decodedCallData?.args?.call?.args?.dest?.id || decodedCallData?.args?.calls?.map((item: any) => item?.args?.dest?.id) || decodedCallData?.args?.call?.args?.calls?.map((item: any) => item?.args?.dest?.id)}
+								/>
 						}
 					</div>
 				</Collapse.Panel>

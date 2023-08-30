@@ -58,6 +58,7 @@ import fs from 'fs';
 import { TOTP } from 'otpauth';
 import generateRandomBase32 from './utlils/generateRandomBase32';
 import dayjs from 'dayjs';
+import getHistoryTransactions from './utlils/getHistoryTransactions';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -1037,7 +1038,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 		const { isValid, error } = await isValidRequest(address, signature, network);
 		if (!isValid) return res.status(400).json({ error });
 
-		const { amount_token, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
+		const { amount_token, approvals, block_number, callData, callHash, from, to, note, transactionFields } = req.body;
 		if (!block_number || !callHash || !from || !network ) return res.status(400).json({ error: responseMessages.invalid_params });
 
 		try {
@@ -1045,6 +1046,7 @@ export const addTransaction = functions.https.onRequest(async (req, res) => {
 			const newTransaction: ITransaction = {
 				callData,
 				callHash,
+				approvals: approvals || [],
 				created_at: new Date(),
 				block_number: Number(block_number),
 				from,
@@ -2873,6 +2875,52 @@ export const getSharedAddressBook = functions.https.onRequest(async (req, res) =
 			return res.status(200).json({ data: addressBookDoc.exists ? (addressBookDoc.data() as ISharedAddressBooks) || {} : {} });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getSharedAddressBook :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+export const getMultisigHistory = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		const signature = req.get('x-signature');
+		const address = req.get('x-address');
+		const network = String(req.get('x-network'));
+
+		const { isValid, error } = await isValidRequest(address, signature, network);
+		if (!isValid) return res.status(400).json({ error });
+
+		const { multisigAddress, limit, page } = req.body;
+		if (!multisigAddress || !network || isNaN(limit) || isNaN(page)) return res.status(400).json({ error: responseMessages.missing_params });
+		if (Number(limit) > 100 || Number(limit) <= 0) return res.status(400).json({ error: responseMessages.invalid_limit });
+		if (Number(page) <= 0) return res.status(400).json({ error: responseMessages.invalid_page });
+
+		try {
+			const encodedMultisigAddress = encodeAddress(multisigAddress, chainProperties[network].ss58Format);
+			const { data: { transactions: historyItemsArr, count }, error: historyItemsError } = await getHistoryTransactions(
+				encodedMultisigAddress,
+				network,
+				Number(limit),
+				Number(page),
+				firestoreDB
+			);
+
+			if (historyItemsError || !historyItemsArr) return res.status(400).json({ error: historyItemsError || responseMessages.queue_fetch_error });
+
+			res.status(200).json({ data: { transactions: historyItemsArr, count } });
+
+			// TODO: make a copy to db after response is sent
+			// single batch will do because there'll never be more than 100 transactions
+			// const firestoreBatch = firestoreDB.batch();
+
+			// transactionsArr.forEach((transaction) => {
+			// const transactionRef = firestoreDB.collection('transactions').doc(transaction.callHash);
+			// firestoreBatch.set(transactionRef, transaction);
+			// });
+
+			// await firestoreBatch.commit();
+			return;
+		} catch (err:unknown) {
+			functions.logger.error('Error in getMultisigHistory :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});

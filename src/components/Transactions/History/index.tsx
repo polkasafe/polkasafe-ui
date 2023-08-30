@@ -9,11 +9,12 @@ import { useLocation } from 'react-router-dom';
 import { useGlobalApiContext } from 'src/context/ApiContext';
 import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
+import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
+import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
 import { usePagination } from 'src/hooks/usePagination';
 import { ITransaction } from 'src/types';
 import Loader from 'src/ui-components/Loader';
 import Pagination from 'src/ui-components/Pagination';
-import getHistoryTransactions from 'src/utils/getHistoryTransactions';
 
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
@@ -29,6 +30,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { currency } = useGlobalCurrencyContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const { network } = useGlobalApiContext();
@@ -53,21 +55,28 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 			try{
 				let data:any = [];
 				let docs:number = 0;
-				const { data: multisigTransactions, error: multisigError, count:multisigTransactionsCount } = await getHistoryTransactions(
-					multisig.address,
-					network,
-					multisig.proxy ? 5 : 10,
-					currentPage,
-					currency
-				);
+
+				const getMultisigHistoryTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigHistory`, {
+					body: JSON.stringify({
+						limit: multisig.proxy ? 5 : 10,
+						multisigAddress: multisig?.address,
+						page: currentPage
+					}),
+					headers: firebaseFunctionsHeader(network),
+					method: 'POST'
+				});
+				const { data: { transactions: multisigTransactions, count: multisigTransactionsCount }, error: multisigError } = await getMultisigHistoryTransactions.json() as { data: { transactions: ITransaction[], count: number}, error: string };
 				if(multisig.proxy){
-					const { data: proxyTransactions, error: proxyError, count:proxyTransactionsCount } = await getHistoryTransactions(
-						multisig.proxy,
-						network,
-						10 - multisigTransactions.length,
-						currentPage,
-						currency
-					);
+					const getProxyHistoryTransactions = await fetch(`${FIREBASE_FUNCTIONS_URL}/getMultisigHistory`, {
+						body: JSON.stringify({
+							limit: 10 - multisigTransactions.length,
+							multisigAddress: multisig.proxy,
+							page: currentPage
+						}),
+						headers: firebaseFunctionsHeader(network),
+						method: 'POST'
+					});
+					const { data: { transactions: proxyTransactions, count: proxyTransactionsCount }, error: proxyError } = await getProxyHistoryTransactions.json() as { data: { transactions: ITransaction[], count: number}, error: string };
 					if(proxyTransactions && !proxyError){
 						setLoading(false);
 						data = proxyTransactions;
@@ -87,6 +96,7 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 					console.log('Error in Fetching Transactions: ', multisigError);
 				}
 			} catch (error) {
+				setLoading(false);
 				console.log(error);
 			}
 		};

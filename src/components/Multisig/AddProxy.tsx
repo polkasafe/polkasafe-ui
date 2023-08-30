@@ -179,7 +179,7 @@ const AddProxy: React.FC<IMultisigProps> = ({ onCancel, signatories, threshold, 
 							<span>
 								<WarningCircleIcon className='text-base' />
 							</span>
-							<p>A small deposit of ({formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)}) should be present in your Multisig account and approval would be required from threshold signatories to Create a Proxy.</p>
+							<p>A small deposit of ({formatBnBalance(reservedProxyDeposit, { numberAfterComma: 3, withUnit: true }, network)} + Existential Deposit) should be present in your Multisig account and approval would be required from threshold signatories to Create a Proxy.</p>
 						</section>
 
 						<div className='flex items-center justify-center gap-x-5 mt-[40px]'>
