@@ -305,9 +305,9 @@ const TxnCard = ({ newTxn, setProxyInProcess }: { newTxn: boolean, setProxyInPro
 											</div>
 										</div>
 										<div>
-											{sent ? <h1 className='text-md text-failure'>-{Number(transaction.amount_token) ? <>{transaction.amount_token} {transaction.token || chainProperties[network].tokenSymbol}</> : '?'}</h1>
-												: <h1 className='text-md text-success'>+{transaction.amount_token} {transaction.token}</h1>}
-											{Number(transaction.amount_token) ? <p className='text-text_secondary text-right text-xs'>{!isNaN(transaction.amount_usd) ? (Number(transaction.amount_usd) * Number(currencyPrice)).toFixed(2) : isNaN(Number(amountUSD)) ? '0.00' : Number(transaction.amount_token) * Number(amountUSD) * Number(currencyPrice)} {currencyProperties[currency].symbol}</p> : ''}
+											{sent ? <h1 className='text-md text-failure text-right'>-{Number(transaction.amount_token) ? <>{transaction.amount_token} {transaction.token || chainProperties[network].tokenSymbol}</> : '?'}</h1>
+												: <h1 className='text-md text-success text-right'>+{transaction.amount_token} {transaction.token}</h1>}
+											{Number(transaction.amount_token) ? <p className='text-text_secondary text-right text-xs'>{!isNaN(transaction.amount_usd) ? (Number(transaction.amount_usd) * Number(currencyPrice)).toFixed(3) : isNaN(Number(amountUSD)) ? '0.00' : (Number(transaction.amount_token) * Number(amountUSD) * Number(currencyPrice)).toFixed(3)} {currencyProperties[currency].symbol}</p> : ''}
 										</div>
 										<div className='flex justify-center items-center h-full px-2 text-text_secondary'>
 											<ArrowRightOutlined/>
