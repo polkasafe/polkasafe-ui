@@ -16,10 +16,11 @@ export default async function getTemplateRender(
 	const triggerTemplateData = await getTriggerTemplate(firestore_db, source, trigger);
 	if (!triggerTemplateData) throw Error(`Template not found for trigger: ${trigger}`);
 
-	const { subject, template, args } = triggerTemplateData;
+	const { subject: subjectTemplate, template, args } = triggerTemplateData;
 
 	if (args.length > 0 && !isValidTemplateArgs(options, args)) throw Error(`Invalid arguments for trigger template : ${trigger}`);
 
+	const subject = ejs.render(subjectTemplate, options);
 	const htmlMessage = ejs.render(template, options);
 
 	const bodyStartIndex = htmlMessage.indexOf('<body>') + 6;
