@@ -25,7 +25,7 @@ export default async function contentDeletedByMod(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 	const { userId = '', commentId = '', postId = '', replyId = '', network = '', reason = '', postType = '' } = args;
 
-	if (!userId || isNaN(Number(userId)) || !postId || !network || !reason || !postType) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	if (isNaN(Number(userId)) || !postId || !network || !reason || !postType) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const contentType = commentId ? 'comment' : replyId ? 'reply' : 'post';
 
