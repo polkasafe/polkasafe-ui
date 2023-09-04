@@ -4,7 +4,6 @@
 import { Layout } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PolkadotIcon } from 'src/ui-components/CustomIcons';
 
 const { Footer: AntdFooter } = Layout;
 
@@ -34,10 +33,6 @@ const Footer = () => {
 						Feature Request
 					</a>
 				</div>
-				<p className='flex items-center gap-x-2'>
-					<PolkadotIcon className='text-sm'/>
-					<span className='text-sm'>Built By Grants From Polkadot Treasury</span>
-				</p>
 				<p className='md:hidden'>
 					<sup>&#169;</sup>
 					All Rights Reserved
