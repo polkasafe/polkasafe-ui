@@ -3,19 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SyncOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Dropdown } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import React, { useEffect,useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import History from 'src/components/Transactions/History';
 import Queued from 'src/components/Transactions/Queued';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ExternalLinkIcon, HistoryIcon, QueueIcon } from 'src/ui-components/CustomIcons';
+import { ExportArrowIcon, ExternalLinkIcon, QuickbooksIcon, XeroIcon } from 'src/ui-components/CustomIcons';
 
 enum ETab {
 	QUEUE,
 	HISTORY
+}
+
+export enum EExportType {
+	QUICKBOOKS='quickbooks',
+	XERO='xero'
 }
 
 const Transactions = () => {
@@ -25,6 +30,19 @@ const Transactions = () => {
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [refetch, setRefetch] = useState<boolean>(false);
+
+	const [openExportModal, setOpenExportModal] = useState<boolean>(false);
+	const [historyTxnLength, setHistoryTxnLength] = useState(0);
+
+	const [exportType, setExportType] = useState<EExportType>(EExportType.QUICKBOOKS);
+
+	const exportTypesOptions: ItemType[] = Object.values(EExportType).map((item) => ({
+		key: item,
+		label: <span className='text-white flex items-center gap-x-2 capitalize '>
+			{item === EExportType.QUICKBOOKS ? <QuickbooksIcon className='text-lg'/> : <XeroIcon className='text-lg'/>}
+			Ready For {item}
+		</span>
+	}));
 
 	useEffect(() => {
 		const search = location.search.split('=')[1];
@@ -73,6 +91,23 @@ const Transactions = () => {
 								History
 							</Button>
 							<div className='flex-1' />
+							{tab === ETab.HISTORY && historyTxnLength > 0 &&
+							<Dropdown
+								menu={{
+									items: exportTypesOptions,
+									onClick: (e) => {setExportType(e.key as EExportType); setOpenExportModal(true);}
+								}}
+								trigger={['click']}
+							>
+								<Button
+									size='large'
+									icon={<ExportArrowIcon className='text-primary'  />}
+									className={'text-primary mr-3 bg-highlight outline-none border-none font-medium text-sm'}
+								>
+							Export
+								</Button>
+							</Dropdown>
+							}
 							<Button
 								size='large'
 								onClick={() => setRefetch(prev => !prev)}
@@ -84,7 +119,7 @@ const Transactions = () => {
 						</div>
 						{
 							tab === ETab.HISTORY?
-								<History loading={loading} refetch={refetch} setLoading={setLoading} />
+								<History exportType={exportType} setHistoryTxnLength={setHistoryTxnLength} openExportModal={openExportModal} setOpenExportModal={setOpenExportModal} loading={loading} refetch={refetch} setLoading={setLoading} />
 								:<Queued loading={loading} refetch={refetch} setLoading={setLoading} setRefetch={setRefetch} />
 						}
 					</>

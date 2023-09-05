@@ -67,6 +67,7 @@ import { ReactComponent as PolkasafeLogoSVG } from 'src/assets/icons/polkasafe-l
 import { ReactComponent as PolkasafeTextSVG } from 'src/assets/icons/polkasafe-text.svg';
 import { ReactComponent as PSSVG } from 'src/assets/icons/ps-icon.svg';
 import { ReactComponent as QRSVG } from 'src/assets/icons/qr.svg';
+import { ReactComponent as QuickbooksLogoSVG } from 'src/assets/icons/quickbooks-logo.svg';
 import { ReactComponent as RightArrowOutlinedSVG } from 'src/assets/icons/RightArrowOutlined.svg';
 import { ReactComponent as SearchSVG } from 'src/assets/icons/search.svg';
 import { ReactComponent as SettingsSVG } from 'src/assets/icons/settings.svg';
@@ -84,6 +85,7 @@ import { ReactComponent as WalletSVG } from 'src/assets/icons/wallet-icon.svg';
 import { ReactComponent as WarningSVG } from 'src/assets/icons/warning.svg';
 import { ReactComponent as WarningCircleSVG } from 'src/assets/icons/warning-circle.svg';
 import { ReactComponent as WarningRoundedSVG } from 'src/assets/icons/warning-rounded.svg';
+import { ReactComponent as XeroLogoSVG } from 'src/assets/icons/xero-logo.svg';
 import { ReactComponent as KusamaSVG } from 'src/assets/parachains-icons/kusama.svg';
 import { ReactComponent as PolkadotSVG } from 'src/assets/parachains-icons/polkadot.svg';
 import { ReactComponent as QueueSVG } from 'src/assets/Queue.svg';
@@ -409,4 +411,12 @@ export const PasswordFilledIcon = (props: Partial<CustomIconComponentProps>) => 
 
 export const ExchangeIcon = (props: Partial<CustomIconComponentProps>) => (
 	<Icon component={ExchangeSVG} {...props} />
+);
+
+export const XeroIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={XeroLogoSVG} {...props} />
+);
+
+export const QuickbooksIcon = (props: Partial<CustomIconComponentProps>) => (
+	<Icon component={QuickbooksLogoSVG} {...props} />
 );
