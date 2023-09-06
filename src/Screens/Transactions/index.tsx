@@ -40,7 +40,7 @@ const Transactions = () => {
 		key: item,
 		label: <span className='text-white flex items-center gap-x-2 capitalize '>
 			{item === EExportType.QUICKBOOKS ? <QuickbooksIcon className='text-lg'/> : <XeroIcon className='text-lg'/>}
-			Ready For {item}
+			Export To {item}
 		</span>
 	}));
 

@@ -3,9 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useState } from 'react';
 import CancelBtn from 'src/components/Settings/CancelBtn';
 import AddBtn from 'src/components/Settings/ModalBtn';
+import { QUICKBOOKS_CSV_HEADERS, XERO_CSV_HEADERS } from 'src/global/exportTransactionsConstants';
 import { EExportType } from 'src/Screens/Transactions';
 
 interface IHistoryTxns {
@@ -20,10 +21,11 @@ interface IHistoryTxns {
 interface IExportTransactionsHistory {
 	exportType: EExportType,
 	historyTxns?: IHistoryTxns[],
-	onCancel: () => void
+	closeModal: () => void
 }
 
-const ExportTransactionsHistory = ({ historyTxns, exportType, onCancel }: IExportTransactionsHistory) => {
+const ExportTransactionsHistory = ({ historyTxns, exportType, closeModal }: IExportTransactionsHistory) => {
+	const [downloaded, setDownloaded] = useState<boolean>(false);
 	const downloadFile = ({ data, fileName, fileType }: { data: any, fileName: string, fileType: string }) => {
 		// Create a blob with the data we want to download as a file
 		const blob = new Blob([data], { type: fileType });
@@ -41,18 +43,14 @@ const ExportTransactionsHistory = ({ historyTxns, exportType, onCancel }: IExpor
 		a.remove();
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const exportToCsv = () => {
 		if(!historyTxns) return;
-		// Headers for each column
-		const quickbooksHeaders = ['Date,Type,Doc Number,P0 Number,Name,Source,Account,Detail Account,Job,Item,Class,Cleared,Amount,Memo'];
-		const xeroHeaders = ['Date,Amount,Payee,Description,Reference,Transaction Type,Account Code,Department,Location'];
 
 		// Convert users data to a csv
 		const quickbooksTransactionsCsv = historyTxns.reduce((txns, a, i) => {
 			const { date, callhash, token, from, amount } = a;
 			const formattedDate = dayjs(date).format('L');
-			txns.push([formattedDate, 'General Journal', i+1, i+1, callhash, from, '', '', '', '', token, '', amount, ''].join(','));
+			txns.push([formattedDate, 'General', i+1, `P-${i+1}`, callhash, from, '', '', '', '', token, '', amount, ''].join(','));
 			return txns;
 		}, ['']);
 
@@ -64,23 +62,39 @@ const ExportTransactionsHistory = ({ historyTxns, exportType, onCancel }: IExpor
 		}, ['']);
 
 		downloadFile({
-			data: exportType === EExportType.QUICKBOOKS ? [...quickbooksHeaders, ...quickbooksTransactionsCsv].join('\n') : [...xeroHeaders, ...xeroTransactionsCsv].join('\n'),
+			data: exportType === EExportType.QUICKBOOKS ? [...QUICKBOOKS_CSV_HEADERS, ...quickbooksTransactionsCsv].join('\n') : [...XERO_CSV_HEADERS, ...xeroTransactionsCsv].join('\n'),
 			fileName: `transactions-history-${exportType}.csv`,
 			fileType: 'text/csv'
 		});
-		onCancel();
+		setDownloaded(true);
 	};
 
 	return (
 		<div className='flex flex-col w-[560px]'>
-			<div className="flex items-left justify-left">
-				<p className='mr-2 text-white'>You are about to export a CSV file with</p>
-				<div className='bg-highlight text-primary px-2 rounded-md'>{historyTxns?.length} transaction entries</div>
-			</div>
-			<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
-				<CancelBtn onClick={onCancel}/>
-				<AddBtn onClick={exportToCsv} title='Export' />
-			</div>
+			{downloaded ?
+				<div className="">
+					<span className='flex items-center'>
+						<div className='bg-highlight text-primary px-2 rounded-md mr-2'>transactions-history-{exportType}.csv</div>
+						<p className='text-white'>has been downloaded.</p>
+					</span>
+					<p className='text-white mt-1 ml-1'>You can import this into {exportType.charAt(0).toUpperCase() + exportType.slice(1)}.</p>
+				</div>
+				:
+				<div className="flex items-left justify-left">
+					<p className='mr-2 text-white'>You are about to export a CSV file with</p>
+					<div className='bg-highlight text-primary px-2 rounded-md'>{historyTxns?.length} transaction entries</div>
+				</div>
+			}
+			{downloaded ?
+				<div className='flex items-center justify-center mt-[30px]'>
+					<CancelBtn title='Close' onClick={closeModal}/>
+				</div>
+				:
+				<div className='flex items-center justify-between gap-x-5 mt-[30px]'>
+					<CancelBtn onClick={closeModal}/>
+					<AddBtn onClick={exportToCsv} title='Export' />
+				</div>
+			}
 		</div>
 	);
 };

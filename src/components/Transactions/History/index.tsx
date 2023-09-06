@@ -150,7 +150,7 @@ const History: FC<IHistory> = ({ loading, exportType, setLoading, refetch, openE
 					const type: 'Sent' | 'Received' = multisig?.address === txn.from || multisig?.proxy === txn.from ? 'Sent' : 'Received';
 					const amount = !isNaN(txn.amount_usd) ? (Number(txn.amount_usd) * Number(currencyPrice)).toFixed(4) : isNaN(Number(amountUSD)) ? '0' : (Number(txn.amount_token) * Number(amountUSD) * Number(currencyPrice)).toFixed(4);
 					return ({ amount: type === 'Sent' ? `-${amount}` : amount, callhash: txn.callHash, date: txn.created_at, from: txn.from, network, token: chainProperties[network].tokenSymbol });
-				})} onCancel={() => setOpenExportModal(false)}/>
+				})} closeModal={() => setOpenExportModal(false)}/>
 			</Modal>
 		);
 	};
