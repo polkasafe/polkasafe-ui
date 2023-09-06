@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Modal } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { FC } from 'react';
@@ -11,11 +12,16 @@ import { useGlobalCurrencyContext } from 'src/context/CurrencyContext';
 import { useGlobalUserDetailsContext } from 'src/context/UserDetailsContext';
 import { firebaseFunctionsHeader } from 'src/global/firebaseFunctionsHeader';
 import { FIREBASE_FUNCTIONS_URL } from 'src/global/firebaseFunctionsUrl';
+import { chainProperties } from 'src/global/networkConstants';
 import { usePagination } from 'src/hooks/usePagination';
+import { EExportType } from 'src/Screens/Transactions';
 import { ITransaction } from 'src/types';
+import { OutlineCloseIcon } from 'src/ui-components/CustomIcons';
 import Loader from 'src/ui-components/Loader';
 import Pagination from 'src/ui-components/Pagination';
+import fetchTokenToUSDPrice from 'src/utils/fetchTokentoUSDPrice';
 
+import ExportTransactionsHistory from './ExportTransactionsHistory';
 import NoTransactionsHistory from './NoTransactionsHistory';
 import Transaction from './Transaction';
 
@@ -23,20 +29,33 @@ interface IHistory{
 	loading: boolean
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>
 	refetch: boolean
+	openExportModal: boolean
+	setOpenExportModal: React.Dispatch<React.SetStateAction<boolean>>
+	setHistoryTxnLength: React.Dispatch<React.SetStateAction<number>>
+	exportType: EExportType
 }
 
-const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
+const History: FC<IHistory> = ({ loading, exportType, setLoading, refetch, openExportModal, setOpenExportModal, setHistoryTxnLength }) => {
 
 	const userAddress = localStorage.getItem('address');
 	const signature = localStorage.getItem('signature');
 	const { activeMultisig, multisigAddresses } = useGlobalUserDetailsContext();
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { currency } = useGlobalCurrencyContext();
+	const { currencyPrice } = useGlobalCurrencyContext();
 	const multisig = multisigAddresses.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 	const { network } = useGlobalApiContext();
 	const location = useLocation();
 	const { currentPage, setPage, totalDocs, setTotalDocs } = usePagination();
 	const [transactions, setTransactions] = useState<ITransaction[]>();
+	const [amountUSD, setAmountUSD] = useState<string>('');
+
+	useEffect(() => {
+		if(!userAddress || !signature || !activeMultisig) return;
+
+		fetchTokenToUSDPrice(1,network).then((formattedUSD) => {
+			setAmountUSD(parseFloat(formattedUSD).toFixed(2));
+		});
+	}, [activeMultisig, network, signature, userAddress]);
+
 	useEffect(() => {
 		const hash = location.hash.slice(1);
 		const elem = document.getElementById(hash);
@@ -104,10 +123,43 @@ const History: FC<IHistory> = ({ loading, setLoading, refetch }) => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeMultisig, multisig, network, signature, userAddress, refetch, currentPage]);
 
+	useEffect(() => {
+		if(transactions && transactions?.length > 0) {
+			setHistoryTxnLength(transactions?.length);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [transactions]);
+
+	const ExportTransactionsModal: FC = () => {
+		return (
+			<Modal
+				centered
+				footer={false}
+				closeIcon={
+					<button
+						className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center'
+						onClick={() => setOpenExportModal(false)}
+					>
+						<OutlineCloseIcon className='text-primary w-2 h-2' />
+					</button>}
+				title={<h3 className='text-white mb-8 text-lg font-semibold md:font-bold md:text-xl capitalize'>Export Transaction History For {exportType}</h3>}
+				open={openExportModal}
+				className={' w-auto md:min-w-[500px] scale-90'}
+			>
+				<ExportTransactionsHistory exportType={exportType} historyTxns={transactions?.map(txn => {
+					const type: 'Sent' | 'Received' = multisig?.address === txn.from || multisig?.proxy === txn.from ? 'Sent' : 'Received';
+					const amount = !isNaN(txn.amount_usd) ? (Number(txn.amount_usd) * Number(currencyPrice)).toFixed(4) : isNaN(Number(amountUSD)) ? '0' : (Number(txn.amount_token) * Number(amountUSD) * Number(currencyPrice)).toFixed(4);
+					return ({ amount: type === 'Sent' ? `-${amount}` : amount, callhash: txn.callHash, date: txn.created_at, from: txn.from, network, token: chainProperties[network].tokenSymbol });
+				})} closeModal={() => setOpenExportModal(false)}/>
+			</Modal>
+		);
+	};
+
 	if(loading) return <Loader size='large'/>;
 
 	return (
 		<>
+			<ExportTransactionsModal/>
 			{
 				(transactions && transactions.length > 0) ?
 					<div className='flex flex-col gap-y-[10px] mb-2 h-[790px] overflow-auto pr-1'>
