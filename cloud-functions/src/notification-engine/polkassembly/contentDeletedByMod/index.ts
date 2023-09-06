@@ -25,7 +25,7 @@ export default async function contentDeletedByMod(args: Args) {
 	if (!args) throw Error(`Missing arguments for trigger: ${TRIGGER_NAME}`);
 	const { userId = '', commentId = '', postId = '', replyId = '', network = '', reason = '', postType = '' } = args;
 
-	if (isNaN(Number(userId)) || !postId || !network || !reason || !postType) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
+	if (isNaN(Number(userId)) || isNaN(Number(postId)) || !network || !reason || !postType) throw Error(`Invalid arguments for trigger: ${TRIGGER_NAME}`);
 
 	const contentType = commentId ? 'comment' : replyId ? 'reply' : 'post';
 
@@ -50,10 +50,23 @@ export default async function contentDeletedByMod(args: Args) {
 
 	const contentAuthorData = contentAuthorDoc.data() as IPAUser;
 
-	const userPANotificationPreferences: IPAUserNotificationPreferences | null = contentAuthorData.notification_preferences || null;
+	const userPANotificationPreferences: IPAUserNotificationPreferences = contentAuthorData.notification_preferences || INIT_PA_USER_NOTIFICATION_PREFS;
 	if (!userPANotificationPreferences) throw Error(`User notification preferences not found for trigger: ${TRIGGER_NAME}`);
 
-	const userNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs((userPANotificationPreferences || INIT_PA_USER_NOTIFICATION_PREFS), network);
+	let userNotificationPreferences = getNetworkNotificationPrefsFromPANotificationPrefs((userPANotificationPreferences), network);
+
+	// pseudo notification prefs with 'contentDeletedByMod' (to make default behaviour as enabled)
+	userNotificationPreferences = {
+		...userNotificationPreferences,
+		triggerPreferences: {
+			...userNotificationPreferences.triggerPreferences,
+			[TRIGGER_NAME]: {
+				...userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME],
+				enabled: true,
+				name: TRIGGER_NAME
+			}
+		}
+	};
 
 	const notificationServiceInstance = new NotificationService(
 		SOURCE,
