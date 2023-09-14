@@ -326,23 +326,25 @@ const Transaction: FC<ITransactionProps> = ({ note, transactionFields, totalAmou
 										<ArrowUpRightIcon />
 									</span>
 
-									<span>
+									<span className='capitalize'>
 										{isProxyApproval ? 'Proxy' : isProxyAddApproval ? 'Adding New Signatories to Multisig' : isProxyRemovalApproval ? 'Remove Old Multisig From Proxy' : customTx ? `${txnParams?.section}.${txnParams?.method}` : 'Sent'}
 									</span>
 								</p>
-								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && !customTx &&
-							<p className='col-span-2 flex items-center gap-x-[6px]'>
-								<ParachainIcon src={chainProperties[network].logo} />
-								<span
-									className={'font-normal text-xs leading-[13px] text-failure'}
-								>
+								{!isProxyApproval && !isProxyAddApproval && !isProxyRemovalApproval && !customTx ?
+									<p className='col-span-2 flex items-center gap-x-[6px]'>
+										<ParachainIcon src={chainProperties[network].logo} />
+										<span
+											className={'font-normal text-xs leading-[13px] text-failure'}
+										>
 									- {decodedCallData && (decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value) ? parseDecodedValue({
-										network,
-										value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
-										withUnit: true
-									}) : totalAmount ? `${totalAmount} ${token}` : `? ${token}`}
-								</span>
-							</p>
+												network,
+												value: String(decodedCallData?.args?.value || decodedCallData?.args?.call?.args?.value),
+												withUnit: true
+											}) : totalAmount ? `${totalAmount} ${token}` : `? ${token}`}
+										</span>
+									</p>
+									:
+									<p className='col-span-2'>-</p>
 								}
 								<p className='col-span-2'>
 									{dayjs(date).format('lll')}

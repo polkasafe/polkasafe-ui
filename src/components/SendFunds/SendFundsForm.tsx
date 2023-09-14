@@ -41,6 +41,8 @@ import styled from 'styled-components';
 
 import ArgumentsTable from '../Transactions/Queued/ArgumentsTable';
 import ManualExtrinsics from './ManualExtrinsics';
+import SubmitPreimage from './SubmitPreimage';
+import SubmitProposal from './SubmitProposal';
 import TransactionFailedScreen from './TransactionFailedScreen';
 import TransactionSuccessScreen from './TransactionSuccessScreen';
 import UploadAttachment from './UploadAttachment';
@@ -48,7 +50,9 @@ import UploadAttachment from './UploadAttachment';
 export enum ETransactionType {
 	SEND_TOKEN='Send Token',
 	MANUAL_EXTRINSIC='Manual Extrinsic',
-	CALL_DATA='Call Data'
+	CALL_DATA='Call Data',
+	SUBMIT_PREIMAGE='Submit Preimage',
+	SUBMIT_PROPOSAL='Submit Proposal'
 }
 
 interface ISendFundsFormProps {
@@ -116,7 +120,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 
 	const [showDecodedCallData, setShowDecodedCallData] = useState<boolean>(false);
 
-	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
+	const transactionTypes: ItemType[] = Object.values(ETransactionType).filter((item) => (['alephzero', 'astar', 'assethub-polkadot', 'assethub-kusama'].includes(network) && item === ETransactionType.SUBMIT_PREIMAGE) || (!['polkadot', 'kusama'].includes(network) && item === ETransactionType.SUBMIT_PROPOSAL) ? false : true).map((item) => ({
 		key: item,
 		label: <span className='text-white text-sm flex items-center gap-x-2'>{item}</span>
 	}));
@@ -155,7 +159,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 	};
 
 	useEffect(() => {
-		if(!api || !apiReady || (transactionType !== ETransactionType.CALL_DATA && transactionType !== ETransactionType.MANUAL_EXTRINSIC) || !callData) return;
+		if(!api || !apiReady || transactionType === ETransactionType.SEND_TOKEN || !callData) return;
 
 		const { data, error } = decodeCallData(callData, api);
 		if(error || !data) return;
@@ -544,88 +548,96 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 											?
 											<ManualExtrinsics setCallData={setCallData} />
 											:
-											<>
+											transactionType === ETransactionType.SUBMIT_PREIMAGE
+												?
+												<SubmitPreimage setCallData={setCallData} className={className} />
+												:
+												transactionType === ETransactionType.SUBMIT_PROPOSAL
+													?
+													<SubmitProposal className={className} setCallData={setCallData} />
+													:
+													<>
 
-												<section className=''>
-													<div className='flex items-start gap-x-[10px]'>
-														<div>
-															<div className='flex flex-col gap-y-3 mb-2'>
-																{recipientAndAmount.map(({ recipient }, i) => (
-																	<article key={recipient} className='w-[500px] flex items-start gap-x-2'>
-																		<AddAddressModal defaultAddress={recipient} />
-																		<div className='w-[55%]'>
-																			<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
-																			<Form.Item
-																				name="recipient"
-																				rules={[{ required: true }]}
-																				help={(!recipient && 'Recipient Address is Required') || (!validRecipient[i] && 'Please add a valid Address')}
-																				className='border-0 outline-0 my-0 p-0'
-																				validateStatus={recipient && validRecipient[i] ? 'success' : 'error'}
-																			>
-																				<div className='h-[50px]'>
-																					{recipient && autocompleteAddresses.some((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
-																						<div className='border border-solid border-primary rounded-lg px-2 h-full flex justify-between items-center'>
-																							{autocompleteAddresses.find((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
-																							<button
-																								className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
-																								onClick={() => {
-																									onRecipientChange('', i);
-																								}}
-																							>
-																								<OutlineCloseIcon className='text-primary w-2 h-2' />
-																							</button>
+														<section className=''>
+															<div className='flex items-start gap-x-[10px]'>
+																<div>
+																	<div className='flex flex-col gap-y-3 mb-2'>
+																		{recipientAndAmount.map(({ recipient }, i) => (
+																			<article key={recipient} className='w-[500px] flex items-start gap-x-2'>
+																				<AddAddressModal defaultAddress={recipient} />
+																				<div className='w-[55%]'>
+																					<label className='text-primary font-normal text-xs leading-[13px] block mb-[5px]'>Recipient*</label>
+																					<Form.Item
+																						name="recipient"
+																						rules={[{ required: true }]}
+																						help={(!recipient && 'Recipient Address is Required') || (!validRecipient[i] && 'Please add a valid Address')}
+																						className='border-0 outline-0 my-0 p-0'
+																						validateStatus={recipient && validRecipient[i] ? 'success' : 'error'}
+																					>
+																						<div className='h-[50px]'>
+																							{recipient && autocompleteAddresses.some((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient)) ?
+																								<div className='border border-solid border-primary rounded-lg px-2 h-full flex justify-between items-center'>
+																									{autocompleteAddresses.find((item) => item.value && getSubstrateAddress(String(item.value)) === getSubstrateAddress(recipient))?.label}
+																									<button
+																										className='outline-none border-none bg-highlight w-6 h-6 rounded-full flex items-center justify-center z-100'
+																										onClick={() => {
+																											onRecipientChange('', i);
+																										}}
+																									>
+																										<OutlineCloseIcon className='text-primary w-2 h-2' />
+																									</button>
+																								</div>
+																								:
+																								<AutoComplete
+																									autoFocus
+																									defaultOpen
+																									filterOption={(inputValue, options) => {
+																										return inputValue && options?.value ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
+																									}}
+																									notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
+																									options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => r.recipient && item.value && getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
+																									id='recipient'
+																									placeholder="Send to Address.."
+																									onChange={(value) => onRecipientChange(value, i)}
+																									value={recipientAndAmount[i].recipient}
+																									defaultValue={defaultSelectedAddress || ''}
+																								/>
+																							}
 																						</div>
-																						:
-																						<AutoComplete
-																							autoFocus
-																							defaultOpen
-																							filterOption={(inputValue, options) => {
-																								return inputValue && options?.value ? getSubstrateAddress(String(options?.value) || '') === getSubstrateAddress(inputValue) : true;
-																							}}
-																							notFoundContent={validRecipient[i] && <Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent border-none outline-none text-primary text-sm flex items-center' onClick={() => setShowAddressModal(true)} >Add Address to Address Book</Button>}
-																							options={autocompleteAddresses.filter((item) => !recipientAndAmount.some((r) => r.recipient && item.value && getSubstrateAddress(r.recipient) === getSubstrateAddress(String(item.value) || '')))}
-																							id='recipient'
-																							placeholder="Send to Address.."
-																							onChange={(value) => onRecipientChange(value, i)}
-																							value={recipientAndAmount[i].recipient}
-																							defaultValue={defaultSelectedAddress || ''}
-																						/>
-																					}
+																					</Form.Item>
 																				</div>
-																			</Form.Item>
-																		</div>
-																		<div className='flex items-center gap-x-2 w-[45%]'>
-																			<BalanceInput multipleCurrency label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
-																			{i !== 0 && <Button
-																				onClick={() => onRemoveRecipient(i)}
-																				className='text-failure border-none outline-none bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
-																				<DeleteIcon />
-																			</Button>}
-																		</div>
+																				<div className='flex items-center gap-x-2 w-[45%]'>
+																					<BalanceInput multipleCurrency label='Amount*' fromBalance={multisigBalance} onChange={(balance) => onAmountChange(balance, i)} />
+																					{i !== 0 && <Button
+																						onClick={() => onRemoveRecipient(i)}
+																						className='text-failure border-none outline-none bg-failure bg-opacity-10 flex items-center justify-center p-1 sm:p-2 rounded-md sm:rounded-lg text-xs sm:text-sm w-6 h-6 sm:w-8 sm:h-8'>
+																						<DeleteIcon />
+																					</Button>}
+																				</div>
+																			</article>
+																		))}
+																	</div>
+																	<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another Recipient</Button>
+																</div>
+																<div className='flex flex-col gap-y-4'>
+																	<article className='w-[412px] flex items-center'>
+																		<span className='-mr-1.5 z-0'>
+																			<LineIcon className='text-5xl' />
+																		</span>
+																		<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>The beneficiary will have access to the transferred fees when the transaction is included in a block.</p>
 																	</article>
-																))}
-															</div>
-															<Button icon={<PlusCircleOutlined className='text-primary' />} className='bg-transparent p-0 border-none outline-none text-primary text-sm flex items-center' onClick={onAddRecipient} >Add Another Recipient</Button>
-														</div>
-														<div className='flex flex-col gap-y-4'>
-															<article className='w-[412px] flex items-center'>
-																<span className='-mr-1.5 z-0'>
-																	<LineIcon className='text-5xl' />
-																</span>
-																<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px]'>The beneficiary will have access to the transferred fees when the transaction is included in a block.</p>
-															</article>
-															<article className='w-[412px] flex items-center'>
-																<span className='-mr-1.5 z-0'>
-																	<LineIcon className='text-5xl' />
-																</span>
-																<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
+																	<article className='w-[412px] flex items-center'>
+																		<span className='-mr-1.5 z-0'>
+																			<LineIcon className='text-5xl' />
+																		</span>
+																		<p className='p-3 bg-bg-secondary rounded-xl font-normal text-sm text-text_secondary leading-[15.23px] -mb-5'>
 									If the recipient account is new, the balance needs to be more than the existential deposit. Likewise if the sending account balance drops below the same value, the account will be removed from the state.
-																</p>
-															</article>
-														</div>
-													</div>
-												</section>
-											</>
+																		</p>
+																	</article>
+																</div>
+															</div>
+														</section>
+													</>
 									}
 
 									{callData &&
@@ -880,7 +892,7 @@ const SendFundsForm = ({ className, onCancel, defaultSelectedAddress, setNewTxn,
 								|| initiatorBalance.lt(totalDeposit.add(totalGas))
 										))
 								||
-								((transactionType === ETransactionType.CALL_DATA || transactionType === ETransactionType.MANUAL_EXTRINSIC) && (!callData || !callHash))
+								((transactionType === ETransactionType.CALL_DATA || transactionType === ETransactionType.MANUAL_EXTRINSIC || transactionType === ETransactionType.SUBMIT_PREIMAGE || transactionType === ETransactionType.SUBMIT_PROPOSAL) && (!callData || !callHash))
 								|| Object.keys(transactionFields[category].subfields).some((key) => (transactionFields[category].subfields[key].subfieldType === EFieldType.ATTACHMENT ? (transactionFields[category].subfields[key].required && !subfieldAttachments[key]?.file) :  (!transactionFieldsObject.subfields[key]?.value && transactionFields[category].subfields[key].required)))}
 									loading={loading}
 									onClick={handleSubmit}
