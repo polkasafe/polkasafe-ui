@@ -56,7 +56,7 @@ const DashboardCard = ({ className, setNewTxn, hasProxy, transactionLoading, ope
 	const [transactionType, setTransactionType] = useState<ETransactionType>(ETransactionType.SEND_TOKEN);
 	const currentMultisig = multisigAddresses?.find((item) => item.address === activeMultisig || item.proxy === activeMultisig);
 
-	const transactionTypes: ItemType[] = Object.values(ETransactionType).map((item) => ({
+	const transactionTypes: ItemType[] = Object.values(ETransactionType).filter((item) => (['alephzero', 'astar', 'assethub-polkadot', 'assethub-kusama'].includes(network) && item === ETransactionType.SUBMIT_PREIMAGE) || (!['polkadot', 'kusama'].includes(network) && item === ETransactionType.SUBMIT_PROPOSAL) ? false : true).map((item) => ({
 		key: item,
 		label: <span className='text-white flex items-center gap-x-2'>{item}</span>
 	}));
