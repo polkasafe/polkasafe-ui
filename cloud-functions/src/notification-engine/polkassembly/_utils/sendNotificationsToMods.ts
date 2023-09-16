@@ -33,8 +33,21 @@ export default async function sendNotificationsToMods(args : Args) {
 		const modUserData = modUserDoc.data() as IPAUser;
 		if (!modUserData || !modUserData.notification_preferences) continue;
 
-		const modUserNotificationPrefs = getNetworkNotificationPrefsFromPANotificationPrefs(modUserData.notification_preferences, network);
+		let modUserNotificationPrefs = getNetworkNotificationPrefsFromPANotificationPrefs(modUserData.notification_preferences, network);
 		if (!modUserNotificationPrefs) continue;
+
+		if (!modUserNotificationPrefs.triggerPreferences[TRIGGER_NAME]) {
+			modUserNotificationPrefs = {
+				...modUserNotificationPrefs,
+				triggerPreferences: {
+					...modUserNotificationPrefs.triggerPreferences,
+					[TRIGGER_NAME]: {
+						name: TRIGGER_NAME,
+						enabled: true
+					}
+				}
+			};
+		}
 
 		const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(
 			SOURCE,
