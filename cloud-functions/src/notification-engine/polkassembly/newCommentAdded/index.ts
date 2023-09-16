@@ -3,7 +3,7 @@ import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import { getSinglePostLinkFromProposalType } from '../_utils/getSinglePostLinkFromProposalType';
-import { EMentionType, EPAProposalType, IPAPostComment, IPAUser, IPAUserNotificationPreferences } from '../_utils/types';
+import { EContentType, EPAProposalType, IPAPostComment, IPAUser, IPAUserNotificationPreferences } from '../_utils/types';
 import { paPostsRef, paUserRef } from '../_utils/paFirestoreRefs';
 import showdown from 'showdown';
 import sendMentionNotifications from '../_utils/sendMentionNotifications';
@@ -123,7 +123,7 @@ export default async function newCommentAdded(args: Args) {
 		authorUsername: commentAuthorData.username,
 		htmlContent: commentHTML,
 		network,
-		type: EMentionType.COMMENT,
+		type: EContentType.COMMENT,
 		url: commentUrl
 	});
 }

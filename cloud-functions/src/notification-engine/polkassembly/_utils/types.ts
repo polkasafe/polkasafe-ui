@@ -106,7 +106,7 @@ export interface IPANotification {
 	network: string
 }
 
-export enum EMentionType {
+export enum EContentType {
 	COMMENT = 'comment',
 	REPLY = 'reply',
 	POST = 'post'
