@@ -3,14 +3,14 @@ import getTemplateRender from '../../global-utils/getTemplateRender';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getMentionedUsernames from './getMentionedUsernames';
 import getNetworkNotificationPrefsFromPANotificationPrefs from './getNetworkNotificationPrefsFromPANotificationPrefs';
-import { EMentionType, IPAUser } from './types';
+import { EContentType, IPAUser } from './types';
 
 interface Args {
 	firestore_db: FirebaseFirestore.Firestore
 	authorUsername: string | number;
 	htmlContent: string;
 	network: string;
-	type: EMentionType;
+	type: EContentType;
 	url: string;
 }
 
