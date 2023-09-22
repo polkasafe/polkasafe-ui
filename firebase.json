@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "polkasafe-a8042",
     "public": "build",
     "ignore": [
       "firebase.json",
