@@ -26,5 +26,7 @@ export const responseMessages = {
 	invalid_2fa_token: 'Invalid 2FA token.',
 	two_factor_auth_not_init: '2FA not initialised.',
 	address_not_registered: 'Address not registered.',
-	tfa_token_expired: '2FA token expired.'
+	tfa_token_expired: '2FA token expired.',
+	address_not_in_db: 'no user with this address',
+	address_already_exists: 'address already exists'
 };

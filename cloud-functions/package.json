@@ -27,6 +27,7 @@
     "discord-interactions": "^3.4.0",
     "discord.js": "^14.11.0",
     "ejs": "^3.1.9",
+    "ethers": "^6.7.1",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.4.1",
     "formidable-serverless": "^1.1.1",
