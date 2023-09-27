@@ -34,6 +34,7 @@ export default async function newProposalCreated(args: Args) {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
 	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(firestorePostType as EPAProposalType);
+	const isPip = [EPAProposalType.COMMUNITY_PIPS, EPAProposalType.TECHNICAL_PIPS, EPAProposalType.UPGRADE_PIPS].includes(firestorePostType as EPAProposalType);
 
 	let SUB_TRIGGER = '';
 	let trackName = '';
@@ -46,6 +47,11 @@ export default async function newProposalCreated(args: Args) {
 		trackName = getTrackName(network, Number(track), true);
 		SUB_TRIGGER = 'fellowshipReferendumSubmitted';
 		break;
+	case EPAProposalType.COMMUNITY_PIPS:
+	case EPAProposalType.TECHNICAL_PIPS:
+	case EPAProposalType.UPGRADE_PIPS:
+		SUB_TRIGGER = 'pipSubmitted';
+		break;
 	default:
 		SUB_TRIGGER = 'gov1ProposalSubmitted';
 		break;
@@ -53,11 +59,13 @@ export default async function newProposalCreated(args: Args) {
 
 	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME} and sub trigger ${SUB_TRIGGER}`);
 
+	const subTriggerKey = isOpenGovProposal ? 'tracks' : isPip ? 'pip_types' : 'post_types';
+
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${subTriggerKey}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
 		.get();
 
 	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
@@ -115,4 +123,6 @@ export default async function newProposalCreated(args: Args) {
 		postId: String(postId),
 		proposerAddress: proposerSubstrateAddress
 	});
+
+	return;
 }
