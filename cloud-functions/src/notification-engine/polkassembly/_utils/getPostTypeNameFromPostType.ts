@@ -13,7 +13,10 @@ export default function getPostTypeNameFromPostType(proposalType: EPAProposalTyp
 		[EPAProposalType.CHILD_BOUNTIES]: 'child bounty',
 		[EPAProposalType.OPEN_GOV]: 'open gov referendum',
 		[EPAProposalType.DISCUSSIONS]: 'discussion',
-		[EPAProposalType.GRANTS]: 'grant'
+		[EPAProposalType.GRANTS]: 'grant',
+		[EPAProposalType.COMMUNITY_PIPS]: 'community PIP',
+		[EPAProposalType.UPGRADE_PIPS]: 'Upgrade Committee PIP',
+		[EPAProposalType.TECHNICAL_PIPS]: 'Technical Committee PIP'
 	};
 
 	return postTypeNameMap[proposalType] || proposalType;
