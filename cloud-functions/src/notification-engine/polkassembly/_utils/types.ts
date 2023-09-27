@@ -10,7 +10,10 @@ export enum EPASubsquidProposalType {
   TIPS = 'Tip',
   CHILD_BOUNTIES = 'ChildBounty',
   REFERENDUM_V2 = 'ReferendumV2',
-  FELLOWSHIP_REFERENDUMS = 'FellowshipReferendum'
+  FELLOWSHIP_REFERENDUMS = 'FellowshipReferendum',
+	COMMUNITY_PIPS = 'Community',
+	TECHNICAL_PIPS = 'TechnicalCommittee',
+	UPGRADE_PIPS = 'UpgradeCommittee',
 }
 
 export enum EPAProposalType {
@@ -26,7 +29,10 @@ export enum EPAProposalType {
 	OPEN_GOV = 'referendums_v2',
 	REFERENDUM_V2 = 'referendums_v2',
 	DISCUSSIONS = 'discussions',
-	GRANTS = 'grants'
+	GRANTS = 'grants',
+	COMMUNITY_PIPS = 'community_pips',
+	TECHNICAL_PIPS = 'technical_pips',
+	UPGRADE_PIPS = 'upgrade_pips',
 }
 
 export enum EPAPostStatusType {

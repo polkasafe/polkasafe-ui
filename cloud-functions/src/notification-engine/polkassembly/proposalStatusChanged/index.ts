@@ -32,6 +32,8 @@ export default async function proposalStatusChanged(args: Args) {
 	const { firestore_db } = getSourceFirebaseAdmin(SOURCE);
 
 	const isOpenGovProposal = [EPAProposalType.REFERENDUM_V2, EPAProposalType.FELLOWSHIP_REFERENDUMS].includes(firestorePostType as EPAProposalType);
+	const isPip = [EPAProposalType.COMMUNITY_PIPS, EPAProposalType.TECHNICAL_PIPS, EPAProposalType.UPGRADE_PIPS].includes(firestorePostType as EPAProposalType);
+
 	if (isOpenGovProposal && !track) throw Error(`Missing track for trigger: ${TRIGGER_NAME}`);
 
 	let SUB_TRIGGER = '';
@@ -68,6 +70,20 @@ export default async function proposalStatusChanged(args: Args) {
 		default:
 			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
 		}
+	} else if (isPip) {
+		switch (statusType) {
+		case EPAPostStatusType.SUBMITTED:
+			SUB_TRIGGER = 'pipSubmitted';
+			break;
+		case EPAPostStatusType.VOTING:
+			SUB_TRIGGER = 'pipInVoting';
+			break;
+		case EPAPostStatusType.CLOSED:
+			SUB_TRIGGER = 'pipClosed';
+			break;
+		default:
+			throw Error(`Invalid status for trigger: ${TRIGGER_NAME}`);
+		}
 	} else {
 		switch (statusType) {
 		case EPAPostStatusType.SUBMITTED:
@@ -84,11 +100,13 @@ export default async function proposalStatusChanged(args: Args) {
 		}
 	}
 
+	const subTriggerKey = isOpenGovProposal ? 'tracks' : isPip ? 'pip_types' : 'post_types';
+
 	// fetch all users who have newProposalCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
 		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.enabled`, '==', true)
-		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${isOpenGovProposal ? 'tracks' : 'post_types'}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
+		.where(`notification_preferences.triggerPreferences.${network}.${SUB_TRIGGER}.${subTriggerKey}`, 'array-contains', isOpenGovProposal ? Number(track) : firestorePostType)
 		.get();
 
 	console.log(`Found ${subscribersSnapshot.size} subscribers for SUB_TRIGGER ${SUB_TRIGGER}`);
@@ -138,4 +156,6 @@ export default async function proposalStatusChanged(args: Args) {
 		console.log(`Sending notification to user_id ${subscriberData.id} for trigger ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER}, post ${postId}, postType ${firestorePostType}, network ${network} and status ${statusName}`);
 		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
 	}
+
+	return;
 }

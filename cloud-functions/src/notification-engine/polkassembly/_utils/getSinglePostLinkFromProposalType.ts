@@ -26,6 +26,12 @@ export function getSinglePostLinkFromProposalType(proposalType: EPAProposalType)
 		return 'tip';
 	case EPAProposalType.TREASURY_PROPOSALS:
 		return 'treasury';
+	case EPAProposalType.TECHNICAL_PIPS:
+		return 'technical';
+	case EPAProposalType.UPGRADE_PIPS:
+		return 'upgrade';
+	case EPAProposalType.COMMUNITY_PIPS:
+		return 'community';
 	}
 	return '';
 }
