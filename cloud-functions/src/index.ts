@@ -2941,7 +2941,6 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -2949,7 +2948,7 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3039,14 +3038,13 @@ export const connectAddressEth = functions.https.onRequest(async (req, res) => {
 
 export const login = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
-		const network = req.get('x-network');
 		const { address } = req.body;
 		try {
 			if (!address) {
 				return res.status(401).json({ error: responseMessages.invalid_params });
 			}
 			const token =`Login with polkasafe ${uuidv4()}`;
-			const docId = `${address}_${network}`;
+			const docId = address;
 			const addressRef = firestoreDB.collection('addresses').doc(docId);
 			await addressRef.set({ address, token }, { merge: true });
 			return res.status(200).json({ token });
@@ -3069,7 +3067,7 @@ export const addTransactionEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3114,7 +3112,6 @@ export const updateTransaction = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = String(req.get('x-address'));
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3122,7 +3119,7 @@ export const updateTransaction = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3166,7 +3163,6 @@ export const updateTransactions = functions.https.onRequest(async (req, res) => 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = String(req.get('x-address'));
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3174,7 +3170,7 @@ export const updateTransactions = functions.https.onRequest(async (req, res) => 
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3221,7 +3217,6 @@ export const addMultisig = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = String(req.get('x-address'));
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3229,7 +3224,7 @@ export const addMultisig = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3275,7 +3270,6 @@ export const completeTransactionEth = functions.https.onRequest(async (req, res)
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = String(req.get('x-address'));
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3283,7 +3277,7 @@ export const completeTransactionEth = functions.https.onRequest(async (req, res)
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3323,7 +3317,7 @@ export const createMultisigEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3444,7 +3438,7 @@ export const addToAddressBookEth = functions.https.onRequest(async (req, res) =>
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3487,7 +3481,6 @@ export const removeFromAddressBookEth = functions.https.onRequest(async (req, re
 	corsHandler(req, res, async () => {
 		const signature = (String(req.get('x-address'))) || '';
 		const address = (String(req.get('x-address'))) || '';
-		const network = (String(req.get('x-network')));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3495,7 +3488,7 @@ export const removeFromAddressBookEth = functions.https.onRequest(async (req, re
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3545,7 +3538,7 @@ export const updateMultisigSignatoryEth = functions.https.onRequest(async (req, 
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3591,7 +3584,7 @@ export const getAssetsForAddressEth = functions.https.onRequest(async (req, res)
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3626,7 +3619,6 @@ export const deleteMultisigEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3634,7 +3626,7 @@ export const deleteMultisigEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3674,7 +3666,6 @@ export const addFeedbackEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3682,7 +3673,7 @@ export const addFeedbackEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3742,7 +3733,6 @@ export const updateEmailEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3750,7 +3740,7 @@ export const updateEmailEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3779,7 +3769,6 @@ export const renameMultisigEth = functions.https.onRequest(async (req, res) => {
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3787,7 +3776,7 @@ export const renameMultisigEth = functions.https.onRequest(async (req, res) => {
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3840,7 +3829,7 @@ export const sendNotificationEth = functions.https.onRequest(async (req, res) =>
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3881,7 +3870,6 @@ export const getNotificationsEth = functions.https.onRequest(async (req, res) =>
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3889,7 +3877,7 @@ export const getNotificationsEth = functions.https.onRequest(async (req, res) =>
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3927,7 +3915,6 @@ export const getNotificationPreferencesForAddressEth = functions.https.onRequest
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3935,7 +3922,7 @@ export const getNotificationPreferencesForAddressEth = functions.https.onRequest
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -3966,7 +3953,6 @@ export const updateTransactionNoteEth = functions.https.onRequest(async (req, re
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -3974,7 +3960,7 @@ export const updateTransactionNoteEth = functions.https.onRequest(async (req, re
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4020,7 +4006,6 @@ export const getTransactionDetailsEth = functions.https.onRequest(async (req, re
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -4028,7 +4013,7 @@ export const getTransactionDetailsEth = functions.https.onRequest(async (req, re
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4067,7 +4052,7 @@ export const setTransactionCallDataEth = functions.https.onRequest(async (req, r
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4110,7 +4095,6 @@ export const updateNotificationTriggerPreferencesEth = functions.https.onRequest
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -4118,7 +4102,7 @@ export const updateNotificationTriggerPreferencesEth = functions.https.onRequest
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4149,7 +4133,6 @@ export const updateNotificationChannelPreferencesEth = functions.https.onRequest
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -4157,7 +4140,7 @@ export const updateNotificationChannelPreferencesEth = functions.https.onRequest
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4194,7 +4177,6 @@ export const updateTransactionFieldsEth = functions.https.onRequest(async (req, 
 	corsHandler(req, res, async () => {
 		const signature = req.get('x-signature');
 		const address = req.get('x-address');
-		const network = String(req.get('x-network'));
 
 		if (!address) {
 			return res.status(500).json({ error: responseMessages.internal });
@@ -4202,7 +4184,7 @@ export const updateTransactionFieldsEth = functions.https.onRequest(async (req, 
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4239,7 +4221,7 @@ export const updateSharedAddressBookEth = functions.https.onRequest(async (req, 
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4319,7 +4301,7 @@ export const removeFromSharedAddressBookEth = functions.https.onRequest(async (r
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
@@ -4384,7 +4366,7 @@ export const getSharedAddressBookEth = functions.https.onRequest(async (req, res
 		if (!signature) {
 			return res.status(500).json({ error: responseMessages.missing_headers });
 		}
-		const docId =`${address}_${network}`;
+		const docId = address;
 		const addressRef = firestoreDB.collection('addresses').doc(docId);
 		const doc = await addressRef.get();
 		let token= '';
