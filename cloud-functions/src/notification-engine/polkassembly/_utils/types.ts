@@ -1,19 +1,22 @@
-import { IUserNotificationChannelPreferences, IUserNotificationTriggerPreferences } from '../../notification_engine_constants';
+import {
+	IUserNotificationChannelPreferences,
+	IUserNotificationTriggerPreferences
+} from '../../notification_engine_constants';
 
 export enum EPASubsquidProposalType {
-  DEMOCRACY_PROPOSALS = 'DemocracyProposal',
-  TECH_COMMITTEE_PROPOSALS = 'TechCommitteeProposal',
-  TREASURY_PROPOSALS = 'TreasuryProposal',
-  REFERENDUMS = 'Referendum',
-  COUNCIL_MOTIONS = 'CouncilMotion',
-  BOUNTIES = 'Bounty',
-  TIPS = 'Tip',
-  CHILD_BOUNTIES = 'ChildBounty',
-  REFERENDUM_V2 = 'ReferendumV2',
-  FELLOWSHIP_REFERENDUMS = 'FellowshipReferendum',
+	DEMOCRACY_PROPOSALS = 'DemocracyProposal',
+	TECH_COMMITTEE_PROPOSALS = 'TechCommitteeProposal',
+	TREASURY_PROPOSALS = 'TreasuryProposal',
+	REFERENDUMS = 'Referendum',
+	COUNCIL_MOTIONS = 'CouncilMotion',
+	BOUNTIES = 'Bounty',
+	TIPS = 'Tip',
+	CHILD_BOUNTIES = 'ChildBounty',
+	REFERENDUM_V2 = 'ReferendumV2',
+	FELLOWSHIP_REFERENDUMS = 'FellowshipReferendum',
 	COMMUNITY_PIPS = 'Community',
 	TECHNICAL_PIPS = 'TechnicalCommittee',
-	UPGRADE_PIPS = 'UpgradeCommittee',
+	UPGRADE_PIPS = 'UpgradeCommittee'
 }
 
 export enum EPAProposalType {
@@ -32,34 +35,34 @@ export enum EPAProposalType {
 	GRANTS = 'grants',
 	COMMUNITY_PIPS = 'community_pips',
 	TECHNICAL_PIPS = 'technical_pips',
-	UPGRADE_PIPS = 'upgrade_pips',
+	UPGRADE_PIPS = 'upgrade_pips'
 }
 
 export enum EPAPostStatusType {
-	SUBMITTED= 'submitted',
-	VOTING= 'voting',
-	CLOSED= 'closed'
+	SUBMITTED = 'submitted',
+	VOTING = 'voting',
+	CLOSED = 'closed'
 }
 
 export interface IPAPostComment {
-  user_id: number,
-  content: string,
-  created_at: Date,
-  id: string,
-  updated_at: Date,
-  sentiment: number|0;
-  username: string,
-  user_profile_img: string;
+	user_id: number;
+	content: string;
+	created_at: Date;
+	id: string;
+	updated_at: Date;
+	sentiment: number | 0;
+	username: string;
+	user_profile_img: string;
 }
 
 export interface IPACommentReply {
-  user_id: number,
-  content: string,
-  created_at: Date,
-  id: string,
-  updated_at: Date,
-  username: string,
-  user_profile_img: string,
+	user_id: number;
+	content: string;
+	created_at: Date;
+	id: string;
+	updated_at: Date;
+	username: string;
+	user_profile_img: string;
 }
 
 export enum EPASocialType {
@@ -67,7 +70,7 @@ export enum EPASocialType {
 	RIOT = 'Riot',
 	TWITTER = 'Twitter',
 	TELEGRAM = 'Telegram',
-	DISCORD = 'Discord',
+	DISCORD = 'Discord'
 }
 
 export interface IPASocial {
@@ -80,14 +83,14 @@ export interface IPAProfileDetails {
 	badges?: string[];
 	title?: string;
 	image?: string;
-	social_links?: IPASocial[]
+	social_links?: IPASocial[];
 }
 
 export interface IPAUserNotificationPreferences {
-	channelPreferences: {[channel:string]: IUserNotificationChannelPreferences},
+	channelPreferences: { [channel: string]: IUserNotificationChannelPreferences };
 	triggerPreferences: {
-		[network:string] : {[index:string] : IUserNotificationTriggerPreferences}
-	}
+		[network: string]: { [trigger_name: string]: IUserNotificationTriggerPreferences };
+	};
 }
 
 export interface IPAUser {
@@ -99,17 +102,17 @@ export interface IPAUser {
 	salt: string;
 	username: string;
 	web3_signup: boolean;
-	notification_preferences?: IPAUserNotificationPreferences
+	notification_preferences?: IPAUserNotificationPreferences;
 }
 
 export interface IPANotification {
-	id: string,
-	userId: number,
-	created_at: Date,
-	title: string,
-	message: string,
-	url?: string,
-	network: string
+	id: string;
+	userId: number;
+	created_at: Date;
+	title: string;
+	message: string;
+	url?: string;
+	network: string;
 }
 
 export enum EContentType {

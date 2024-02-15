@@ -7,6 +7,7 @@ import { CHANNEL, ELEMENT_API_KEY, IUserNotificationPreferences, NOTIFICATION_SO
 import { IPANotification } from './polkassembly/_utils/types';
 import sendDiscordMessage from './global-utils/sendDiscordMessage';
 import sendSlackMessage from './global-utils/sendSlackMessage';
+import { ITHNotification } from './townhall/_utils/types';
 
 export class NotificationService {
 	constructor(
@@ -26,12 +27,12 @@ export class NotificationService {
 	public async notifyAllChannels(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
 		if (!userNotificationPreferences.triggerPreferences?.[this.trigger]?.enabled) return;
 
-		this.sendEmailNotification(userNotificationPreferences);
-		this.sendTelegramNotification(userNotificationPreferences);
-		this.sendDiscordNotification(userNotificationPreferences);
-		this.sendElementNotification(userNotificationPreferences);
-		this.sendSlackNotification(userNotificationPreferences);
-		this.sendInAppNotification(userNotificationPreferences);
+		await this.sendEmailNotification(userNotificationPreferences);
+		await this.sendTelegramNotification(userNotificationPreferences);
+		await this.sendDiscordNotification(userNotificationPreferences);
+		await this.sendElementNotification(userNotificationPreferences);
+		await this.sendSlackNotification(userNotificationPreferences);
+		await this.sendInAppNotification(userNotificationPreferences);
 	}
 
 	public async sendEmailNotification(userNotificationPreferences: IUserNotificationPreferences, isVerificationEmail?: boolean): Promise<void> {
@@ -70,7 +71,7 @@ export class NotificationService {
 			trigger: this.trigger
 		});
 
-		sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
+		await sgMail.send(msg).catch((e) => console.error('Error in sending email : ', e));
 	}
 
 	public async sendTelegramNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
@@ -101,7 +102,7 @@ export class NotificationService {
 			trigger: this.trigger
 		});
 
-		bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
+		await bot.sendMessage(chatId, this.markdownMessage, { parse_mode: 'Markdown' }).catch((error) => console.error('Error in sending telegram : ', error));
 	}
 
 	public async sendDiscordNotification(userNotificationPreferences: IUserNotificationPreferences): Promise<void> {
@@ -237,6 +238,7 @@ export class NotificationService {
 
 		case NOTIFICATION_SOURCE.POLKASSEMBLY:
 			if (!this.sourceArgs?.network) return;
+
 			newNotificationRef = firestore_db.collection('users').doc(String(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle)).collection('notifications').doc();
 			newNotification = {
 				id: newNotificationRef.id,
@@ -247,8 +249,22 @@ export class NotificationService {
 				title: this.subject,
 				url: this.sourceArgs.link || ''
 			} as IPANotification;
+			break;
+
+		case NOTIFICATION_SOURCE.TOWNHALL:
+			newNotificationRef = firestore_db.collection('users').doc(String(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle)).collection('notifications').doc();
+			newNotification = {
+				id: newNotificationRef.id,
+				created_at: new Date(),
+				title: this.subject,
+				message: this.message,
+				url: this.sourceArgs?.link || ''
+			} as ITHNotification;
+			break;
 		}
 
-		if (newNotificationRef && newNotification) newNotificationRef.set(newNotification, { merge: true });
+		if (newNotificationRef && newNotification) {
+			await newNotificationRef.set(newNotification, { merge: true });
+		}
 	}
 }
