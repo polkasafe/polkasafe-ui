@@ -4,5 +4,8 @@ export const thPostRef = (firestore_db: FirebaseFirestore.Firestore, postId: str
 export const thUserRef = (firestore_db: FirebaseFirestore.Firestore, userId: string) =>
 	firestore_db.collection('users').doc(String(userId));
 
-export const thHouseRef = (firestore_db: FirebaseFirestore.Firestore, postId: string) =>
-	firestore_db.collection('houses').doc(String(postId));
+export const thHouseRef = (firestore_db: FirebaseFirestore.Firestore, houseId: string) =>
+	firestore_db.collection('houses').doc(String(houseId));
+
+export const thBountyRef = (firestore_db: FirebaseFirestore.Firestore, bountyId: string) =>
+	firestore_db.collection('bounties').doc(String(bountyId));

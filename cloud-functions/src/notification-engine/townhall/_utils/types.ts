@@ -99,3 +99,34 @@ export interface ITHNotification {
 	message: string;
 	url?: string;
 }
+
+export enum ETHBountySource {
+	TWITTER = 'twitter',
+	LENS = 'lens',
+	BOUNTY_BIRD = 'bounty bird',
+	FARCASTER = 'farcaster'
+}
+
+export enum ETHBountyStatus {
+	OPEN = 'OPEN',
+	CLOSED = 'CLOSED'
+}
+
+export interface ITHBounty {
+	id: string;
+	username: string;
+	display_name: string;
+	status: ETHBountySource;
+	source: ETHBountyStatus;
+	source_author_id?: string;
+	source_id?: string;
+	source_text?: string;
+	task: string;
+	amount: string;
+	deadline?: Date;
+	max_claims: number;
+	created_at: Date;
+	updated_at: Date;
+	replies_count?: number;
+	deleted?: boolean;
+}
