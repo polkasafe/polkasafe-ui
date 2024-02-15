@@ -130,3 +130,27 @@ export interface ITHBounty {
 	replies_count?: number;
 	deleted?: boolean;
 }
+
+export interface ITHComment {
+	id: string;
+	is_reason?: boolean;
+	created_at: Date;
+	updated_at: Date;
+	post_id: string;
+	house_id: string;
+	post_type: ETHPostType;
+	content: string;
+	user_id: string;
+	discourse_id: number | null;
+
+	// For Reply
+	is_reply: boolean;
+	parent_id: string | null;
+
+	// report
+	is_flagged: boolean;
+	is_moderator_approval: boolean;
+
+	// PROJECT FOR CUSTOM DEPLOYMENT
+	project_id: string;
+}
