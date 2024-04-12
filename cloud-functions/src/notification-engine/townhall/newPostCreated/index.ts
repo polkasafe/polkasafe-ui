@@ -6,6 +6,7 @@ import { thPostRef, thUserRef } from '../_utils/thFirestoreRefs';
 import { ETHNotificationTrigger, ETHPostType, ITHPost, ITHUser } from '../_utils/types';
 import getHouseNotificationPrefsFromTHNotificationPrefs from '../_utils/getHouseNotificationPrefsFromTHNotificationPrefs';
 import { generatePostUrl } from '../_utils/generateUrl';
+import { firestore } from 'firebase-admin';
 
 const TRIGGER_NAME = 'newPostCreated';
 const SOURCE = NOTIFICATION_SOURCE.TOWNHALL;
@@ -52,10 +53,11 @@ export default async function newPostCreated(args: Args) {
 		throw Error(`Invalid post type for trigger: ${TRIGGER_NAME}`);
 	}
 
+	const fieldPath = new firestore.FieldPath('notification_preferences', 'triggerPreferences', postData.house_id, SUB_TRIGGER, 'enabled');
 	// fetch all users who have newPostCreated trigger enabled for this network
 	const subscribersSnapshot = await firestore_db
 		.collection('users')
-		.where(`notification_preferences.triggerPreferences.${postData.house_id}.${SUB_TRIGGER}.enabled`, '==', true)
+		.where(fieldPath, '==', true)
 		.get();
 
 	console.log(`Found ${subscribersSnapshot.size} subscribers for TRIGGER_NAME ${TRIGGER_NAME} and SUB_TRIGGER ${SUB_TRIGGER}`);
@@ -87,7 +89,7 @@ export default async function newPostCreated(args: Args) {
 
 		const notificationServiceInstance = new NotificationService(
 			SOURCE,
-			TRIGGER_NAME,
+			SUB_TRIGGER,
 			htmlMessage,
 			markdownMessage,
 			textMessage,
