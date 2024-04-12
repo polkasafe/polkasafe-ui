@@ -35,14 +35,14 @@ export default async function newPostCreated(args: Args) {
 	switch (postData.post_type) {
 	case ETHPostType.PROPOSAL:
 	case ETHPostType.SNAPSHOT_PROPOSAL:
-		SUB_TRIGGER = ETHNotificationTrigger.NEW_OFFCHAIN_CREATED;
+		SUB_TRIGGER = ETHNotificationTrigger.NEW_OFFCHAIN_PROPOSAL_CREATED;
 		break;
 	case ETHPostType.ONCHAIN_PROPOSAL:
-		SUB_TRIGGER = ETHNotificationTrigger.NEW_ONCHAIN_CREATED;
+		SUB_TRIGGER = ETHNotificationTrigger.NEW_ONCHAIN_PROPOSAL_CREATED;
 		break;
 	case ETHPostType.DISCOURSE_POST:
 	case ETHPostType.DISCUSSION:
-		SUB_TRIGGER = ETHNotificationTrigger.NEW_OFFCHAIN_CREATED;
+		SUB_TRIGGER = ETHNotificationTrigger.NEW_DISCUSSION_CREATED;
 		break;
 	default:
 		break;

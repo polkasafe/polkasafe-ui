@@ -2215,7 +2215,7 @@ export const townhallTelegramBotCommands = functions.https.onRequest(async (req,
 				if (!username || !verificationToken) {
 					await bot.sendMessage(
 						chat.id,
-						'Invalid command. Please use the following format: /remove <web3Address><space><verificationToken>'
+						'Invalid command. Please use the following format: /remove <username><space><verificationToken>'
 					);
 					return res.sendStatus(200);
 				}
