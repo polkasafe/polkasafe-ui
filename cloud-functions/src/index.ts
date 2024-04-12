@@ -60,6 +60,7 @@ import { TOTP } from 'otpauth';
 import generateRandomBase32 from './utlils/generateRandomBase32';
 import dayjs from 'dayjs';
 import getHistoryTransactions from './utlils/getHistoryTransactions';
+import { ITHUser } from './notification-engine/townhall/_utils/types';
 
 admin.initializeApp();
 const firestoreDB = admin.firestore();
@@ -2070,11 +2071,211 @@ export const getChannelVerifyToken = functions.https.onRequest(async (req, res) 
 					[`notification_preferences.channelPreferences.${channel}.verification_token`]: token,
 					[`notification_preferences.channelPreferences.${channel}.verification_token_expires`]: token_expires_at
 				});
+			} else if (source === NOTIFICATION_SOURCE.TOWNHALL) {
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.TOWNHALL);
+
+				const thUserDoc = await firestore_db.collection('users').doc(String(userId)).get();
+				if (!thUserDoc.exists) return res.status(400).json({ error: responseMessages.invalid_params });
+
+				const token_expires_at = new Date();
+				token_expires_at.setDate(token_expires_at.getDate() + 3);
+
+				await thUserDoc.ref.update({
+					[`notification_preferences.channelPreferences.${channel}.verification_token`]: token,
+					[`notification_preferences.channelPreferences.${channel}.verification_token_expires`]: token_expires_at
+				});
 			}
 
 			return res.status(200).json({ data: token });
 		} catch (err:unknown) {
 			functions.logger.error('Error in getChannelVerifyToken :', { err, stack: (err as any).stack });
+			return res.status(500).json({ error: responseMessages.internal });
+		}
+	});
+});
+
+// Townhall
+export const townhallTelegramBotCommands = functions.https.onRequest(async (req, res) => {
+	corsHandler(req, res, async () => {
+		functions.logger.info('townhallTelegramBotCommands req', { req } );
+
+		try {
+			const { message = null, edited_message = null } = req.body;
+			let text = null;
+			let chat = null;
+
+			if (message) {
+				text = message.text;
+				chat = message.chat;
+			} else if (edited_message) {
+				text = edited_message.text;
+				chat = edited_message.chat;
+			}
+
+			if (!text || !chat) {
+				return res.status(400).json({ error: responseMessages.missing_params });
+			}
+
+			if (!TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.TOWNHALL]) {
+				functions.logger.error('TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.TOWNHALL] not found');
+				return res.status(500).json({ error: responseMessages.internal });
+			}
+
+			const bot = new TelegramBot(TELEGRAM_BOT_TOKEN[NOTIFICATION_SOURCE.TOWNHALL], { polling: false });
+
+			if (text.startsWith('/start')) {
+				await bot.sendMessage(
+					chat.id,
+					`Welcome to the Townhall Bot!
+
+				To interact with this bot, you can use the following commands:
+
+				- '/add <username><space><verificationToken>': Use this command to add a username to Townhall Bot.
+
+				- '/remove <username><space><verificationToken>': Use this command to remove a username from Townhall Bot
+
+				Please note that you need to replace '<username>' with the actual username you want to add or remove, and '<verificationToken>' with the token provided for verification.
+				`
+				);
+				return res.sendStatus(200);
+			}
+
+			if (text.startsWith('/add')) {
+				const commandParts = text.split(' ');
+				const username = commandParts[1];
+				const verificationToken = commandParts[2];
+
+				if (!username || !verificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid command. Please use the following format: /add <username><space><verificationToken>'
+					);
+					return res.sendStatus(200);
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.TOWNHALL);
+
+				// check if the username is valid
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await bot.sendMessage(
+						chat.id,
+						`User with username ${username} not found.`
+					);
+					return res.sendStatus(200);
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as ITHUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid verification token.'
+					);
+					return res.sendStatus(200);
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: true,
+							verified: true,
+							handle: String(chat.id),
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Username added successfully. You will now receive notifications on this chat.'
+				);
+				return res.sendStatus(200);
+			}
+
+			if (text.startsWith('/remove')) {
+				const commandParts = text.split(' ');
+				const username = commandParts[1];
+				const verificationToken = commandParts[2];
+
+				if (!username || !verificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid command. Please use the following format: /remove <username><space><verificationToken>'
+					);
+					return res.sendStatus(200);
+				}
+
+				const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.TOWNHALL);
+
+				// check if the username is valid
+				const userDocSnapshot = await firestore_db.collection('users').where('username', '==', username).limit(1).get();
+				if (userDocSnapshot.empty) {
+					await bot.sendMessage(
+						chat.id,
+						`User with username ${username} not found.`
+					);
+					return res.sendStatus(200);
+				}
+
+				// check if the verification token is valid
+				const userDoc = userDocSnapshot.docs[0];
+				const userData = userDoc.data() as ITHUser;
+
+				const storedVerificationToken = userData.notification_preferences?.channelPreferences?.[CHANNEL.TELEGRAM]?.verification_token || null;
+
+				if (!storedVerificationToken || verificationToken !== storedVerificationToken) {
+					await bot.sendMessage(
+						chat.id,
+						'Invalid verification token.'
+					);
+					return res.sendStatus(200);
+				}
+
+				const newNotificationPreferences = {
+					...(userData.notification_preferences || {}),
+					channelPreferences: {
+						...(userData.notification_preferences?.channelPreferences || {}),
+						[CHANNEL.TELEGRAM]: {
+							name: CHANNEL.TELEGRAM,
+							enabled: false,
+							verified: false,
+							handle: '',
+							verification_token: ''
+						}
+					}
+				};
+
+				// update the address with the telegram chat id
+				await userDoc.ref.update({
+					notification_preferences: newNotificationPreferences
+				});
+
+				// Sending a reply to the user
+				await bot.sendMessage(
+					chat.id,
+					'Username removed successfully. You will not receive notifications on this chat anymore.'
+				);
+				return res.sendStatus(200);
+			}
+
+			return res.sendStatus(200);
+		} catch (err:unknown) {
+			functions.logger.error('Error in townhallTelegramBotCommands :', { err, stack: (err as any).stack });
 			return res.status(500).json({ error: responseMessages.internal });
 		}
 	});
