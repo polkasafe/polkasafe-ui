@@ -3,6 +3,12 @@ import {
 	IUserNotificationTriggerPreferences
 } from '../../notification_engine_constants';
 
+export enum ETHNotificationTrigger {
+    NEW_DISCUSSION_CREATED = 'newDiscussionCreated',
+    NEW_OFFCHAIN_CREATED = 'newOffchainCreated',
+    NEW_ONCHAIN_CREATED = 'newOnchainCreated',
+}
+
 export enum ETHPostType {
 	DISCUSSION = 'discussion',
 	PROPOSAL = 'proposal',
