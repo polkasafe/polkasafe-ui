@@ -3,8 +3,11 @@ import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import { thCommentRef, thPostRef, thUserRef } from '../_utils/thFirestoreRefs';
-import { ITHComment, ITHUser } from '../_utils/types';
+import { EContentType, ITHComment, ITHPost, ITHUser, ITHUserNotificationPreferences } from '../_utils/types';
 import getHouseNotificationPrefsFromTHNotificationPrefs from '../_utils/getHouseNotificationPrefsFromTHNotificationPrefs';
+import { generatePostUrl } from '../_utils/generateUrl';
+import Showdown from 'showdown';
+import sendMentionNotifications from '../_utils/sendMentionNotifications';
 
 const TRIGGER_NAME = 'postCommentAdded';
 const SOURCE = NOTIFICATION_SOURCE.TOWNHALL;
@@ -31,10 +34,16 @@ export default async function postCommentAdded(args: Args) {
 
 	// get post
 	const postId = commentData.post_id;
-	const postData = (await thPostRef(firestore_db, postId).get()).data();
+	const postData = (await thPostRef(firestore_db, postId).get()).data() as ITHPost;
 
 	if (!postData) {
 		throw Error(`Post with id ${postId} not found`);
+	}
+
+	const subscribers = [...(postData?.subscribers || []), postData.user_id].filter((user_id) => !!user_id) as string[]; // add post author to subscribers
+	if (!subscribers || !subscribers?.length) {
+		console.log(`No subscribers for a ${postData.post_type} type, post ${postId} in house ${postData?.house_id}.`);
+		return;
 	}
 
 	// get comment author
@@ -44,37 +53,76 @@ export default async function postCommentAdded(args: Args) {
 		throw Error(`Comment author with id ${commentData.user_id} not found`);
 	}
 
-	// fetch all users who have newPostCreated trigger enabled for this network
-	const subscribersSnapshot = await firestore_db
-		.collection('users')
-		.where(`notification_preferences.triggerPreferences.${postData.house_id}.${TRIGGER_NAME}.enabled`, '==', true)
-		.get();
+	const commentUrl = `${generatePostUrl(postData)}#${comment_id}`;
 
-	console.log(`Found ${subscribersSnapshot.size} subscribers for TRIGGER_NAME ${TRIGGER_NAME}`);
+	const converter = new Showdown.Converter();
+	const commentHTML = converter.makeHtml(commentData.content);
 
-	for (const subscriberDoc of subscribersSnapshot.docs) {
-		const subscriberData = subscriberDoc.data() as ITHUser;
-		if (!subscriberData.notification_preferences) continue;
+	for (const userId of subscribers) {
+		if (userId === commentAuthorData.id) continue;
 
-		console.log(`Subscribed user for ${TRIGGER_NAME} with id: ${subscriberData.id}`);
+		const userDoc = await thUserRef(firestore_db, userId).get();
+		if (!userDoc.exists) continue;
+		const userData = userDoc.data() as ITHUser;
+		if (!userData) continue;
 
-		const subscriberNotificationPreferences = getHouseNotificationPrefsFromTHNotificationPrefs(
-			subscriberData.notification_preferences,
+		const userTHNotificationPreferences: ITHUserNotificationPreferences | null = userData.notification_preferences || null;
+		if (!userTHNotificationPreferences && userId !== postData.user_id) continue; // only skip if user is not the post author
+
+		let userNotificationPreferences = getHouseNotificationPrefsFromTHNotificationPrefs(
+			userTHNotificationPreferences,
 			postData.house_id
 		);
 
-		if (!subscriberNotificationPreferences) continue;
+		// send notification to post author even if he hasn't set any notification preferences (or for this trigger)
+		if (userId === postData.user_id) {
+			// only skip if user has explicitly disabled 'commentsOnMyPosts' sub-trigger
+			if (userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.enabled === false ||
+				!(userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.sub_triggers || ['commentsOnMyPosts']).includes('commentsOnMyPosts')
+			) continue;
 
-		const link = `https://www.townhallgov.com/${postData.house_id}/post/${postId}`;
+			// pseudo notification prefs with 'commentsOnMyPosts' sub-trigger enabled (to make default behaviour as enabled)
+			userNotificationPreferences = {
+				...userNotificationPreferences,
+				triggerPreferences: {
+					...userNotificationPreferences.triggerPreferences,
+					[TRIGGER_NAME]: {
+						...userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME],
+						enabled: true,
+						name: TRIGGER_NAME,
+						sub_triggers: ['commentsOnMyPosts']
+					}
+				}
+			};
+		} else {
+			// only skip if user has explicitly disabled 'commentsOnSubscribedPosts' sub-trigger
+			if (userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.enabled === false ||
+				!(userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME]?.sub_triggers || ['commentsOnSubscribedPosts']).includes('commentsOnSubscribedPosts')
+			) continue;
+
+			// pseudo notification prefs with 'commentsOnSubscribedPosts' sub-trigger enabled (to make default behaviour as enabled)
+			userNotificationPreferences = {
+				...userNotificationPreferences,
+				triggerPreferences: {
+					...userNotificationPreferences.triggerPreferences,
+					[TRIGGER_NAME]: {
+						...userNotificationPreferences.triggerPreferences?.[TRIGGER_NAME],
+						enabled: true,
+						name: TRIGGER_NAME,
+						sub_triggers: ['commentsOnSubscribedPosts']
+					}
+				}
+			};
+		}
 
 		const { htmlMessage, markdownMessage, textMessage, subject } = await getTemplateRender(SOURCE, TRIGGER_NAME, {
 			...args,
-			username: subscriberData.name || !subscriberData.is_username_autogenerated ? subscriberData.username : 'user',
+			username: userData.name || !userData.is_username_autogenerated ? userData.username : 'user',
 			comment_author: commentAuthorData.name || !commentAuthorData.is_username_autogenerated ? commentAuthorData.username : 'user',
 			proposal_title: postData.title,
-			link,
+			link: commentUrl,
 			post_type: (`${postData.post_type}`).replaceAll('_', ' '),
-			comment: commentData.content
+			comment: commentHTML
 		});
 
 		const notificationServiceInstance = new NotificationService(
@@ -85,15 +133,24 @@ export default async function postCommentAdded(args: Args) {
 			textMessage,
 			subject,
 			{
-				link
+				link: commentUrl
 			}
 		);
 
 		console.log(
-			`Sending notification to user_id ${subscriberDoc.id} for trigger ${TRIGGER_NAME} on house ${postData.house_id} for postId ${postData.id}`
+			`Sending notification to user_id ${userData.id} for trigger ${TRIGGER_NAME} on house ${postData.house_id} for postId ${postData.id}`
 		);
-		await notificationServiceInstance.notifyAllChannels(subscriberNotificationPreferences);
+		await notificationServiceInstance.notifyAllChannels(userNotificationPreferences);
 	}
+
+	await sendMentionNotifications({
+		firestore_db,
+		authorUsername: commentAuthorData.username,
+		htmlContent: commentHTML,
+		house_id: postData.house_id || commentData.house_id,
+		type: EContentType.COMMENT,
+		url: commentUrl
+	});
 
 	return;
 }
