@@ -216,7 +216,7 @@ export class NotificationService {
 			!userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle
 		) return;
 
-		const { firestore_db } = getSourceFirebaseAdmin(NOTIFICATION_SOURCE.POLKASAFE);
+		const { firestore_db } = getSourceFirebaseAdmin(this.source);
 		let newNotificationRef;
 		let newNotification;
 
