@@ -3,7 +3,7 @@ import getSourceFirebaseAdmin from '../../global-utils/getSourceFirebaseAdmin';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getTemplateRender from '../../global-utils/getTemplateRender';
 import { thCommentRef, thPostRef, thUserRef } from '../_utils/thFirestoreRefs';
-import { EContentType, ITHComment, ITHPost, ITHUser, ITHUserNotificationPreferences } from '../_utils/types';
+import { ETHContentType, ITHComment, ITHPost, ITHUser, ITHUserNotificationPreferences } from '../_utils/types';
 import getHouseNotificationPrefsFromTHNotificationPrefs from '../_utils/getHouseNotificationPrefsFromTHNotificationPrefs';
 import { generatePostUrl } from '../_utils/generateUrl';
 import Showdown from 'showdown';
@@ -148,7 +148,7 @@ export default async function postCommentAdded(args: Args) {
 		authorUsername: commentAuthorData.username,
 		htmlContent: commentHTML,
 		house_id: postData.house_id || commentData.house_id,
-		type: EContentType.COMMENT,
+		type: ETHContentType.COMMENT,
 		url: commentUrl
 	});
 

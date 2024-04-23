@@ -3,14 +3,14 @@ import getTemplateRender from '../../global-utils/getTemplateRender';
 import { NOTIFICATION_SOURCE } from '../../notification_engine_constants';
 import getHouseNotificationPrefsFromTHNotificationPrefs from './getHouseNotificationPrefsFromTHNotificationPrefs';
 import getMentionedUsernames from './getMentionedUsernames';
-import { EContentType, ITHUser } from './types';
+import { ETHContentType, ITHUser } from './types';
 
 interface Args {
 	firestore_db: FirebaseFirestore.Firestore
 	authorUsername: string | null;
 	htmlContent: string;
 	house_id: string;
-	type: EContentType;
+	type: ETHContentType;
 	url: string;
 }
 

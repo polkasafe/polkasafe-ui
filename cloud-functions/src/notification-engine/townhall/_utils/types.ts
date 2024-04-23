@@ -106,7 +106,7 @@ export interface ITHNotification {
 	url?: string;
 }
 
-export enum EContentType {
+export enum ETHContentType {
 	COMMENT = 'comment',
 	REPLY = 'reply',
 	POST = 'post'
