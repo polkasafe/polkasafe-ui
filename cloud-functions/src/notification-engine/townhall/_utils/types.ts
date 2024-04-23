@@ -69,6 +69,8 @@ export interface ITHPost {
 
 	// PROJECT FOR CUSTOM DEPLOYMENT
 	project_id: string;
+
+	subscribers: string[];
 }
 
 export interface ITHUserNotificationPreferences {
@@ -102,6 +104,12 @@ export interface ITHNotification {
 	title: string;
 	message: string;
 	url?: string;
+}
+
+export enum ETHContentType {
+	COMMENT = 'comment',
+	REPLY = 'reply',
+	POST = 'post'
 }
 
 export enum ETHBountySource {
