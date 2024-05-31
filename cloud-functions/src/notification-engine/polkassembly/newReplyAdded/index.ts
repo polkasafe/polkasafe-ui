@@ -75,7 +75,8 @@ export default async function newReplyAdded(args: Args) {
 		textMessage,
 		subject,
 		{
-			network
+			network,
+			link: commentUrl
 		}
 	);
 	await notificationServiceInstance.notifyAllChannels(commentAuthorNotificationPreferences);

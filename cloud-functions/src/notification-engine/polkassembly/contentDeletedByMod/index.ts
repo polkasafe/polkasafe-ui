@@ -89,7 +89,8 @@ export default async function contentDeletedByMod(args: Args) {
 		textMessage,
 		subject,
 		{
-			network
+			network,
+			link: contentUrl
 		}
 	);
 

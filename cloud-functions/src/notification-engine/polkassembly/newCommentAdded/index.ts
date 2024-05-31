@@ -110,7 +110,8 @@ export default async function newCommentAdded(args: Args) {
 			textMessage,
 			subject,
 			{
-				network
+				network,
+				link: commentUrl
 			}
 		);
 
