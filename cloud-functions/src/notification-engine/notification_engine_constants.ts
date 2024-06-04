@@ -42,7 +42,7 @@ export const NOTIFICATION_SOURCE_FIREBASE_ADMIN_CONFIG: {[index in NOTIFICATION_
 export const NOTIFICATION_SOURCE_EMAIL: {[index in NOTIFICATION_SOURCE] : string} = {
 	[NOTIFICATION_SOURCE.POLKASSEMBLY]: 'noreply@polkassembly.io',
 	[NOTIFICATION_SOURCE.POLKASAFE]: 'noreply@polkasafe.xyz',
-	[NOTIFICATION_SOURCE.TOWNHALL]: 'noreply@townhall.io'
+	[NOTIFICATION_SOURCE.TOWNHALL]: 'noreply@townhallgov.com'
 };
 
 export const TELEGRAM_BOT_TOKEN: {[index in NOTIFICATION_SOURCE] : string | undefined} = {
