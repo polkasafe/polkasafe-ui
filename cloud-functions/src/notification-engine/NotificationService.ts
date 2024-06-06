@@ -230,7 +230,7 @@ export class NotificationService {
 				address: userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle,
 				created_at: new Date(),
 				link: this.sourceArgs.link || '',
-				message: this.message,
+				message: this.markdownMessage,
 				type: 'sent',
 				network: String(this.sourceArgs.network)
 			} as IPSNotification;
@@ -244,7 +244,7 @@ export class NotificationService {
 				id: newNotificationRef.id,
 				userId: Number(userNotificationPreferences.channelPreferences?.[CHANNEL.IN_APP]?.handle),
 				created_at: new Date(),
-				message: this.message,
+				message: this.markdownMessage,
 				network: String(this.sourceArgs.network),
 				title: this.subject,
 				url: this.sourceArgs.link || ''
@@ -257,7 +257,7 @@ export class NotificationService {
 				id: newNotificationRef.id,
 				created_at: new Date(),
 				title: this.subject,
-				message: this.message,
+				message: this.markdownMessage,
 				url: this.sourceArgs?.link || ''
 			} as ITHNotification;
 			break;
