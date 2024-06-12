@@ -247,7 +247,8 @@ export class NotificationService {
 				message: this.markdownMessage,
 				network: String(this.sourceArgs.network),
 				title: this.subject,
-				url: this.sourceArgs.link || ''
+				url: this.sourceArgs.link || '',
+				trigger: this.trigger
 			} as IPANotification;
 			break;
 

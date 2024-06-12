@@ -113,6 +113,7 @@ export interface IPANotification {
 	message: string;
 	url?: string;
 	network: string;
+	trigger: string;
 }
 
 export enum EContentType {
