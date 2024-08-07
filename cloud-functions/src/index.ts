@@ -1904,8 +1904,14 @@ export const polkasafeSlackBotCommands = functions.https.onRequest(async (req, r
 		try {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
-			const { command, text, user_id } = req.body;
+			const { command, text, user_id: slackUserId, channel_id } = req.body;
 			functions.logger.info('polkasafeSlackBotCommands req :', { req });
+
+			if (!channel_id && !slackUserId) {
+				return;
+			}
+
+			const user_id = channel_id || slackUserId;
 
 			if (command == '/polkasafe-add') {
 				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASAFE, String(user_id), 'Adding address...');
@@ -2697,8 +2703,14 @@ export const polkassemblySlackBotCommands = functions.https.onRequest(async (req
 		try {
 			// slack needs an acknowledgement response within 3 seconds
 			res.status(200).end();
-			const { command, text, user_id } = req.body;
+			const { command, text, user_id: slackUserId, channel_id } = req.body;
 			functions.logger.info('polkassemblySlackBotCommands req :', { req });
+
+			if (!slackUserId && !channel_id) {
+				return;
+			}
+
+			const user_id = channel_id || slackUserId;
 
 			if (command == '/polkassembly-add') {
 				await sendSlackMessage(NOTIFICATION_SOURCE.POLKASSEMBLY, String(user_id), 'Adding username...');
